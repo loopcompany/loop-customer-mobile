@@ -1,125 +1,70 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ImageBackground,
-  I18nManager,
-  ScrollView,
-  FlatList,
-} from "react-native";
-import Footer from "./Footer";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Image, ImageBackground, FlatList} from "react-native";
 import Folder from "../components/Folder";
 import NewStyles from "../styles/NewStyles";
 import CustomStatusBar from './../components/CustomStatusBar';
 import { handleError, showToastOrAlert } from './../helpers/Common';
-import { useSelector } from "react-redux";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
+import categoriesAPI from '../services/CategoriesApi';
+import { useDispatch } from 'react-redux';
+import { fetchSteps } from '../slices/stepSlice';
+import { setCategory } from "../slices/categorySlice";
 
 export default function FolderScreen({ navigation }) {
-  const userToken = useSelector(state=>state.auth.token)
-  // تابع دسترسی به ابجکت های یک استیت
-  console.log(userToken);
-  const fetchToken = async()=>{
-    const userId = await AsyncStorage.getItem("userId");
-    // گت کوکی
-    console.log(userId);
-    
-  }
-  // const [menuVisible, setMenuVisible] = useState(false);
-  // const [selectedItems, setSelectedItems] = useState({});
 
-  // const menuItems = [
-  //   'سفارش‌های جاری / رزرو',
-  //   'سازمانی / شرکتی',
-  //   'سفارش‌ها',
-  //   'تراکنش‌ها',
-  //   'لوپ‌نامه‌ها',
-  //   'پیش‌رسید',
-  //   'رسید',
-  //   'ادرس‌های منتخب',
-  //   'کیف پول',
-  //   'ثبت نام دوره‌های آموزشی',
-  //   'طرح‌های تشویقی',
-  //   'عضویت سرویس / محصول',
-  //   'درخواست',
-  //   'ثبت / پیگیری تلفن',
-  //   'نظرات و پیشنهادات',
-  //   'مهلت تست / گارانتی',
-  //   'یادداشت',
-  //   'بیشتر بدانید',
-  //   'قوانین / درباره لوپ',
-  // ];
+  const [folders, setFolders] = useState([]);
+  const dispatch = useDispatch();
 
-  // const toggleItem = (item) => {
-  //   setSelectedItems((prev) => ({
-  //     ...prev,
-  //     [item]: !prev[item],
-  //   }));
-  // }
-  const folders = [
-    {
-      id: 1,
-      title: "لپ تاپ",
-      screen:'GuideScreen'
-    },
-    {
-      id: 2,
-      title: "کیس",
-    },
-    {
-      id: 3,
-      title: "مانیتور",
-    },
-    {
-      id: 4,
-      title: "آل این وان",
-    },
-    {
-      id: 5,
-      title: "چاپگر",
-    },
-    {
-      id: 6,
-      title: "هارد دیسک",
-    },
-    {
-      id: 7,
-      title: "تجهیز مدارس",
-    },
-  ];
-  fetchToken() 
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await categoriesAPI.getCategories();
+        // API shape: { success: true, data: [...] }
+        const categories = Array.isArray(res.data) ? res.data : (res.data || res.data?.data || []);
+        if (mounted) setFolders(categories);
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+        showToastOrAlert('خطا در دریافت دسته‌ها');
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
   return (
-    <ImageBackground
-      source={require("../assets/moon.jpg")}
-      style={NewStyles.container}
-    >
-      <CustomStatusBar/>
-      <View style={{ flex: 1 }}>
-        {/* لوگو بالا */}
-        <View style={styles.logoWrapper}>
-          <Image source={require("../assets/logo.png")} style={NewStyles.logo} />
-        </View>
-        <FlatList
-          data={folders}
-          renderItem={({ item, index }) => {
-            return <Folder title={item?.title} onPress={()=>{
-              if(item?.screen){
+    <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
+      <ImageBackground
+        source={require("../assets/moon.jpg")}
+        style={NewStyles.container}
+      >
+        <CustomStatusBar />
+        <View style={{ flex: 1 }}>
+          {/* لوگو بالا */}
+          <View style={styles.logoWrapper}>
+            <Image source={require("../assets/logo.png")} style={NewStyles.logo} />
+          </View>
+          <FlatList
+            data={folders}
+            renderItem={({ item }) => {
+              return <Folder title={item?.title} onPress={() => {
+                if (item?.has_subcategory === 1) {
+                  // اگر دارای زیر دسته است، به SubCategories برو
+                  navigation.push('SubCategories', { categoryId: item.id, categoryTitle: item.title });
+                } else {
+                  // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
+                  dispatch(fetchSteps(item.id));
+                  dispatch(setCategory(item));
+                  navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
+                }
+              }} />;
+            }}
+            keyExtractor={item => item?.id?.toString()}
+          />
 
-                navigation.navigate(item?.screen)
-              }else{
-                showToastOrAlert('به زودی')
-              }
-            }} />;
-          }}
-          keyExtractor={item=>item?.id}
-        />
-        
-        <Footer />
-      </View>
-    </ImageBackground>
+
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }
 

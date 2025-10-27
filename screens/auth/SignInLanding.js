@@ -1,42 +1,12 @@
-import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-  I18nManager,
-} from "react-native";
+import { StyleSheet, Image, ImageBackground, } from "react-native";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
-// import * as SplashScreen from 'expo-splash-screen';
 
-// قفل کردن نمایش صفحه تا فونت ها و RTL ست بشه
-// SplashScreen.preventAutoHideAsync();
-
-// اطمینان از راست‌چین بودن اپ
-I18nManager.forceRTL(false);
 
 export default function SignInLanding({ navigation }) {
   return (
-    <ImageBackground
-      source={require("../../assets/moon.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      {/* <View style={styles.container}> */}
-      <Image
-        source={require("../../assets/logo.png")}
-        style={NewStyles.logo}
-        resizeMode="contain"
-      />
-
-      {/* <TouchableOpacity style={styles.button} onPress={()=>{
-            navigation.navigate('LoginScreen')
-        }}>
-          <Text style={styles.buttonText}>ورود</Text>
-        </TouchableOpacity> */}
+    <ImageBackground source={require("../../assets/moon.jpg")} style={styles.background} resizeMode="cover">
+      <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain"/>
       <Button
         style={{ width: "70%" }}
         title={"ورود"}
@@ -51,25 +21,7 @@ export default function SignInLanding({ navigation }) {
           navigation.navigate("MainSignIn");
         }}
       />
-      {/* <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          navigation.navigate("SignInScreen");
-        }}
-      >
-        <Text style={styles.buttonText}>ثبت نام</Text>
-      </TouchableOpacity> */}
 
-      <TouchableOpacity style={styles.languageSwitcher}>
-        <Image
-          source={{
-            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/320px-Flag_of_Iran.svg.png",
-          }}
-          style={styles.flag}
-        />
-        <Text style={styles.languageText}>فارسی</Text>
-      </TouchableOpacity>
-      {/* </View> */}
     </ImageBackground>
   );
 }

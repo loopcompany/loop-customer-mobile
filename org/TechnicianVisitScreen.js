@@ -281,7 +281,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
 
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

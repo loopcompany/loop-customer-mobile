@@ -342,7 +342,7 @@ export default function Choosingatechnician({ navigation }) {
         </View>
         
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 }

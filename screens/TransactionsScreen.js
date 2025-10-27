@@ -5,7 +5,7 @@ import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import Footer from './Footer';
 
-I18nManager.forceRTL(false);
+
 
 export default function TransactionsScreen() {
   const transactions = [
@@ -29,7 +29,7 @@ export default function TransactionsScreen() {
         </View>
       ))}
     </ScrollView>
-    <Footer/>
+    
 </SafeAreaView>
   );
 }

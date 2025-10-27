@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import {
     View,
     Text,
@@ -8,116 +8,313 @@ import {
     TouchableOpacity,
     StyleSheet,
     ScrollView,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
 } from "react-native";
+// CodeField imports removed - using InviteCodeInput component instead
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
-import { themeColor10, themeColor4, themeColor0 } from "../../theme/Color";
+import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "../../theme/Color";
+import { authAPI } from "../../services/Api";
+import AuthManager from "../../services/AuthManager";
+import { showToastOrAlert } from "../../helpers/Common";
+import CustomStatusBar from "../../components/CustomStatusBar";
+import InviteCodeInput from "../../components/InviteCodeInput";
+import { Ionicons } from '@expo/vector-icons';
+// Form state management with useReducer
+const initialState = {
+    melicode: '',
+    phone: '',
+    email: '',
+    otherReferralCode: '',
+    captchaInput: '',
+    captcha: Math.floor(1000 + Math.random() * 9000).toString(),
+    errors: {},
+    isLoading: false,
+};
+
+const formReducer = (state, action) => {
+    switch (action.type) {
+        case 'SET_FIELD':
+            return { 
+                ...state, 
+                [action.field]: action.value,
+                errors: { ...state.errors, [action.field]: null }
+            };
+        case 'SET_ERROR':
+            return { 
+                ...state, 
+                errors: { ...state.errors, [action.field]: action.error }
+            };
+        case 'SET_ERRORS':
+            return { ...state, errors: action.errors };
+        case 'SET_LOADING':
+            return { ...state, isLoading: action.isLoading };
+        case 'GENERATE_CAPTCHA':
+            return { 
+                ...state, 
+                captcha: Math.floor(1000 + Math.random() * 9000).toString(),
+                captchaInput: ''
+            };
+        case 'CLEAR_FORM':
+            return { ...initialState, captcha: state.captcha };
+        default:
+            return state;
+    }
+};
+
 export default function MainSignIn({ navigation }) {
-    const [username, setUsername] = useState("");
-    const [mobile, setMobile] = useState("");
-    const [nationalId, setNationalId] = useState("");
-    const [email, setEmail] = useState("");
-    const [countryCode, setCountryCode] = useState('+98');
-    const [inviteLetter, setInviteLetter] = useState('L');
-    const [pin1, setPin1] = useState('');
-    const [pin2, setPin2] = useState('');
-    const [pin3, setPin3] = useState('');
-    const [pin4, setPin4] = useState('');
-    const [pin5, setPin5] = useState('');
-    const [captcha, setCaptcha] = useState('8699');
+    const [state, dispatch] = useReducer(formReducer, initialState);
+    const inviteLetter = 'L'; // Static invite letter
+
+    // Form validation
+    const validateForm = () => {
+        const errors = {};
+        
+        // Melicode validation (10 digits)
+        if (!state.melicode) {
+            errors.melicode = 'کد ملی الزامی است';
+        } else if (state.melicode.length !== 10 || !/^\d{10}$/.test(state.melicode)) {
+            errors.melicode = 'کد ملی باید 10 رقم باشد';
+        }
+        
+        // Phone validation (11 digits starting with 09)
+        if (!state.phone) {
+            errors.phone = 'شماره موبایل الزامی است';
+        } else if (state.phone.length !== 11 || !/^09\d{9}$/.test(state.phone)) {
+            errors.phone = 'شماره موبایل باید 11 رقم و با 09 شروع شود';
+        }
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!state.email) {
+            errors.email = 'آدرس ایمیل الزامی است';
+        } else if (!emailRegex.test(state.email)) {
+            errors.email = 'فرمت ایمیل صحیح نیست';
+        }
+        
+        // Captcha validation
+        if (!state.captchaInput) {
+            errors.captchaInput = 'کد امنیتی الزامی است';
+        } else if (state.captchaInput !== state.captcha) {
+            errors.captchaInput = 'کد امنیتی صحیح نیست';
+        }
+        
+        return errors;
+    };
+
+    // Handle form submission
+    const handleRegistration = async () => {
+        const errors = validateForm();
+        
+        if (Object.keys(errors).length > 0) {
+            dispatch({ type: 'SET_ERRORS', errors });
+            return;
+        }
+
+        dispatch({ type: 'SET_LOADING', isLoading: true });
+
+        try {
+            const userData = {
+                melicode: state.melicode,
+                phone: state.phone,
+                email: state.email,
+                other_referral_code: state.otherReferralCode ? `${inviteLetter}${state.otherReferralCode}` : null,
+            };
+
+            const response = await authAPI.register(userData);
+            
+            if (response.success) {
+                showToastOrAlert('کد تایید به شماره موبایل شما ارسال شد');
+                
+                // Navigate to verification screen
+                navigation.navigate('RegistrationVerificationScreen', {
+                    phone: state.phone,
+                    userData
+                });
+            } else {
+                dispatch({ 
+                    type: 'SET_ERROR', 
+                    field: 'general', 
+                    error: response.message || 'خطا در ثبت نام'
+                });
+            }
+        } catch (error) {
+            console.log('Registration error:', error);
+            let errorMessage = 'خطا در ثبت نام. لطفاً مجدداً تلاش کنید';
+            
+            if (error.response?.data?.errors) {
+                // Handle field-specific errors from backend
+                const backendErrors = {};
+                Object.keys(error.response.data.errors).forEach(field => {
+                    backendErrors[field] = error.response.data.errors[field][0];
+                });
+                dispatch({ type: 'SET_ERRORS', errors: backendErrors });
+                return;
+            }
+            
+            dispatch({ type: 'SET_ERROR', field: 'general', error: errorMessage });
+        } finally {
+            dispatch({ type: 'SET_LOADING', isLoading: false });
+        }
+    };
 
     const generateCaptcha = () => {
-        const n = Math.floor(1000 + Math.random() * 9000).toString();
-        setCaptcha(n);
+        dispatch({ type: 'GENERATE_CAPTCHA' });
     };
 
     return (
         <ImageBackground source={require("../../assets/moon.jpg")} style={styles.background}>
-            <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-                <View style={[styles.card, NewStyles.center]}>
-                    <Image source={require("../../assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
+            <CustomStatusBar />
+            <KeyboardAvoidingView 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+                    <View style={[styles.card, NewStyles.center]}>
+                        <Image source={require("../../assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
 
-                    {/* National ID */}
-                    <TextInput
-                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: 'right' }]}
-                        placeholder="شماره ملی :"
-                        placeholderTextColor={themeColor10.bgColor(0.9)}
-                        value={nationalId}
-                        onChangeText={setNationalId}
-                        keyboardType="number-pad"
-                    />
+                        {/* General Error Message */}
+                        {state.errors.general && (
+                            <Text style={styles.errorText}>{state.errors.general}</Text>
+                        )}
 
-                    {/* Mobile with country code selector (matches image) */}
-                    <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center', gap: 8 }}>
-                        <TouchableOpacity style={styles.codeSelector} onPress={() => { /* open country picker */ }}>
-                            <Text style={{ fontSize: 12, marginRight: 6 }}>▼</Text>
-                            <Text style={{ fontFamily: 'VazirBold', fontSize: 14, marginLeft: 4 }}>+98 irn</Text>
-                        </TouchableOpacity>
+                        {/* Melicode (National ID) */}
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={[
+                                    NewStyles.textInput, 
+                                    NewStyles.text10, 
+                                    NewStyles.border10, 
+                                    { width: '100%', textAlign: 'right' },
+                                    state.errors.melicode && styles.inputError
+                                ]}
+                                placeholder="کد ملی :"
+                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                value={state.melicode}
+                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
+                                keyboardType="number-pad"
+                                maxLength={10}
+                                accessibilityLabel="کد ملی"
+                                accessibilityHint="کد ملی 10 رقمی خود را وارد کنید"
+                            />
+                            {state.errors.melicode && (
+                                <Text style={styles.fieldErrorText}>{state.errors.melicode}</Text>
+                            )}
+                        </View>
 
-                        <TextInput
-                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.mobileInput]}
-                            placeholder="  موبایل : 10 رقمی"
-                            placeholderTextColor={themeColor10.bgColor(0.9)}
-                            value={mobile}
-                            onChangeText={setMobile}
-                            keyboardType="phone-pad"
+                        {/* Phone Number */}
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={[
+                                    NewStyles.textInput, 
+                                    NewStyles.text10, 
+                                    NewStyles.border10, 
+                                    { width: '100%', textAlign: 'right' },
+                                    state.errors.phone && styles.inputError
+                                ]}
+                                placeholder="شماره موبایل : 09XXXXXXXXX"
+                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                value={state.phone}
+                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
+                                keyboardType="phone-pad"
+                                maxLength={11}
+                                accessibilityLabel="شماره موبایل"
+                                accessibilityHint="شماره موبایل 11 رقمی خود را با 09 وارد کنید"
+                            />
+                            {state.errors.phone && (
+                                <Text style={styles.fieldErrorText}>{state.errors.phone}</Text>
+                            )}
+                        </View>
+
+                        {/* Other Referral Code using reusable component */}
+                        <InviteCodeInput
+                            value={state.otherReferralCode}
+                            onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'otherReferralCode', value })}
+                            prefix={inviteLetter}
+                            hasError={!!state.errors.otherReferralCode}
+                            errorMessage={state.errors.otherReferralCode}
                         />
-                    </View>
 
-                    {/* Invite code boxes */}
-                    <View style={[NewStyles.textInput, { width: '100%', borderRadius: 10, marginTop: 6, marginBottom: 6 }]}>
-                        <Text style={{ color: themeColor10.bgColor(1), fontFamily: 'VazirLight', marginBottom: 6, textAlign: 'right' }}>کد معرف (اختیاری)</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <View style={[NewStyles.codePrefixBox, NewStyles.border5, { backgroundColor: '#ffffff', borderColor: '#ccc', width: 36, height: 40 }]}>
-                                <Text style={{ fontFamily: 'VazirBold', color: '#000', fontSize: 25, textAlign: "center" }}>{inviteLetter}-</Text>
+                        {/* Email */}
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={[
+                                    NewStyles.textInput, 
+                                    NewStyles.text10, 
+                                    NewStyles.border10, 
+                                    { width: '100%', textAlign: 'right' },
+                                    state.errors.email && styles.inputError
+                                ]}
+                                placeholder="آدرس ایمیل : *"
+                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                value={state.email}
+                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                accessibilityLabel="آدرس ایمیل"
+                                accessibilityHint="آدرس ایمیل معتبر خود را وارد کنید"
+                            />
+                            {state.errors.email && (
+                                <Text style={styles.fieldErrorText}>{state.errors.email}</Text>
+                            )}
+                        </View>
+
+                        {/* Captcha */}
+                        <View style={styles.inputContainer}>
+                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                                <TextInput 
+                                    style={[
+                                        NewStyles.textInput, 
+                                        NewStyles.text10, 
+                                        NewStyles.border10, 
+                                        { width: '50%', textAlign: 'right' },
+                                        state.errors.captchaInput && styles.inputError
+                                    ]} 
+                                    placeholderTextColor={themeColor10.bgColor(0.9)} 
+                                    placeholder="کد امنیتی"
+                                    value={state.captchaInput}
+                                    onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'captchaInput', value })}
+                                    keyboardType="number-pad"
+                                    maxLength={4}
+                                />
+                                
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                                    <TouchableOpacity onPress={generateCaptcha}>
+                                        <Ionicons name={"reload"} size={24} color={themeColor4.bgColor(1)} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.captchaBox} onPress={generateCaptcha}>
+                                        <Text style={{ fontSize: 16, fontFamily: 'VazirBold' }}>{state.captcha}</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                            <TextInput style={[NewStyles.codeBox, NewStyles.border5, { width: 27, height: 40, backgroundColor: '#fff' }]} value={pin1} onChangeText={setPin1} maxLength={1} keyboardType="default" />
-                            <TextInput style={[NewStyles.codeBox, NewStyles.border5, { width: 27, height: 40, backgroundColor: '#fff' }]} value={pin2} onChangeText={setPin2} maxLength={1} keyboardType="default" />
-                            <TextInput style={[NewStyles.codeBox, NewStyles.border5, { width: 27, height: 40, backgroundColor: '#fff' }]} value={pin3} onChangeText={setPin3} maxLength={1} keyboardType="default" />
-                            <TextInput style={[NewStyles.codeBox, NewStyles.border5, { width: 27, height: 40, backgroundColor: '#fff' }]} value={pin4} onChangeText={setPin4} maxLength={1} keyboardType="default" />
-                            <TextInput style={[NewStyles.codeBox, NewStyles.border5, { width: 27, height: 40, backgroundColor: '#fff' }]} value={pin5} onChangeText={setPin5} maxLength={1} keyboardType="default" />
+                            {state.errors.captchaInput && (
+                                <Text style={styles.fieldErrorText}>{state.errors.captchaInput}</Text>
+                            )}
                         </View>
+
+                        {/* Submit Button */}
+                        <Button
+                            title="ثبت نام"
+                            loading={state.isLoading}
+                            onPress={handleRegistration}
+                            style={styles.submitButton}
+                        />
+                        
+                        {/* Login Link */}
+                        <TouchableOpacity 
+                            style={{ marginTop: 15 }} 
+                            onPress={() => navigation.navigate('LoginScreen')}
+                            disabled={state.isLoading}
+                        >
+                            <Text style={styles.loginLinkText}>
+                                قبلاً ثبت نام کرده‌اید؟ ورود به حساب کاربری
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-
-                    {/* Email */}
-                    <TextInput
-                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: 'right' }]}
-                        placeholder="آدرس ایمیل : *"
-                        placeholderTextColor={themeColor10.bgColor(0.9)}
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                    />
-
-                    {/* 'Create new email' link centered and underlined */}
-                    <TouchableOpacity onPress={() => { /* optional: open email helper */ }} style={{ width: '90%',marginTop: 6 }}>
-                        <Text style={[NewStyles.title10,{textAlign:"right",textDecorationLine:"underline"}]}>آدرس ایمیل جدید بسازید</Text>
-                    </TouchableOpacity>
-
-                    {/* Captcha + Security Code buttons */}
-                    <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center', marginTop: 10, gap: 12 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                            <TouchableOpacity onPress={generateCaptcha}>
-                                <Text style={{ fontSize: 18, color: '#fff' }}>↺</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.captchaBox} onPress={generateCaptcha}>
-                                <Text style={{ fontSize: 16, fontFamily: 'VazirBold' }}>{captcha}</Text>
-                            </TouchableOpacity>
-
-                            <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '50%', textAlign: 'right' }]} placeholderTextColor={themeColor10.bgColor(0.9)} placeholder="کد امنیتی" />
-
-                        </View>
-                    </View>
-
-                    {/* Action Links */}
-                    <TouchableOpacity style={{ marginTop: 18 }} onPress={() => navigation.navigate('PrivacyScreen')}>
-                        <Text style={{ color: '#ffd700', fontFamily: 'VazirBold', fontSize: 18 }}>ثبت نام</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ marginTop: 8 }} onPress={() => navigation.navigate('LoginScreen')}>
-                        <Text style={{ color: '#ffd700', fontFamily: 'VazirBold', fontSize: 16 }}>ورود به حساب کاربری</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </ImageBackground>
     );
 }
@@ -225,8 +422,46 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center'
     },
+    // inviteCodeCell styles moved to InviteCodeInput component
     mobileInput: {
         flex: 1,
         textAlign: 'right'
-    }
+    },
+    inputContainer: {
+        width: '100%',
+        marginBottom: 10,
+    },
+    inputError: {
+        borderColor: '#ff4444',
+        borderWidth: 2,
+    },
+    errorText: {
+        color: '#ff4444',
+        fontFamily: 'VazirLight',
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 15,
+        backgroundColor: 'rgba(255, 68, 68, 0.1)',
+        padding: 10,
+        borderRadius: 8,
+    },
+    fieldErrorText: {
+        color: '#ff4444',
+        fontFamily: 'VazirLight',
+        fontSize: 12,
+        textAlign: 'right',
+        marginTop: 5,
+    },
+    submitButton: {
+        width: '100%',
+        marginTop: 20,
+        backgroundColor: themeColor0.bgColor(1),
+    },
+    loginLinkText: {
+        color: themeColor4.bgColor(1),
+        fontFamily: 'VazirLight',
+        fontSize: 14,
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+    },
 });

@@ -99,7 +99,7 @@ export default function SoftwareInstallScreen({ navigation }) {
         />
       </View>
    
-      <Footer />
+      
     
     </ImageBackground>
      

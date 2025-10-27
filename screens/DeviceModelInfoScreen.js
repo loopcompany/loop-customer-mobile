@@ -219,7 +219,7 @@ export default function DeviceModelInfoScreen({ navigation }) {
         </ScrollView>
 
    
-      <Footer />
+      
     </ImageBackground>
   );
 }

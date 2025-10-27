@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
 
 import { uri } from "../../services/URL";
+import TokenManager from "../../services/TokenManager";
 import { fetchUser } from "../../slices/userSlice";
 
 import {
@@ -125,10 +126,12 @@ export default function LoginModal({ loginModal, setLoginModal }) {
         code: value,
       });
       if (response?.data?.success == "success") {
-        const userId = JSON.stringify(response?.data?.userId);
+        const userId = response?.data?.userId;
         const userToken = response?.data?.token?.replace('"', "");
-        await AsyncStorage.setItem("userId", userId);
-        await AsyncStorage.setItem("userToken", userToken);
+        
+        // Use TokenManager for consistent token storage
+        await TokenManager.saveAuthData(userToken, { id: userId });
+        
         dispatch(setToken(userToken));
         dispatch(fetchUser(userToken));
         setPhone("");
@@ -157,10 +160,12 @@ export default function LoginModal({ loginModal, setLoginModal }) {
         password: password,
       });
       if (response?.data?.success == "success") {
-        const userId = JSON.stringify(response?.data?.userId);
+        const userId = response?.data?.userId;
         const userToken = response?.data?.token?.replace('"', "");
-        await AsyncStorage.setItem("userId", userId);
-        await AsyncStorage.setItem("userToken", userToken);
+        
+        // Use TokenManager for consistent token storage
+        await TokenManager.saveAuthData(userToken, { id: userId });
+        
         dispatch(fetchUser(userToken));
         dispatch(setToken(userToken));
         setPhone("");

@@ -36,7 +36,7 @@ export default function IncentivePlansScreen({ navigation }) {
         </View>
       </View>
       
-      <Footer/>
+      
     </SafeAreaView>
   );
 }

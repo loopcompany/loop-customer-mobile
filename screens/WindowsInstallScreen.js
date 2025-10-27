@@ -77,7 +77,7 @@ export default function WindowsInstallScreen({ navigation }) {
           )
         }}
       />
-      <Footer />
+      
     </ImageBackground>
   );
 }

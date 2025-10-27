@@ -338,7 +338,7 @@ const DiscountCodeScreen = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

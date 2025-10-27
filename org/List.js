@@ -71,7 +71,7 @@ const List = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

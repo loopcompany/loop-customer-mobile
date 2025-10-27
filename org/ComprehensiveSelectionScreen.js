@@ -933,7 +933,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

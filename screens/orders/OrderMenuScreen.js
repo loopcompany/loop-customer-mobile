@@ -9,22 +9,22 @@ import {
   ScrollView,
   Linking,
 } from "react-native";
-import Menuitem from "../components/Menuitem";
-import NewStyles from "../styles/NewStyles";
+import Menuitem from "../../components/Menuitem";
+import NewStyles from "../../styles/NewStyles";
 const callSupport = () => {
   Linking.openURL("tel:09012955939"); // شماره دلخواهت
 };
 
 export default function OrderMenuScreen({ navigation }) {
   return (
-    <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} >
+    <ImageBackground source={require("../../assets/moon.jpg")} style={NewStyles.container} >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.container, , NewStyles.center]}>
           <Image
-            source={require("../assets/logo.png")}
+            source={require("../../assets/logo.png")}
             style={NewStyles.logo}
             resizeMode="contain"
           />

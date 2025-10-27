@@ -17,7 +17,7 @@ const ScreenHeaders = ({ title, onPressLeft, onPressRight }) => {
         <Image source={require("../assets/next.png")} style={styles.arrow} />
       </TouchableOpacity>
       <View style={styles.titleContainer}>
-        <Text style={[NewStyles.title, styles.titleText]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
+        <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
       </View>
       <TouchableOpacity onPress={onPressLeft} style={styles.iconContainer}>
         <Image source={require("../assets/back.png")} style={styles.arrow} />
@@ -58,6 +58,5 @@ const styles = StyleSheet.create({
   titleText: {
     textAlign: "center",
     fontSize: 16,
-    fontWeight: "bold",
   },
 });

@@ -10,14 +10,14 @@ import {
   Image,
   ImageBackground,
 } from 'react-native';
-import Footer from './Footer';
-import NewStyles from '../styles/NewStyles';
-import CustomStatusBar from '../components/CustomStatusBar';
-import ScreenTitle from '../components/ScreenTitle';
+import Footer from '../Footer';
+import NewStyles from '../../styles/NewStyles';
+import CustomStatusBar from '../../components/CustomStatusBar';
+import ScreenTitle from '../../components/ScreenTitle';
 export default function OrderTrackingScreen() {
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')}
+      source={require('../../assets/moon.jpg')}
       style={NewStyles.container}
     >
       <CustomStatusBar />
@@ -52,15 +52,9 @@ export default function OrderTrackingScreen() {
           <Text style={NewStyles.text4}>ثبت سفارش جدید</Text>
         </TouchableOpacity>
 
-        {/* Footer */}
-        {/* <View style={styles.footer}>
-          <Image source={require('../assets/logo.png')} style={styles.footerLogo} />
-          <Text style={styles.supportText}>پشتیبانی</Text>
-          <Text style={styles.language}>فا</Text>
-          <Text style={styles.phone}>21164552</Text>
-        </View> */}
+       
       </ScrollView>
-      <Footer />
+      
     </ImageBackground>
   );
 }

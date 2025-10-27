@@ -540,7 +540,7 @@ const Register = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

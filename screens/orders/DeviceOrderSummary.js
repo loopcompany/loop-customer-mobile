@@ -9,12 +9,12 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
-import ScreenTitle from '../components/ScreenTitle';
-import NewStyles from '../styles/NewStyles';
-import CustomStatusBar from '../components/CustomStatusBar';
-import { themeColor10 } from '../theme/Color';
-import ScreenHeaders from '../components/ScreenHeaders';
-import Footer from './Footer';
+import ScreenTitle from '../../components/ScreenTitle';
+import NewStyles from '../../styles/NewStyles';
+import CustomStatusBar from '../../components/CustomStatusBar';
+import { themeColor10 } from '../../theme/Color';
+import ScreenHeaders from '../../components/ScreenHeaders';
+import Footer from '../Footer';
 
 export default function DeviceOrderSummary({ navigation }) {
   const [visibleSection, setVisibleSection] = useState(null);
@@ -37,7 +37,7 @@ export default function DeviceOrderSummary({ navigation }) {
   ];
 
   return (
-    <ImageBackground source={require('../assets/moon.jpg')} style={NewStyles.container}>
+    <ImageBackground source={require('../../assets/moon.jpg')} style={NewStyles.container}>
       <CustomStatusBar />
       {/* <View style={{ padding: 10 }}>
         <ScreenTitle title={'سفارش‌های جاری من'} />
@@ -59,7 +59,7 @@ export default function DeviceOrderSummary({ navigation }) {
           <Text style={styles.sectionButtonText}>بازگشت به صفحه اصلی</Text>
         </TouchableOpacity>
       </ScrollView>
-      <Footer />
+      
     </ImageBackground>
   );
 }
@@ -127,7 +127,7 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
           <>
             <View style={styles.techImageCircle}>
               <Image
-                source={require('../assets/technician.png')}
+                source={require('../../assets/technician.png')}
                 style={styles.techImage}
               />
             </View>

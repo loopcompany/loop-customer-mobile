@@ -1,3 +1,3 @@
-export const mainUri = 'https://narchino.com';
-export const uri = 'https://narchino.com/api';
-export const imageUri = 'https://narchino.com/storage';
+export const mainUri = 'http://192.168.21.123:8000';
+export const uri = 'http://192.168.21.123:8000/api';
+export const imageUri = 'http://192.168.21.123:8000/storage';

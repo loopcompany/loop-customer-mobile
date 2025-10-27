@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import { useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
-import ScreenHeaders from "../components/ScreenHeaders";
-import NewStyles from "../styles/NewStyles";
-import Footer from "./Footer";
+import ScreenHeaders from "../../components/ScreenHeaders";
+import NewStyles from "../../styles/NewStyles";
+import Footer from "../Footer";
 
-I18nManager.forceRTL(false);
+
 export default function AddressScreen({ route, navigation }) {
   const [data, setData] = useState({
     addressName: "",
@@ -207,7 +207,7 @@ export default function AddressScreen({ route, navigation }) {
           {/* </View> */}
         </ScrollView>
       </View>
-      <Footer />
+      
     </SafeAreaView>
   );
 }

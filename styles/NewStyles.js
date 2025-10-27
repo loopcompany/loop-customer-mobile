@@ -40,6 +40,34 @@ const NewStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  add: {
+    padding: 3,
+    backgroundColor: themeColor0.bgColor(1),
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+
+  remove: {
+    padding: 3,
+    borderRadius: 100,
+    borderColor: themeColor0.bgColor(1),
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  seperator1: {
+    paddingBottom: '5%',
+    paddingHorizontal: '5%',
+    gap: 20,
+    // borderBottomWidth: 5,
+    // borderBottomColor: themeColor3.bgColor(0.2),
+  },
+  nav: {
+    gap: 50,
+    paddingHorizontal: '5%',
+    backgroundColor: themeColor4.bgColor(1)
+  },
   categoriesWrapper: {
     justifyContent: "flex-start",
     alignItems: "center",
@@ -225,6 +253,12 @@ const NewStyles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "VazirBold",
     color: themeColor4.bgColor(1),
+    textAlign: "center",
+  },
+  title7: {
+    fontSize: 15,
+    fontFamily: "VazirBold",
+    color: themeColor7.bgColor(1),
     textAlign: "center",
   },
 

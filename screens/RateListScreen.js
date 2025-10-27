@@ -1,5 +1,5 @@
 // RateListScreen.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,47 +7,99 @@ import {
   ScrollView,
   Image,
   I18nManager,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import Footer from './Footer';
+import { formatJalaaliDate } from '../helpers/Common';
+import { themeColor0, themeColor4 } from '../theme/Color';
+import letterRatesAPI from '../services/LetterRatesApi';
+import { RefreshControl } from 'react-native';
 
-I18nManager.forceRTL(false);
+
 
 export default function RateListScreen() {
-  const rates = new Array(12).fill('---'); // فرضی، چون محتوای نرخ‌نامه در عکس نیست
+  const [rates, setRates] = useState([]);
+  const [unionRates, setUnionRates] = useState([]);
+  const [loopRates, setLoopRates] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    fetchLetterRates();
+  }, [refreshing]);
+
+  const fetchLetterRates = async () => {
+    try {
+      const response = await letterRatesAPI.getLetterRates();
+
+      if (response.status === 'success') {
+        const allRates = response.data;
+        setRates(allRates);
+
+        // تفکیک نرخ‌ها بر اساس نوع
+        const unionRatesData = allRates.filter(rate => rate.type === 'union');
+        const loopRatesData = allRates.filter(rate => rate.type === 'loop');
+
+        setUnionRates(unionRatesData);
+        setLoopRates(loopRatesData);
+      }
+    } catch (error) {
+      console.error('Error fetching letter rates:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={[styles.rateRow, NewStyles.center]}>
+      <Text style={[NewStyles.title10, { fontSize: 14 }]}>{item.title}</Text>
+      <Text style={styles.rateText}>{item.amount}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={'نرخنامه'} />
-    <ScrollView contentContainerStyle={styles.container}>
-    
-      <Text style={styles.subTitle}>نرخنامه اتحادیه لوپ ۱۴۰۳ ⬇️</Text>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}>
 
-      {rates.map((item, index) => (
-        <View key={index} style={styles.rateRow}>
-          <Text style={styles.rateText}>{item}</Text>
+        <View style={[NewStyles.row, { flex: 1 }]}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.titleContainer}>
+              <Text style={NewStyles.title4}>نرخنامه لوپ {formatJalaaliDate(new Date())?.slice(0, 4)}</Text>
+            </View>
+            <FlatList
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              data={loopRates}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.container}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={styles.titleContainer}>
+              <Text style={NewStyles.title4}>نرخنامه اتحادیه {formatJalaaliDate(new Date())?.slice(0, 4)}</Text>
+            </View>
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              data={unionRates}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.container}
+            />
+          </View>
         </View>
-      ))}
+      </ScrollView>
 
-      {/* <View style={styles.footer}>
-        <Image
-          source={require('../assets/logo.png')}
-          style={styles.logo}
-        />
-        <Text style={styles.phone}>21164552</Text>
-      </View> */}
-    </ScrollView>
-    <Footer/>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#e0f0ff',
+    paddingHorizontal: 20,
   },
   title: {
     textAlign: 'center',
@@ -59,6 +111,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
   },
+  titleContainer: {
+    backgroundColor: themeColor0.bgColor(1),
+    padding: 10,
+    ...NewStyles.border10,
+    marginVertical: 10,
+    marginHorizontal: 15
+  },
   subTitle: {
     backgroundColor: '#007bff',
     color: '#fff',
@@ -69,14 +128,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   rateRow: {
-    backgroundColor: '#fff',
+    backgroundColor: themeColor4.bgColor(1),
     padding: 15,
     marginBottom: 8,
     borderRadius: 10,
   },
+  rateTitle: {
+    ...NewStyles.text3,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   rateText: {
-    fontSize: 16,
-    color: '#333',
+    ...NewStyles.text3,
+    color: '#666',
   },
   footer: {
     marginTop: 30,

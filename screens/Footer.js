@@ -23,8 +23,8 @@ export default function Footer() {
     { id: 4, title: "تراکنش‌ها", screen: "TransactionsScreen" },
     { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
     { id: 6, title: "پیام", screen: "MessageScreen" },
-    { id: 7, title: "حساب کاربری", screen: "PrivacyScreen" },
-    { id: 8, title: "حریم خصوصی", screen: "PrivacyScreen" },
+    { id: 7, title: "حساب کاربری", screen: "Profile" },
+    // { id: 8, title: "حریم خصوصی", screen: "PrivacyScreen" },
     { id: 9, title: "آدرس‌های منتخب", screen: "AddressScreen" },
     {
       id: 10,
@@ -41,6 +41,7 @@ export default function Footer() {
     { id: 18, title: "یادداشت", screen: "NotesScreen" },
     { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
     { id: 20, title: "قوانین / درباره لوپ", screen: "AboutScreen" },
+    { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
   ]);
   const [menuVisible, setMenuVisible] = useState(false);
 

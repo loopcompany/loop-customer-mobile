@@ -29,7 +29,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
         </Text>
       </View>
 
-      <Footer />
+      
     </SafeAreaView>
   );
 }

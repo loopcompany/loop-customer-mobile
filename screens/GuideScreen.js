@@ -13,7 +13,7 @@ import Footer from './Footer';
 import NewStyles from '../styles/NewStyles';
 import ScreenTitle from './../components/ScreenTitle';
 import Button from '../components/Button';
-I18nManager.forceRTL(false); // فعال کردن RTL برای زبان فارسی
+ // فعال کردن RTL برای زبان فارسی
 
 export default function GuideScreen({ navigation }) {
   return (
@@ -57,7 +57,7 @@ export default function GuideScreen({ navigation }) {
   <Text style={styles.phoneText}>21164552</Text>
 </View> */}
       <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <Footer />
+        
       </View>
 
     </ImageBackground>

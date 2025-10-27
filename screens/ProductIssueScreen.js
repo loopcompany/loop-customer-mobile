@@ -15,7 +15,7 @@ import ScreenHeaders from '../components/ScreenHeaders';
 import NewStyles from '../styles/NewStyles';
 import Footer from './Footer';
 
-I18nManager.forceRTL(false);
+
 
 export default function ProductIssueScreen() {
   const [form, setForm] = useState({
@@ -96,7 +96,7 @@ export default function ProductIssueScreen() {
         <Text style={styles.phone}>21164552</Text>
       </View> */}
     </ScrollView>
-    <Footer />
+    
     </SafeAreaView>
   );
 }

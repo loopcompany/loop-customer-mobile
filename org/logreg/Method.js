@@ -279,7 +279,7 @@ const Method = ({ navigation }) => {
 
       </ImageBackground>
 
-      <Footer />
+      
     </View>
   );
 };

@@ -39,7 +39,7 @@ export default function Fekrobekr({ navigation }) {
         </View>
       </View>
 
-<Footer/>
+
     </SafeAreaView>
   );
 }

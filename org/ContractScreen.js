@@ -73,7 +73,7 @@ const ContractScreen = ({ navigation }) => {
         </TouchableOpacity>
       </ScrollView>
       {/* فوتر استاندارد */}
-      <Footer />
+      
     </View>
   );
 };

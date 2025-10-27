@@ -426,7 +426,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      <Footer />
+      
     </View>
   );
 };

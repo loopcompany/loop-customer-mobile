@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NewStyles from '../styles/NewStyles';
-import ScreenHeaders from '../components/ScreenHeaders';
-import Footer from './Footer';
+import NewStyles from '../../styles/NewStyles';
+import ScreenHeaders from '../../components/ScreenHeaders';
+import Footer from '../Footer';
 export default function OrdersScreen() {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
@@ -30,7 +30,7 @@ export default function OrdersScreen() {
         </View>
       </View>
     </ScrollView>
-    <Footer/>
+    
     </SafeAreaView>
   );
 }

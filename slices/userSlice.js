@@ -1,13 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { uri } from '../services/URL';
+import { authAPI } from '../services/Api';
 
-export const fetchUser = createAsyncThunk('user/fetchUser', async (token) => {
-    return await axios
-        .get(`${uri}/fetchUser`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
-        .then(response => response?.data)
-        .catch(error => { console.log(error) })
-})
+export const fetchUser = createAsyncThunk('user/fetchUser', async (token, { rejectWithValue }) => {
+    try {
+        const response = await authAPI.validateToken(token);
+        
+        if (response.success && response.valid) {
+            return response.data.user;
+        } else {
+            return rejectWithValue(response.message || 'Token validation failed');
+        }
+    } catch (error) {
+        console.error('fetchUser error:', error);
+        return rejectWithValue(error.response?.data?.message || 'Network error');
+    }
+});
 
 const userSlice = createSlice({
     name: 'user',

@@ -144,7 +144,7 @@ export default function PartsSupplyScreen() {
         </ScrollView>
 
         {/* Footer */}
-        <Footer />
+        
       </KeyboardAvoidingView>
     </ImageBackground>
   );

@@ -1,0 +1,327 @@
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
+import { showToastOrAlert } from '../helpers/Common';
+
+// Create axios instance with default config
+const apiClient = axios.create({
+  baseURL: API_ENDPOINTS.BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(
+  async (config) => {
+    // Add auth token if available
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.warn('Failed to get token from storage:', error);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Log error but don't show toast automatically for verification endpoints
+    if (error.config?.url?.includes('/auth/verify-phone') || 
+        error.config?.url?.includes('/auth/verify-reset-code')) {
+      console.log('Verification error (no toast):', error.response?.data);
+    } else {
+      const message = error.response?.data?.message || 'خطایی رخ داده است';
+      showToastOrAlert(message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Authentication endpoints
+export const authAPI = {
+  // Register user
+  // Expected payload: { melicode, phone, email, other_referral_code }
+  register: async (userData) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Resend verification code
+  resendCode: async (phone) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.RESEND_CODE, {
+        phone
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Login user
+  // Expected payload: { phone, password }
+  login: async (credentials) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Validate token
+  // Check if token is valid and get user info
+  validateToken: async (token) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.VALIDATE_TOKEN, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Logout user
+  logout: async (token) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Logout API error:', error);
+      throw error;
+    }
+  },
+
+  // Logout from all devices
+  logoutAll: async (token) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT_ALL, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Logout all API error:', error);
+      throw error;
+    }
+  },
+
+  // Forgot password - request password reset
+  forgotPassword: async (userData) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
+        melicode: userData.melicode,
+        phone: userData.phone,
+        email: userData.email
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Forgot password API error:', error);
+      throw error;
+    }
+  },
+
+  // Verify reset code for forgot password
+  verifyResetCode: async (userData) => {
+    try {
+      console.log('verifyResetCode called with:', userData);
+      console.log('API endpoint:', API_ENDPOINTS.AUTH.VERIFY_RESET_CODE);
+      
+      const requestData = {
+        phone: userData.phone?.toString().trim(),
+        verification_code: userData.code?.toString().trim()
+      };
+      
+      console.log('Request data:', requestData);
+      
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_RESET_CODE, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
+      
+      console.log('verifyResetCode response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Verify reset code API error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  },
+
+  // Resend reset code for forgot password
+  resendResetCode: async (phone) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.RESEND_RESET_CODE, {
+        phone: phone?.toString().trim()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Resend reset code API error:', error);
+      throw error;
+    }
+  },
+
+  // Verify phone number with code (for regular registration)
+  verifyPhone: async (userData) => {
+    try {
+      console.log('verifyPhone called with:', userData);
+      console.log('API endpoint:', API_ENDPOINTS.AUTH.VERIFY_PHONE);
+      console.log('Base URL:', API_ENDPOINTS.BASE_URL);
+      
+      // Handle both formats: object with phone/code OR direct phone, code parameters
+      let requestData;
+      if (typeof userData === 'object' && userData.phone) {
+        requestData = {
+          phone: userData.phone?.toString().trim(),
+          verification_code: userData.code?.toString().trim()
+        };
+      } else {
+        // Legacy format - first param is phone, second is code
+        requestData = {
+          phone: userData?.toString().trim(),
+          verification_code: arguments[1]?.toString().trim()
+        };
+      }
+      
+      console.log('Request data:', requestData);
+      
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_PHONE, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
+      
+      console.log('verifyPhone response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Verify phone API error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.config?.data,
+          headers: error.config?.headers,
+        }
+      });
+      throw error;
+    }
+  }
+};
+
+// User Profile Management endpoints
+export const userAPI = {
+  // Get user profile
+  getProfile: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.USER.PROFILE);
+      return response.data;
+    } catch (error) {
+      console.error('Get profile API error:', error);
+      throw error;
+    }
+  },
+
+  // Update user profile
+  updateProfile: async (profileData) => {
+    try {
+      // Filter out empty or undefined values
+      const cleanData = {};
+      Object.keys(profileData).forEach(key => {
+        if (profileData[key] !== undefined && profileData[key] !== null && profileData[key] !== '') {
+          cleanData[key] = profileData[key];
+        }
+      });
+
+      console.log('Updating profile with data:', cleanData);
+
+      const response = await apiClient.put(API_ENDPOINTS.USER.UPDATE_PROFILE, cleanData);
+      return response.data;
+    } catch (error) {
+      console.error('Update profile API error:', error);
+      throw error;
+    }
+  },
+
+  // Change password
+  changePassword: async (passwordData) => {
+    try {
+      const response = await apiClient.patch(API_ENDPOINTS.USER.CHANGE_PASSWORD, {
+        password: passwordData.newPassword,
+        current_password: passwordData.currentPassword
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Info endpoints (Public APIs - no authentication needed)
+export const infoAPI = {
+  // Get FAQs
+  getFAQs: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.INFO.FAQS);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get Terms
+  getTerms: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.INFO.TERMS);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get Privacy Policy
+  getPrivacy: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.INFO.PRIVACY);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+export default apiClient;

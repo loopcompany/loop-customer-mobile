@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from "../components/ScreenHeaders";
 import Footer from './Footer';
-I18nManager.forceRTL(false);
+
 
 export default function MessageScreen({ navigation }) {
   const [messageToSend, setMessageToSend] = useState('');
@@ -53,7 +53,7 @@ export default function MessageScreen({ navigation }) {
 
 
     </ScrollView>
-    <Footer />
+    
     </SafeAreaView>
   );
 }

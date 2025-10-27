@@ -300,7 +300,7 @@ const Grouping = ({ navigation }) => {
 
       </ImageBackground>
 
-      <Footer />
+      
     </View>
   );
 };
