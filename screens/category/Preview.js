@@ -109,7 +109,7 @@ export default function Preview({ navigation }) {
                     <View style={NewStyles.rowWrapper}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={26} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>{isFixed ? 'مبلغ قطعی پاکار' : 'مبلغ پایه پاکار'}</Text>
+                            <Text style={NewStyles.title}>{isFixed ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ'}</Text>
                         </View>
                         <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} onPress={() => navigation.navigate('FAQ')} >
                             <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
@@ -173,7 +173,7 @@ export default function Preview({ navigation }) {
                         )
                     }
 
-                    {/* {renderRow('مبلغ پیشنهادی پاکار', totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'توافقی')} */}
+                    {/* {renderRow('مبلغ پیشنهادی لوپ', totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'توافقی')} */}
 
                     {renderRow('آدرس محل خدمت', '')}
                     {renderRow(address?.neighbourhood?.region?.city?.title + ' - ' + address?.neighbourhood?.region?.title + ' - ' + address?.neighbourhood?.title + ' - ' + address?.address, '', NewStyles.text10)}

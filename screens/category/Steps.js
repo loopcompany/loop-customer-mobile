@@ -1,4 +1,4 @@
-import { View, FlatList, BackHandler, StyleSheet, ScrollView } from 'react-native';
+import { View, FlatList, BackHandler, StyleSheet, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Image } from 'expo-image';
@@ -25,6 +25,7 @@ import Input from '../../components/Input';
 import ProgressBar from '../../components/ProgressBar';
 import Gender from '../../components/Gender';
 import { emptyAddress } from '../../slices/addressSlice';
+import StepsHeader from '../../components/StepsHeader';
 
 export default function Steps({ navigation }) {
 
@@ -33,24 +34,24 @@ export default function Steps({ navigation }) {
     const steps = useSelector(state => state.step);
     const length = steps?.data?.length;
     const [loading, setLoading] = useState(false);
-    
+
     useFocusEffect(
-            useCallback(() => {
-                const onBackPress = () => {
+        useCallback(() => {
+            const onBackPress = () => {
                 dispatch(emptySteps());
                 dispatch(emptyCategory());
                 dispatch(emptyAddress());
                 navigation.goBack();
                 return true;
             };
-    
-                const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    
-                return () => subscription.remove(); // ✅ درست
-            }, [])
-        );
 
-    
+            const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            return () => subscription.remove(); // ✅ درست
+        }, [])
+    );
+
+
 
     function required(step) {
         return steps.data?.[step].every(item => {
@@ -94,47 +95,50 @@ export default function Steps({ navigation }) {
 
     return (
         <View style={NewStyles.container}>
-            <ProgressBar step={step} />
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 0 }}>
-                <FlatList
-                    contentContainerStyle={styles.flatListContainer}
-                    showsVerticalScrollIndicator={false} scrollEnabled={false}
-                    data={steps?.data?.[step]}
-                    keyExtractor={(item) => item?.id?.toString()}
-                    renderItem={({ item }) => {
-                        const isUrgentActive = steps?.isUrgent === 1;
-                        if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
-                            return null;
-                        }
-                        return (
-                            <View style={steps?.data?.[step]?.length > 1 ? {borderBottomWidth: 5, borderBottomColor: themeColor3.bgColor(0.2)} : {}}>
-                                {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
-                                {(item?.type == 'description') && <Description data={item} />}
-                                {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
-                                {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
-                                {(item?.type == 'counter') && <Counter step={step} data={item} />}
-                                {(item?.type == 'input') && <Input step={step} data={item} />}
-                                {(item?.type == 'urgent') && <Urgent step={step} data={item} />}
-                                {(item?.type == 'date') && <Date step={step} data={item} />}
-                                {(item?.type == 'gender') && <Gender step={step} data={item} />}
-                                {(item?.type == 'time') && <Time step={step} data={item} />}
-                                {(item?.type == 'address') && <Address step={step} data={item} navigation={navigation} />}
-                                {(item?.type == 'note') && <Note step={step} data={item} />}
-                                {(item?.type == 'file') && <File step={step} data={item} />}
-                            </View>
-                        )
-                    }}
-                />
-            </ScrollView>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" >
+                <StepsHeader handleNextStep={() => { handleNextStep() }} handlePreStep={() => { setStep((currStep) => currStep - 1); }} showPre={step != 0} />
+                {/* <ProgressBar step={step} /> */}
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+                    <FlatList
+                        contentContainerStyle={styles.flatListContainer}
+                        showsVerticalScrollIndicator={false} scrollEnabled={false}
+                        data={steps?.data?.[step]}
+                        keyExtractor={(item) => item?.id?.toString()}
+                        renderItem={({ item }) => {
+                            const isUrgentActive = steps?.isUrgent === 1;
+                            if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
+                                return null;
+                            }
+                            return (
+                                <View >
+                                    {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
+                                    {(item?.type == 'description') && <Description data={item} />}
+                                    {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
+                                    {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
+                                    {(item?.type == 'counter') && <Counter step={step} data={item} />}
+                                    {(item?.type == 'input') && <Input step={step} data={item} />}
+                                    {(item?.type == 'urgent') && <Urgent step={step} data={item} />}
+                                    {(item?.type == 'date') && <Date step={step} data={item} />}
+                                    {(item?.type == 'gender') && <Gender step={step} data={item} />}
+                                    {(item?.type == 'time') && <Time step={step} data={item} />}
+                                    {(item?.type == 'address') && <Address step={step} data={item} navigation={navigation} />}
+                                    {(item?.type == 'note') && <Note step={step} data={item} />}
+                                    {(item?.type == 'file') && <File step={step} data={item} />}
+                                </View>
+                            )
+                        }}
+                    />
+                </ScrollView>
 
-            <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
-                <View style={{ flex: 1 }}>
-                    <Button title={'مرحله بعد'} loading={step == steps?.data?.length || loading} onPress={() => handleNextStep()} />
-                </View>
-                {step != 0 && <View style={{ flex: 1 }}>
-                    <Button title={'مرحله قبل'} loading={step == steps?.data?.length} onPress={() => { setStep((currStep) => currStep - 1); }} />
-                </View>}
-            </View>
+                {/* <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
+                    <View style={{ flex: 1 }}>
+                        <Button title={'مرحله بعد'} loading={step == steps?.data?.length || loading} onPress={() => handleNextStep()} />
+                    </View>
+                    {step != 0 && <View style={{ flex: 1 }}>
+                        <Button title={'مرحله قبل'} loading={step == steps?.data?.length} onPress={() => { setStep((currStep) => currStep - 1); }} />
+                    </View>}
+                </View> */}
+            </KeyboardAvoidingView>
         </View>
     )
 }

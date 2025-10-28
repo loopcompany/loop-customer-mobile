@@ -188,7 +188,7 @@ const App = () => {
                     component={DiscountCodeScreen}
                     name="DiscountCodeScreen"
                     options={{ headerShown: false, }} />
-                  <Stack.Screen name='Steps' component={Steps} options={{ headerShown: true, header: () => <StepsHeader />, gestureEnabled: false }} />
+                  <Stack.Screen name='Steps' component={Steps} options={{ headerShown: false,  gestureEnabled: false }} />
 
                   <Stack.Screen
                     component={TechnicianVisitScreen}

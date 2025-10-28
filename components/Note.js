@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor6 } from '../theme/Color';
+import { themeColor0, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
 import { setDescription } from '../slices/stepSlice';
 
 export default function Note({ step, data }) {
@@ -17,7 +17,7 @@ export default function Note({ step, data }) {
                 <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                 <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View>}</Text>
             </View>
-            <TextInput style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { minHeight: 150, paddingTop: 10 }]} keyboardType='default' placeholder={`${description}`} placeholderTextColor={themeColor3.bgColor(1)} verticalAlign='top' textAlignVertical='top' multiline={true} value={description} maxLength={150} onChangeText={(text) => { dispatch(setDescription(text)) }} />
+            <TextInput style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { minHeight: 150, paddingTop: 10, backgroundColor:themeColor4.bgColor(1) }]} keyboardType='default' placeholder={`${data?.des}`} placeholderTextColor={themeColor3.bgColor(1)} verticalAlign='top' textAlignVertical='top' multiline={true} value={description} maxLength={150} onChangeText={(text) => { dispatch(setDescription(text)) }} />
         </View>
     )
 }

@@ -20,7 +20,6 @@ export default function Addresses({ navigation }) {
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector(state => state.user?.data);
 
-    console.log('Addresses state:', { addresses, addressLoading, token });
 
     useEffect(() => {
         console.log('Addresses useEffect - Token:', token);

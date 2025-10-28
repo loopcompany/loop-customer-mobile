@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, ImageBackground, FlatList} from "react-native";
+import { View, StyleSheet, Image, ImageBackground, FlatList, RefreshControl } from "react-native";
 import Folder from "../components/Folder";
 import NewStyles from "../styles/NewStyles";
 import CustomStatusBar from './../components/CustomStatusBar';
@@ -9,10 +9,13 @@ import categoriesAPI from '../services/CategoriesApi';
 import { useDispatch } from 'react-redux';
 import { fetchSteps } from '../slices/stepSlice';
 import { setCategory } from "../slices/categorySlice";
+import Loader from "../components/Loader";
 
 export default function FolderScreen({ navigation }) {
 
   const [folders, setFolders] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -26,11 +29,21 @@ export default function FolderScreen({ navigation }) {
       } catch (err) {
         console.error('Failed to load categories:', err);
         showToastOrAlert('خطا در دریافت دسته‌ها');
+      } finally {
+        setRefreshing(false);
+        setLoader(false);
       }
     };
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [refreshing]);
+
+  if (loader) {
+    return (
+      <Loader />
+    )
+  }
+
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
       <ImageBackground
@@ -44,6 +57,7 @@ export default function FolderScreen({ navigation }) {
             <Image source={require("../assets/logo.png")} style={NewStyles.logo} />
           </View>
           <FlatList
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
             data={folders}
             renderItem={({ item }) => {
               return <Folder title={item?.title} onPress={() => {

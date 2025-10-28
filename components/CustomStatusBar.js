@@ -10,7 +10,7 @@ export default function CustomStatusBar() {
     const navigationState = useNavigationState(state => state);
     const currentRouteName = navigationState.routes[navigationState.index].name;
 
-    const statusBarStyle = (currentRouteName === 'SignInLanding' || currentRouteName === 'Account') ? 'light-content' : 'light-content';
+    const statusBarStyle = (currentRouteName === 'SignInLanding' || currentRouteName === 'Account') ? 'dark-content' : 'dark-content';
     const statusBarBackgroundColor = (currentRouteName === 'SignInLanding' || currentRouteName === 'Account' || currentRouteName === 'Collection') ? themeColor0.bgColor(1) : themeColor0.bgColor(1);
 
     return (

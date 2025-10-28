@@ -12,6 +12,7 @@ import axios from 'axios';
 import { uri } from '../services/URL';
 import ConfirmationModal from './ConfirmationModal';
 import { fetchAddresses } from '../slices/addressSlice';
+import { handleError } from '../helpers/Common';
 
 export default function Address({ step, data, navigation }) {
 
@@ -35,15 +36,14 @@ export default function Address({ step, data, navigation }) {
     const deleteAddress = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/address/delete`, { addressId: id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.delete(`${uri}/addresses/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 200) {
                 dispatch(fetchAddresses(token));
                 dispatch(setAddressId(null))
                 dispatch(setGeneralData({ fieldId: data?.id, value: 0, step }))
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
-            showToastOrAlert(message);
+            handleError(error)
         } finally {
             setLoading(false);
         }
@@ -51,9 +51,9 @@ export default function Address({ step, data, navigation }) {
 
     return (
         <View style={NewStyles.seperator1}>
-            <Pressable style={NewStyles.row} onPress={() => navigation.navigate('Add New Address')}>
-                <Ionicons name="add" size={24} color={themeColor0.bgColor(1)} />
-                <Text style={NewStyles.title}>افزودن آدرس جدید</Text>
+            <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('Add New Address')}>
+                <Ionicons name="add" size={24} color={themeColor4.bgColor(1)} />
+                <Text style={NewStyles.title4}>افزودن آدرس جدید</Text>
             </Pressable>
             <FlatList
                 style={{ gap: 15 }}

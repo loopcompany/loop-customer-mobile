@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, ImageBackground, FlatList} from "react-native";
+import { View, StyleSheet, Image, ImageBackground, FlatList, RefreshControl } from "react-native";
 import Folder from "../../components/Folder";
 import NewStyles from "../../styles/NewStyles";
 import CustomStatusBar from '../../components/CustomStatusBar';
@@ -10,10 +10,13 @@ import { useDispatch } from 'react-redux';
 import { fetchSteps } from '../../slices/stepSlice';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { setCategory } from "../../slices/categorySlice";
+import Loader from "../../components/Loader";
 
 const SubCategories = ({ navigation, route }) => {
   const { categoryId, categoryTitle } = route.params;
   const [subCategories, setSubCategories] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,17 +26,26 @@ const SubCategories = ({ navigation, route }) => {
         const res = await categoriesAPI.getSubCategories(categoryId);
         // API shape: { success: true, data: [...] }
         console.log(res.data?.children);
-        
+
         const categories = Array.isArray(res.data?.children) ? res.data?.children : (res.data?.children || res.data || []);
         if (mounted) setSubCategories(categories);
       } catch (err) {
         console.error('Failed to load subcategories:', err);
         showToastOrAlert('خطا در دریافت زیردسته‌ها');
+      }finally{
+        setRefreshing(false);
+        setLoader(false);
       }
     };
     load();
     return () => { mounted = false; };
-  }, [categoryId]);
+  }, [categoryId, refreshing]);
+
+  if (loader) {
+    return (
+      <Loader />
+    )
+  }
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
@@ -44,18 +56,19 @@ const SubCategories = ({ navigation, route }) => {
         <CustomStatusBar />
         <View style={{ flex: 1 }}>
           {/* Header */}
-          <ScreenHeaders 
-            title={categoryTitle || 'زیردسته‌ها'} 
+          <ScreenHeaders
+            title={categoryTitle || 'زیردسته‌ها'}
             onPressLeft={() => navigation.goBack()}
             showLeftIcon={true}
           />
-          
+
           {/* لوگو بالا */}
           <View style={styles.logoWrapper}>
             <Image source={require("../../assets/logo.png")} style={NewStyles.logo} />
           </View>
-          
+
           <FlatList
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
             data={subCategories}
             renderItem={({ item }) => {
               return <Folder title={item?.title} onPress={() => {

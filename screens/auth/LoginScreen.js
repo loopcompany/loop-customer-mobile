@@ -169,7 +169,7 @@ export default function LoginScreen({ navigation }) {
         showToastOrAlert('ورود با موفقیت انجام شد');
 
         // Navigate to main app
-        navigation.navigate('FolderScreen');
+        navigation.navigate('MainApp',{screen:'FolderScreen'});
 
       } else {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });

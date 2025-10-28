@@ -109,7 +109,24 @@ export function generateTimeSlots(startTime, endTime, intervalMinutes) {
 }
 
 export function isMoreThan4HoursFromNow(dateString, timeString) {
-    const targetDateTime = new Date(`${dateString}T${timeString}:00`);
+    // Parse time range format like "10 الی 12" or single time like "10:00"
+    let startTime = timeString;
+    
+    if (timeString && timeString.includes('الی')) {
+        // Extract start time from range format
+        const parts = timeString.split('الی');
+        if (parts.length === 2) {
+            startTime = parts[0].trim();
+        }
+    }
+    
+    // Ensure time format is HH:MM
+    if (startTime && !startTime.includes(':')) {
+        startTime = startTime + ':00';
+    }
+    
+    // Create target datetime
+    const targetDateTime = new Date(`${dateString}T${startTime}:00`);
     const now = new Date();
     const diffMs = targetDateTime - now;
     const diffHours = diffMs / (1000 * 60 * 60);

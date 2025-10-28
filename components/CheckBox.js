@@ -50,7 +50,9 @@ export default function CheckBox({ step, data }) {
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
-            {show && data?.des && <Text style={NewStyles.text3}>{data?.des}</Text>}
+            {show && data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}>
+                    <Text style={NewStyles.text10}>{data?.des}</Text>
+                </View>}
             {show && <FlatList
                 style={{ gap: 20 }}
                 showsVerticalScrollIndicator={false}

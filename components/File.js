@@ -59,7 +59,7 @@ export default function File({ step, data }) {
                 <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                 <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View>}</Text>
             </View>
-            {data?.des && <Text style={NewStyles.text3}>{data?.des}</Text>}
+            {data?.des && <Text style={NewStyles.text10}>{data?.des}</Text>}
             <Pressable style={[styles.file, NewStyles.border10, NewStyles.center]} onPress={() => upload()} >
                 {loading ? (
                     <ActivityIndicator size="small" color={themeColor0.bgColor(1)} />
