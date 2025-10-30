@@ -9,150 +9,150 @@ var jalaali = require("jalaali-js");
 const { width: deviceWidth, height: deviceHeight } = Dimensions.get("window");
 
 const weekDaysFa = [
-    'یکشنبه',
-    'دوشنبه',
-    'سه‌شنبه',
-    'چهارشنبه',
-    'پنجشنبه',
-    'جمعه',
-    'شنبه',
+  'یکشنبه',
+  'دوشنبه',
+  'سه‌شنبه',
+  'چهارشنبه',
+  'پنجشنبه',
+  'جمعه',
+  'شنبه',
 ];
 
 const persianMonths = [
-    '',
-    'فروردین',
-    'اردیبهشت',
-    'خرداد',
-    'تیر',
-    'مرداد',
-    'شهریور',
-    'مهر',
-    'آبان',
-    'آذر',
-    'دی',
-    'بهمن',
-    'اسفند',
+  '',
+  'فروردین',
+  'اردیبهشت',
+  'خرداد',
+  'تیر',
+  'مرداد',
+  'شهریور',
+  'مهر',
+  'آبان',
+  'آذر',
+  'دی',
+  'بهمن',
+  'اسفند',
 ];
 const padZero = (num) => (num < 10 ? `0${num}` : `${num}`);
 export function generateTimeSlots(startTime, endTime, intervalMinutes) {
-    const slots = [];
+  const slots = [];
 
-    const parseTime = (timeStr) => {
-      // Accept formats like 'HH:MM' or 'HH:MM:SS' and tolerate minor whitespace
-      if (!timeStr) return [0, 0];
-      const parts = String(timeStr).trim().split(':').map(p => p.trim());
-      if (parts.length < 2) return [0, 0];
-      const h = Number(parts[0]);
-      const m = Number(parts[1]);
-      return [isNaN(h) ? 0 : h, isNaN(m) ? 0 : m];
-    };
-  
-    // Validate inputs
-    if (!startTime || !endTime || !intervalMinutes || intervalMinutes <= 0) {
-      return slots; // Return empty array if invalid inputs
-    }
-  
-    let [startHour, startMinute] = parseTime(startTime);
-    let [endHour, endMinute] = parseTime(endTime);
-  
-    let start = new Date();
-    start.setHours(startHour, startMinute, 0, 0);
-  
-    let end = new Date();
-    end.setHours(endHour, endMinute, 0, 0);
-  
-    if (end <= start) {
-      end.setDate(end.getDate() + 1);
-    }
-    
-    // Safety: avoid accidental infinite loops by capping iterations
-    const durationMs = intervalMinutes * 60000;
-    // Estimate needed iterations (ensure at least 1) and add safety margin
-    let estimatedCount = 1;
-    if (end.getTime() > start.getTime()) {
-      estimatedCount = Math.ceil((end.getTime() - start.getTime()) / durationMs) + 2;
-    } else {
-      estimatedCount = Math.ceil((24 * 60) / (intervalMinutes || 1)) + 2;
-    }
-    const maxIterations = Math.max(estimatedCount, 2) + 100; // generous cap
+  const parseTime = (timeStr) => {
+    // Accept formats like 'HH:MM' or 'HH:MM:SS' and tolerate minor whitespace
+    if (!timeStr) return [0, 0];
+    const parts = String(timeStr).trim().split(':').map(p => p.trim());
+    if (parts.length < 2) return [0, 0];
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    return [isNaN(h) ? 0 : h, isNaN(m) ? 0 : m];
+  };
 
-    let id = 1;
-    let iterations = 0;
-    let current = new Date(start.getTime());
-    
-    while (current < end && iterations < maxIterations) {
-      const startHours = current.getHours();
-      const startMinutes = current.getMinutes();
-      
-      // Calculate end time for this slot
-      const slotEnd = new Date(current.getTime() + durationMs);
-      const endHours = slotEnd.getHours();
-      const endMinutes = slotEnd.getMinutes();
-      
-      // Format the range
-      const startTimeStr = startMinutes === 0 ? `${startHours}` : `${startHours}:${startMinutes.toString().padStart(2, '0')}`;
-      const endTimeStr = endMinutes === 0 ? `${endHours}` : `${endHours}:${endMinutes.toString().padStart(2, '0')}`;
-      
-      slots.push({ 
-        id: id, 
-        value: `${startTimeStr} الی ${endTimeStr}`,
-        startTime: `${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}`,
-        endTime: `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
-      });
-      
-      current = new Date(current.getTime() + durationMs);
-      id++;
-      iterations++;
-    }
-  
-    return slots;
+  // Validate inputs
+  if (!startTime || !endTime || !intervalMinutes || intervalMinutes <= 0) {
+    return slots; // Return empty array if invalid inputs
+  }
+
+  let [startHour, startMinute] = parseTime(startTime);
+  let [endHour, endMinute] = parseTime(endTime);
+
+  let start = new Date();
+  start.setHours(startHour, startMinute, 0, 0);
+
+  let end = new Date();
+  end.setHours(endHour, endMinute, 0, 0);
+
+  if (end <= start) {
+    end.setDate(end.getDate() + 1);
+  }
+
+  // Safety: avoid accidental infinite loops by capping iterations
+  const durationMs = intervalMinutes * 60000;
+  // Estimate needed iterations (ensure at least 1) and add safety margin
+  let estimatedCount = 1;
+  if (end.getTime() > start.getTime()) {
+    estimatedCount = Math.ceil((end.getTime() - start.getTime()) / durationMs) + 2;
+  } else {
+    estimatedCount = Math.ceil((24 * 60) / (intervalMinutes || 1)) + 2;
+  }
+  const maxIterations = Math.max(estimatedCount, 2) + 100; // generous cap
+
+  let id = 1;
+  let iterations = 0;
+  let current = new Date(start.getTime());
+
+  while (current < end && iterations < maxIterations) {
+    const startHours = current.getHours();
+    const startMinutes = current.getMinutes();
+
+    // Calculate end time for this slot
+    const slotEnd = new Date(current.getTime() + durationMs);
+    const endHours = slotEnd.getHours();
+    const endMinutes = slotEnd.getMinutes();
+
+    // Format the range
+    const startTimeStr = startMinutes === 0 ? `${startHours}` : `${startHours}:${startMinutes.toString().padStart(2, '0')}`;
+    const endTimeStr = endMinutes === 0 ? `${endHours}` : `${endHours}:${endMinutes.toString().padStart(2, '0')}`;
+
+    slots.push({
+      id: id,
+      value: `${startTimeStr} الی ${endTimeStr}`,
+      startTime: `${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}`,
+      endTime: `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+    });
+
+    current = new Date(current.getTime() + durationMs);
+    id++;
+    iterations++;
+  }
+
+  return slots;
 }
 
 export function isMoreThan4HoursFromNow(dateString, timeString) {
-    // Parse time range format like "10 الی 12" or single time like "10:00"
-    let startTime = timeString;
-    
-    if (timeString && timeString.includes('الی')) {
-        // Extract start time from range format
-        const parts = timeString.split('الی');
-        if (parts.length === 2) {
-            startTime = parts[0].trim();
-        }
+  // Parse time range format like "10 الی 12" or single time like "10:00"
+  let startTime = timeString;
+
+  if (timeString && timeString.includes('الی')) {
+    // Extract start time from range format
+    const parts = timeString.split('الی');
+    if (parts.length === 2) {
+      startTime = parts[0].trim();
     }
-    
-    // Ensure time format is HH:MM
-    if (startTime && !startTime.includes(':')) {
-        startTime = startTime + ':00';
-    }
-    
-    // Create target datetime
-    const targetDateTime = new Date(`${dateString}T${startTime}:00`);
-    const now = new Date();
-    const diffMs = targetDateTime - now;
-    const diffHours = diffMs / (1000 * 60 * 60);
-    return diffHours >= 4;
+  }
+
+  // Ensure time format is HH:MM
+  if (startTime && !startTime.includes(':')) {
+    startTime = startTime + ':00';
+  }
+
+  // Create target datetime
+  const targetDateTime = new Date(`${dateString}T${startTime}:00`);
+  const now = new Date();
+  const diffMs = targetDateTime - now;
+  const diffHours = diffMs / (1000 * 60 * 60);
+  return diffHours >= 4;
 }
 
 
 export const getNext20DaysJalaali = () => {
-    const days = [];
-    for (let i = 0; i < 20; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        const dayOfWeek = date.getDay();
-        const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-        const weekday = weekDaysFa[dayOfWeek];
-        const monthName = persianMonths[jDate.jm];
-        const day = jDate.jd;
-        const value = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
-        days.push({
-          id: i + 1,
-          weekday: weekday,
-          date: `${day} ${monthName}`,
-          value: value,
-        });
-    }
-    return days;
+  const days = [];
+  for (let i = 0; i < 20; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    const dayOfWeek = date.getDay();
+    const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    const weekday = weekDaysFa[dayOfWeek];
+    const monthName = persianMonths[jDate.jm];
+    const day = jDate.jd;
+    const value = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
+    days.push({
+      id: i + 1,
+      weekday: weekday,
+      date: `${day} ${monthName}`,
+      value: value,
+    });
+  }
+  return days;
 };
 
 export const appName = () => {
@@ -269,32 +269,32 @@ export const validateMelicode = (melicode) => {
   if (!melicode) {
     return { isValid: false, message: 'کد ملی الزامی است' };
   }
-  
+
   const cleanMelicode = melicode.toString().replace(/\D/g, '');
-  
+
   if (cleanMelicode.length !== 10) {
     return { isValid: false, message: 'کد ملی باید 10 رقم باشد' };
   }
-  
+
   // Check for invalid patterns
   const invalidPatterns = [
     '0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
     '5555555555', '6666666666', '7777777777', '8888888888', '9999999999'
   ];
-  
+
   if (invalidPatterns.includes(cleanMelicode)) {
     return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
   }
-  
+
   // Check sum validation
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cleanMelicode.charAt(i)) * (10 - i);
   }
-  
+
   const remainder = sum % 11;
   const checkDigit = parseInt(cleanMelicode.charAt(9));
-  
+
   if (remainder < 2) {
     if (checkDigit === remainder) {
       return { isValid: true, message: '' };
@@ -304,7 +304,7 @@ export const validateMelicode = (melicode) => {
       return { isValid: true, message: '' };
     }
   }
-  
+
   return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
 };
 
@@ -312,17 +312,17 @@ export const validatePhone = (phone) => {
   if (!phone) {
     return { isValid: false, message: 'شماره موبایل الزامی است' };
   }
-  
+
   const cleanPhone = phone.toString().replace(/\D/g, '');
-  
+
   if (cleanPhone.length !== 11) {
     return { isValid: false, message: 'شماره موبایل باید 11 رقم باشد' };
   }
-  
+
   if (!cleanPhone.startsWith('09')) {
     return { isValid: false, message: 'شماره موبایل باید با 09 شروع شود' };
   }
-  
+
   return { isValid: true, message: '' };
 };
 
@@ -330,13 +330,13 @@ export const validateEmail = (email) => {
   if (!email) {
     return { isValid: false, message: 'آدرس ایمیل الزامی است' };
   }
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (!emailRegex.test(email)) {
     return { isValid: false, message: 'فرمت ایمیل صحیح نیست' };
   }
-  
+
   return { isValid: true, message: '' };
 };
 
@@ -359,19 +359,11 @@ export const formatJalaaliDate = (isoDate) => {
 };
 
 export const formatDate = (isoDate) => {
+  if (!isoDate) return '';
   const date = new Date(isoDate);
-  const { jy, jm, jd } = jalaali.toJalaali(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate()
-  );
-
-  // گرفتن ساعت و دقیقه
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-
-  // return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
-  return moment(date)?.format("MMM D - LT");
+  if (isNaN(date.getTime())) return '';
+  const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return `${jy}/${jm}/${jd}`;
 };
 
 export const blurhash =
@@ -383,6 +375,60 @@ export const isDateValid = (date, daysToAdd) => {
 
   return targetDate.isBefore(today);
 };
+
+// Order status helpers
+export const getOrderStatusText = (status) => {
+  const statusMap = {
+    0: 'در انتظار',
+    1: 'در حال انجام',
+    2: 'انجام شده',
+    3: 'لغو شده توسط کاربر',
+    4: 'لغو شده توسط متخصص',
+    5: 'لغو شده توسط ادمین',
+    6: 'منقضی شده'
+  };
+  return statusMap[status] || 'نامشخص';
+};
+
+export const getOrderStatusColor = (status) => {
+  const colorMap = {
+    0: '#FFA500', // نارنجی - در انتظار
+    1: '#2196F3', // آبی - در حال انجام
+    2: '#4CAF50', // سبز - انجام شده
+    3: '#F44336', // قرمز - لغو شده توسط کاربر
+    4: '#F44336', // قرمز - لغو شده توسط متخصص
+    5: '#F44336', // قرمز - لغو شده توسط ادمین
+    6: '#9E9E9E'  // خاکستری - منقضی شده
+  };
+  return colorMap[status] || '#9E9E9E';
+};
+export const formatDateTime = (isoDate) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '';
+    const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    
+    // گرفتن ساعت و دقیقه
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
+};
+export const calculateDaysDifference = (targetDate) => {
+  const now = dayjs();
+  const givenDate = dayjs(targetDate);
+  const diffInDays = now.diff(givenDate, 'day');
+  return diffInDays;
+};
+
+export const getPaymentStatusText = (status) => {
+  return status === 0 ? 'پرداخت نشده' : 'پرداخت شده';
+};
+
+export const getPaymentStatusColor = (status) => {
+  return status === 0 ? '#F44336' : '#4CAF50';
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // function generateCode(id){

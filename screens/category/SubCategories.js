@@ -28,6 +28,7 @@ const SubCategories = ({ navigation, route }) => {
         console.log(res.data?.children);
 
         const categories = Array.isArray(res.data?.children) ? res.data?.children : (res.data?.children || res.data || []);
+        
         if (mounted) setSubCategories(categories);
       } catch (err) {
         console.error('Failed to load subcategories:', err);
@@ -71,14 +72,17 @@ const SubCategories = ({ navigation, route }) => {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
             data={subCategories}
             renderItem={({ item }) => {
-              return <Folder title={item?.title} onPress={() => {
+              return <Folder title={item?.title} image={item?.image_path} onPress={() => {
                 if (item?.has_subcategory === 1) {
                   // اگر دارای زیر دسته است، به SubCategories برو
                   navigation.navigate('SubCategories', { categoryId: item.id, categoryTitle: item.title });
                 } else {
                   // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
+                  
                   dispatch(fetchSteps(item.id));
                   dispatch(setCategory(item));
+                  console.log(item);
+                  
                   navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
                 }
               }} />;

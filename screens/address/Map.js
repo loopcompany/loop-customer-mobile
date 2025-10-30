@@ -31,7 +31,7 @@ export default function Map({ route, navigation }) {
     const getLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-            Platform.OS === 'android' ? ToastAndroid.show('شما دسترسی پاکار به لوکیشن خود را بسته‌اید!', ToastAndroid.SHORT) : alert('شما دسترسی پاکار به لوکیشن خود را بسته‌اید!')
+            Platform.OS === 'android' ? ToastAndroid.show('شما دسترسی لوپ به لوکیشن خود را بسته‌اید!', ToastAndroid.SHORT) : alert('شما دسترسی لوپ به لوکیشن خود را بسته‌اید!')
         } else {
             try {
                 const location = await Location.getCurrentPositionAsync();

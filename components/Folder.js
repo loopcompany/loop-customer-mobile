@@ -9,28 +9,18 @@ import {
 import React from "react";
 import { themeColor0, themeColor10 } from "../theme/Color";
 import NewStyles from "../styles/NewStyles";
+import { imageUri } from "../services/URL";
 
-export default function Folder({
-  onPress,
-  title,
-  style,
-  loading,
-}) {
+export default function Folder({ onPress, title, style, loading, image }) {
+console.log(image);
+
   return (
-    <TouchableOpacity
-      disabled={loading}
-      style={[styles.button, NewStyles.center, style]}
-      onPress={onPress}
-    >
-  
-      {/* {(!loading && image) && <Text style={NewStyles.title4}>{image}</Text>} */}
-
-  
-            <Image
-                    source={require("../assets/folder.png")}
-                    style={styles.folderIcon}
-                  />
-       <Text style={NewStyles.title4}>{title}</Text>
+    <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style]} onPress={onPress}>
+      <Image
+        source={{ uri: `${imageUri}/${image}` }}
+        style={styles.folderIcon}
+      />
+      <Text style={NewStyles.title4}>{title}</Text>
     </TouchableOpacity>
   );
 }

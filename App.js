@@ -66,6 +66,8 @@ import AddNewAddress from './screens/address/AddNewAddress';
 import Map from './screens/address/Map';
 import SubcategoryHeader from "./components/SubcategoryHeader";
 import Preview from "./screens/category/Preview";
+import Details from "./screens/orders/Details";
+import Invoice from "./screens/orders/Invoice";
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
@@ -184,6 +186,8 @@ const App = () => {
                   <Stack.Screen name='Map' component={Map} options={{ headerShown: true, header: () => <SubcategoryHeader title={'موقعیت مکانی'} />, }} />
                   <Stack.Screen component={SubCategories} name="SubCategories" options={{ headerShown: false }}/>
                   <Stack.Screen component={Preview} name="Preview" options={{ headerShown: false }}/>
+                  <Stack.Screen component={Details} name="Details" options={{ headerShown: false }}/>
+                  <Stack.Screen component={Invoice} name="Invoice" options={{ headerShown: false }}/>
                   <Stack.Screen
                     component={DiscountCodeScreen}
                     name="DiscountCodeScreen"

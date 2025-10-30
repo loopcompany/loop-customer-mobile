@@ -57,10 +57,10 @@ export default function FolderScreen({ navigation }) {
             <Image source={require("../assets/logo.png")} style={NewStyles.logo} />
           </View>
           <FlatList
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
             data={folders}
             renderItem={({ item }) => {
-              return <Folder title={item?.title} onPress={() => {
+              return <Folder title={item?.title} image={item?.image_path} onPress={() => {
                 if (item?.has_subcategory === 1) {
                   // اگر دارای زیر دسته است، به SubCategories برو
                   navigation.push('SubCategories', { categoryId: item.id, categoryTitle: item.title });

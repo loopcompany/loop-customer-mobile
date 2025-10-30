@@ -37,9 +37,11 @@ export default function File({ step, data }) {
         formData.append('file[]', { uri: localUri, name: filename, type });
         setLoading(true)
         await axios
-            .post(`${uri}/order/upload`, formData, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }, })
+            .post(`${uri}/orders/upload`, formData, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }, })
             .then(response => {
-                dispatch(setFile(response?.data))
+                console.log(response?.data?.data);
+                
+                dispatch(setFile(response?.data?.data))
             })
             .catch(error => {
                 const message = error.response

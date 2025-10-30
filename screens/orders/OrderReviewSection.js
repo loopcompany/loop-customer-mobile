@@ -1,0 +1,202 @@
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import axios from 'axios'
+import Ionicons from '@expo/vector-icons/Ionicons'
+
+import { uri } from '../../services/URL'
+import NewStyles from '../../styles/NewStyles'
+import { formatDate, showToastOrAlert } from '../../helpers/Common'
+import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color'
+import ConfirmationModal from '../../components/ConfirmationModal'
+import Button from '../../components/Button'
+
+const OrderReviewSection = ({ data, orderId, onUpdate }) => {
+  const token = useSelector((state) => state?.auth?.token)
+  const [loadingAccept, setLoadingAccept] = useState(false)
+  const [loadingCancel, setLoadingCancel] = useState(false)
+  const [acceptModal, setAcceptModal] = useState(false)
+  const [cancelModal, setCancelModal] = useState(false)
+
+  // تایید سفارش
+  const handleAcceptOrder = async () => {
+    setLoadingAccept(true)
+    try {
+      const response = await axios.post(
+        `${uri}/orders/${orderId}/initial-accept`,
+        {},
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      )
+
+      if (response.status == 200) {
+        showToastOrAlert(response?.data?.message || 'تایید سفارش با موفقیت انجام شد')
+        // بروزرسانی داده‌ها
+        if (onUpdate) onUpdate()
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || 'خطا در تایید سفارش'
+      showToastOrAlert(message)
+    } finally {
+      setLoadingAccept(false)
+    }
+  }
+
+  // لغو سفارش
+  const handleCancelOrder = async () => {
+    setLoadingCancel(true)
+    try {
+      const response = await axios.post(
+        `${uri}/orders/cancel`,
+        { orderId: orderId },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      )
+
+      if (response.status == 200) {
+        showToastOrAlert(response?.data?.message || 'سفارش با موفقیت لغو شد')
+        // بروزرسانی داده‌ها
+        if (onUpdate) onUpdate()
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || 'خطا در لغو سفارش'
+      showToastOrAlert(message)
+    } finally {
+      setLoadingCancel(false)
+    }
+  }
+
+  const renderRow = (text1, text2, textStyle1, textStyle2) => (
+    <View style={NewStyles.rowWrapper}>
+      <Text style={[NewStyles.text, textStyle1]}>{text1}</Text>
+      <Text style={[NewStyles.text10, textStyle2]}>{text2}</Text>
+    </View>
+  )
+
+  // چک کردن قفل بودن
+  const isLocked = data?.user_initial_accept
+
+  return (
+    <View style={[{ width: '90%', alignSelf: 'center', paddingBottom:10 }, NewStyles.center]}>
+      {/* توضیحات */}
+      <View style={styles.noticeBox}>
+        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
+          کاربر گرامی، توضیحات شما در حال بررسی توسط کارشناس مربوطه می باشد. از صبر و شکیبایی شما سپاس گزاریم
+        </Text>
+      </View>
+
+      {/* اطلاعات سفارش */}
+      <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '100%', paddingVertical: 15, paddingHorizontal: '5%', gap: 10 }, NewStyles.border10]}>
+        
+        {/* توضیحات کارشناس */}
+        {data?.technician_des && (
+          <View style={{ gap: 5 }}>
+            <View style={[NewStyles.row, { gap: 5 }]}>
+              <Ionicons name="create-outline" size={20} color={themeColor0.bgColor(1)} />
+              <Text style={NewStyles.title}>توضیحات کارشناس لوپ</Text>
+            </View>
+            <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
+              <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
+              <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.technician_des}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* تاریخ و ساعت مراجعه */}
+        {renderRow(
+          'زمان مراجعه تکنسین',
+          data?.is_urgent > 0 
+            ? 'درخواست فوری' 
+            : formatDate(data?.date) + ' ساعت ' + data?.time?.split(':')?.slice(0, 2)?.join(':'),
+          NewStyles.text,
+          data?.is_urgent > 0 && NewStyles.title6
+        )}
+      </View>
+
+      {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
+      {data?.technician_des && (
+        isLocked ? (
+          <View style={[styles.lockedBox, NewStyles.center, NewStyles.border10]}>
+            <Ionicons name="checkmark-circle" size={40} color={themeColor0.bgColor(1)} />
+            <Text style={[NewStyles.title, { color: themeColor0.bgColor(1) }]}>
+              سفارش تایید شده
+            </Text>
+            <Text style={[NewStyles.text10]}>
+              شما این سفارش را در تاریخ {formatDate(data?.user_initial_accept)} تایید کرده‌اید
+            </Text>
+          </View>
+        ) : (
+          <View style={[NewStyles.row, { width: '100%', gap: 10, marginTop: 15 }]}>
+            <View style={{ flex: 1 }}>
+              <Button
+                title="تایید سفارش"
+                onPress={() => setAcceptModal(true)}
+                loading={loadingAccept}
+                textStyle={NewStyles.text4}
+                style={{ backgroundColor: themeColor7.bgColor(1) }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                title="لغو سفارش"
+                onPress={() => setCancelModal(true)}
+                loading={loadingCancel}
+                textStyle={NewStyles.text4}
+                style={{ backgroundColor: themeColor6.bgColor(1) }}
+              />
+            </View>
+          </View>
+        )
+      )}
+
+      {/* Modals */}
+      <ConfirmationModal
+        title="تایید سفارش"
+        message="آیا از تایید این سفارش اطمینان دارید؟"
+        action={handleAcceptOrder}
+        confirmationModal={acceptModal}
+        setConfirmationModal={setAcceptModal}
+      />
+
+      <ConfirmationModal
+        title="لغو سفارش"
+        message="آیا از لغو سفارش خود اطمینان دارید؟"
+        action={handleCancelOrder}
+        confirmationModal={cancelModal}
+        setConfirmationModal={setCancelModal}
+      />
+    </View>
+  )
+}
+
+export default OrderReviewSection
+
+const styles = StyleSheet.create({
+  noticeBox: {
+    backgroundColor: themeColor1.bgColor(1),
+    padding: 10,
+    ...NewStyles.border10,
+    marginBottom: 12,
+    width: '100%',
+  },
+  itemWrapper: {
+    backgroundColor: themeColor5.bgColor(1),
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  lockedBox: {
+    backgroundColor: themeColor4.bgColor(1),
+    padding: 20,
+    marginTop: 15,
+    width: '100%',
+    gap: 10,
+  },
+})

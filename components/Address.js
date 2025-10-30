@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 import NewStyles, { deviceWidth } from '../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6 } from '../theme/Color';
 import { useTranslation } from 'react-i18next';
 import { setAddressId, setGeneralData } from '../slices/stepSlice';
 import axios from 'axios';
@@ -63,8 +63,11 @@ export default function Address({ step, data, navigation }) {
                 keyExtractor={(item) => item?.id?.toString()}
                 renderItem={({ item }) => {
                     return (
-                        <View style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow]}>
-                            <View>
+                        <Pressable onPress={() => {
+                                        dispatch(setAddressId(item?.id))
+                                        dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
+                                    }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && {backgroundColor:themeColor1.bgColor(1)}]}>
+                            {/* <View>
                                 <BouncyCheckbox
                                     size={25}
                                     fillColor={themeColor0.bgColor(1)}
@@ -77,15 +80,15 @@ export default function Address({ step, data, navigation }) {
                                         dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
                                     }}
                                 />
-                            </View>
+                            </View> */}
                             <View style={{ flex: 1 }}>
                                 {renderRow(`${item?.title}`, '')}
                                 {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }])}
                             </View>
                             <Pressable style={styles.searchBarIcons} onPress={() => { setId(item?.id); setDeletModal(true); }}>
-                                <Ionicons name="trash" size={20} color={themeColor0.bgColor(1)} />
+                                <Ionicons name="trash" size={20} color={themeColor6.bgColor(1)} />
                             </Pressable>
-                        </View>
+                        </Pressable>
                     )
                 }}
             />

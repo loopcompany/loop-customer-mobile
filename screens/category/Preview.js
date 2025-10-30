@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6 } from '../../theme/Color';
+import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
 import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { useDispatch, useSelector } from 'react-redux';
 import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
@@ -16,6 +16,7 @@ import { emptyCategory } from '../../slices/categorySlice';
 import ProgressBar from '../../components/ProgressBar';
 import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Preview({ navigation }) {
 
@@ -24,7 +25,7 @@ export default function Preview({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(false);
 
-    const token = useSelector((state) => state?.token?.token);
+    const token = useSelector((state) => state?.auth?.token);
 
     const totalPrice = useSelector(selectTotalPrice);
     const category = useSelector(state => state.category?.data);
@@ -52,20 +53,15 @@ export default function Preview({ navigation }) {
     const submitOrder = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/order/submit`, { categoryId: category?.id, isFixed: isFixed, discountCode, totalPrice, addressId, isUrgent, date, time, des, femaleCount, maleCount, unspecifiedCount, imagePath, steps: steps?.data }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/orders`, { category_id: category?.id, is_fixed: isFixed, discount_code: discountCode, total_price: totalPrice, address_id: addressId, is_urgent: isUrgent, date: date, time: time, description: des, female: femaleCount, male: maleCount, unspecified: unspecifiedCount, image_path: imagePath, steps: steps?.data }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 201) {
                 showToastOrAlert(response?.data?.message);
                 dispatch(fetchOrders(token));
                 dispatch(emptySteps());
                 dispatch(emptyCategory());
                 dispatch(emptyAddress());
-                navigation.replace('DrawerLayout', {
-                    screen: 'MainLayout', params: {
-                        screen: 'Orders',
-                        params: {
-                            screen: 'Pending'
-                        }
-                    }
+                navigation.replace('MainApp', {
+                    screen: 'OrdersScreen'
                 });
             }
         } catch (error) {
@@ -98,13 +94,13 @@ export default function Preview({ navigation }) {
             <Text style={[NewStyles.text10, textStyle2]}>{text2}</Text>
         </View>
     );
+    console.log(address);
 
-    if (loading) { return (<Loader/>)};
+    if (loading) { return (<Loader />) };
 
     return (
-        <View style={NewStyles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-                <ProgressBar step={'preview'} />
+        <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={NewStyles.rowWrapper}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
@@ -144,7 +140,7 @@ export default function Preview({ navigation }) {
                                 NewStyles.center
                             ]}
                             onPress={() => checkDiscount()}>
-                            {!pending && <Text style={NewStyles.text4}>بررسی کد تخفیف</Text>}
+                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>بررسی کد تخفیف</Text>}
                             {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                         </Pressable>
                     </View>
@@ -175,8 +171,8 @@ export default function Preview({ navigation }) {
 
                     {/* {renderRow('مبلغ پیشنهادی لوپ', totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'توافقی')} */}
 
-                    {renderRow('آدرس محل خدمت', '')}
-                    {renderRow(address?.neighbourhood?.region?.city?.title + ' - ' + address?.neighbourhood?.region?.title + ' - ' + address?.neighbourhood?.title + ' - ' + address?.address, '', NewStyles.text10)}
+                    {renderRow('آدرس', '')}
+                    {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + address?.region + ' - ' + address?.address, '', NewStyles.text10)}
                     {discountPercent && renderRow('درصد تخفیف نهایی شما', discountPercent + ' درصد', NewStyles.text10)}
                 </View>
 
@@ -205,7 +201,7 @@ export default function Preview({ navigation }) {
                                                 else
                                                     return (
                                                         (item?.value || item?.value > 0) ?
-                                                            <View style={[styles.itemWrapper, NewStyles.shadow, NewStyles.border10]}>
+                                                            <View style={[styles.itemWrapper,  NewStyles.border10]}>
                                                                 <View style={NewStyles.rowWrapper}>
                                                                     <View style={[NewStyles.rowWrapper, { justifyContent: 'flex-end', flex: 2, gap: 5 }]}>
                                                                         <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
@@ -232,19 +228,19 @@ export default function Preview({ navigation }) {
                         <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
                         <Text style={NewStyles.title}>توضیحات کاربر</Text>
                     </View>
-                    <View style={[styles.itemWrapper, NewStyles.row, NewStyles.shadow, NewStyles.border10, { gap: 10 }]}>
+                    <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                         <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{des}</Text>
                     </View>
                 </View>}
                 {imagePath && <Image style={[{ height: 250, margin: '5%' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
             </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
+            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
                 <View style={{ flex: 1 }}>
-                    <Button title={'ثبت نهایی سفارش'} loading={loading} onPress={() => submitOrder()} />
+                    <Button title={'ثبت نهایی سفارش'} textStyle={NewStyles.text4} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -259,7 +255,6 @@ const styles = StyleSheet.create({
         padding: 5
     },
     itemWrapper: {
-        backgroundColor: themeColor5.bgColor(1),
         paddingVertical: '5%',
         paddingHorizontal: '5%',
         minHeight: 50,

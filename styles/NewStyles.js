@@ -40,6 +40,26 @@ const NewStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
+  seperator: {
+    paddingBottom: '5%',
+    paddingHorizontal: '5%',
+    gap: 20,
+    borderBottomWidth: 5,
+    borderBottomColor: themeColor3.bgColor(0.2),
+  },
+  whiteButton: {
+    backgroundColor: themeColor4.bgColor(1),
+    borderRadius: 100,
+    margin: 5,
+    padding: 10,
+  },
+  title6: {
+    fontSize: 14,
+    fontFamily: 'iransans',
+    color: themeColor6.bgColor(1),
+    textAlign: 'right',
+  },
   add: {
     padding: 3,
     backgroundColor: themeColor0.bgColor(1),

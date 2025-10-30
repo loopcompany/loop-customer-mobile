@@ -9,7 +9,7 @@ import React from "react";
 import { themeColor0, themeColor10, themeColor4 } from "../theme/Color";
 import NewStyles from "../styles/NewStyles";
 
-export default function Button({ onPress, title, style, loading }) {
+export default function Button({ onPress, title, style, loading , textStyle}) {
   return (
     <TouchableOpacity
       disabled={loading}
@@ -19,7 +19,7 @@ export default function Button({ onPress, title, style, loading }) {
       {loading && (
         <ActivityIndicator size={"small"} color={themeColor4.bgColor(1)} />
       )}
-      {!loading && <Text style={NewStyles.title1}>{title}</Text>}
+      {!loading && <Text style={[NewStyles.title1,textStyle]}>{title}</Text>}
     </TouchableOpacity>
   );
 }
