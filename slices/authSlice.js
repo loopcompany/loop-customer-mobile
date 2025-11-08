@@ -7,6 +7,7 @@ export const authSlice = createSlice({
         isAuthenticated: false,
         isLoading: false,
         authError: null,
+        userType: null, // 'individual' or 'organization'
     },
     reducers: {
         setToken: (state, action) => {
@@ -14,10 +15,14 @@ export const authSlice = createSlice({
             state.isAuthenticated = !!action.payload;
             state.authError = null;
         },
+        setUserType: (state, action) => {
+            state.userType = action.payload;
+        },
         removeToken: (state) => {
             state.token = null;
             state.isAuthenticated = false;
             state.authError = null;
+            state.userType = null;
         },
         setAuthLoading: (state, action) => {
             state.isLoading = action.payload;
@@ -34,6 +39,7 @@ export const authSlice = createSlice({
 
 export const { 
     setToken, 
+    setUserType,
     removeToken, 
     setAuthLoading, 
     setAuthError, 

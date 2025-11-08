@@ -51,6 +51,10 @@ import HardwareSelectionScreen from "./org/HardwareSelectionScreen";
 import ComprehensiveSelectionScreen from "./org/ComprehensiveSelectionScreen";
 import Login from "./org/logreg/Login";
 import Register from "./org/logreg/Register";
+import OTPVerification from "./org/logreg/OTPVerification";
+import TestConnection from "./org/logreg/TestConnection";
+import OrganizationForgotPassword from "./org/logreg/OrganizationForgotPassword";
+import OrganizationResetPassword from "./org/logreg/OrganizationResetPassword";
 import Grouping from "./org/logreg/Grouping";
 import Method from "./org/logreg/Method";
 import OrgPrivacy from "./org/logreg/Privacy";
@@ -141,6 +145,34 @@ const App = () => {
           <Stack.Screen
             component={Register}
             name="Register"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            component={OTPVerification}
+            name="OTPVerification"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            component={TestConnection}
+            name="TestConnection"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            component={OrganizationForgotPassword}
+            name="OrganizationForgotPassword"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            component={OrganizationResetPassword}
+            name="OrganizationResetPassword"
             options={{
               headerShown: false,
             }}

@@ -61,6 +61,17 @@ export const API_ENDPOINTS = {
     FAQS: '/info/faqs',
     TERMS: '/info/terms', 
     PRIVACY: '/info/privacy',
+  },
+
+  // Organization endpoints
+  ORGANIZATION: {
+    REGISTER: '/organization/register',
+    VERIFY_PHONE: '/organization/verify-phone',
+    RESEND_CODE: '/organization/resend-code',
+    LOGIN: '/organization/login',
+    VALIDATE_TOKEN: '/organization/validate-token',
+    LOGOUT: '/organization/logout',
+    LOGOUT_ALL: '/organization/logout-all',
   }
 };
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, Alert, KeyboardAvoidingView, } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 import NewStyles from '../../styles/NewStyles';
 import Button from '../../components/Button';
 import useLogout from '../../hooks/useLogout';
@@ -14,11 +15,17 @@ import TokenManager from '../../services/TokenManager';
 import { showToastOrAlert } from '../../helpers/Common';
 import DatePickerModal from '../../components/DatePickerModal';
 import { Ionicons } from '@expo/vector-icons';
+import OrganizationProfile from './OrganizationProfile';
 
 export default function Profile() {
     const navigation = useNavigation();
     const { logoutWithConfirmation, logoutFromAllDevicesWithConfirmation, isLoggingOut } = useLogout();
     const [datePickerModal, setDatePickerModal] = useState(false);
+    const [checkingUserType, setCheckingUserType] = useState(true);
+    const [userType, setUserType] = useState(null);
+    
+    // Get user type from Redux
+    const userTypeFromRedux = useSelector(state => state.auth.userType);
     // Profile data states
     const [profileData, setProfileData] = useState({
         name: '',
@@ -55,12 +62,39 @@ export default function Profile() {
     const [captcha, setCaptcha] = useState(() => Math.floor(1000 + Math.random() * 9000).toString());
     const [captchaInput, setCaptchaInput] = useState('');
     const [autoLoginEnabled, setAutoLoginEnabled] = useState(false);
+    // Check user type on mount
+    useEffect(() => {
+        checkUserType();
+    }, []);
+
+    // Check user type from AsyncStorage or Redux
+    const checkUserType = async () => {
+        try {
+            // First check Redux
+            if (userTypeFromRedux) {
+                setUserType(userTypeFromRedux);
+                setCheckingUserType(false);
+                return;
+            }
+            
+            // If not in Redux, check AsyncStorage
+            const accountType = await AsyncStorage.getItem('accountType');
+            setUserType(accountType);
+            setCheckingUserType(false);
+        } catch (error) {
+            console.error('Error checking user type:', error);
+            setCheckingUserType(false);
+        }
+    };
+
     // Load profile data on component mount
     useEffect(() => {
-        loadProfile();
-        loadAutoLoginStatus();
-        generateCaptcha(); // Generate a fresh captcha on component mount
-    }, []);
+        if (userType === 'individual' || !userType) {
+            loadProfile();
+            loadAutoLoginStatus();
+            generateCaptcha(); // Generate a fresh captcha on component mount
+        }
+    }, [userType]);
 
     // Load auto-login status
     const loadAutoLoginStatus = async () => {
@@ -298,6 +332,22 @@ export default function Profile() {
         setCaptcha(n);
     };
 
+    // Show loading while checking user type
+    if (checkingUserType) {
+        return (
+            <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
+                <Text style={{ marginTop: 10, fontFamily: 'VazirLight' }}>در حال بارگذاری...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    // Show OrganizationProfile for organization users
+    if (userType === 'organization') {
+        return <OrganizationProfile />;
+    }
+
+    // Show individual user profile
     return (
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>

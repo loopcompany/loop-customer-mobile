@@ -460,3 +460,39 @@ export const getPaymentStatusColor = (status) => {
 // {
 //     return Math.floor(10 ** length * Math.random()).toString().padStart(length, '0');
 // }
+
+/**
+ * تبدیل تاریخ شمسی به میلادی با استفاده از کتابخانه jalaali-js
+ * @param {string} jDate - تاریخ شمسی به فرمت YYYY/MM/DD (مثال: 1402/08/17)
+ * @returns {string} - تاریخ میلادی به فرمت YYYY-MM-DD (مثال: 2023-11-08) یا رشته خالی در صورت خطا
+ */
+export function jalaliToGregorian(jDate) {
+  if (!jDate) return '';
+  
+  try {
+    // فرمت ورودی: 1402/08/17
+    const parts = jDate.split('/');
+    if (parts.length !== 3) return '';
+    
+    const jy = parseInt(parts[0]);
+    const jm = parseInt(parts[1]);
+    const jd = parseInt(parts[2]);
+    
+    // بررسی اعتبار مقادیر
+    if (isNaN(jy) || isNaN(jm) || isNaN(jd)) return '';
+    if (jm < 1 || jm > 12 || jd < 1 || jd > 31) return '';
+    
+    // استفاده از کتابخانه jalaali-js برای تبدیل دقیق
+    const gregorian = jalaali.toGregorian(jy, jm, jd);
+    
+    // فرمت خروجی: YYYY-MM-DD
+    const year = gregorian.gy;
+    const month = gregorian.gm < 10 ? `0${gregorian.gm}` : `${gregorian.gm}`;
+    const day = gregorian.gd < 10 ? `0${gregorian.gd}` : `${gregorian.gd}`;
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('Error converting Jalali to Gregorian:', error);
+    return '';
+  }
+}

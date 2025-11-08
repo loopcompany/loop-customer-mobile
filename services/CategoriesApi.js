@@ -1,11 +1,18 @@
 // CategoriesApi.js
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from './URL';
 
 const categoriesAPI = {
   getCategories: async () => {
     try {
-      const response = await axios.get(`${uri}/categories`);
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axios.get(`${uri}/categories`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -15,7 +22,13 @@ const categoriesAPI = {
   
   getSubCategories: async (categoryId) => {
     try {
-      const response = await axios.get(`${uri}/categories/${categoryId}`);
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axios.get(`${uri}/categories/${categoryId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching subcategories:', error);

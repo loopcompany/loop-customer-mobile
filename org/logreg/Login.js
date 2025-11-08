@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { setToken, setUserType } from '../../slices/authSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
+import { uri } from '../../services/URL';
 
 const Login = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [organizationCode, setOrganizationCode] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const [securityCode, setSecurityCode] = useState('');
-  const [captchaCode, setCaptchaCode] = useState('');
 
   // Generate random captcha code
   const generateCaptcha = () => {
@@ -26,21 +34,118 @@ const Login = ({ navigation }) => {
 
   const [displayedCaptcha, setDisplayedCaptcha] = useState(generateCaptcha());
 
-  const handleLogin = () => {
-    if (!organizationCode || !password) {
-      Alert.alert('خطا', 'لطفا تمام فیلدها را پر کنید');
+  const handleLogin = async () => {
+    // Clear previous errors
+    setErrors({});
+
+    // Validation
+    const newErrors = {};
+    if (!organizationCode) {
+      newErrors.organizationCode = 'کد سازمانی الزامی است';
+    } else if (organizationCode.length !== 6) {
+      newErrors.organizationCode = 'کد سازمانی باید 6 رقم باشد';
+    }
+
+    if (!password) {
+      newErrors.password = 'رمز عبور الزامی است';
+    } else if (password.length < 8) {
+      newErrors.password = 'رمز عبور باید حداقل 8 کاراکتر باشد';
+    }
+
+    // Validate captcha
+    if (!securityCode) {
+      newErrors.securityCode = 'کد امنیتی الزامی است';
+    } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
+      newErrors.securityCode = 'کد امنیتی صحیح نیست';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Alert.alert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
       return;
     }
-    if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
-      Alert.alert('خطا', 'کد امنیتی صحیح نیست');
-      return;
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(`${uri}/organization/login`, {
+        organization_code: organizationCode,
+        password: password,
+      });
+
+      if (response.data.status === 'success') {
+        // Save token and user data
+        await AsyncStorage.setItem('userToken', response.data.data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
+        await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
+        await AsyncStorage.setItem('accountType', 'organization');
+        await AsyncStorage.setItem('organizationCode', organizationCode);
+        
+        // Dispatch to Redux
+        dispatch(setToken(response.data.data.token));
+        dispatch(setUserType('organization'));
+
+        if (rememberPassword) {
+          await AsyncStorage.setItem('savedOrganizationCode', organizationCode);
+        }
+
+        Alert.alert(
+          'موفق',
+          'ورود با موفقیت انجام شد',
+          [
+            {
+              text: 'تایید',
+              onPress: () => {
+                // Navigate to main app
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'MainApp' }],
+                });
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      if (error.response) {
+        const errorData = error.response.data;
+        
+        if (errorData.error === 'organization_not_found') {
+          setErrors({ organizationCode: 'کد سازمانی یافت نشد' });
+          Alert.alert('خطا', 'کد سازمانی یافت نشد');
+        } else if (errorData.error === 'phone_not_verified') {
+          Alert.alert(
+            'توجه',
+            'شماره موبایل هنوز تایید نشده است. لطفا ابتدا شماره موبایل خود را تایید کنید.',
+            [
+              {
+                text: 'تایید',
+                onPress: () => {
+                  // Navigate to OTP verification if needed
+                },
+              },
+            ]
+          );
+        } else if (errorData.error === 'invalid_password') {
+          setErrors({ password: 'رمز عبور اشتباه است' });
+          Alert.alert('خطا', 'رمز عبور اشتباه است');
+        } else if (errorData.error === 'account_disabled') {
+          Alert.alert('خطا', 'حساب کاربری شما غیرفعال شده است. لطفا با پشتیبانی تماس بگیرید');
+        } else {
+          Alert.alert('خطا', errorData.message || 'خطا در ورود');
+        }
+      } else {
+        Alert.alert('خطا', 'خطا در ارتباط با سرور');
+      }
+    } finally {
+      setLoading(false);
     }
-    // Handle login logic here
-    navigation.navigate('Method');
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate('ResetPasswordScreen');
+    navigation.navigate('OrganizationForgotPassword');
   };
 
   const handleSecurityCode = () => {
@@ -49,7 +154,11 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}> 
+    <KeyboardAvoidingView 
+      style={{ flex: 1, backgroundColor: '#d1e9ff' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
@@ -57,7 +166,11 @@ const Login = ({ navigation }) => {
         onPressRight={() => {}}
       />
       
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Main header - ورود به حساب کاربری */}
         <View style={{ 
           width: '90%', 
@@ -89,20 +202,27 @@ const Login = ({ navigation }) => {
             <TextInput
               value={organizationCode}
               onChangeText={setOrganizationCode}
-              placeholder="کد سازمانی  *"
+              placeholder="کد سازمانی * (6 رقم)"
+              keyboardType="numeric"
+              maxLength={6}
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
                 paddingVertical: 10, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
-                borderColor: '#ccc',
+                borderColor: errors.organizationCode ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
                 height: 40
               }}
             />
+            {errors.organizationCode && (
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                {errors.organizationCode}
+              </Text>
+            )}
           </View>
 
           {/* رمز عبور */}
@@ -110,7 +230,7 @@ const Login = ({ navigation }) => {
             <TextInput
               value={password}
               onChangeText={setPassword}
-              placeholder="رمز عبور * "
+              placeholder="رمز عبور * (حداقل 8 کاراکتر)"
               secureTextEntry={!showPassword}
               style={{ 
                 backgroundColor: '#f5f5f5', 
@@ -119,7 +239,7 @@ const Login = ({ navigation }) => {
                 paddingHorizontal: 12,
                 paddingLeft: 45,
                 borderWidth: 1, 
-                borderColor: '#ccc',
+                borderColor: errors.password ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
@@ -136,8 +256,17 @@ const Login = ({ navigation }) => {
                 zIndex: 1 
               }}
             >
-              <Text style={{ fontSize: 18 }}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+              <Ionicons 
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'} 
+                size={22} 
+                color="#666" 
+              />
             </TouchableOpacity>
+            {errors.password && (
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                {errors.password}
+              </Text>
+            )}
           </View>
 
           {/* ذخیره رمز عبور - Checkbox */}
@@ -182,57 +311,68 @@ const Login = ({ navigation }) => {
           </TouchableOpacity>
 
           {/* Security Code Input and Captcha */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15, gap: 8 }}>
-            {/* بروچر - دکمه سمت چپ */}
-            <TouchableOpacity 
-              onPress={() => setDisplayedCaptcha(generateCaptcha())}
-              style={{ 
-                backgroundColor: '#e3f2fd',
-                borderRadius: 8,
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                borderWidth: 1.5,
-                borderColor: '#1976d2',
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 36,
-                flexDirection: 'row'
-              }}
-            >
-              <Text style={{ 
-                fontSize: 14,
-                fontFamily: 'VazirBold',
-                color: '#1976d2',
-                textAlign: 'center',
-                letterSpacing: 2,
-                textDecorationLine: 'line-through',
-                textDecorationColor: '#1976d2',
-                marginRight: 4
-              }}>{displayedCaptcha}</Text>
-              <Text style={{ fontSize: 12, color: '#1976d2' }}>↺</Text>
-            </TouchableOpacity>
-
-            {/* کد امنیتی - Text Input سمت راست */}
-            <View style={{ flex: 1 }}>
-              <TextInput
-                value={securityCode}
-                onChangeText={setSecurityCode}
-                placeholder="کد امنیتی"
-                style={{ 
-                  backgroundColor: '#f5f5f5', 
-                  borderRadius: 8, 
-                  paddingVertical: 8, 
-                  paddingHorizontal: 10,
-                  borderWidth: 1, 
-                  borderColor: '#ccc',
-                  fontSize: 14,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'right',
-                  height: 36
+          <View style={{ marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              {/* بروچر - دکمه سمت چپ */}
+              <TouchableOpacity 
+                onPress={() => {
+                  setDisplayedCaptcha(generateCaptcha());
+                  setSecurityCode('');
                 }}
-              />
+                style={{ 
+                  backgroundColor: '#e3f2fd',
+                  borderRadius: 8,
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  borderWidth: 1.5,
+                  borderColor: '#1976d2',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 36,
+                  flexDirection: 'row'
+                }}
+              >
+                <Text style={{ 
+                  fontSize: 14,
+                  fontFamily: 'VazirBold',
+                  color: '#1976d2',
+                  textAlign: 'center',
+                  letterSpacing: 2,
+                  textDecorationLine: 'line-through',
+                  textDecorationColor: '#1976d2',
+                  marginRight: 4
+                }}>{displayedCaptcha}</Text>
+                <Text style={{ fontSize: 12, color: '#1976d2' }}>↺</Text>
+              </TouchableOpacity>
+
+              {/* کد امنیتی - Text Input سمت راست */}
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  value={securityCode}
+                  onChangeText={setSecurityCode}
+                  placeholder="کد امنیتی"
+                  autoCapitalize="characters"
+                  style={{ 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: 8, 
+                    paddingVertical: 8, 
+                    paddingHorizontal: 10,
+                    borderWidth: 1, 
+                    borderColor: errors.securityCode ? '#ff0000' : '#ccc',
+                    fontSize: 14,
+                    fontFamily: 'VazirLight',
+                    textAlign: 'right',
+                    height: 36
+                  }}
+                />
+              </View>
             </View>
+            {errors.securityCode && (
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                {errors.securityCode}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -240,8 +380,9 @@ const Login = ({ navigation }) => {
         <View style={{ width: '90%', alignSelf: 'center' }}>
           <TouchableOpacity 
             onPress={handleLogin}
+            disabled={loading}
             style={{ 
-              backgroundColor: '#1976d2', 
+              backgroundColor: loading ? '#90caf9' : '#1976d2', 
               borderRadius: 10, 
               paddingVertical: 12, 
               marginBottom: 10, 
@@ -250,21 +391,26 @@ const Login = ({ navigation }) => {
               elevation: 3,
               shadowColor: '#1976d2',
               shadowOpacity: 0.3,
-              shadowRadius: 4
+              shadowRadius: 4,
+              opacity: loading ? 0.7 : 1
             }}
           >
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              fontFamily: 'VazirBold',
-              textAlign: 'center' 
-            }}>ورود</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={{ 
+                color: '#fff', 
+                fontSize: 16, 
+                fontWeight: 'bold', 
+                fontFamily: 'VazirBold',
+                textAlign: 'center' 
+              }}>ورود</Text>
+            )}
           </TouchableOpacity>
 
           {/* Info text */}
           <View style={{ alignItems: 'center', marginBottom: 15 }}>
-            <TouchableOpacity onPress={()=>{navigation.navigate('ResetPasswordScreen')}}>
+            <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={{ 
               fontSize: 11, 
               color: '#000000ff', 
@@ -288,7 +434,7 @@ const Login = ({ navigation }) => {
 
       </ScrollView>
       
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
