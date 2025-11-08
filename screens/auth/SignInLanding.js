@@ -1,11 +1,12 @@
-import { StyleSheet, Image, ImageBackground, } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
+import { ImageBackground } from "expo-image";
 
 
 export default function SignInLanding({ navigation }) {
   return (
-    <ImageBackground source={require("../../assets/moon.jpg")} style={styles.background} resizeMode="cover">
+    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
       <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain"/>
       <Button
         style={{ width: "70%" }}

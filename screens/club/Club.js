@@ -1,0 +1,351 @@
+import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, Modal, ActivityIndicator, ToastAndroid, Platform, Alert } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+import moment from 'moment-jalaali';
+
+import NewStyles from '../../styles/NewStyles';
+import { themeColor0, themeColor1, themeColor5 } from '../../theme/Color';
+import { mainUri, uri } from '../../services/URL';
+import OfferItem from './OfferItem';
+import axios from 'axios';
+import { useTranslation } from 'react-i18next';
+import Filters from '../../components/Filters';
+import DiscountItem from './DiscountItem';
+import Loader from '../../components/Loader';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import LuckyWheel from '../../components/LuckyWheel';
+import WinnerModal from '../../components/WinnerModal';
+import { getGemActions, spinWheel, canPlayWheel } from '../../services/GemApi';
+import { showToastOrAlert } from '../../helpers/Common';
+
+export default function Club({ navigation }) {
+
+  const { t } = useTranslation();
+  const token = useSelector(state => state.auth.token);
+
+  const [refreshing, setRefreshing] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const [offers, setOffers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [data, setData] = useState([]);
+
+  // حالت‌های گردونه شانس
+  const [showWheelModal, setShowWheelModal] = useState(false);
+  const [spinning, setSpinning] = useState(false);
+  const [wonPrize, setWonPrize] = useState(null);
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [userGems, setUserGems] = useState(0);
+  const [canSpin, setCanSpin] = useState(false);
+  const [nextPlayDate, setNextPlayDate] = useState(null);
+  const [prizes, setPrizes] = useState([]);
+  const [loadingWheel, setLoadingWheel] = useState(false);
+
+  // تابع نمایش پیام
+
+  // بررسی امکان شرکت در گردونه
+  const checkCanPlay = async () => {
+    if (!token) return;
+    try {
+      const response = await canPlayWheel(token);
+      setCanSpin(response.data.can_play);
+      setNextPlayDate(response.data.next_available_date);
+    } catch (error) {
+      console.log('Error checking can play:', error);
+    }
+  };
+
+  // دریافت لیست جوایز از سرور
+  const fetchPrizes = async () => {
+    if (!token) return;
+    try {
+      const response = await getGemActions(token);
+      if (response.success && response.data.actions) {
+        // تبدیل به فرمت مورد نیاز کامپوننت
+        const formattedPrizes = response.data.actions.map(action => ({
+          id: action.id,
+          label: action.name,
+          points: action.gems,
+          action_key: action.action_key,
+        }));
+        setPrizes(formattedPrizes);
+      }
+    } catch (error) {
+      console.log('Error fetching prizes:', error);
+      // فقط اگر خطای واقعی باشه پیام بده
+      if (error.response && error.response.status !== 401) {
+        showToastOrAlert('خطا در دریافت اطلاعات گردونه');
+      }
+    }
+  };
+
+  // مدیریت چرخش گردونه
+  const handleSpinWheel = async () => {
+    if (!canSpin) {
+      showToastOrAlert('شما این هفته قبلاً شرکت کرده‌اید. لطفاً هفته آینده مجدداً تلاش کنید.');
+      return;
+    }
+
+    setSpinning(true);
+
+    try {
+      // فراخوانی API
+      const response = await spinWheel(token);
+
+      if (response.success) {
+        // تاخیر برای نمایش انیمیشن چرخش
+        setTimeout(() => {
+          setWonPrize(response.data.won_action);
+          setUserGems(response.data.total_gems);
+          setSpinning(false);
+          setCanSpin(false);
+
+          // نمایش مودال برنده بعد از 500ms
+          setTimeout(() => {
+            setShowWinnerModal(true);
+          }, 500);
+        }, 4000);
+      }
+    } catch (error) {
+      setSpinning(false);
+
+      if (error.response) {
+        const errorCode = error.response.data?.error_code;
+
+        if (errorCode === 'ALREADY_PLAYED_THIS_WEEK') {
+          showToastOrAlert(error.response.data.message);
+          setCanSpin(false);
+          if (error.response.data.data?.can_play_again_after) {
+            setNextPlayDate(error.response.data.data.can_play_again_after);
+          }
+        } else if (errorCode === 'NO_ACTIVE_ACTIONS') {
+          showToastOrAlert('در حال حاضر هیچ پاداشی موجود نیست.');
+        } else {
+          showToastOrAlert(error.response.data.message || 'خطا در شرکت در گردونه');
+        }
+      } else {
+        showToastOrAlert('خطای شبکه! لطفاً اتصال اینترنت خود را بررسی کنید.');
+      }
+    }
+  };
+
+  // باز کردن مودال گردونه
+  const handleOpenWheel = async () => {
+    if (!token) {
+      showToastOrAlert('لطفاً ابتدا وارد شوید');
+      return;
+    }
+
+    setShowWheelModal(true);
+    setLoadingWheel(true);
+
+    try {
+      // دریافت اطلاعات جوایز و وضعیت
+      await Promise.all([
+        fetchPrizes(),
+        checkCanPlay(),
+      ]);
+    } catch (error) {
+      console.log('Error loading wheel data:', error);
+    } finally {
+      setLoadingWheel(false);
+    }
+  };
+
+  // بستن مودال برنده
+  const handleCloseWinner = () => {
+    setShowWinnerModal(false);
+    setShowWheelModal(false);
+    setWonPrize(null);
+  };
+  const fetchData = async () => {
+
+    try {
+      const [response, response1, response2] = await Promise.all([
+        axios.get(`${uri}/discounts/offers`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
+        axios.get(`${uri}/discounts/categories`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
+        axios.get(`${uri}/discounts/list`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
+      ]);
+      setOffers(response.data);
+      const allCategory = { id: '0', title: 'همه' };
+      const updatedCategories = [allCategory, ...response1.data];
+      setCategories(updatedCategories);
+      setData(response2.data);
+    } catch (error) {
+      const message = error.response ? t('An unexpected error occurred!') : t('Network error!');
+      showToastOrAlert(message);
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [refreshing]);
+
+  if (loading) return <Loader />;
+
+  return (
+    <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
+      <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
+        <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
+          <View style={NewStyles.rowWrapper}>
+            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('Gem Transactions')}>
+              <Text style={NewStyles.text}>تاریخچه گردونه شما</Text>
+            </Pressable>
+            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('User Discounts')}>
+              <Text style={NewStyles.text}>جوایز دریافت شده</Text>
+            </Pressable >
+          </View>
+        </View>
+        {/* دکمه گردونه شانس */}
+        <Pressable
+          style={[NewStyles.border10, NewStyles.spacing, {
+            height: 140,
+            alignSelf: 'center',
+            width: '90%',
+            backgroundColor: themeColor1.bgColor(0.1),
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: themeColor1.bgColor(0.3),
+            borderStyle: 'dashed',
+          }]}
+          onPress={handleOpenWheel}
+        >
+          <Ionicons name="gift" size={50} color={themeColor1.bgColor(1)} />
+          <Text style={[NewStyles.title10, { marginTop: 10 }]}>گردونه شانس</Text>
+          <Text style={[NewStyles.text10, { opacity: 0.7 }]}>برای دریافت امتیاز بچرخان!</Text>
+          {userGems > 0 && (
+            <Text style={[NewStyles.title1, { marginTop: 5, }]}>
+              امتیاز شما: {userGems} 💎
+            </Text>
+          )}
+        </Pressable>
+
+        <View style={{ paddingHorizontal: '5%', alignItems: 'flex-end' }}>
+          <Text style={NewStyles.title10}>پیشنهادهای این هفته</Text>
+        </View>
+        <View>
+          <FlatList
+            contentContainerStyle={{ paddingHorizontal: '5%' }}
+            horizontal inverted showsHorizontalScrollIndicator={false}
+            data={offers}
+            keyExtractor={item => item.id?.toString()}
+            renderItem={({ item }) => <OfferItem item={item} navigation={navigation} />}
+          />
+        </View>
+        <View style={[NewStyles.strip, NewStyles.center, { backgroundColor: themeColor1.bgColor(1) }]}>
+          <Text style={NewStyles.title}>طرح های تشویقی</Text>
+        </View>
+        <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+        <FlatList
+          contentContainerStyle={NewStyles.center} scrollEnabled={false}
+          showsVerticalScrollIndicator={false}
+          data={activeIndex ? data.filter(item => item?.category_id == categories?.[activeIndex]?.id) : data}
+          keyExtractor={(item) => item.id?.toString()}
+          renderItem={({ item }) => {
+            return (
+              <DiscountItem item={item} navigation={navigation} />
+            )
+          }}
+        />
+      </ScrollView>
+
+      {/* مودال گردونه شانس */}
+      <Modal
+        visible={showWheelModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowWheelModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center' }}>
+          <View style={{
+            backgroundColor: '#fff',
+            marginHorizontal: 20,
+            borderRadius: 20,
+            padding: 20,
+            maxHeight: '90%'
+          }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Pressable onPress={() => setShowWheelModal(false)}>
+                <Ionicons name="close" size={30} color="#333" />
+              </Pressable>
+              <Text style={NewStyles.title10}>گردونه شانس هفتگی 🎰</Text>
+              <View style={{ width: 30 }} />
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {loadingWheel ? (
+                <View style={{ paddingVertical: 100, alignItems: 'center' }}>
+                  <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
+                  <Text style={[NewStyles.text10, { marginTop: 15 }]}>در حال بارگذاری...</Text>
+                </View>
+              ) : prizes.length > 0 ? (
+                <>
+                  <LuckyWheel
+                    prizes={prizes}
+                    onSpinStart={handleSpinWheel}
+                    spinning={spinning}
+                    disabled={!canSpin}
+                  />
+
+                  {!canSpin && !spinning && nextPlayDate && (
+                    <View style={{
+                      marginTop: 20,
+                      padding: 15,
+                      backgroundColor: '#fff3cd',
+                      borderRadius: 10,
+                      alignItems: 'center'
+                    }}>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', color: '#856404' }]}>
+                        شما این هفته شرکت کرده‌اید! 🎉
+                      </Text>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: '#856404' }]}>
+                        شرکت بعدی: {moment(nextPlayDate).format('jYYYY/jMM/jDD')}
+                      </Text>
+                    </View>
+                  )}
+
+                  {userGems > 0 && (
+                    <View style={{
+                      marginTop: 15,
+                      padding: 15,
+                      backgroundColor: themeColor1.bgColor(0.1),
+                      borderRadius: 10,
+                      alignItems: 'center'
+                    }}>
+                      <Text style={[NewStyles.title10, { color: themeColor1.bgColor(1) }]}>
+                        مجموع امتیازات شما: {userGems} 💎
+                      </Text>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <View style={{ paddingVertical: 50, alignItems: 'center' }}>
+                  <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
+                    در حال حاضر هیچ جایزه‌ای موجود نیست
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* مودال برنده شدن */}
+      {wonPrize && (
+        <WinnerModal
+          visible={showWinnerModal}
+          onClose={handleCloseWinner}
+          prize={wonPrize}
+          totalGems={userGems}
+        />
+      )}
+    </SafeAreaView>
+  )
+}

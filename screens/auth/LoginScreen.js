@@ -1,5 +1,5 @@
 import React, { useState, useReducer } from "react";
-import { Text, TextInput, Image, Platform, ImageBackground, StyleSheet, ScrollView, View, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
+import { Text, TextInput, Image, Platform, StyleSheet, ScrollView, View, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from "react-redux";
 import TransparentButton from "../../components/TransparentButton";
@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { setToken } from "../../slices/authSlice";
 import { fetchUser } from "../../slices/userSlice";
 import { Ionicons } from '@expo/vector-icons';
-
+import { ImageBackground } from "expo-image";
 const initialState = {
   phone: '',
   password: '',
@@ -145,7 +145,7 @@ export default function LoginScreen({ navigation }) {
         const token = response.data.token;
 
         // Always save token for current session
-        
+
 
         // Save additional data and enable auto-login only if user wants to remember login
         if (state.rememberMe) {
@@ -169,7 +169,7 @@ export default function LoginScreen({ navigation }) {
         showToastOrAlert('ورود با موفقیت انجام شد');
 
         // Navigate to main app
-        navigation.navigate('MainApp',{screen:'FolderScreen'});
+        navigation.navigate('MainApp', { screen: 'FolderScreen' });
 
       } else {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });
@@ -244,16 +244,16 @@ export default function LoginScreen({ navigation }) {
       try {
         // First check if auto-login is explicitly enabled by user
         const autoLoginEnabled = await AsyncStorage.getItem('autoLoginEnabled');
-        
+
         // If auto-login is not explicitly enabled, clear any existing tokens
         if (autoLoginEnabled !== 'true') {
           console.log('Auto-login not enabled by user, clearing tokens');
           await TokenManager.clearAuthData();
           return;
         }
-        
+
         const savedToken = await TokenManager.getToken();
-        
+
         if (savedToken) {
           // Validate token with backend
           try {
@@ -261,13 +261,13 @@ export default function LoginScreen({ navigation }) {
             if (response.success) {
               // Token is valid, auto-login user
               const userData = await TokenManager.getUserData();
-              
+
               // Update Redux store
               reduxDispatch(setToken(savedToken));
               reduxDispatch(fetchUser(savedToken));
-              
+
               showToastOrAlert('ورود خودکار انجام شد');
-              
+
               // Navigate to main app
               navigation.navigate('FolderScreen');
               return;
@@ -290,15 +290,9 @@ export default function LoginScreen({ navigation }) {
     checkAutoLogin();
   }, []);
   return (
-    <ImageBackground
-      source={require("../../assets/moon.jpg")}
-      style={NewStyles.container}
-    >
+    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
       <CustomStatusBar />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -468,7 +462,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 40,
-    backgroundColor: themeColor0.bgColor(0.22),
   },
   logo: {
     width: 200,

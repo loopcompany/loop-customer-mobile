@@ -1,23 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Platform,
-  ImageBackground,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Alert,
-} from "react-native";
+import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Alert, } from "react-native";
 import { useDispatch } from "react-redux";
 import NewStyles from "../../styles/NewStyles";
-import {
-  CodeField,
-  Cursor,
-  useBlurOnFulfill,
-  useClearByFocusCell,
-} from "react-native-confirmation-code-field";
+import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from "react-native-confirmation-code-field";
 import { themeColor0, themeColor1, themeColor3, themeColor10 } from "../../theme/Color";
 import { setToken } from "../../slices/authSlice";
 import { authAPI } from "../../services/Api";
@@ -27,6 +12,7 @@ import CustomStatusBar from "../../components/CustomStatusBar";
 import ScreenHeaders from "../../components/ScreenHeaders";
 import { showToastOrAlert, formatTime } from "../../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ImageBackground } from "expo-image";
 
 export default function ResetPasswordScreen({ navigation, route }) {
   const params = route?.params;
@@ -108,7 +94,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
           setTimeout(() => {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'MainApp',params: { screen: 'FolderScreen' } }],
+              routes: [{ name: 'MainApp', params: { screen: 'FolderScreen' } }],
             });
           }, 1500);
         }
@@ -160,16 +146,13 @@ export default function ResetPasswordScreen({ navigation, route }) {
     );
   };
   return (
-    <SafeAreaView edges={{top:'off', bottom:'additive'}} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
       <ScreenHeaders
         title="بازیابی رمز عبور"
         onPressLeft={() => navigation.goBack()}
         showLeftIcon={true}
       />
-      <ImageBackground
-        source={require('../../assets/moon.jpg')}
-        style={styles.background}
-      >
+      <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
         <CustomStatusBar />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -291,6 +274,7 @@ const styles = StyleSheet.create({
     gap: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    maxWidth:500
   },
   instructionContainer: {
     alignItems: 'center',

@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor4 } from '../theme/Color';
+import { themeColor0, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
 
 export default function PairButton({ text1, text2, onPress1, onPress2, loading1, loading2, style }) {
     return (
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     },
 
     button2: {
-        backgroundColor: themeColor3.bgColor(1),
+        backgroundColor: themeColor6.bgColor(1),
         marginHorizontal: 5,
         paddingHorizontal: 15,
         paddingVertical: 12,

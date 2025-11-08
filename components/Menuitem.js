@@ -32,17 +32,9 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: themeColor0.bgColor(1),
     borderColor: themeColor0.bgColor(1),
-    // borderWidth: 2,
-    
-    // paddingVertical: 12,
-   
-    // shadowColor: "#00f",
-    // shadowOffset: { width: 0, height: 0 },
-    // shadowOpacity: 0.9,
-    // shadowRadius: 10,
-    // elevation: 5,
     width: "100%",
     height: 70,
     alignItems: "center",
+    maxWidth:200
   },
 });

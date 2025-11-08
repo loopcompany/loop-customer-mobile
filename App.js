@@ -68,6 +68,19 @@ import SubcategoryHeader from "./components/SubcategoryHeader";
 import Preview from "./screens/category/Preview";
 import Details from "./screens/orders/Details";
 import Invoice from "./screens/orders/Invoice";
+import Increase from "./screens/account/Increase";
+import PaymentScreen from "./screens/account/PaymentScreen";
+import ChatRoom from "./screens/chat/ChatRoom";
+import Club from './screens/club/Club';
+import DiscountDetail from "./screens/club/DiscountDetail";
+import GemTransactions from './screens/club/GemTransactions';
+import UserDiscounts from './screens/club/UserDiscounts';
+import NotesScreen from './screens/NotesScreen';
+import AddEditNoteScreen from './screens/notes/AddEditNoteScreen';
+import WarrantyScreen from "./screens/resources/WarrantyScreen";
+import GameMenuScreen from './screens/game/GameMenuScreen';
+import GamePlayScreen from './screens/game/GamePlayScreen';
+import GameResultScreen from './screens/game/GameResultScreen';
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
@@ -175,12 +188,26 @@ const App = () => {
             }}
           />
           <Stack.Screen component={OrderMenuScreen} name="OrderMenuScreen" options={{ headerShown: false, }} />
-
+<Stack.Screen
+                    component={List}
+                    name="List"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  
           {/* Main app screens (WITH MenuProvider) */}
           <Stack.Screen name="MainApp">
             {() => (
               <MenuProvider>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen
+                    component={ContractScreen}
+                    name="ContractScreen"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
                   <Stack.Screen component={FolderScreen} name="FolderScreen" options={{ headerShown: false, }} />
                   <Stack.Screen name='Add New Address' component={AddNewAddress} options={{ headerShown: true, header: () => <SubcategoryHeader title={'افزودن آدرس'} />, }} />
                   <Stack.Screen name='Map' component={Map} options={{ headerShown: true, header: () => <SubcategoryHeader title={'موقعیت مکانی'} />, }} />
@@ -188,6 +215,13 @@ const App = () => {
                   <Stack.Screen component={Preview} name="Preview" options={{ headerShown: false }}/>
                   <Stack.Screen component={Details} name="Details" options={{ headerShown: false }}/>
                   <Stack.Screen component={Invoice} name="Invoice" options={{ headerShown: false }}/>
+                  <Stack.Screen component={Increase} name="Increase" options={{ headerShown: false }}/>
+                  <Stack.Screen component={PaymentScreen} name="PaymentScreen" options={{ headerShown: false }}/>
+                  <Stack.Screen component={ChatRoom} name="ChatRoom" options={{ headerShown: false }}/>
+                  <Stack.Screen component={Club} name="Club" options={{ headerShown: false }}/>
+                  <Stack.Screen component={DiscountDetail} name="Discount Detail" options={{ headerShown: false }}/>
+                  <Stack.Screen component={GemTransactions} name="Gem Transactions" options={{ headerShown: false }}/>
+                  <Stack.Screen component={UserDiscounts} name="User Discounts" options={{ headerShown: false }}/>
                   <Stack.Screen
                     component={DiscountCodeScreen}
                     name="DiscountCodeScreen"
@@ -201,13 +235,7 @@ const App = () => {
                       headerShown: false,
                     }}
                   />
-                  <Stack.Screen
-                    component={ContractScreen}
-                    name="ContractScreen"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
+                  
                   <Stack.Screen
                     component={HardwareSelectionScreen}
                     name="HardwareSelectionScreen"
@@ -222,13 +250,7 @@ const App = () => {
                       headerShown: false,
                     }}
                   />
-                  <Stack.Screen
-                    component={List}
-                    name="List"
-                    options={{
-                      headerShown: false,
-                    }}
-                  />
+                  
                   <Stack.Screen
                     component={GuideScreen}
                     name="GuideScreen"
@@ -406,6 +428,20 @@ const App = () => {
                     }}
                   />
                   <Stack.Screen
+                    component={NotesScreen}
+                    name="NotesScreen"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    component={AddEditNoteScreen}
+                    name="AddEditNote"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
                     component={LearnMoreScreen}
                     name="LearnMoreScreen"
                     options={{
@@ -422,6 +458,34 @@ const App = () => {
                   <Stack.Screen
                     component={PrivacyScreen}
                     name="PrivacyScreen"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    component={WarrantyScreen}
+                    name="WarrantyScreen"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    component={GameMenuScreen}
+                    name="GameMenu"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    component={GamePlayScreen}
+                    name="GamePlay"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    component={GameResultScreen}
+                    name="GameResult"
                     options={{
                       headerShown: false,
                     }}

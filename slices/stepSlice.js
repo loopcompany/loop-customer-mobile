@@ -112,6 +112,19 @@ const stepSlice = createSlice({
             state.unspecifiedCount -= 1;
         },
 
+        // set counts directly (used by radio-style selection)
+        setMaleCount: (state, action) => {
+            state.maleCount = action.payload;
+        },
+
+        setFemaleCount: (state, action) => {
+            state.femaleCount = action.payload;
+        },
+
+        setUnspecifiedCount: (state, action) => {
+            state.unspecifiedCount = action.payload;
+        },
+
         decrement: (state, action) => {
             const { fieldId, fieldDetailId, step } = action.payload;
             const newData = JSON.parse(JSON.stringify(state.data));
@@ -303,6 +316,9 @@ export const {
     decrementMaleCount,
     incrementUnspecifiedCount,
     decrementUnspecifiedCount,
+    setMaleCount,
+    setFemaleCount,
+    setUnspecifiedCount,
     updateCheckbox,
     updateRadioButton,
     increment,

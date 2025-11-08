@@ -297,7 +297,7 @@ export default function Profile() {
         const n = Math.floor(1000 + Math.random() * 9000).toString();
         setCaptcha(n);
     };
-
+    
     return (
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
@@ -313,16 +313,15 @@ export default function Profile() {
                     <View style={{ gap: 10 }}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="نام و نام خانوادگی *"
-                            value={`${profileData.name} ${profileData.last_name}`.trim()}
-                            onChangeText={(text) => {
-                                const parts = text.split(' ');
-                                setProfileData(prev => ({
-                                    ...prev,
-                                    name: parts[0] || '',
-                                    last_name: parts.slice(1).join(' ') || ''
-                                }));
-                            }}
+                            placeholder="نام *"
+                            value={profileData.name}
+                            onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
+                        />
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
+                            placeholder="نام خانوادگی *"
+                            value={profileData.last_name}
+                            onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
@@ -392,6 +391,7 @@ export default function Profile() {
                                 style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
                                 placeholder="منطقه"
                                 value={profileData.region}
+                                keyboardType='number-pad'
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
                             />
                         </View>

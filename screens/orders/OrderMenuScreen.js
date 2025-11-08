@@ -1,23 +1,15 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  ScrollView,
-  Linking,
-} from "react-native";
+import { View, Image, StyleSheet, ScrollView, Linking, } from "react-native";
 import Menuitem from "../../components/Menuitem";
 import NewStyles from "../../styles/NewStyles";
+import { ImageBackground } from "expo-image";
 const callSupport = () => {
   Linking.openURL("tel:09012955939"); // شماره دلخواهت
 };
 
 export default function OrderMenuScreen({ navigation }) {
   return (
-    <ImageBackground source={require("../../assets/moon.jpg")} style={NewStyles.container} >
+    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit="contain"  >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
@@ -33,7 +25,7 @@ export default function OrderMenuScreen({ navigation }) {
           <Menuitem
             style={{ width: "75%" }}
             title={"سفارش سیستماتیک"}
-            subTitle={"(انتخابی)"}   
+            subTitle={"(انتخابی)"}
             onPress={() => {
               navigation.navigate("SignInLanding");
             }}
@@ -87,7 +79,7 @@ const styles = StyleSheet.create({
     gap: 10,
     width: '100%',
   },
- 
+
   menuButton: {
     backgroundColor: "rgba(70, 100,255,0.5)",
     paddingVertical: 15,

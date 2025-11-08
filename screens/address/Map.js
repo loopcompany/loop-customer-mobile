@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable, ToastAndroid, Platform } from 'react-native';
 import React, { useState } from 'react';
-import MapView from 'react-native-maps';
+import MapView from '../../components/MapView';
 import * as Location from 'expo-location';
 
 import { useDispatch, useSelector } from "react-redux";

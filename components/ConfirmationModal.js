@@ -41,5 +41,6 @@ const styles = StyleSheet.create({
         backgroundColor: themeColor4.bgColor(1),
         paddingHorizontal: 20,
         justifyContent: 'space-evenly',
+        maxWidth: 500
     },
 });

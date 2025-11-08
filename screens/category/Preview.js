@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
 import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { useDispatch, useSelector } from 'react-redux';
 import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
@@ -75,7 +75,7 @@ export default function Preview({ navigation }) {
     const checkDiscount = async () => {
         setPending(true);
         try {
-            const response = await axios.post(`${uri}/discount/check`, { categoryId: category?.id, discountCode }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/discounts/check`, { categoryId: category?.id, discountCode }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response?.status == 200) {
                 setDiscountPercent(response?.data?.discount_code_percent)
                 showToastOrAlert(response?.data?.message)
@@ -107,19 +107,23 @@ export default function Preview({ navigation }) {
                             <Ionicons name="cash-outline" size={26} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.title}>{isFixed ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ'}</Text>
                         </View>
-                        <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} onPress={() => navigation.navigate('FAQ')} >
+                        <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} >
                             <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.text}>{totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'توافقی'}</Text>
+                            <Text style={NewStyles.text}>{totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'نیاز به بررسی'}</Text>
                         </Pressable>
                     </View>
-                    <Text style={NewStyles.text3}>مشتری گرامی قیمت فوق نهایی شده است ولی امکان دارد متخصصان قیمت پیشنهادی خود را نیز ارائه بدهند.</Text>
+                    <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
+                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، اطلاعات سفارش شما پس از بررسی توسط تکسنین لوپ، و بررسی های تخصصی قیمت گذاری نهایی خواهد شد.</Text>
+                    </View>
                 </View>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name="gift-outline" size={26} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>کد تخفیف</Text>
+                        <Text style={NewStyles.title}>کد تشویق</Text>
                     </View>
-                    <Text style={NewStyles.text3}>مشتری گرامی جهت مشاهده کدهای تخفیف و جوایز خود به باشگاه مشتریان در بخش کلاب مراجعه نمائید.</Text>
+                    <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
+                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، جهت دریافت کد تشویق، می توانید به بخش طرح های تشویقی مراجعه کرده و هر هفته در گردونه شانس لوپ شرکت کنید!</Text>
+                    </View>
                     <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
                         <View
                             style={[
@@ -140,7 +144,7 @@ export default function Preview({ navigation }) {
                                 NewStyles.center
                             ]}
                             onPress={() => checkDiscount()}>
-                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>بررسی کد تخفیف</Text>}
+                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>بررسی کد</Text>}
                             {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                         </Pressable>
                     </View>
@@ -148,28 +152,26 @@ export default function Preview({ navigation }) {
                 <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
                     <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Text style={NewStyles.title}>جزئیات سفارش</Text>
+                            <Text style={NewStyles.title}>پیش نمایش سفارش</Text>
                             <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
                         </View>
                         <Text style={NewStyles.text3}>{category?.title}</Text>
                     </View>
-                    {renderRow('زمان مراجعه متخصص', isUrgent > 0 ? 'درخواست فوری' : formatDate(date) + ' ساعت ' + time, NewStyles.text, isUrgent > 0 && NewStyles.title6)}
+                    {renderRow('زمان مراجعه تکنسین', isUrgent > 0 ? 'درخواست فوری' : formatDate(date) + ' ساعت ' + time, NewStyles.text, isUrgent > 0 && NewStyles.title6)}
                     {maleCount + femaleCount + unspecifiedCount > 0 &&
                         renderRow(
-                            'جنسیت و تعداد متخصصین',
+                            'جنسیت تکنسین',
                             (() => {
                                 const total = maleCount + femaleCount + unspecifiedCount;
                                 if (total === 0) return 'مشخص نشده';
                                 let details = [];
-                                if (maleCount > 0) details.push(`${maleCount} آقا`);
-                                if (femaleCount > 0) details.push(`${femaleCount} خانم`);
+                                if (maleCount > 0) details.push(`تکنسین آقا`);
+                                if (femaleCount > 0) details.push(`تکنسین خانم`);
 
-                                return `${total} متخصص` + (details.length > 0 ? ` (${details.join(' ')} الزامی)` : '');
+                                return (details.length > 0 ? ` ${details.join(' ')}` : '');
                             })()
                         )
                     }
-
-                    {/* {renderRow('مبلغ پیشنهادی لوپ', totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'توافقی')} */}
 
                     {renderRow('آدرس', '')}
                     {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + address?.region + ' - ' + address?.address, '', NewStyles.text10)}
@@ -201,7 +203,7 @@ export default function Preview({ navigation }) {
                                                 else
                                                     return (
                                                         (item?.value || item?.value > 0) ?
-                                                            <View style={[styles.itemWrapper,  NewStyles.border10]}>
+                                                            <View style={[styles.itemWrapper, NewStyles.border10]}>
                                                                 <View style={NewStyles.rowWrapper}>
                                                                     <View style={[NewStyles.rowWrapper, { justifyContent: 'flex-end', flex: 2, gap: 5 }]}>
                                                                         <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />

@@ -1,16 +1,5 @@
 import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    Image,
-    ImageBackground,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Alert,
-    KeyboardAvoidingView
-} from "react-native";
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
 import { useDispatch } from "react-redux";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
@@ -19,6 +8,7 @@ import { authAPI } from "../../services/Api";
 import { setAuthLoading, setAuthError, clearAuthError } from "../../slices/authSlice";
 import { validateMelicode, validatePhone, validateEmail, showToastOrAlert } from "../../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ImageBackground } from "expo-image";
 
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
@@ -134,7 +124,7 @@ export default function ForgotPassword({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-            <ImageBackground source={require("../../assets/moon.jpg")} style={styles.background}>
+            <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
                 <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
                     <ScrollView
                         contentContainerStyle={styles.container}

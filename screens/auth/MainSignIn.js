@@ -17,7 +17,6 @@ import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "../../theme/Color";
 import { authAPI } from "../../services/Api";
-import AuthManager from "../../services/AuthManager";
 import { showToastOrAlert } from "../../helpers/Common";
 import CustomStatusBar from "../../components/CustomStatusBar";
 import InviteCodeInput from "../../components/InviteCodeInput";

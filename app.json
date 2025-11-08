@@ -2,7 +2,7 @@
   "expo": {
     "name": "لوپ",
     "slug": "loop",
-    "schema":"loop",
+    "scheme": "expo.loop.with-webbrowser-redirect",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

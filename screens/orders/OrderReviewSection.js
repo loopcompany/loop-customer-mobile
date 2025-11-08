@@ -11,7 +11,7 @@ import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeC
 import ConfirmationModal from '../../components/ConfirmationModal'
 import Button from '../../components/Button'
 
-const OrderReviewSection = ({ data, orderId, onUpdate }) => {
+const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
   const token = useSelector((state) => state?.auth?.token)
   const [loadingAccept, setLoadingAccept] = useState(false)
   const [loadingCancel, setLoadingCancel] = useState(false)
@@ -85,7 +85,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate }) => {
   const isLocked = data?.user_initial_accept
 
   return (
-    <View style={[{ width: '90%', alignSelf: 'center', paddingBottom:10 }, NewStyles.center]}>
+    <View style={[{ width: '90%', alignSelf: 'center', paddingBottom: 10 }, NewStyles.center]}>
       {/* توضیحات */}
       <View style={styles.noticeBox}>
         <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
@@ -93,9 +93,10 @@ const OrderReviewSection = ({ data, orderId, onUpdate }) => {
         </Text>
       </View>
 
+
       {/* اطلاعات سفارش */}
       <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '100%', paddingVertical: 15, paddingHorizontal: '5%', gap: 10 }, NewStyles.border10]}>
-        
+
         {/* توضیحات کارشناس */}
         {data?.technician_des && (
           <View style={{ gap: 5 }}>
@@ -113,16 +114,18 @@ const OrderReviewSection = ({ data, orderId, onUpdate }) => {
         {/* تاریخ و ساعت مراجعه */}
         {renderRow(
           'زمان مراجعه تکنسین',
-          data?.is_urgent > 0 
-            ? 'درخواست فوری' 
+          data?.is_urgent > 0
+            ? 'درخواست فوری'
             : formatDate(data?.date) + ' ساعت ' + data?.time?.split(':')?.slice(0, 2)?.join(':'),
           NewStyles.text,
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
-
+      <View style={{ width: '100%' }}>
+        <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+      </View>
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
-      {data?.technician_des && (
+      {(data?.technician_des || data?.is_time_changed==1) && (
         isLocked ? (
           <View style={[styles.lockedBox, NewStyles.center, NewStyles.border10]}>
             <Ionicons name="checkmark-circle" size={40} color={themeColor0.bgColor(1)} />

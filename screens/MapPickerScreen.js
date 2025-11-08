@@ -1,7 +1,7 @@
 // screens/MapPickerScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from '../components/MapView';
 
 export default function MapPickerScreen({ navigation }) {
   const [marker, setMarker] = useState({

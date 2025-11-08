@@ -207,7 +207,7 @@ export const generateUniqueCode = () => {
 export const handleError = (error, t) => {
 
   try {
-    if (error?.response?.status == 409) {
+    if (error?.response?.status == 409 || error?.response?.status == 400) {
       const message = error?.response?.data?.message || "خطایی رخ داد";
       showToastOrAlert(`${t(message)}`);
     } else if (error?.response?.status == 401) {
@@ -383,7 +383,7 @@ export const getOrderStatusText = (status) => {
     1: 'در حال انجام',
     2: 'انجام شده',
     3: 'لغو شده توسط کاربر',
-    4: 'لغو شده توسط متخصص',
+    4: 'لغو شده توسط تکنسین',
     5: 'لغو شده توسط ادمین',
     6: 'منقضی شده'
   };
@@ -396,7 +396,7 @@ export const getOrderStatusColor = (status) => {
     1: '#2196F3', // آبی - در حال انجام
     2: '#4CAF50', // سبز - انجام شده
     3: '#F44336', // قرمز - لغو شده توسط کاربر
-    4: '#F44336', // قرمز - لغو شده توسط متخصص
+    4: '#F44336', // قرمز - لغو شده توسط تکنسین
     5: '#F44336', // قرمز - لغو شده توسط ادمین
     6: '#9E9E9E'  // خاکستری - منقضی شده
   };

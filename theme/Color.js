@@ -36,8 +36,8 @@ const palate = [
   },
   {
     //green
-    color: "#00cc66",
-    bgColor: (opacity) => `rgba(0, 204, 102, ${opacity})`,
+    color: "#2e7d32",
+    bgColor: (opacity) => `rgba(46, 125, 50, ${opacity})`,
   },
   {
     //blue

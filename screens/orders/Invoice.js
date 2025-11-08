@@ -26,8 +26,9 @@ export default function Invoice({ route }) {
     const [refreshing, setRefreshing] = useState(true)
     const [loading1, setLoading1] = useState(false)
     const [loading2, setLoading2] = useState(false)
-
+    const [extraServices, setExtraServices] = useState([])
     const [data, setData] = useState([]);
+
     const fetchData = async () => {
         try {
             const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
@@ -41,8 +42,31 @@ export default function Invoice({ route }) {
             setRefreshing(false);
         }
     };
+
+    const fetchExtraServices = async () => {
+        try {
+            const response = await axios.post(
+                `${uri}/orders/extra-services`,
+                { order_id: orderId },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            )
+
+            if (response.status == 200 && response.data?.success) {
+                setExtraServices(response.data?.data?.extra_services || [])
+            }
+        } catch (error) {
+            setExtraServices([])
+        }
+    }
+
     useEffect(() => {
         fetchData();
+        fetchExtraServices();
         dispatch(fetchUser(token))
     }, [refreshing]);
 
@@ -140,13 +164,46 @@ export default function Invoice({ route }) {
                             </View>
                         </View>
 
-                        {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'توافقی')}
-                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ توافقی با متخصص', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
+                        {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
+                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ نهایی تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                         {(data?.extra_price > 0) && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                         {(data?.discount_price > 0) && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
                         {(totalPrice > totalDiscountedPrice > 0) && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
                         {(data?.status > 0) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
                         {renderRow('موجودی کیف پول شما: ', formatPrice(user?.wallet ?? 0) + ' تومان')}
+
+                        {/* نمایش هزینه‌های اضافی */}
+                        {extraServices.length > 0 && (
+                            <>
+                                <View style={{ borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1), marginVertical: 15, paddingTop: 15 }}>
+                                    <View style={[NewStyles.row, { gap: 5, marginBottom: 10 }]}>
+                                        <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
+                                        <Text style={NewStyles.title}>هزینه‌های اضافی</Text>
+                                    </View>
+                                    {extraServices.map((item, index) => (
+                                        <View key={index} style={{ marginBottom: 8 }}>
+                                            <View style={NewStyles.rowWrapper}>
+                                                <View style={[NewStyles.row, { gap: 5, flex: 1 }]}>
+                                                    <Ionicons name="ellipse" size={8} color={themeColor0.bgColor(0.5)} />
+                                                    <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.title ?? item?.extra_service?.title}</Text>
+                                                </View>
+                                                <Text style={[NewStyles.text10]}>
+                                                    {formatPrice(item?.price)} تومان
+                                                </Text>
+                                            </View>
+                                            {item?.extra_service?.des && (
+                                                <Text style={[NewStyles.text10, { color: themeColor0.bgColor(0.5), fontSize: 12, paddingRight: 15 }]}>
+                                                    {item?.extra_service?.des}
+                                                </Text>
+                                            )}
+                                        </View>
+                                    ))}
+                                    <View style={{ borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1), marginTop: 10, paddingTop: 10 }}>
+                                        {renderRow('جمع هزینه‌های اضافی', `${formatPrice(extraServices.reduce((sum, item) => sum + Number(item?.price || 0), 0))} تومان`, NewStyles.title, NewStyles.title)}
+                                    </View>
+                                </View>
+                            </>
+                        )}
 
                     </View>
                     <Text style={NewStyles.title7}>ضمن تشکر از اعتماد شما:</Text>
@@ -154,7 +211,7 @@ export default function Invoice({ route }) {
                 </View>
             </ScrollView>
 
-            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10 }]}>
+            {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10 }]}>
                 {data?.payment_status > 0 ?
                     <View style={{ flex: 1 }}>
                         <Button title={'پرداخت شده'} backgroundColor={themeColor7.bgColor(1)} />
@@ -169,7 +226,7 @@ export default function Invoice({ route }) {
                         </View>
                     </>
                 }
-            </View>
+            </View>}
 
         </View>
     )

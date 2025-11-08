@@ -4,8 +4,6 @@ import {
   Text,
   ActivityIndicator,
   StyleSheet,
-  Image,
-  ImageBackground,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
@@ -15,6 +13,8 @@ import TokenManager from '../services/TokenManager';
 import CustomStatusBar from '../components/CustomStatusBar';
 import { themeColor0, themeColor10 } from '../theme/Color';
 import { fetchAddresses } from '../slices/addressSlice';
+import { ImageBackground } from 'expo-image';
+import NewStyles from '../styles/NewStyles';
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
@@ -28,13 +28,13 @@ export default function Landing({ navigation }) {
   const checkAuthenticationStatus = async () => {
     try {
       console.log('🔍 Landing: Checking authentication status...');
-      
+
       // Use TokenManager to check authentication
       const authStatus = await TokenManager.isAuthenticated();
-      
+
       if (authStatus.authenticated) {
         console.log('✅ Landing: User is authenticated');
-        
+
         // Set token in Redux
         dispatch(setToken(authStatus.token));
         dispatch(fetchAddresses(authStatus.token));
@@ -45,7 +45,7 @@ export default function Landing({ navigation }) {
         } else {
           // Try to fetch user data
           const userResult = await dispatch(fetchUser(authStatus.token));
-          
+
           if (fetchUser.fulfilled.match(userResult)) {
             console.log('✅ Landing: User data loaded, redirecting to main app');
             navigateToMainApp();
@@ -58,7 +58,7 @@ export default function Landing({ navigation }) {
         console.log('📝 Landing: User not authenticated:', authStatus.reason);
         navigateToWelcome();
       }
-      
+
     } catch (error) {
       console.error('❌ Landing: Auth check failed:', error);
       navigateToWelcome();
@@ -77,22 +77,19 @@ export default function Landing({ navigation }) {
   const navigateToMainApp = () => {
     setTimeout(() => {
       setChecking(false);
-      navigation.replace('MainApp',{screen:'FolderScreen'});
+      navigation.replace('MainApp', { screen: 'FolderScreen' });
     }, 1000);
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/moon.jpg')}
-      style={styles.background}
-    >
+    <ImageBackground source={require('../assets/moon.jpg')} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit="contain" cachePolicy={'memory-disk'} >
       <CustomStatusBar />
       <View style={styles.container}>
         {/* Loading Section */}
         <View style={styles.loadingContainer}>
-          <ActivityIndicator 
-            size="large" 
-            color={themeColor0.bgColor(1)} 
+          <ActivityIndicator
+            size="large"
+            color={themeColor0.bgColor(1)}
             style={styles.spinner}
           />
           <Text style={styles.loadingText}>
