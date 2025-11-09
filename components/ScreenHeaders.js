@@ -3,9 +3,22 @@ import React from "react";
 import NewStyles from "../styles/NewStyles";
 import { themeColor4 } from "../theme/Color";
 
-const ScreenHeaders = ({ title, onPressLeft, onPressRight }) => {
+const ScreenHeaders = ({ 
+  title, 
+  // Old API (deprecated but still supported for backward compatibility)
+  onPressLeft,    
+  onPressRight,
+  // New API (recommended - more clear naming)
+  onBackPress,
+  onNextPress
+}) => {
   const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
+  
+  // Priority: new API > old API > empty function
+  // For RTL apps: back button should be on the right side
+  const handleBack = onBackPress || onPressRight || (() => {});
+  const handleNext = onNextPress || onPressLeft || (() => {});
   
   return (
     <View style={[styles.header, NewStyles.rowWrapper, { 
@@ -13,14 +26,27 @@ const ScreenHeaders = ({ title, onPressLeft, onPressRight }) => {
       paddingTop: statusBarHeight,
       height: 50 + statusBarHeight
     }]}>
-      <TouchableOpacity onPress={onPressRight} style={styles.iconContainer}>
-        <Image source={require("../assets/next.png")} style={styles.arrow} />
+      {/* Right side: Back button (RTL) */}
+      <TouchableOpacity 
+        onPress={handleBack} 
+        style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
+      >
+        <Image source={require("../assets/back.png")} style={styles.arrow} />
+        <Text style={styles.titleText}>قبلی</Text>
       </TouchableOpacity>
+      
+      {/* Center: Title */}
       <View style={styles.titleContainer}>
         <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
       </View>
-      <TouchableOpacity onPress={onPressLeft} style={styles.iconContainer}>
-        <Image source={require("../assets/back.png")} style={styles.arrow} />
+      
+      {/* Left side: Next button (RTL) */}
+      <TouchableOpacity 
+        onPress={handleNext} 
+        style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
+      >
+        <Text style={styles.titleText}>بعدی</Text>
+        <Image source={require("../assets/next.png")} style={styles.arrow} />
       </TouchableOpacity>
     </View>
   );
@@ -39,14 +65,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   iconContainer: {
-    width: 50,
+    minWidth: 60,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 5,
   },
   arrow: {
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
     resizeMode: "contain",
   },
   titleContainer: {
@@ -57,6 +84,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 12,
+    fontFamily: 'VazirBold',
   },
 });
