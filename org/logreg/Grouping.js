@@ -8,6 +8,7 @@ import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
 
 const Grouping = ({ navigation }) => {
+  const [isOrganizationalGuideOpen, setIsOrganizationalGuideOpen] = useState(false);
   const handleOrganizationalLogin = () => {
     navigation.navigate("Login");
   };
@@ -256,52 +257,95 @@ const Grouping = ({ navigation }) => {
             left: 0,
           }}
         >
-          {/* First yellow section - Full width banner */}
+          {/* First yellow section - Accordion Guide */}
           <View
             style={{
               width: "100%",
-              backgroundColor: "#ffeb3b",
-              paddingVertical: 8,
               marginBottom: 10,
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 10,
             }}
           >
-            {/* Dotted line */}
-            <View
+            {/* Header - clickable */}
+            <TouchableOpacity
+              onPress={() => setIsOrganizationalGuideOpen(!isOrganizationalGuideOpen)}
               style={{
-                flex: 1,
-                borderTopWidth: 2,
-                borderTopColor: "#000",
-                borderStyle: "dotted",
-                marginRight: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: "VazirBold",
-                color: "#000",
-                textAlign: "center",
+                width: "100%",
+                backgroundColor: "#ffeb3b",
+                paddingVertical: 8,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 10,
               }}
             >
-              راهنمای پنل سازمانی / دولتی ۱
-            </Text>
-            {/* Red arrow pointing down */}
-            <View
-              style={{
-                marginLeft: 15,
-                width: 0,
-                height: 0,
-                borderLeftWidth: 8,
-                borderRightWidth: 8,
-                borderTopWidth: 12,
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                borderTopColor: "#ff0000",
-              }}
-            />
+              {/* Dotted line */}
+              <View
+                style={{
+                  flex: 1,
+                  borderTopWidth: 2,
+                  borderTopColor: "#000",
+                  borderStyle: "dotted",
+                  marginRight: 10,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontFamily: "VazirBold",
+                  color: "#000",
+                  textAlign: "center",
+                }}
+              >
+                راهنمای پنل سازمانی / دولتی ۱
+              </Text>
+              {/* Red arrow pointing down or up based on state */}
+              <View
+                style={{
+                  marginLeft: 15,
+                  width: 0,
+                  height: 0,
+                  borderLeftWidth: 8,
+                  borderRightWidth: 8,
+                  ...(isOrganizationalGuideOpen
+                    ? {
+                        borderBottomWidth: 12,
+                        borderLeftColor: "transparent",
+                        borderRightColor: "transparent",
+                        borderBottomColor: "#ff0000",
+                      }
+                    : {
+                        borderTopWidth: 12,
+                        borderLeftColor: "transparent",
+                        borderRightColor: "transparent",
+                        borderTopColor: "#ff0000",
+                      }),
+                }}
+              />
+            </TouchableOpacity>
+
+            {/* Content - collapsible */}
+            {isOrganizationalGuideOpen && (
+              <View
+                style={{
+                  width: "100%",
+                  backgroundColor: "rgba(255, 235, 59, 0.95)",
+                  paddingVertical: 12,
+                  paddingHorizontal: 15,
+                  borderBottomWidth: 2,
+                  borderBottomColor: "#000",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontFamily: "VazirBold",
+                    color: "#000",
+                    textAlign: "right",
+                    lineHeight: 20,
+                  }}
+                >
+                  پنل سازمانی / شرکتی لوپ برای کاربرانی که دارای تعداد زیادی از محصولات / دستگاه / قطعات کامپیوتری می‌باشد و ثبت نام در این پنل به منظور تسریع در انجام خدمات و نیز کاهش درصد هزینه‌ها انجام گردیده است.
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Second yellow section - Full width banner */}
