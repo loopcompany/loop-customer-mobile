@@ -125,10 +125,9 @@ export default function ForgotPassword({ navigation }) {
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
-                <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
+                <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior='padding'>
                     <ScrollView
                         contentContainerStyle={styles.container}
-                        keyboardShouldPersistTaps="handled"
                     >
                         {/* Logo Section */}
                         <View style={[{ flex: 1 }, NewStyles.center]}>
