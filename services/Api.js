@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
-import { showToastOrAlert } from '../helpers/Common';
+import { handleError, showToastOrAlert } from '../helpers/Common';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -36,8 +36,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     // Log error but don't show toast automatically for verification endpoints
-    if (error.config?.url?.includes('/auth/verify-phone') || 
-        error.config?.url?.includes('/auth/verify-reset-code')) {
+    if (error.config?.url?.includes('/auth/verify-phone') ||
+      error.config?.url?.includes('/auth/verify-reset-code')) {
       console.log('Verification error (no toast):', error.response?.data);
     } else {
       const message = error.response?.data?.message || 'خطایی رخ داده است';
@@ -148,21 +148,21 @@ export const authAPI = {
     try {
       console.log('verifyResetCode called with:', userData);
       console.log('API endpoint:', API_ENDPOINTS.AUTH.VERIFY_RESET_CODE);
-      
+
       const requestData = {
         phone: userData.phone?.toString().trim(),
         verification_code: userData.code?.toString().trim()
       };
-      
+
       console.log('Request data:', requestData);
-      
+
       const response = await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_RESET_CODE, requestData, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         }
       });
-      
+
       console.log('verifyResetCode response:', response.data);
       return response.data;
     } catch (error) {
@@ -196,7 +196,7 @@ export const authAPI = {
       console.log('verifyPhone called with:', userData);
       console.log('API endpoint:', API_ENDPOINTS.AUTH.VERIFY_PHONE);
       console.log('Base URL:', API_ENDPOINTS.BASE_URL);
-      
+
       // Handle both formats: object with phone/code OR direct phone, code parameters
       let requestData;
       if (typeof userData === 'object' && userData.phone) {
@@ -211,16 +211,16 @@ export const authAPI = {
           verification_code: arguments[1]?.toString().trim()
         };
       }
-      
+
       console.log('Request data:', requestData);
-      
+
       const response = await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_PHONE, requestData, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         }
       });
-      
+
       console.log('verifyPhone response:', response.data);
       return response.data;
     } catch (error) {
@@ -315,7 +315,7 @@ export const faultReportAPI = {
       throw error;
     }
   },
-  
+
   // Get all fault reports for the user
   getAll: async () => {
     try {
@@ -325,7 +325,7 @@ export const faultReportAPI = {
       throw error;
     }
   },
-  
+
   // Get details of a specific fault report
   getById: async (id) => {
     try {
@@ -348,7 +348,7 @@ export const educationRegistrationAPI = {
       throw error;
     }
   },
-  
+
   // Get all education registrations for the user
   getAll: async () => {
     try {
@@ -358,7 +358,7 @@ export const educationRegistrationAPI = {
       throw error;
     }
   },
-  
+
   // Get details of a specific education registration
   getById: async (id) => {
     try {
@@ -381,7 +381,7 @@ export const addressAPI = {
       throw error;
     }
   },
-  
+
   // Get address by ID
   getById: async (id) => {
     try {
@@ -391,7 +391,7 @@ export const addressAPI = {
       throw error;
     }
   },
-  
+
   // Create new address
   create: async (data) => {
     try {
@@ -401,7 +401,7 @@ export const addressAPI = {
       throw error;
     }
   },
-  
+
   // Update address
   update: async (id, data) => {
     try {
@@ -411,7 +411,7 @@ export const addressAPI = {
       throw error;
     }
   },
-  
+
   // Delete address
   delete: async (id) => {
     try {
@@ -474,6 +474,56 @@ export const notesAPI = {
       throw error;
     }
   }
+};
+
+export const getTicketsList = async () => {
+  try {
+    console.log('📨 دریافت لیست پیام‌های پشتیبانی...');
+
+    const response = await apiClient.get('/tickets');
+
+    console.log('✅ لیست پیام‌ها دریافت شد:', {
+      total: response.data?.total || 0,
+      messages: response.data?.data?.length || 0
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error('❌ خطا در دریافت پیام‌ها:', error.response?.data || error.message);
+    return handleError(error);
+  }
+};
+export const sendTicketMessage = async (message) => {
+  try {
+    console.log('📤 ارسال پیام جدید...');
+    console.log('📝 طول پیام:', message?.length || 0);
+
+    const response = await apiClient.post('/tickets', { message });
+
+    console.log('✅ پیام با موفقیت ارسال شد:', response.data);
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error('❌ خطا در ارسال پیام:', error.response?.data || error.message);
+
+    if (error.response?.status === 422) {
+      const errors = error.response?.data?.errors;
+      if (errors) {
+        const errorMessages = Object.values(errors).flat().join('\n');
+        throw new Error(errorMessages);
+      }
+      throw new Error('لطفاً متن پیام را به درستی وارد کنید');
+    }
+
+    return handleError(error);
+  }
+};
+const handleResponse = (response) => {
+  return {
+    success: true,
+    data: response.data.data || response.data,
+    message: response.data.message || 'عملیات با موفقیت انجام شد',
+  };
 };
 
 // Info endpoints (Public APIs - no authentication needed)

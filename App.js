@@ -98,127 +98,28 @@ SplashScreen.setOptions({
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
-// Route mapping configuration - must match linking config exactly
-const ROUTE_MAP = {
-  '/': 'Landing',
-  '/folder': 'FolderScreen',
-  '/subcategories': 'SubCategories',
-  '/steps': 'Steps',
-  '/preview': 'Preview',
-  '/order-details': 'Details',
-  '/invoice': 'Invoice',
-  '/chat': 'ChatRoom',
-  '/club': 'Club',
-  '/discount-detail': 'Discount Detail',
-  '/gem-transactions': 'Gem Transactions',
-  '/user-discounts': 'User Discounts',
-  '/profile': 'Profile',
-  '/orders': 'OrdersScreen',
-  '/transactions': 'TransactionsScreen',
-  '/notes': 'NotesScreen',
-  '/note': 'AddEditNoteScreen',
-  '/increase': 'Increase',
-  '/payment': 'PaymentScreen',
-  '/contract': 'ContractScreen',
-  '/add-address': 'Add New Address',
-  '/map': 'Map',
-  '/guide': 'GuideScreen',
-  '/hardware-issue': 'HardwareIssueScreen',
-  '/windows-install': 'WindowsInstallScreen',
-  '/software-install': 'SoftwareInstallScreen',
-  '/order-tracking': 'OrderTrackingScreen',
-  '/order-summary': 'OrderSummaryScreen',
-  '/parts-supply': 'PartsSupplyScreen',
-  '/technician-booking': 'TechnicianBookingScreen',
-  '/device-model-info': 'DeviceModelInfoScreen',
-  '/device-order-summary': 'DeviceOrderSummary',
-  '/address': 'AddressScreen',
-  '/privacy': 'PrivacyScreen',
-  '/learn-more': 'LearnMoreScreen',
-  '/about': 'AboutScreen',
-  '/messages': 'MessageScreen',
-  '/canceled-orders': 'CanceledOrdersScreen',
-  '/violation-report': 'ViolationReportScreen',
-  '/violation-reports': 'ViolationReportsListScreen',
-  '/feedback': 'FeedbackSurveyScreen',
-  '/fekrobekr': 'Fekrobekr',
-  '/rates': 'RateListScreen',
-  '/product-issue': 'ProductIssueScreen',
-  '/training-registration': 'TrainingRegistrationScreen',
-  '/incentive-plans': 'IncentivePlansScreen',
-  '/discount-code': 'DiscountCodeScreen',
-  '/technician-visit': 'TechnicianVisitScreen',
-  '/hardware-selection': 'HardwareSelectionScreen',
-  '/comprehensive-selection': 'ComprehensiveSelectionScreen',
-  '/org-contract': 'OrganizationContract',
-  '/warranty': 'WarrantyScreen',
-  '/game': 'GameMenu',
-  '/game-play': 'GamePlay',
-  '/game-result': 'GameResult',
-  '/webview': 'WebView',
-  '/map-picker': 'MapPickerScreen',
-  '/welcome': 'Welcome',
-  '/login': 'LoginScreen',
-  '/main-signin': 'MainSignIn',
-  '/forgot-password': 'ForgotPassword',
-  '/signin-landing': 'SignInLanding',
-  '/registration-verification': 'RegistrationVerificationScreen',
-  '/org-login': 'Login',
-  '/org-register': 'Register',
-  '/order-menu': 'OrderMenuScreen',
-  '/list': 'List',
-};
-
-// Reverse mapping: screen name -> path
-const PATH_MAP = Object.fromEntries(
-  Object.entries(ROUTE_MAP).map(([path, screen]) => [screen, path])
-);
-
-const MAIN_APP_SCREENS = [
-  'FolderScreen', 'SubCategories', 'Steps', 'Preview', 
-  'Details', 'Invoice', 'ChatRoom', 'Club', 'Discount Detail', 'Gem Transactions',
-  'User Discounts', 'Profile', 'OrdersScreen', 'TransactionsScreen', 'NotesScreen',
-  'AddEditNoteScreen', 'Increase', 'PaymentScreen', 'ContractScreen', 'Add New Address', 'Map',
-  'GuideScreen', 'HardwareIssueScreen', 'WindowsInstallScreen', 'SoftwareInstallScreen',
-  'OrderTrackingScreen', 'OrderSummaryScreen', 'PartsSupplyScreen', 'TechnicianBookingScreen',
-  'DeviceModelInfoScreen', 'DeviceOrderSummary', 'AddressScreen', 'PrivacyScreen',
-  'LearnMoreScreen', 'AboutScreen', 'MessageScreen', 'CanceledOrdersScreen',
-  'ViolationReportScreen', 'ViolationReportsListScreen', 'FeedbackSurveyScreen',
-  'Fekrobekr', 'RateListScreen', 'ProductIssueScreen', 'TrainingRegistrationScreen',
-  'IncentivePlansScreen', 'DiscountCodeScreen', 'TechnicianVisitScreen',
-  'HardwareSelectionScreen', 'ComprehensiveSelectionScreen', 'OrganizationContract',
-  'WarrantyScreen', 'GameMenu', 'GamePlay', 'GameResult', 'WebView', 'MapPickerScreen'
-];
-
 const App = () => {
   const navigationRef = useRef(null);
-  const isNavigatingFromBrowser = useRef(false);
-  const currentPath = useRef('');
-  const navigationTimeout = useRef(null);
   
   const [loaded, error] = useFonts({
     'VazirBold': require("./assets/fonts/Vazir-Bold-FD.ttf"),
     'VazirLight': require("./assets/fonts/Vazir-Light-FD.ttf"),
   });
   
-  const [isReady, setIsReady] = useState(!__DEV__);
+  const [isReady, setIsReady] = useState(false);
   const [initialState, setInitialState] = useState();
 
   useEffect(() => {
     const restoreState = async () => {
       try {
-        if (Platform.OS === 'web') {
-          // For web, we don't need to restore from AsyncStorage
-          // as linking will handle the URL
-          setIsReady(true);
-          return;
-        }
-        
-        const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
-        const state = savedStateString ? JSON.parse(savedStateString) : undefined;
+        // Only restore state in development mode for native platforms
+        if (__DEV__ && Platform.OS !== 'web') {
+          const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
+          const state = savedStateString ? JSON.parse(savedStateString) : undefined;
 
-        if (state !== undefined) {
-          setInitialState(state);
+          if (state !== undefined) {
+            setInitialState(state);
+          }
         }
       } finally {
         setIsReady(true);
@@ -236,82 +137,6 @@ const App = () => {
     }
   }, [loaded, error]);
 
-  // Handle browser back/forward buttons for web
-  useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const handlePopState = (event) => {
-        const path = window.location.pathname;
-        console.log('\n🔙🔙🔙 BROWSER BACK/FORWARD CLICKED 🔙🔙🔙');
-        console.log('📍 New URL:', path);
-        console.log('📍 Previous path in ref:', currentPath.current);
-        console.log('📍 isNavigatingFromBrowser flag:', isNavigatingFromBrowser.current);
-        console.log('📊 Browser History Length:', window.history.length);
-        
-        // Prevent handling if we're already navigating or path hasn't changed
-        if (isNavigatingFromBrowser.current || currentPath.current === path) {
-          console.log('⏭️  SKIPPED - already handling or same path\n');
-          return;
-        }
-        
-        isNavigatingFromBrowser.current = true;
-        console.log('🚩 Flag set: isNavigatingFromBrowser = true');
-        currentPath.current = path;
-        console.log('💾 Updated currentPath.current to:', path);
-        
-        // Clear any pending navigation timeout
-        if (navigationTimeout.current) {
-          clearTimeout(navigationTimeout.current);
-        }
-        
-        if (navigationRef.current && navigationRef.current.isReady()) {
-          const screenName = ROUTE_MAP[path];
-          console.log('🗺️  Screen name from route map:', screenName);
-          
-          if (screenName) {
-            console.log('✅ NAVIGATING TO:', screenName);
-            
-            try {
-              if (MAIN_APP_SCREENS.includes(screenName)) {
-                console.log('📱 MainApp screen detected');
-                navigationRef.current.navigate('MainApp', {
-                  screen: screenName
-                });
-              } else {
-                console.log('🔐 Auth/Top-level screen detected');
-                navigationRef.current.navigate(screenName);
-              }
-              console.log('✅ Navigation command executed');
-            } catch (error) {
-              console.error('❌❌❌ Navigation error on popstate:', error);
-            }
-          } else {
-            console.log('⚠️⚠️⚠️ NO SCREEN FOUND FOR PATH:', path);
-          }
-        } else {
-          console.log('⚠️ Navigation ref not ready');
-        }
-        
-        // Reset the flag after a brief delay
-        navigationTimeout.current = setTimeout(() => {
-          isNavigatingFromBrowser.current = false;
-          console.log('🚩 Flag reset: isNavigatingFromBrowser = false\n');
-        }, 300);
-      };
-
-      // Store initial path
-      currentPath.current = window.location.pathname;
-
-      window.addEventListener('popstate', handlePopState);
-
-      return () => {
-        window.removeEventListener('popstate', handlePopState);
-        if (navigationTimeout.current) {
-          clearTimeout(navigationTimeout.current);
-        }
-      };
-    }
-  }, [isReady]);
-
   if (!loaded && !error) {
     return null;
   }
@@ -320,56 +145,9 @@ const App = () => {
     return null;
   }
 
-  // Web linking configuration for preserving navigation state on reload
-  if (Platform.OS === 'web') {
-    console.log('Current URL:', window.location.href);
-    console.log('Current pathname:', window.location.pathname);
-  }
-  
+  // Simple linking configuration for web only
   const linking = Platform.OS === 'web' ? {
-    enabled: true,
-    prefixes: ['http://localhost:8081', 'https://loop.app', '/'],
-    // Custom getStateFromPath to control how URLs map to navigation state
-    getStateFromPath: (path, config) => {
-      // این تابع فقط برای initial load استفاده می‌شه
-      // بعد از اون، ما خودمون URL رو manage می‌کنیم
-      console.log('🔍 getStateFromPath called with:', path);
-      
-      const screenName = ROUTE_MAP[path];
-      if (!screenName) {
-        return undefined;
-      }
-      
-      // Check if it's a MainApp screen
-      if (MAIN_APP_SCREENS.includes(screenName)) {
-        return {
-          routes: [
-            {
-              name: 'MainApp',
-              state: {
-                routes: [{ name: screenName }],
-                index: 0,
-              },
-            },
-          ],
-          index: 0,
-        };
-      }
-      
-      // It's an auth screen
-      return {
-        routes: [{ name: screenName }],
-        index: 0,
-      };
-    },
-    // CRITICAL: Return current path to prevent React Navigation from changing URL
-    getPathFromState: (state, config) => {
-      // Return current path so React Navigation doesn't add its own history entry
-      // ما خودمون در onStateChange با replaceState URL رو update می‌کنیم
-      const path = typeof window !== 'undefined' ? window.location.pathname : '/';
-      console.log('🚫 getPathFromState: Keeping current path:', path);
-      return path;
-    },
+    prefixes: ['http://localhost:8081', 'http://localhost:8082', 'https://loop.app'],
     config: {
       screens: {
         Landing: '',
@@ -465,58 +243,8 @@ const App = () => {
         formatter: (options, route) => `لوپ - ${route?.name || 'خانه'}`
       }}
       onStateChange={(state) => {
-        if (Platform.OS === 'web') {
-          console.log('\n📡📡📡 onStateChange FIRED 📡📡📡');
-          console.log('📍 isNavigatingFromBrowser flag:', isNavigatingFromBrowser.current);
-          console.log('📊 Browser History Length:', window.history.length);
-          
-          // Don't update URL if we're navigating from browser back/forward
-          if (isNavigatingFromBrowser.current) {
-            console.log('🚫 SKIPPED - navigating from browser\n');
-            return;
-          }
-          
-          // For web, update browser history
-          if (state && typeof window !== 'undefined') {
-            const getCurrentRoute = (navState) => {
-              if (!navState || !navState.routes) return null;
-              const route = navState.routes[navState.index || 0];
-              if (route && route.state) {
-                return getCurrentRoute(route.state);
-              }
-              return route;
-            };
-
-            const currentRoute = getCurrentRoute(state);
-            if (currentRoute && currentRoute.name) {
-              console.log('� Current Route Name:', currentRoute.name);
-              
-              // Use the same path mapping as in popstate handler
-              const path = PATH_MAP[currentRoute.name] || `/${currentRoute.name.toLowerCase().replace(/screen/gi, '')}`;
-              console.log('📌 Mapped Path:', path);
-              console.log('📌 Current URL:', window.location.pathname);
-              console.log('📌 currentPath.current:', currentPath.current);
-              
-              // Only update if path has actually changed
-              if (window.location.pathname !== path && currentPath.current !== path) {
-                console.log('🔄 WILL UPDATE URL');
-                console.log('   From:', window.location.pathname);
-                console.log('   To:', path);
-                
-                currentPath.current = path;
-                console.log('💾 Updated currentPath.current to:', path);
-                
-                // Use replaceState instead of pushState to avoid creating duplicate history entries
-                window.history.replaceState({}, '', path);
-                console.log('✅ replaceState executed');
-                console.log('📊 History length after replace:', window.history.length, '\n');
-              } else {
-                console.log('🚫 SKIPPED - URL already correct:', path, '\n');
-              }
-            }
-          }
-        } else if (state) {
-          // For native, save to AsyncStorage
+        // Only save state for native platforms in dev mode
+        if (state && Platform.OS !== 'web' && __DEV__) {
           AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
         }
       }}

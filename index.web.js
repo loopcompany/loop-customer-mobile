@@ -1,4 +1,5 @@
-import 'leaflet/dist/leaflet.css';
+// Leaflet CSS is loaded via CDN in app.json or index.html
+// Removed direct import to avoid Metro bundler issues with CSS images
 import { registerRootComponent } from 'expo';
 
 import App from './App';
