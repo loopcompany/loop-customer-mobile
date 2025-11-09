@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
@@ -10,8 +10,9 @@ import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import DatePickerModal from '../../components/DatePickerModal';
+import LocationPicker from '../../components/LocationPicker';
 import { uri } from '../../services/URL';
-import { jalaliToGregorian } from '../../helpers/Common';
+import { jalaliToGregorian, showAlert } from '../../helpers/Common';
 
 const Register = ({ navigation }) => {
   // Form states
@@ -30,6 +31,11 @@ const Register = ({ navigation }) => {
   const [organizationAddress, setOrganizationAddress] = useState('');
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');
   const [securityCode, setSecurityCode] = useState('');
+
+  // Location states
+  const [selectedProvince, setSelectedProvince] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedRegion, setSelectedRegion] = useState(null);
 
   // UI states
   const [loading, setLoading] = useState(false);
@@ -117,12 +123,15 @@ const Register = ({ navigation }) => {
       newErrors.password = 'رمز عبور باید حداقل 8 کاراکتر باشد';
     }
 
-    if (!city) {
-      newErrors.city = 'شهر الزامی است';
+    // Location validation
+    if (!selectedProvince) {
+      newErrors.province = 'انتخاب استان الزامی است';
     }
-
-    if (!region) {
-      newErrors.region = 'منطقه الزامی است';
+    if (!selectedCity) {
+      newErrors.city = 'انتخاب شهر الزامی است';
+    }
+    if (!selectedRegion) {
+      newErrors.region = 'انتخاب منطقه الزامی است';
     }
 
     if (!organizationAddress || organizationAddress.length < 10) {
@@ -135,6 +144,13 @@ const Register = ({ navigation }) => {
       newErrors.organizationPostalCode = 'کد پستی باید 10 رقم باشد';
     }
 
+    // Captcha validation
+    if (!securityCode) {
+      newErrors.securityCode = 'کد امنیتی الزامی است';
+    } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
+      newErrors.securityCode = 'کد امنیتی صحیح نیست';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,7 +161,7 @@ const Register = ({ navigation }) => {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (permissionResult.granted === false) {
-        Alert.alert('خطا', 'دسترسی به گالری مورد نیاز است');
+        showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
         return;
       }
 
@@ -161,7 +177,7 @@ const Register = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('خطا', 'خطا در انتخاب تصویر');
+      showAlert('خطا', 'خطا در انتخاب تصویر');
     }
   };
 
@@ -172,18 +188,18 @@ const Register = ({ navigation }) => {
 
     // Validate form
     if (!validateForm()) {
-      Alert.alert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
+      showAlert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
       return;
     }
 
     // Validate captcha
     if (!securityCode) {
       setErrors({ securityCode: 'کد امنیتی الزامی است' });
-      Alert.alert('خطا', 'لطفا کد امنیتی را وارد کنید');
+      showAlert('خطا', 'لطفا کد امنیتی را وارد کنید');
       return;
     } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
       setErrors({ securityCode: 'کد امنیتی صحیح نیست' });
-      Alert.alert('خطا', 'کد امنیتی صحیح نیست');
+      showAlert('خطا', 'کد امنیتی صحیح نیست');
       setDisplayedCaptcha(generateCaptcha());
       setSecurityCode('');
       return;
@@ -232,6 +248,18 @@ const Register = ({ navigation }) => {
       formData.append('region', region);
       formData.append('postal_code', organizationPostalCode);
       formData.append('password', password);
+      formData.append('password_confirmation', password);
+      
+      // Add location IDs
+      if (selectedProvince) {
+        formData.append('province_id', selectedProvince.id);
+      }
+      if (selectedCity) {
+        formData.append('city_id', selectedCity.id);
+      }
+      if (selectedRegion) {
+        formData.append('region_id', selectedRegion.id);
+      }
 
       // Make API call with timeout
       const response = await axios.post(
@@ -249,7 +277,7 @@ const Register = ({ navigation }) => {
       console.log('✅ Registration successful:', response.data);
 
       if (response.data.status === 'success') {
-        Alert.alert(
+        showAlert(
           'موفق',
           'ثبت نام با موفقیت انجام شد. کد تایید به شماره موبایل ارسال شد.',
           [
@@ -294,14 +322,14 @@ const Register = ({ navigation }) => {
           });
           setErrors(serverErrors);
           
-          Alert.alert('خطا در اعتبارسنجی', errorData.message || 'لطفا فیلدها را بررسی کنید');
+          showAlert('خطا در اعتبارسنجی', errorData.message || 'لطفا فیلدها را بررسی کنید');
         } else {
-          Alert.alert('خطا', errorData.message || 'خطا در ثبت نام');
+          showAlert('خطا', errorData.message || 'خطا در ثبت نام');
         }
       } else if (error.request) {
         // Request made but no response (network error)
         console.log('No response received');
-        Alert.alert(
+        showAlert(
           'خطا در اتصال',
           `سرور پاسخگو نیست. لطفا موارد زیر را بررسی کنید:\n\n` +
           `1. اتصال اینترنت دستگاه\n` +
@@ -318,7 +346,7 @@ const Register = ({ navigation }) => {
       } else {
         // Something else happened
         console.log('Unknown error:', error.message);
-        Alert.alert('خطا', `خطای نامشخص: ${error.message}`);
+        showAlert('خطا', `خطای نامشخص: ${error.message}`);
       }
     } finally {
       setLoading(false);
@@ -683,52 +711,23 @@ const Register = ({ navigation }) => {
             )}
           </View>
 
-          {/* شهر و منطقه */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, gap: 8 }}>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                value={region}
-                onChangeText={setRegion}
-                placeholder="منطقه * :"
-                style={{ 
-                  backgroundColor: '#f5f5f5', 
-                  borderRadius: 8, 
-                  paddingVertical: 10, 
-                  paddingHorizontal: 12,
-                  borderWidth: 1, 
-                  borderColor: errors.region ? '#ff0000' : '#ccc',
-                  fontSize: 14,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'right',
-                  height: 40
-                }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                value={city}
-                onChangeText={setCity}
-                placeholder="شهر * :"
-                style={{ 
-                  backgroundColor: '#f5f5f5', 
-                  borderRadius: 8, 
-                  paddingVertical: 10, 
-                  paddingHorizontal: 12,
-                  borderWidth: 1, 
-                  borderColor: errors.city ? '#ff0000' : '#ccc',
-                  fontSize: 14,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'right',
-                  height: 40
-                }}
-              />
-            </View>
+          {/* استان، شهر و منطقه با LocationPicker */}
+          <View style={{ marginBottom: 8 }}>
+            <LocationPicker
+              selectedProvince={selectedProvince}
+              selectedCity={selectedCity}
+              selectedRegion={selectedRegion}
+              onProvinceChange={setSelectedProvince}
+              onCityChange={setSelectedCity}
+              onRegionChange={setSelectedRegion}
+              errors={{
+                province: errors.province,
+                city: errors.city,
+                region: errors.region
+              }}
+              required={true}
+            />
           </View>
-          {(errors.region || errors.city) && (
-            <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: -4, marginBottom: 8, textAlign: 'right' }}>
-              {errors.region || errors.city}
-            </Text>
-          )}
 
           {/* آدرس سازمان */}
           <View style={{ marginBottom: 8 }}>

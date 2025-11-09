@@ -213,7 +213,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="alert-circle-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>مشکلات گزارش شده توسط کاربر</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات گزارش شده توسط کاربر</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -227,7 +227,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="construct-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>مشکلات گزارش شده توسط تکنسین</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات گزارش شده توسط تکنسین</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -241,7 +241,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="eye-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>مشکلات مشاهده شده توسط تکنسین</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات مشاهده شده توسط تکنسین</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -307,7 +307,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     </Text>
                 </View>
             ) : (
-                <View style={{ width: '100%', marginTop: 15 }}>
+                <View style={{ width: '100%', marginTop: 15, alignItems:'center' }}>
                     <Button
                         title="تایید گزارش تحویل"
                         onPress={() => setConfirmModal(true)}

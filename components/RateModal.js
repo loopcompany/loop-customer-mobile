@@ -47,9 +47,9 @@ export default function RateModal({ rateModal, setRateModal, orderId, data }) {
             <TouchableWithoutFeedback onPress={() => { setRateModal(false) }}>
                 <View style={[styles.container, NewStyles.center]}>
                     <View style={[styles.modalView, NewStyles.border10]}>
-                        <Text style={NewStyles.title10}>به متخصص و سفارش خود امتیاز دهید.</Text>
+                        <Text style={NewStyles.title10}>به تکنسین و سفارش خود امتیاز دهید.</Text>
                         <Rating variant="stars" size={30} baseColor={themeColor3.bgColor(1)} fillColor={themeColor0.bgColor(1)} touchColor={themeColor0.bgColor(1)} rating={Number(data?.rate) || rate} onChange={(value) => setRate(value)} />
-                        <Text style={NewStyles.text10}>لطفاً با ثبت امتیاز و نظر خود ما را در ارتقاء کیفیت خدمات یاری فرمایید. بازخورد شما نقش مهمی در بهبود تجربه سایر کاربران و ارزیابی عملکرد متخصصان دارد.</Text>
+                        <Text style={NewStyles.text10}>لطفاً با ثبت امتیاز و نظر خود ما را در ارتقاء کیفیت خدمات یاری فرمایید. بازخورد شما نقش مهمی در بهبود تجربه سایر کاربران و ارزیابی عملکرد تکنسینان دارد.</Text>
                         <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', height: 150 }]} placeholder='دیدگاه خود را با ما به اشتراک بکذارید.' placeholderTextColor={themeColor3.bgColor(1)} verticalAlign='top' textAlignVertical='top' editable={data ? false : true} multiline={true} value={data?.cm || comment} maxLength={350} onChangeText={(text) => { setComment(text) }} />
                         {!data && <PairButton text1={`${t('Submit Review')}`} onPress1={() => { submitReview(); setRateModal(false); setRate(0); setComment(null) }} text2={`${t('Dismiss')}`} onPress2={() => { setRateModal(false); setRate(0); setComment(null) }} />}
                     </View>

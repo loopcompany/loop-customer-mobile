@@ -72,18 +72,26 @@ const SubCategories = ({ navigation, route }) => {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
             data={subCategories}
             renderItem={({ item }) => {
-              return <Folder title={item?.title} image={item?.image_path} onPress={() => {
+              return <Folder title={item?.title} image={item?.image_path} onPress={async () => {
                 if (item?.has_subcategory === 1) {
                   // اگر دارای زیر دسته است، به SubCategories برو
+                  console.log('📂 [SubCategories] باز کردن زیر دسته:', item.title);
                   navigation.navigate('SubCategories', { categoryId: item.id, categoryTitle: item.title });
                 } else {
                   // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
+                  console.log('🎯 [SubCategories] انتخاب دسته‌بندی نهایی:', item.title);
+                  console.log('🎯 [SubCategories] اطلاعات کامل آیتم:', JSON.stringify(item, null, 2));
+                  console.log('🎯 [SubCategories] شروع دریافت مراحل برای ID:', item.id);
                   
-                  dispatch(fetchSteps(item.id));
-                  dispatch(setCategory(item));
-                  console.log(item);
-                  
-                  navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
+                  try {
+                    const result = await dispatch(fetchSteps(item.id));
+                    console.log('🎯 [SubCategories] نتیجه dispatch:', result);
+                    dispatch(setCategory(item));
+                    
+                    navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
+                  } catch (error) {
+                    console.log('❌ [SubCategories] خطا در dispatch fetchSteps:', error);
+                  }
                 }
               }} />;
             }}

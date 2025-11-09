@@ -1,0 +1,59 @@
+{
+  "name": "cross-platform-mapview",
+  "version": "1.0.0",
+  "description": "Unified MapView component for React Native iOS, Android, and Web",
+  "main": "components/MapView.js",
+  "keywords": [
+    "react-native",
+    "react-native-web",
+    "map",
+    "mapview",
+    "leaflet",
+    "react-native-maps",
+    "cross-platform",
+    "ios",
+    "android",
+    "web"
+  ],
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-native": ">=0.60.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native-maps": {
+      "optional": false
+    },
+    "leaflet": {
+      "optional": true
+    },
+    "react-leaflet": {
+      "optional": true
+    }
+  },
+  "dependencies": {},
+  "optionalDependencies": {
+    "leaflet": "^1.7.1",
+    "react-leaflet": "^3.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "files": [
+    "components/",
+    "utils/",
+    "README.md",
+    "INTEGRATION_GUIDE.md",
+    "CHANGELOG.md"
+  ],
+  "author": "Your Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/your-repo"
+  },
+  "bugs": {
+    "url": "https://example.com/your-issues"
+  },
+  "homepage": "https://example.com/your-homepage"
+}

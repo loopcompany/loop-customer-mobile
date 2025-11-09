@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
+import { showAlert } from '../../helpers/Common';
 
 const OTPVerification = ({ route, navigation }) => {
   const { phone, organizationCode, userId, organizationId } = route.params;
@@ -54,7 +55,7 @@ const OTPVerification = ({ route, navigation }) => {
     const verificationCode = code.join('');
     
     if (verificationCode.length !== 6) {
-      Alert.alert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
+      showAlert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
       return;
     }
 
@@ -91,7 +92,7 @@ const OTPVerification = ({ route, navigation }) => {
           await AsyncStorage.setItem('organizationId', organizationId.toString());
         }
 
-        Alert.alert(
+        showAlert(
           'موفق',
           `شماره موبایل با موفقیت تایید شد.\nکد سازمانی شما: ${organizationCode}\n\nلطفا با این کد وارد شوید.`,
           [
@@ -110,16 +111,16 @@ const OTPVerification = ({ route, navigation }) => {
       
       if (error.response) {
         console.error('Response error:', error.response.data);
-        Alert.alert(
+        showAlert(
           'خطا در تایید',
           error.response.data.message || 'کد تایید اشتباه است. لطفا مجددا تلاش کنید.'
         );
       } else if (error.request) {
         console.error('Request error:', error.request);
-        Alert.alert('خطا', 'سرور پاسخگو نیست. لطفا اتصال اینترنت را بررسی کنید.');
+        showAlert('خطا', 'سرور پاسخگو نیست. لطفا اتصال اینترنت را بررسی کنید.');
       } else {
         console.error('Unknown error:', error.message);
-        Alert.alert('خطا', error.message || 'خطای نامشخص رخ داد');
+        showAlert('خطا', error.message || 'خطای نامشخص رخ داد');
       }
     } finally {
       setLoading(false);
@@ -128,7 +129,7 @@ const OTPVerification = ({ route, navigation }) => {
 
   const handleResendCode = async () => {
     if (timer > 0) {
-      Alert.alert('توجه', `لطفا ${timer} ثانیه صبر کنید`);
+      showAlert('توجه', `لطفا ${timer} ثانیه صبر کنید`);
       return;
     }
 
@@ -140,13 +141,13 @@ const OTPVerification = ({ route, navigation }) => {
       });
 
       if (response.data.status === 'success') {
-        Alert.alert('موفق', 'کد تایید مجددا ارسال شد');
+        showAlert('موفق', 'کد تایید مجددا ارسال شد');
         setTimer(120); // Reset timer
         setCode(['', '', '', '', '', '']); // Clear inputs (6 digits)
       }
     } catch (error) {
       console.error('Resend error:', error);
-      Alert.alert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
+      showAlert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
     } finally {
       setResendLoading(false);
     }

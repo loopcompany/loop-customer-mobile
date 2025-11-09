@@ -24,6 +24,7 @@ import Urgent from '../../components/Urgent';
 import Input from '../../components/Input';
 import ProgressBar from '../../components/ProgressBar';
 import Gender from '../../components/Gender';
+import ServiceSchedule from '../../components/ServiceSchedule';
 import { emptyAddress } from '../../slices/addressSlice';
 import StepsHeader from '../../components/StepsHeader';
 
@@ -34,6 +35,18 @@ export default function Steps({ navigation }) {
     const steps = useSelector(state => state.step);
     const length = steps?.data?.length;
     const [loading, setLoading] = useState(false);
+
+    // لاگ کردن مراحل بعد از دریافت
+    useEffect(() => {
+        console.log('🎯 [Steps] کامپوننت Steps لود شد');
+        console.log('📋 [Steps] تعداد کل مراحل:', length);
+        console.log('📋 [Steps] مرحله فعلی:', step);
+        console.log('📦 [Steps] داده‌های کامل مراحل:', JSON.stringify(steps, null, 2));
+        
+        if (steps?.data && steps.data.length > 0) {
+            console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
+        }
+    }, [steps, step, length]);
 
     useFocusEffect(
         useCallback(() => {
@@ -54,18 +67,106 @@ export default function Steps({ navigation }) {
 
 
     function required(step) {
-        return steps.data?.[step].every(item => {
+        console.log('━━━━━━━━━ VALIDATION START ━━━━━━━━━');
+        console.log('🔍 [Steps.required] بررسی validation برای step:', step);
+        console.log('📦 [Steps.required] داده این step:', JSON.stringify(steps.data?.[step], null, 2));
+        
+        const result = steps.data?.[step].every(item => {
+            console.log(`\n🔍 [Steps.required] بررسی item: ${item.type} (id: ${item.id})`);
+            console.log(`   is_required: ${item.is_required}`);
+            
             if (["date", "time", "address", "gender"].includes(item.type) && item.is_required == 1) {
-                return item.value;
+                const isValid = !!item.value;
+                console.log(`   ✓ type: ${item.type}, value: "${item.value}", valid: ${isValid ? '✅' : '❌'}`);
+                return isValid;
             }
             if (["checkbox", "radioButton", "counter"].includes(item.type) && item.is_required == 1) {
-                return item.field_details.some(dataItem => dataItem.value > 0);
+                const hasValue = item.field_details.some(dataItem => dataItem.value > 0);
+                console.log(`   ✓ type: ${item.type}, has value: ${hasValue ? '✅' : '❌'}`);
+                if (!hasValue) {
+                    console.log(`   ⚠️ field_details:`, item.field_details.map(f => `${f.id}:${f.value}`).join(', '));
+                }
+                return hasValue;
             }
             if (item.type == "input") {
-                return !item.field_details.some(dataItem => dataItem.is_required == 1 && dataItem.value == "");
+                const hasEmptyRequired = item.field_details.some(dataItem => dataItem.is_required == 1 && dataItem.value == "");
+                console.log(`   ✓ type: input, valid: ${!hasEmptyRequired ? '✅' : '❌'}`);
+                return !hasEmptyRequired;
             }
+            // Validation برای service_schedule (فقط برای کاربران سازمانی)
+            if (item.type == "service_schedule" && item.is_required == 1) {
+                console.log('🔍 [Steps.validation] بررسی service_schedule...');
+                
+                // پیدا کردن فیلد اصلی
+                const mainField = item.field_details?.find(f => f.id === 'main_selection');
+                const selectedOption = mainField?.options?.find(opt => opt.value > 0);
+                
+                if (!selectedOption) {
+                    console.log('❌ [Steps.validation] service_schedule: انتخاب اصلی (long_term/short_term) نشده');
+                    return false; // اگر انتخابی نشده
+                }
+                
+                console.log('✅ [Steps.validation] service_schedule: نوع انتخاب شده:', selectedOption.id);
+                
+                // بررسی فیلدهای شرطی
+                const conditionalFields = item.field_details?.filter(
+                    f => f.conditional_on === selectedOption.id
+                );
+                
+                console.log('📋 [Steps.validation] تعداد فیلدهای شرطی:', conditionalFields?.length);
+                
+                // بررسی که همه فیلدهای شرطی اجباری پر شده باشند
+                const isValid = conditionalFields?.every(field => {
+                    if (field.type === 'radioButton') {
+                        const hasSelection = field.options?.some(opt => opt.value > 0);
+                        if (!hasSelection) {
+                            console.log(`❌ [Steps.validation] ${field.id} (radioButton): انتخاب نشده`);
+                        } else {
+                            console.log(`✅ [Steps.validation] ${field.id} (radioButton): انتخاب شده`);
+                        }
+                        return hasSelection;
+                    }
+                    if (field.type === 'date') {
+                        const hasValue = !!field.value;
+                        if (!hasValue) {
+                            console.log(`❌ [Steps.validation] ${field.id} (date): خالی است`);
+                        } else {
+                            console.log(`✅ [Steps.validation] ${field.id} (date): ${field.value}`);
+                        }
+                        return hasValue; // تاریخ باید انتخاب شده باشد
+                    }
+                    if (field.type === 'time') {
+                        const hasValue = !!field.value;
+                        if (!hasValue) {
+                            console.log(`❌ [Steps.validation] ${field.id} (time): خالی است`);
+                        } else {
+                            console.log(`✅ [Steps.validation] ${field.id} (time): ${field.value}`);
+                        }
+                        return hasValue; // زمان باید انتخاب شده باشد
+                    }
+                    // file اختیاری است - نیازی به چک نیست
+                    if (field.type === 'file') {
+                        console.log(`ℹ️ [Steps.validation] ${field.id} (file): اختیاری`);
+                        return true;
+                    }
+                    return true;
+                });
+                
+                if (!isValid) {
+                    console.log('❌ [Steps.validation] service_schedule ناقص است');
+                } else {
+                    console.log('✅ [Steps.validation] service_schedule کامل است');
+                }
+                
+                return isValid;
+            }
+            
+            console.log(`   ✓ type: ${item.type}, no validation needed or not required`);
             return true;
         });
+        
+        console.log('━━━━━━━━━ VALIDATION RESULT:', result ? '✅ VALID' : '❌ INVALID', '━━━━━━━━━');
+        return result;
     }
 
     const handleNextStep = () => {
@@ -105,14 +206,22 @@ export default function Steps({ navigation }) {
                         data={steps?.data?.[step]}
                         keyExtractor={(item) => item?.id?.toString()}
                         renderItem={({ item }) => {
+                            console.log('🎯 [Steps.renderItem] رندر item:', item?.id, 'type:', item?.type);
+                            
                             const isUrgentActive = steps?.isUrgent === 1;
                             if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
                                 return null;
                             }
+                            
+                            if (item?.type === 'service_schedule') {
+                                console.log('✅ [Steps.renderItem] service_schedule یافت شد! رندر ServiceSchedule...');
+                            }
+                            
                             return (
                                 <View >
                                     {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
                                     {(item?.type == 'description') && <Description data={item} />}
+                                    {(item?.type == 'service_schedule') && <ServiceSchedule step={step} data={item} />}
                                     {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
                                     {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
                                     {(item?.type == 'counter') && <Counter step={step} data={item} />}

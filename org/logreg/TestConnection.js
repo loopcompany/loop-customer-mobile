@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import { uri } from '../../services/URL';
 import CustomStatusBar from '../../components/CustomStatusBar';
+import { showAlert } from '../../helpers/Common';
 
 const TestConnection = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -205,7 +205,7 @@ const TestConnection = ({ navigation }) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     await testMultipartEndpoint();
     
-    Alert.alert('تست‌ها تمام شد', 'نتایج را بررسی کنید و اسکرین‌شات بگیرید.');
+    showAlert('تست‌ها تمام شد', 'نتایج را بررسی کنید و اسکرین‌شات بگیرید.');
   };
 
   const clearResults = () => {
@@ -502,3 +502,4 @@ const styles = StyleSheet.create({
 });
 
 export default TestConnection;
+

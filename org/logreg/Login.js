@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { setToken, setUserType } from '../../slices/authSlice';
+import { setOrganizationData } from '../../slices/organizationSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
+import { showAlert } from '../../helpers/Common';
 
 const Login = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -61,7 +63,7 @@ const Login = ({ navigation }) => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      Alert.alert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
+      showAlert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
       return;
     }
 
@@ -74,32 +76,70 @@ const Login = ({ navigation }) => {
       });
 
       if (response.data.status === 'success') {
+        console.log('✅ [Login] ورود موفق - شروع ذخیره‌سازی اطلاعات...');
+        console.log('🔑 [Login] توکن دریافتی:', response.data.data.token ? `${response.data.data.token.substring(0, 20)}...` : 'null');
+        
         // Save token and user data
         await AsyncStorage.setItem('userToken', response.data.data.token);
+        console.log('💾 [Login] userToken ذخیره شد');
+        
         await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
+        console.log('💾 [Login] userData ذخیره شد');
+        
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
+        console.log('💾 [Login] organizationData ذخیره شد');
+        
         await AsyncStorage.setItem('accountType', 'organization');
+        console.log('💾 [Login] accountType ذخیره شد: organization');
+        
         await AsyncStorage.setItem('organizationCode', organizationCode);
+        console.log('💾 [Login] organizationCode ذخیره شد');
         
         // Dispatch to Redux
         dispatch(setToken(response.data.data.token));
+        console.log('📦 [Login] توکن به Redux ارسال شد');
+        
         dispatch(setUserType('organization'));
+        console.log('📦 [Login] userType به Redux ارسال شد: organization');
+        
+        dispatch(setOrganizationData(response.data.data.organization));
+        console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
 
         if (rememberPassword) {
           await AsyncStorage.setItem('savedOrganizationCode', organizationCode);
+          console.log('💾 [Login] savedOrganizationCode ذخیره شد');
+        }
+        
+        console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');
+
+        // Clear navigation state from AsyncStorage to ensure fresh start
+        try {
+          await AsyncStorage.removeItem('NAVIGATION_STATE_V1');
+          console.log('🗑️ [Login] Navigation state cleared from AsyncStorage');
+        } catch (error) {
+          console.error('Error clearing navigation state:', error);
         }
 
-        Alert.alert(
+        // Show success message and navigate
+        showAlert(
           'موفق',
           'ورود با موفقیت انجام شد',
           [
             {
               text: 'تایید',
               onPress: () => {
-                // Navigate to main app
+                // Navigate to FolderScreen inside MainApp
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'MainApp' }],
+                  routes: [
+                    {
+                      name: 'MainApp',
+                      state: {
+                        routes: [{ name: 'FolderScreen' }],
+                        index: 0,
+                      },
+                    },
+                  ],
                 });
               },
             },
@@ -114,30 +154,22 @@ const Login = ({ navigation }) => {
         
         if (errorData.error === 'organization_not_found') {
           setErrors({ organizationCode: 'کد سازمانی یافت نشد' });
-          Alert.alert('خطا', 'کد سازمانی یافت نشد');
+          showAlert('خطا', 'کد سازمانی یافت نشد');
         } else if (errorData.error === 'phone_not_verified') {
-          Alert.alert(
+          showAlert(
             'توجه',
-            'شماره موبایل هنوز تایید نشده است. لطفا ابتدا شماره موبایل خود را تایید کنید.',
-            [
-              {
-                text: 'تایید',
-                onPress: () => {
-                  // Navigate to OTP verification if needed
-                },
-              },
-            ]
+            'شماره موبایل هنوز تایید نشده است. لطفا ابتدا شماره موبایل خود را تایید کنید.'
           );
         } else if (errorData.error === 'invalid_password') {
           setErrors({ password: 'رمز عبور اشتباه است' });
-          Alert.alert('خطا', 'رمز عبور اشتباه است');
+          showAlert('خطا', 'رمز عبور اشتباه است');
         } else if (errorData.error === 'account_disabled') {
-          Alert.alert('خطا', 'حساب کاربری شما غیرفعال شده است. لطفا با پشتیبانی تماس بگیرید');
+          showAlert('خطا', 'حساب کاربری شما غیرفعال شده است. لطفا با پشتیبانی تماس بگیرید');
         } else {
-          Alert.alert('خطا', errorData.message || 'خطا در ورود');
+          showAlert('خطا', errorData.message || 'خطا در ورود');
         }
       } else {
-        Alert.alert('خطا', 'خطا در ارتباط با سرور');
+        showAlert('خطا', 'خطا در ارتباط با سرور');
       }
     } finally {
       setLoading(false);
@@ -150,15 +182,11 @@ const Login = ({ navigation }) => {
 
   const handleSecurityCode = () => {
     // Handle security code logic
-    Alert.alert('کد امنیتی', 'کد امنیتی ارسال شد');
+    showAlert('کد امنیتی', 'کد امنیتی ارسال شد');
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1, backgroundColor: '#d1e9ff' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
+    <View style={{ flex: 1, backgroundColor: '#d1e9ff' }}>
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
@@ -166,11 +194,17 @@ const Login = ({ navigation }) => {
         onPressRight={() => {}}
       />
       
-      <ScrollView 
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        enabled={Platform.OS !== 'web'}
       >
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         {/* Main header - ورود به حساب کاربری */}
         <View style={{ 
           width: '90%', 
@@ -432,9 +466,9 @@ const Login = ({ navigation }) => {
           </View>
         </View>
 
-      </ScrollView>
-      
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 

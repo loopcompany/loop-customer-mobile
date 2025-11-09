@@ -1,8 +1,9 @@
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import NewStyles, { deviceWidth } from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6 } from '../theme/Color';
@@ -18,14 +19,24 @@ export default function Address({ step, data, navigation }) {
 
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const [refreshing, setRefreshing] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [id, setId] = useState(null);
     const addressId = useSelector(state => state.step?.addressId);
     const addresses = useSelector(state => state.address?.data);
-    const token = useSelector((state) => state?.auth?.token)
     const [deleteModal, setDeletModal] = useState(false);
 
     const [loading, setLoading] = useState(false);
+
+    // Fetch addresses when component mounts
+    useEffect(() => {
+        const loadAddresses = async () => {
+            const token = await AsyncStorage.getItem('userToken');
+            if (token) {
+                dispatch(fetchAddresses(token));
+            }
+        };
+        loadAddresses();
+    }, [dispatch]);
 
     const renderRow = (label, value, textStyle = NewStyles.text10) =>
         <View style={NewStyles.rowWrapper}>
@@ -36,6 +47,7 @@ export default function Address({ step, data, navigation }) {
     const deleteAddress = async () => {
         setLoading(true);
         try {
+            const token = await AsyncStorage.getItem('userToken');
             const response = await axios.delete(`${uri}/addresses/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 200) {
                 dispatch(fetchAddresses(token));
@@ -49,6 +61,14 @@ export default function Address({ step, data, navigation }) {
         }
     }
 
+    const handleRefresh = async () => {
+        const token = await AsyncStorage.getItem('userToken');
+        if (token) {
+            dispatch(fetchAddresses(token));
+        }
+        setRefreshing(false);
+    };
+
     return (
         <View style={NewStyles.seperator1}>
             <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('Add New Address')}>
@@ -58,7 +78,7 @@ export default function Address({ step, data, navigation }) {
             <FlatList
                 style={{ gap: 15 }}
                 showsVerticalScrollIndicator={false}
-                refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
+                refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={handleRefresh} />}
                 data={addresses}
                 keyExtractor={(item) => item?.id?.toString()}
                 renderItem={({ item }) => {

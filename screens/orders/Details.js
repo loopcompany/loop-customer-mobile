@@ -1,7 +1,8 @@
-import { View, Text, Image, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux';
+import { View, Text, Image, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, KeyboardAvoidingView, TextInput } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import * as Linking from "expo-linking";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { imageUri, uri } from '../../services/URL';
@@ -16,10 +17,13 @@ import TechnicianDetailsComponent from '../../components/TechnicianDetailsCompon
 import Button from '../../components/Button';
 import OrderExtraServices from './OrderExtraServices';
 import OrderReviewSection from './OrderReviewSection';
+import OrderReviewRatingSection from './OrderReviewRatingSection';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
 import AccordionHeader from '../../components/AccordionHeader';
+import { fetchUser } from '../../slices/userSlice';
+import { fetchOrders } from '../../slices/orderSlice';
 
 
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
@@ -57,8 +61,8 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 )}
 
                 {data?.status == 1 && renderRow('وضعیت سفارش', data?.started_at ? 'در حال انجام' : data?.arrived_at ? 'تکنسین به محل سفارش رسید' : data?.set_off_at ? 'تکنسین در راه است' : 'جاری', NewStyles.text, NewStyles.text7)}
-                {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'توافقی')}
-                {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ توافقی با تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
+                {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
+                {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                 {data?.extra_price > 0 && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                 {data?.discount_price > 0 && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
                 {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
@@ -148,8 +152,11 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
 
 export default function Details({ route, navigation }) {
 
+    const dispatch = useDispatch();
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
+    const user = useSelector((state) => state?.user?.data)
+
     const [refreshing, setRefreshing] = useState(true)
     const [showDetails, setShowDetails] = useState(false);
     const [showReview, setShowReview] = useState(false);
@@ -162,13 +169,18 @@ export default function Details({ route, navigation }) {
     const [showMorePrices, setShowMorePrices] = useState(false);
     // Payment & receive stages
     const [showPayment, setShowPayment] = useState(false);
+    const [loadingWallet, setLoadingWallet] = useState(false);
+    const [loadingGateway, setLoadingGateway] = useState(false);
     const [showReceive, setShowReceive] = useState(false);
     const [selectedReceiveOption, setSelectedReceiveOption] = useState(null);
     const [showCustomReceive, setShowCustomReceive] = useState(false);
     const [customReceiveText, setCustomReceiveText] = useState('');
+    const [submittingReceive, setSubmittingReceive] = useState(false);
+    const [showReviewRating, setShowReviewRating] = useState(false);
     const [isTechnicianVerified, setIsTechnicianVerified] = useState(0);
     const [verifying, setVerifying] = useState(false);
     const [data, setData] = useState([]);
+    const paymentSubscriptionRef = useRef(null);
 
     // چک کردن وضعیت گزارش بعد از لود شدن داده‌ها
     useEffect(() => {
@@ -176,6 +188,16 @@ export default function Details({ route, navigation }) {
             checkReportStatus();
         }
     }, [orderId, token, refreshing]);
+
+    // Cleanup payment listener on unmount
+    useEffect(() => {
+        return () => {
+            if (paymentSubscriptionRef.current) {
+                paymentSubscriptionRef.current.remove();
+                paymentSubscriptionRef.current = null;
+            }
+        };
+    }, []);
 
     const checkReportStatus = async () => {
         try {
@@ -248,9 +270,153 @@ export default function Details({ route, navigation }) {
             setVerifying(false);
         }
     };
+
+    const handleSubmitReceive = async () => {
+        // بررسی انتخاب گزینه یا ثبت توضیحات
+        if (!selectedReceiveOption && !showCustomReceive) {
+            showToastOrAlert('لطفاً یکی از گزینه‌ها را انتخاب کنید');
+            return;
+        }
+
+        if (showCustomReceive && !customReceiveText.trim()) {
+            showToastOrAlert('لطفاً توضیحات را وارد کنید');
+            return;
+        }
+
+        // تعریف متن‌های مربوط به هر گزینه
+        const optionTexts = {
+            1: 'محصول را با تست سلامت دریافت کردم',
+            2: 'محصول را بدون تست سلامت دریافت کردم',
+            3: 'محصول را تحویل گرفتم اما دارای نواقص فنی می باشد',
+            4: 'محصول پس از تست، به لوپ عودت داده شد',
+            5: 'محصول را طبق درخواست خودم دریافت کردم'
+        };
+
+        const description = showCustomReceive ? customReceiveText.trim() : optionTexts[selectedReceiveOption];
+
+        setSubmittingReceive(true);
+        try {
+            const response = await axios.post(
+                `${uri}/orders/${orderId}/final-description`,
+                { description },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.status == 200) {
+                showToastOrAlert(response?.data?.message || 'توضیحات نهایی با موفقیت ثبت شد');
+                // بروزرسانی داده‌ها
+                setRefreshing(true);
+            }
+        } catch (error) {
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            showToastOrAlert(message);
+        } finally {
+            setSubmittingReceive(false);
+        }
+    };
+
+    const walletPayment = async () => {
+        setLoadingWallet(true);
+        try {
+            const response = await axios.post(
+                `${uri}/wallet/pay-order`,
+                { orderId: orderId },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.status == 200 || response.status == 201) {
+                showToastOrAlert(response?.data?.message || 'پرداخت با موفقیت انجام شد');
+                dispatch(fetchOrders(token));
+                dispatch(fetchUser(token));
+                setRefreshing(true);
+            }
+        } catch (error) {
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            showToastOrAlert(message);
+        } finally {
+            setLoadingWallet(false);
+        }
+    };
+
+    const redirectUrl = Linking.createURL("/?");
+
+    const _addLinkingListener = () => {
+        // Remove existing listener if any
+        if (paymentSubscriptionRef.current) {
+            paymentSubscriptionRef.current.remove();
+        }
+
+        paymentSubscriptionRef.current = Linking.addEventListener("url", ({ url }) => {
+            const { queryParams } = Linking.parse(url);
+            if (queryParams?.status == 'OK') {
+                dispatch(fetchOrders(token));
+                dispatch(fetchUser(token));
+                setRefreshing(true);
+                showToastOrAlert('پرداخت با موفقیت انجام شد.');
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
+            } else if (queryParams?.status == 'NOK') {
+                showToastOrAlert('پرداخت با خطا مواجه شد.');
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
+            }
+            setLoadingGateway(false);
+        });
+    };
+
+    const gatewayPayment = async () => {
+        setLoadingGateway(true);
+        try {
+            const response = await axios.post(
+                `${uri}/orders/gateway-payment`,
+                {
+                    order_id: orderId,
+                    linking_url: redirectUrl
+                },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.status == 200 && response.data?.data?.payment_url) {
+                _addLinkingListener();
+                await Linking.openURL(response.data.data.payment_url);
+            } else {
+                showToastOrAlert('خطا در اتصال به درگاه پرداخت');
+                setLoadingGateway(false);
+            }
+        } catch (error) {
+            const message = error?.response ? (error?.response?.data?.message || 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه!';
+            showToastOrAlert(message);
+            setLoadingGateway(false);
+        } finally {
+            setLoadingGateway(false);
+        }
+    };
+
     useFocusEffect(useCallback(
         () => {
             fetchData();
+            dispatch(fetchUser(token));
         }, [refreshing]
     ));
 
@@ -274,34 +440,25 @@ export default function Details({ route, navigation }) {
 
     if (data.length <= 0) { return <Loader /> }
 
-    if ((data?.status == '3' || data?.status == '4' || data?.status == '5' || data?.status == '6') && !data?.user_cancellation_date) {
-        return (
-            <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container,]}>
-                <ScreenHeaders title={'سفارش لغو شده'} />
-                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 },]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
-                    <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} />
-                </ScrollView>
-            </SafeAreaView >
-        )
-    }
+
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container,]}>
             <ScreenHeaders title={'سفارش جاری'} />
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
 
-                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 },]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
+                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
 
-                    <AccordionHeader
-                        title="جزئیات سفارش"
-                        isActive={true}
-                        isOpen={showDetails}
-                        onPress={() => setShowDetails(!showDetails)}
-                    />
+                        <AccordionHeader
+                            title="جزئیات سفارش"
+                            isActive={true}
+                            isOpen={showDetails}
+                            onPress={() => setShowDetails(!showDetails)}
+                        />
                     {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} />}
 
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
-                        title="بررسی / جایگزین"
+                        title="بررسی / جایگزین / پیش رسید"
                         isActive={(data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
                         isOpen={showReview}
                         onPress={() => {
@@ -315,6 +472,7 @@ export default function Details({ route, navigation }) {
                     {showReview && ((data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) && (
                         <OrderReviewSection
                             data={data}
+                            navigation={navigation}
                             orderId={orderId}
                             onUpdate={() => setRefreshing(true)}
                         />
@@ -358,7 +516,7 @@ export default function Details({ route, navigation }) {
                                 </Text>
                                 }
                                 {(!data?.set_off_at) &&
-                                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، سفارش شما در حال بررسی تکنسین لوپ می باشد. از صبر و شکیبایی شما سپاس گزاریم.</Text>
+                                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، سفارش شما در حال بررسی تکنسین لوپ می‌باشد. از صبر و شکیبایی شما سپاس گزاریم.</Text>
                                 }
                                 {data?.arrived_at && <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
                                     کاربر گرامی، در صورت عدم تطابق مشخصات کاربر تکنسین با اطلاعات ثبت شده، لطفاً به پشتیبانی لوپ اطلاع دهید.
@@ -450,7 +608,7 @@ export default function Details({ route, navigation }) {
                         </>
                     )}
                     {data?.returned_at &&
-                        <View style={{paddingHorizontal:'5%'}}>
+                        <View style={{ paddingHorizontal: '5%' }}>
                             <Button style={{ backgroundColor: themeColor6.bgColor(1) }} title={'محصول با موفقیت عودت داده شد'} />
                         </View>
                     }
@@ -490,27 +648,67 @@ export default function Details({ route, navigation }) {
                                 <Text style={NewStyles.text10}>وضعیت پرداخت: {data?.payment_status == 1 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
                             </View>
 
-                            {data?.payment_status == 0 && (
+                            <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                                <Text style={[NewStyles.title]}>مبلغ قابل پرداخت</Text>
+                                <Text style={[NewStyles.title]}>
+                                    {formatPrice(totalDiscountedPrice)} تومان
+                                </Text>
+                            </View>
+
+                            <View style={NewStyles.rowWrapper}>
+                                <Text style={NewStyles.text}>موجودی کیف پول شما</Text>
+                                <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} تومان</Text>
+                            </View>
+
+                            {data?.payment_status == 0 ? (
                                 <>
-                                    <View style={[NewStyles.row, { gap: 10 }]}> 
+                                    <View style={[NewStyles.row, { gap: 10 }]}>
                                         <View style={{ flex: 1 }}>
-                                            <Button title={'پرداخت آنلاین'} onPress={() => { }} />
+                                            <Button
+                                                title={'کسر هزینه از کیف پول'}
+                                                style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }}
+                                                textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                                loading={loadingWallet}
+                                                onPress={walletPayment}
+                                            />
                                         </View>
                                         <View style={{ flex: 1 }}>
-                                            <Button title={'پرداخت از کیف پول'} onPress={() => { }} />
+                                            <Button
+                                                title={'شارژ کیف پول'}
+                                                textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                                onPress={() => navigation.navigate('Increase')}
+                                                style={{ backgroundColor: themeColor7.bgColor(1) }}
+                                            />
                                         </View>
                                     </View>
-                                    <View style={{ paddingTop: 10 }}>
-                                        <Button title={'شارژ کیف پول'} onPress={() => { }} style={{ backgroundColor: themeColor6.bgColor(1) }} />
+                                    <View style={{ paddingBottom: 10 }}>
+
+
+                                        <Button
+                                            title={'پرداخت آنلاین'}
+                                            style={{ paddingHorizontal: 0 }}
+                                            textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                            loading={loadingGateway}
+                                            onPress={gatewayPayment}
+                                        />
                                     </View>
                                 </>
+                            ) : (
+                                <View style={{ paddingTop: 10 }}>
+                                    <Button
+                                        title={'پرداخت شده'}
+                                        style={{ backgroundColor: themeColor7.bgColor(1) }}
+                                        textStyle={{ color: themeColor4.bgColor(1) }}
+                                        disabled={true}
+                                    />
+                                </View>
                             )}
                         </View>
                     )}
 
                     {/* مرحله دریافت سفارش - فعال بعد از پرداخت */}
                     <AccordionHeader
-                        title={"دریافت سفارش"}
+                        title={"دریافت محصول / سفارش"}
                         isActive={data?.payment_status == 1}
                         isOpen={showReceive}
                         onPress={() => {
@@ -523,31 +721,72 @@ export default function Details({ route, navigation }) {
                     />
                     {showReceive && data?.payment_status == 1 && (
                         <View style={{ paddingHorizontal: '5%', gap: 12 }}>
-                            <Text style={NewStyles.text}>لطفاً یکی از وضعیت‌های دریافت را انتخاب کنید:</Text>
-                            <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 1 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(1); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                <Text style={NewStyles.text10}>محصول را با تست سلامت دریافت کردم</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 2 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(2); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                <Text style={NewStyles.text10}>محصول را بدون تست سلامت دریافت کردم</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 3 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(3); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                <Text style={NewStyles.text10}>محصول را تحویل گرفتم اما دارای نقص فنی می باشد</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.optionBox, NewStyles.border10, showCustomReceive && styles.optionBoxSelected]} onPress={() => { setShowCustomReceive(true); setSelectedReceiveOption(null); }}>
-                                <Text style={NewStyles.text10}>ثبت توضیح</Text>
-                            </TouchableOpacity>
-
-                            {showCustomReceive && (
-                                <View>
-                                    <Text style={NewStyles.text}>توضیحات:</Text>
-                                    <TextInput style={[styles.textInput, NewStyles.border10]} placeholder={'توضیحات خود را وارد کنید...'} value={customReceiveText} onChangeText={setCustomReceiveText} multiline numberOfLines={3} textAlignVertical={'top'} />
+                            {data?.user_final_description ? (
+                                <View style={styles.noticeBox}>
+                                    <Text style={[NewStyles.title10, { marginBottom: 5 }]}>توضیحات ثبت شده:</Text>
+                                    <Text style={NewStyles.text10}>{data?.user_final_description}</Text>
                                 </View>
-                            )}
+                            ) : (
+                                <>
+                                    <Text style={NewStyles.text}>لطفاً یکی از وضعیت‌های دریافت را انتخاب کنید:</Text>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 1 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(1); setShowCustomReceive(false); setCustomReceiveText(''); }}>
+                                        <Text style={NewStyles.text10}>محصول را با تست سلامت دریافت کردم</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 2 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(2); setShowCustomReceive(false); setCustomReceiveText(''); }}>
+                                        <Text style={NewStyles.text10}>محصول را بدون تست سلامت دریافت کردم</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 3 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(3); setShowCustomReceive(false); setCustomReceiveText(''); }}>
+                                        <Text style={NewStyles.text10}>محصول را تحویل گرفتم اما دارای نواقص فنی می باشد</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 4 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(4); setShowCustomReceive(false); setCustomReceiveText(''); }}>
+                                        <Text style={NewStyles.text10}>محصول پس از تست، به لوپ عودت داده شد</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 5 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(5); setShowCustomReceive(false); setCustomReceiveText(''); }}>
+                                        <Text style={NewStyles.text10}>محصول را طبق درخواست خودم دریافت کردم</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.optionBox, NewStyles.border10, showCustomReceive && styles.optionBoxSelected]} onPress={() => { setShowCustomReceive(true); setSelectedReceiveOption(null); }}>
+                                        <Text style={NewStyles.text10}>ثبت توضیح</Text>
+                                    </TouchableOpacity>
 
-                            <View>
-                                <Button title={'ثبت وضعیت دریافت (محلی)'} onPress={() => showToastOrAlert('وضعیت انتخاب شد')} />
-                            </View>
+                                    {showCustomReceive && (
+                                        <View>
+                                            <Text style={NewStyles.text}>توضیحات:</Text>
+                                            <TextInput style={[styles.textInput, NewStyles.border10]} placeholder={'توضیحات خود را وارد کنید...'} value={customReceiveText} onChangeText={setCustomReceiveText} multiline numberOfLines={3} textAlignVertical={'top'} />
+                                        </View>
+                                    )}
+
+                                    <View>
+                                        <Button
+                                            title={'ثبت وضعیت دریافت'}
+                                            onPress={handleSubmitReceive}
+                                            loading={submittingReceive}
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </View>
+                    )}
+
+                    {/* مرحله ثبت نظر - فعال بعد از تکمیل سفارش (status=2 و finished_at) */}
+                    <AccordionHeader
+                        title={"ثبت نظر"}
+                        isActive={data?.status == 2 && data?.finished_at}
+                        isOpen={showReviewRating}
+                        onPress={() => {
+                            if (data?.status == 2 && data?.finished_at) {
+                                setShowReviewRating(!showReviewRating)
+                            } else {
+                                showToastOrAlert('این بخش بعد از تکمیل سفارش فعال می‌شود.')
+                            }
+                        }}
+                    />
+                    {showReviewRating && data?.status == 2 && data?.finished_at && (
+                        <OrderReviewRatingSection
+                            orderId={orderId}
+                            technicianId={data?.technician?.id}
+                            orderStatus={data?.status}
+                            finishedAt={data?.finished_at}
+                        />
                     )}
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -599,5 +838,22 @@ const styles = StyleSheet.create({
         width: '100%',
         ...NewStyles.border10,
         ...NewStyles.center
+    },
+    optionBox: {
+        backgroundColor: themeColor4.bgColor(1),
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+    },
+    optionBoxSelected: {
+        backgroundColor: themeColor1.bgColor(1),
+    },
+    textInput: {
+        backgroundColor: themeColor4.bgColor(1),
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        marginTop: 8,
+        minHeight: 80,
+        fontSize: 14,
+        fontFamily: 'VazirLight',
     }
 })

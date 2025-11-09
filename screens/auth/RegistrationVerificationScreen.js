@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
-  Alert,
 } from 'react-native';
 import {
   CodeField,
@@ -18,6 +17,7 @@ import {
 } from 'react-native-confirmation-code-field';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { showAlert } from '../../helpers/Common';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor10 } from '../../theme/Color';
@@ -170,7 +170,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
   };
 
   const handleEditMobile = () => {
-    Alert.alert(
+    showAlert(
       'ویرایش شماره موبایل',
       'آیا می‌خواهید شماره موبایل را ویرایش کنید؟',
       [

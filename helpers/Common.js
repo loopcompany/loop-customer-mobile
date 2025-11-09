@@ -1,4 +1,4 @@
-import { Dimensions, Platform, ToastAndroid } from "react-native";
+import { Dimensions, Platform, ToastAndroid, Alert } from "react-native";
 import Constants from "expo-constants";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -207,7 +207,7 @@ export const generateUniqueCode = () => {
 export const handleError = (error, t) => {
 
   try {
-    if (error?.response?.status == 409) {
+    if (error?.response?.status == 409 || error?.response?.status == 400) {
       const message = error?.response?.data?.message || "خطایی رخ داد";
       showToastOrAlert(`${t(message)}`);
     } else if (error?.response?.status == 401) {
@@ -383,7 +383,7 @@ export const getOrderStatusText = (status) => {
     1: 'در حال انجام',
     2: 'انجام شده',
     3: 'لغو شده توسط کاربر',
-    4: 'لغو شده توسط متخصص',
+    4: 'لغو شده توسط تکنسین',
     5: 'لغو شده توسط ادمین',
     6: 'منقضی شده'
   };
@@ -396,7 +396,7 @@ export const getOrderStatusColor = (status) => {
     1: '#2196F3', // آبی - در حال انجام
     2: '#4CAF50', // سبز - انجام شده
     3: '#F44336', // قرمز - لغو شده توسط کاربر
-    4: '#F44336', // قرمز - لغو شده توسط متخصص
+    4: '#F44336', // قرمز - لغو شده توسط تکنسین
     5: '#F44336', // قرمز - لغو شده توسط ادمین
     6: '#9E9E9E'  // خاکستری - منقضی شده
   };
@@ -496,3 +496,79 @@ export function jalaliToGregorian(jDate) {
     return '';
   }
 }
+
+/**
+ * Cross-platform Alert function
+ * Works with both web and native platforms
+ * 
+ * @param {string} title - Alert title
+ * @param {string} message - Alert message
+ * @param {Array} buttons - Array of button objects (optional)
+ * 
+ * @example
+ * // Simple alert
+ * showAlert('خطا', 'لطفا فیلدها را پر کنید');
+ * 
+ * // Confirmation dialog
+ * showAlert('حذف', 'آیا مطمئن هستید؟', [
+ *   { text: 'انصراف', style: 'cancel' },
+ *   { text: 'حذف', style: 'destructive', onPress: () => deleteItem() }
+ * ]);
+ */
+export const showAlert = (title, message, buttons = []) => {
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined') {
+      console.warn('showAlert called on web but window is undefined');
+      return;
+    }
+
+    if (buttons && buttons.length > 0) {
+      // For confirmation dialogs with buttons
+      const confirmMessage = title ? `${title}\n\n${message}` : message;
+      const confirmed = window.confirm(confirmMessage);
+      
+      if (confirmed) {
+        // Find and execute the positive/destructive button
+        const positiveButton = buttons.find(btn => 
+          btn.style === 'destructive' || 
+          btn.style === 'default' ||
+          btn.text?.includes('بله') || 
+          btn.text?.includes('تایید') || 
+          btn.text?.includes('خروج') ||
+          btn.text?.includes('حذف') ||
+          btn.text?.includes('ارسال') ||
+          btn.text?.includes('ذخیره') ||
+          btn.text?.includes('OK')
+        ) || buttons[buttons.length - 1]; // Default to last button
+        
+        if (positiveButton && positiveButton.onPress) {
+          positiveButton.onPress();
+        }
+      } else {
+        // Find and execute the cancel button
+        const cancelButton = buttons.find(btn => 
+          btn.style === 'cancel' || 
+          btn.text?.includes('انصراف') || 
+          btn.text?.includes('خیر') ||
+          btn.text?.includes('Cancel')
+        );
+        
+        if (cancelButton && cancelButton.onPress) {
+          cancelButton.onPress();
+        }
+      }
+    } else {
+      // Simple alert without buttons
+      const alertMessage = title ? `${title}\n\n${message}` : message;
+      window.alert(alertMessage);
+    }
+  } else {
+    // Native platform (iOS/Android)
+    if (!buttons || buttons.length === 0) {
+      // Add default "OK" button for simple alerts
+      Alert.alert(title, message, [{ text: 'باشه', style: 'default' }]);
+    } else {
+      Alert.alert(title, message, buttons);
+    }
+  }
+};

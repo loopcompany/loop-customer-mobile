@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import axios from 'axios';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
+import { showAlert } from '../../helpers/Common';
 
 const OrganizationForgotPassword = ({ navigation }) => {
   const [organizationCode, setOrganizationCode] = useState('');
@@ -72,7 +72,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
       console.log('✅ Response:', response.data);
 
       if (response.data.status === 'success') {
-        Alert.alert(
+        showAlert(
           'موفق',
           response.data.message || 'کد بازیابی رمز عبور به شماره موبایل شما ارسال شد.',
           [
@@ -109,7 +109,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
         errorMessage = error.message || 'خطای نامشخص رخ داد';
       }
 
-      Alert.alert('خطا', errorMessage);
+      showAlert('خطا', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -351,3 +351,4 @@ const OrganizationForgotPassword = ({ navigation }) => {
 };
 
 export default OrganizationForgotPassword;
+

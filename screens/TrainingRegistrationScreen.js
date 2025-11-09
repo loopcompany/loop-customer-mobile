@@ -1,82 +1,240 @@
 // screens/TrainingRegistrationScreen.js
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeaders from "../components/ScreenHeaders";
-import { themeColor14 } from "../theme/Color";
+import { themeColor14, themeColor1, themeColor4 } from "../theme/Color";
 import Footer from "./Footer";
 import NewStyles from "../styles/NewStyles";
+import { educationRegistrationAPI } from "../services/Api";
+import { showToastOrAlert } from "../helpers/Common";
+import Button from "../components/Button";
 
 export default function TrainingRegistrationScreen({ navigation }) {
+  const [form, setForm] = useState({
+    telephone: '',
+    phone: '',
+    address: '',
+    description: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+  };
+
+  const validatePhone = (phone) => {
+    // شماره موبایل باید 11 رقمی و با 09 شروع شود
+    const phoneRegex = /^09[0-9]{9}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateTelephone = (telephone) => {
+    // شماره تلفن ثابت باید 11 رقمی و با 0 شروع شود
+    const telephoneRegex = /^0[0-9]{10}$/;
+    return telephoneRegex.test(telephone);
+  };
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!form.telephone.trim()) {
+      showToastOrAlert('لطفاً شماره تلفن ثابت را وارد کنید');
+      return;
+    }
+
+    if (!validateTelephone(form.telephone)) {
+      showToastOrAlert('فرمت شماره تلفن صحیح نیست. باید 11 رقم و با 0 شروع شود (مثال: 02112345678)');
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      showToastOrAlert('لطفاً شماره موبایل را وارد کنید');
+      return;
+    }
+
+    if (!validatePhone(form.phone)) {
+      showToastOrAlert('فرمت شماره موبایل صحیح نیست. باید 11 رقم و با 09 شروع شود (مثال: 09123456789)');
+      return;
+    }
+
+    if (!form.address.trim()) {
+      showToastOrAlert('لطفاً آدرس را وارد کنید');
+      return;
+    }
+
+    if (form.address.length > 500) {
+      showToastOrAlert('آدرس نباید بیشتر از 500 کاراکتر باشد');
+      return;
+    }
+
+    if (form.description.length > 1000) {
+      showToastOrAlert('توضیحات نباید بیشتر از 1000 کاراکتر باشد');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        telephone: form.telephone.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        description: form.description.trim() || undefined, // اختیاری
+      };
+
+      console.log('Submitting education registration with payload:', payload);
+      const response = await educationRegistrationAPI.create(payload);
+
+      if (response.success) {
+        showToastOrAlert(response.message || 'درخواست ثبت‌نام آموزشی با موفقیت ثبت شد');
+
+        // Reset form
+        setForm({
+          telephone: '',
+          phone: '',
+          address: '',
+          description: '',
+        });
+
+        // Optional: Navigate back or to success screen
+        // navigation.goBack();
+      }
+    } catch (error) {
+      console.error('Error submitting education registration:', error);
+      const resp = error.response?.data;
+      let errorMessage = 'خطا در ثبت درخواست';
+
+      if (resp) {
+        if (resp.message) {
+          errorMessage = resp.message;
+        } else if (resp.error_code) {
+          errorMessage = resp.error_code;
+        } else if (resp.errors && typeof resp.errors === 'object') {
+          // نمایش اولین خطای validation
+          const firstKey = Object.keys(resp.errors)[0];
+          const errs = resp.errors[firstKey];
+          if (Array.isArray(errs)) {
+            errorMessage = errs.join('\n');
+          } else {
+            errorMessage = String(errs);
+          }
+        }
+        console.debug('Education registration API response status:', error.response?.status, resp);
+      } else {
+        errorMessage = error.message || errorMessage;
+      }
+
+      showToastOrAlert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'additive' }}>
+    <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>
       <ScreenHeaders 
         title="ثبت نام دوره‌های آموزشی" 
         onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
       />
-      <View style={styles.contentBox}>
-        <Text
-          style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-        >
-          مراحل ثبت و توضیحات{"\n"}
-          فقط سایت{"\n"}
-          پر کردن اطلاعات ضروری{"\n"}
-          شماره ثابت ۰۲۱{"\n"}
-          شماره همراه{"\n"}
-          آدرس{"\n"}
-          همه موارد ضروری
-        </Text>
-      </View>
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={[NewStyles.wrapper]}>
+          
+         
+          <View style={styles.infoBox}>
+            <Text style={[NewStyles.text10, { lineHeight: 24 }]}>
+              📌 مراحل ثبت‌نام:{'\n'}
+              • شماره تلفن ثابت (02112345678){'\n'}
+              • شماره موبایل (09123456789){'\n'}
+              • آدرس کامل محل سکونت یا کار{'\n'}
+              • توضیحات و علایق آموزشی (اختیاری)
+            </Text>
+          </View>
 
-      
+          <TextInput
+            placeholder="شماره تلفن ثابت (مثال: 02112345678)"
+            value={form.telephone}
+            onChangeText={(t) => handleChange('telephone', t)}
+            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
+            placeholderTextColor="#999"
+            keyboardType="phone-pad"
+            maxLength={11}
+          />
+
+          <TextInput
+            placeholder="شماره موبایل (مثال: 09123456789)"
+            value={form.phone}
+            onChangeText={(t) => handleChange('phone', t)}
+            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
+            placeholderTextColor="#999"
+            keyboardType="phone-pad"
+            maxLength={11}
+          />
+
+          <TextInput
+            placeholder="آدرس کامل (حداکثر 500 کاراکتر)"
+            value={form.address}
+            onChangeText={(t) => handleChange('address', t)}
+            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 100, textAlignVertical: 'top' }]}
+            placeholderTextColor="#999"
+            multiline
+            maxLength={500}
+          />
+
+          <TextInput
+            placeholder="توضیحات و علایق آموزشی (اختیاری - حداکثر 1000 کاراکتر)"
+            value={form.description}
+            onChangeText={(t) => handleChange('description', t)}
+            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}
+            placeholderTextColor="#999"
+            multiline
+            maxLength={1000}
+          />
+
+          <View style={styles.spacer} />
+
+         
+
+          <Button title={'ثبت درخواست'} onPress={handleSubmit} loading={isSubmitting} />
+
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: themeColor14.bgColor(1),
-  },
-  contentBox: {
-    // marginTop: 40,
-    padding: 20,
-    flex: 1,
-
-  },
-  title: {
-    backgroundColor: "#a6d7f7",
-    color: "#003366",
-    fontWeight: "bold",
-    fontSize: 18,
-    padding: 10,
-    textAlign: "center",
-    borderRadius: 10,
-  },
-  description: {
-    backgroundColor: "#fff",
-    marginTop: 20,
+  infoBox: {
+    backgroundColor: themeColor4.bgColor(0.5),
     padding: 15,
     borderRadius: 10,
-    textAlign: "right",
-    fontSize: 14,
-    color: "#333",
+    marginBottom: 20,
   },
-  footer: {
-    flexDirection: "row-reverse",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
+  spacer: {
+    height: 20,
   },
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
+  submitBtn: {
+    backgroundColor: themeColor1.bgColor(1),
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
   },
-  footerText: {
-    fontWeight: "bold",
-    color: "#003366",
+  submitBtnDisabled: {
+    backgroundColor: themeColor4.bgColor(0.5),
   },
 });

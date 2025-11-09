@@ -121,7 +121,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
             
                 </View>
                 <View style={{paddingHorizontal:'5%'}}>
-                    <Button title={'فاکتور سفارش شما'} onPress={()=>{navigation.navigate('Invoice', { orderId: orderId })}} />
+                    <Button title={'پیش رسید'} onPress={()=>{navigation.navigate('Invoice', { orderId: orderId })}} />
                 </View>
             </View>
         </View>

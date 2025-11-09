@@ -165,7 +165,10 @@ export class TokenManager {
         this.SESSION_USER_DATA_KEY, // Clear session user data
         'autoLoginEnabled',         // Clear auto-login flag
         'savedPhone',              // Clear saved phone
-        'rememberLogin'            // Clear remember login flag
+        'rememberLogin',           // Clear remember login flag
+        'accountType',             // Clear account type (organization/individual)
+        'organizationData',        // Clear organization data
+        'organizationCode'         // Clear organization code
       ]);
       console.log('🗑️ All authentication data and auto-login settings cleared');
       return true;

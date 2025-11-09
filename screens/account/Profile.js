@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,19 +70,31 @@ export default function Profile() {
     // Check user type from AsyncStorage or Redux
     const checkUserType = async () => {
         try {
+            console.log('🔍 [Profile] شروع بررسی نوع کاربر...');
+            
             // First check Redux
+            console.log('📦 [Profile] بررسی Redux - userType:', userTypeFromRedux);
             if (userTypeFromRedux) {
+                console.log('✅ [Profile] نوع کاربر از Redux:', userTypeFromRedux);
                 setUserType(userTypeFromRedux);
                 setCheckingUserType(false);
                 return;
             }
             
             // If not in Redux, check AsyncStorage
+            console.log('💾 [Profile] بررسی AsyncStorage...');
             const accountType = await AsyncStorage.getItem('accountType');
+            console.log('💾 [Profile] accountType از AsyncStorage:', accountType);
+            
+            const userToken = await AsyncStorage.getItem('userToken');
+            console.log('🔑 [Profile] userToken موجود:', userToken ? 'بله' : 'خیر');
+            
             setUserType(accountType);
             setCheckingUserType(false);
+            
+            console.log('✅ [Profile] نوع کاربر نهایی تنظیم شد:', accountType);
         } catch (error) {
-            console.error('Error checking user type:', error);
+            console.error('❌ [Profile] خطا در بررسی نوع کاربر:', error);
             setCheckingUserType(false);
         }
     };
@@ -334,6 +346,7 @@ export default function Profile() {
 
     // Show loading while checking user type
     if (checkingUserType) {
+        console.log('⏳ [Profile] در حال بررسی نوع کاربر...');
         return (
             <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
                 <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
@@ -344,10 +357,12 @@ export default function Profile() {
 
     // Show OrganizationProfile for organization users
     if (userType === 'organization') {
+        console.log('🏢 [Profile] نمایش پروفایل سازمانی');
         return <OrganizationProfile />;
     }
 
     // Show individual user profile
+    console.log('👤 [Profile] نمایش پروفایل فردی - userType:', userType);
     return (
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
@@ -363,16 +378,15 @@ export default function Profile() {
                     <View style={{ gap: 10 }}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="نام و نام خانوادگی *"
-                            value={`${profileData.name} ${profileData.last_name}`.trim()}
-                            onChangeText={(text) => {
-                                const parts = text.split(' ');
-                                setProfileData(prev => ({
-                                    ...prev,
-                                    name: parts[0] || '',
-                                    last_name: parts.slice(1).join(' ') || ''
-                                }));
-                            }}
+                            placeholder="نام *"
+                            value={profileData.name}
+                            onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
+                        />
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
+                            placeholder="نام خانوادگی *"
+                            value={profileData.last_name}
+                            onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
@@ -442,6 +456,7 @@ export default function Profile() {
                                 style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
                                 placeholder="منطقه"
                                 value={profileData.region}
+                                keyboardType='number-pad'
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
                             />
                         </View>

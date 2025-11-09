@@ -185,7 +185,7 @@ export default function FeedbackSurveyScreen() {
             </View>
             
             <View style={styles.resultRow}>
-              <Text style={styles.resultItemLabel}>امتیاز متخصص:</Text>
+              <Text style={styles.resultItemLabel}>امتیاز تکنسین:</Text>
               <Text style={styles.resultItemValue}>{alreadyPoll.tech_rate}</Text>
             </View>
             

@@ -25,9 +25,9 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
         }
     };
     return (
-        <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '90%', alignSelf: 'center', paddingVertical: 10, marginBottom:10 }, NewStyles.border10,]}>
+        <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '90%', alignSelf: 'center', paddingVertical: 10, marginBottom: 10 }, NewStyles.border10,]}>
             <View style={NewStyles.center}>
-                <Image source={{ uri: `${imageUri}/${data?.technician?.profile_photo_path}` }} style={[styles.profileImage, NewStyles.center, NewStyles.border100]} contentFit="cover" />
+                {data?.technician?.profile_photo_path ? <Image source={{ uri: `${imageUri}/${data?.technician?.profile_photo_path}` }} style={[styles.profileImage, NewStyles.center, NewStyles.border100]} contentFit="cover" /> : <View style={[styles.profileImage, NewStyles.border100, NewStyles.center]}><Text style={styles.profileImageThumbnail}>{data?.technician?.name?.[0]}</Text></View>}
                 <Text style={NewStyles.title10}>{data?.technician?.name}</Text>
                 <Text style={NewStyles.text10}>{data?.technician?.technician_type}</Text>
             </View>
@@ -43,19 +43,24 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
 
             </View>
             <View style={[{ paddingHorizontal: '10%' }]}>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { Linking.openURL(`tel:${data?.technician?.phone}`) }}>
+                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => {
+                    if(data?.status==0 || data?.status==1){
+                         Linking.openURL(`tel:${data?.technician?.phone}`)
+                    }else{
+                        showToastOrAlert('به علت لغو یا اتمام سفارش امکان تماس با تکنسین وجود ندارد.')
+                    }
+                 }}>
                     <Ionicons name="call-outline" size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>تماس با تکنسین</Text>
                 </Pressable>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { navigation.navigate('Chat Room', { technicianId: data?.technician?.id }) }}>
+                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { navigation.navigate('ChatRoom', { technicianId: data?.technician?.id }) }}>
                     <Ionicons name="chatbubble-ellipses-outline" size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>پیام به تکنسین</Text>
-                    {(data?.unread > 0) && <Text style={[NewStyles.text4, styles.chatdataBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread}</Text>}
+                    {(data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
                 </Pressable>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare()}}>
+                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>ارسال به دوستان</Text>
-                    {(data?.unread > 0) && <Text style={[NewStyles.text4, styles.chatdataBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread}</Text>}
                 </Pressable>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
@@ -83,7 +88,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                             <Ionicons name="close-circle" size={30} color={themeColor0.bgColor(1)} />
                         </TouchableOpacity>
 
-                        <Text style={[NewStyles.title, { marginBottom: 20 }]}>کد QR معرفی متخصص</Text>
+                        <Text style={[NewStyles.title, { marginBottom: 20 }]}>کد QR معرفی تکنسین</Text>
 
                         <View style={styles.qrWrapper}>
                             <QRCode
@@ -95,7 +100,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                         </View>
 
                         <Text style={[NewStyles.text10, { marginTop: 20, textAlign: 'center' }]}>
-                            برای مشاهده اطلاعات بیشتر متخصص
+                            برای مشاهده اطلاعات بیشتر تکنسین
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -112,6 +117,18 @@ const styles = StyleSheet.create({
         height: 60,
         aspectRatio: 1,
         backgroundColor: themeColor5.bgColor(1),
+    },
+    profileImageThumbnail: {
+        fontSize: 20,
+        fontFamily: 'VazirBold',
+        color: themeColor0.bgColor(1),
+    },
+    chatItemBadge: {
+        width: 20,
+        height: 20,
+        backgroundColor: themeColor0.bgColor(0.5),
+        borderRadius: 100,
+        textAlign: 'center'
     },
     modalOverlay: {
         flex: 1,

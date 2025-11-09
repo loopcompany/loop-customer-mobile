@@ -272,7 +272,7 @@ export const userAPI = {
       const response = await apiClient.put(API_ENDPOINTS.USER.UPDATE_PROFILE, cleanData);
       return response.data;
     } catch (error) {
-      console.error('Update profile API error:', error);
+      console.log('Update profile API error:', error);
       throw error;
     }
   },
@@ -284,6 +284,191 @@ export const userAPI = {
         password: passwordData.newPassword,
         current_password: passwordData.currentPassword
       });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Order endpoints
+export const orderAPI = {
+  // Get orders summary
+  getOrdersSummary: async () => {
+    try {
+      const response = await apiClient.get('/orders/summary');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Fault Report endpoints
+export const faultReportAPI = {
+  // Submit a new fault report
+  create: async (data) => {
+    try {
+      const response = await apiClient.post('/fault-reports', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get all fault reports for the user
+  getAll: async () => {
+    try {
+      const response = await apiClient.get('/fault-reports');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get details of a specific fault report
+  getById: async (id) => {
+    try {
+      const response = await apiClient.get(`/fault-reports/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Education Registration endpoints
+export const educationRegistrationAPI = {
+  // Create new education registration
+  create: async (data) => {
+    try {
+      const response = await apiClient.post('/education-registerations', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get all education registrations for the user
+  getAll: async () => {
+    try {
+      const response = await apiClient.get('/education-registerations');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get details of a specific education registration
+  getById: async (id) => {
+    try {
+      const response = await apiClient.get(`/education-registerations/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Address endpoints
+export const addressAPI = {
+  // Get all user addresses
+  getAll: async () => {
+    try {
+      const response = await apiClient.get('/addresses');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get address by ID
+  getById: async (id) => {
+    try {
+      const response = await apiClient.get(`/addresses/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Create new address
+  create: async (data) => {
+    try {
+      const response = await apiClient.post('/addresses', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Update address
+  update: async (id, data) => {
+    try {
+      const response = await apiClient.put(`/addresses/${id}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Delete address
+  delete: async (id) => {
+    try {
+      const response = await apiClient.delete(`/addresses/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Notes API
+export const notesAPI = {
+  // Get all user notes
+  getAll: async () => {
+    try {
+      const response = await apiClient.get('/notes');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get note by ID
+  getById: async (id) => {
+    try {
+      const response = await apiClient.get(`/notes/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Create new note
+  create: async (data) => {
+    try {
+      const response = await apiClient.post('/notes', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update note
+  update: async (id, data) => {
+    try {
+      const response = await apiClient.put(`/notes/${id}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete note
+  delete: async (id) => {
+    try {
+      const response = await apiClient.delete(`/notes/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -317,6 +502,16 @@ export const infoAPI = {
   getPrivacy: async () => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.INFO.PRIVACY);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get Warranty Information
+  getWarranty: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.INFO.WARRANTY);
       return response.data;
     } catch (error) {
       throw error;

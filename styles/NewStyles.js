@@ -40,7 +40,16 @@ const NewStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
+  spacing: {
+    paddingVertical: '5%',
+    paddingHorizontal: '5%',
+  },
+  strip: {
+    minHeight: 50,
+    width: '100%',
+    marginVertical: 10,
+    backgroundColor: themeColor0.bgColor(0.5),
+  },
   seperator: {
     paddingBottom: '5%',
     paddingHorizontal: '5%',
@@ -86,7 +95,7 @@ const NewStyles = StyleSheet.create({
   nav: {
     gap: 50,
     paddingHorizontal: '5%',
-    backgroundColor: themeColor4.bgColor(1)
+    backgroundColor: themeColor4.bgColor(0)
   },
   categoriesWrapper: {
     justifyContent: "flex-start",
@@ -307,6 +316,7 @@ const NewStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     width: "100%",
+    maxWidth: 400,
   },
 
   profileImage: {

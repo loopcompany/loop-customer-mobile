@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, Pressable, ToastAndroid, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import React, { useState } from 'react';
-import MapView from 'react-native-maps';
+import MapView from '../../components/MapView';
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useDispatch, useSelector } from "react-redux";
+import { showAlert } from '../../helpers/Common';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -22,7 +24,6 @@ export default function Map({ route, navigation }) {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
-    const token = useSelector(state => state.auth?.token);
     const user = useSelector(state => state.user?.data);
     const address = useSelector(state => state?.address);
 
@@ -31,7 +32,7 @@ export default function Map({ route, navigation }) {
     const getLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-            Platform.OS === 'android' ? ToastAndroid.show('شما دسترسی لوپ به لوکیشن خود را بسته‌اید!', ToastAndroid.SHORT) : alert('شما دسترسی لوپ به لوکیشن خود را بسته‌اید!')
+            showAlert('خطا', 'شما دسترسی لوپ به لوکیشن خود را بسته‌اید!');
         } else {
             try {
                 const location = await Location.getCurrentPositionAsync();
@@ -44,7 +45,7 @@ export default function Map({ route, navigation }) {
                     })
                 }
             } catch (e) {
-                Platform.OS === 'android' ? ToastAndroid.show('برای دسترسی به موقعیت فعلی، باید لوکیشن خود را روشن کنید.', ToastAndroid.SHORT) : alert('برای دسترسی به موقعیت فعلی، باید لوکیشن خود را روشن کنید.')
+                showAlert('خطا', 'برای دسترسی به موقعیت فعلی، باید لوکیشن خود را روشن کنید.');
                 console.log('Error while trying to get location: ', e);
             }
         }
@@ -53,11 +54,15 @@ export default function Map({ route, navigation }) {
     const submitAddress = async () => {
         setLoading(true);
         try {
+            // دریافت توکن از AsyncStorage
+            const token = await AsyncStorage.getItem('userToken');
+            
             console.log('Token:', token);
             console.log('Address data:', address);
             
             if (!token) {
                 showToastOrAlert('لطفا ابتدا وارد شوید');
+                setLoading(false);
                 return;
             }
             

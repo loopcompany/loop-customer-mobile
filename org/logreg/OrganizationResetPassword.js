@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +14,7 @@ import axios from 'axios';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
+import { showAlert } from '../../helpers/Common';
 
 const OrganizationResetPassword = ({ route, navigation }) => {
   const { organizationCode, phone } = route.params;
@@ -141,7 +141,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
       console.log('✅ Password reset response:', response.data);
 
       if (response.data.status === 'success') {
-        Alert.alert(
+        showAlert(
           'موفق',
           'رمز عبور با موفقیت تغییر یافت. اکنون می‌توانید با رمز جدید وارد شوید.',
           [
@@ -174,7 +174,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
         errorMessage = error.message || 'خطای نامشخص رخ داد';
       }
 
-      Alert.alert('خطا', errorMessage);
+      showAlert('خطا', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -182,7 +182,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
   const handleResendCode = async () => {
     if (timer > 0) {
-      Alert.alert('توجه', `لطفا ${formatTime(timer)} صبر کنید`);
+      showAlert('توجه', `لطفا ${formatTime(timer)} صبر کنید`);
       return;
     }
 
@@ -205,14 +205,14 @@ const OrganizationResetPassword = ({ route, navigation }) => {
       );
 
       if (response.data.status === 'success') {
-        Alert.alert('موفق', 'کد تایید مجددا ارسال شد');
+        showAlert('موفق', 'کد تایید مجددا ارسال شد');
         setTimer(120);
         setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
       console.error('❌ Resend code error:', error);
-      Alert.alert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
+      showAlert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
     } finally {
       setResendLoading(false);
     }
@@ -582,3 +582,4 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 };
 
 export default OrganizationResetPassword;
+

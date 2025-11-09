@@ -1,55 +1,21 @@
-import {
-  View,
-  Text,
-  Modal,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  TextInput,
-  Platform,
-  ToastAndroid,
-  TouchableOpacity,
-} from "react-native";
+import { Platform } from "react-native";
 import React, { useEffect, useState } from "react";
-import {
-  CodeField,
-  Cursor,
-  useBlurOnFulfill,
-  useClearByFocusCell,
-} from "react-native-confirmation-code-field";
+import { useBlurOnFulfill, useClearByFocusCell, } from "react-native-confirmation-code-field";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
-
 import { uri } from "../../services/URL";
 import TokenManager from "../../services/TokenManager";
 import { fetchUser } from "../../slices/userSlice";
-
-import {
-  themeColor0,
-  themeColor1,
-  themeColor12,
-  themeColor3,
-  themeColor4,
-  themeColor5,
-} from "../../theme/Color";
-import Button from "../../components/Button";
-import TransparentButton from "../../components/TransparentButton";
 import { setToken } from "../../slices/authSlice";
 import { useTranslation } from "react-i18next";
-import NewStyles from "../../styles/NewStyles";
+import { showAlert } from "../../helpers/Common";
 import { useNavigation } from "@react-navigation/native";
-import {
-  formatTime,
-  persianAppName,
-  showToastOrAlert,
-} from "../../helpers/Common";
 
 export default function LoginModal({ loginModal, setLoginModal }) {
   const navigation = useNavigation();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [loginWithPassword, setLoginWithPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [value, setValue] = useState("");
   const [password, setPassword] = useState("");
@@ -58,18 +24,7 @@ export default function LoginModal({ loginModal, setLoginModal }) {
   const [timer, setTimer] = useState(120);
 
   const ref = useBlurOnFulfill({ value, cellCount: 6 });
-  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
-    value,
-    setValue,
-  });
 
-  const validatePhone = () => {
-    if (phone.match(/^09\d{9}$/)) {
-      return true;
-    } else {
-      return false;
-    }
-  };
   useEffect(() => {
     if (code) {
       if (timer === 0) return;
@@ -81,6 +36,7 @@ export default function LoginModal({ loginModal, setLoginModal }) {
       return () => clearInterval(intervalId);
     }
   }, [timer, code]);
+  
   const validatePassword = () => {
     const pattern =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
@@ -111,9 +67,7 @@ export default function LoginModal({ loginModal, setLoginModal }) {
         );
       }
     } catch (error) {
-      Platform.OS === "android"
-        ? ToastAndroid.show(`${t("Something went wrong!")}`, ToastAndroid.SHORT)
-        : alert(`${t("Something went wrong!")}`);
+      showAlert('خطا', `${t("Something went wrong!")}`);
     } finally {
       setLoading(false);
     }
@@ -128,10 +82,10 @@ export default function LoginModal({ loginModal, setLoginModal }) {
       if (response?.data?.success == "success") {
         const userId = response?.data?.userId;
         const userToken = response?.data?.token?.replace('"', "");
-        
+
         // Use TokenManager for consistent token storage
         await TokenManager.saveAuthData(userToken, { id: userId });
-        
+
         dispatch(setToken(userToken));
         dispatch(fetchUser(userToken));
         setPhone("");
@@ -146,9 +100,7 @@ export default function LoginModal({ loginModal, setLoginModal }) {
     } catch (error) {
       console.log(error);
 
-      Platform.OS === "android"
-        ? ToastAndroid.show(`${t("Something went wrong!")}`, ToastAndroid.SHORT)
-        : alert(`${t("Something went wrong!")}`);
+      showAlert('خطا', `${t("Something went wrong!")}`);
     } finally {
       setLoading(false);
     }
@@ -162,10 +114,10 @@ export default function LoginModal({ loginModal, setLoginModal }) {
       if (response?.data?.success == "success") {
         const userId = response?.data?.userId;
         const userToken = response?.data?.token?.replace('"', "");
-        
+
         // Use TokenManager for consistent token storage
         await TokenManager.saveAuthData(userToken, { id: userId });
-        
+
         dispatch(fetchUser(userToken));
         dispatch(setToken(userToken));
         setPhone("");
@@ -178,12 +130,11 @@ export default function LoginModal({ loginModal, setLoginModal }) {
         setError(`${t("The entered password is not correct!")}`);
       }
     } catch (error) {
-      Platform.OS === "android"
-        ? ToastAndroid.show(`${t("Something went wrong!")}`, ToastAndroid.SHORT)
-        : alert(`${t("Something went wrong!")}`);
+      showAlert('خطا', `${t("Something went wrong!")}`);
     } finally {
       setLoading(false);
     }
   };
-  
+
 }
+

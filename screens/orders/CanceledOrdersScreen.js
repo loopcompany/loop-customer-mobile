@@ -1,65 +1,59 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
+import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useEffect, useState } from 'react';
+import { fetchOrders } from '../../slices/ordersSlice';
+import { useFocusEffect } from '@react-navigation/native';
+import OrderItem from '../../components/OrderItem';
 
-export default function CanceledOrdersScreen() {
-  const canceledOrders = [
-    {
-      id: 1,
-      date: '1403/04/07',
-      code: '211-001',
-      model: 'K555L',
-      device: 'ASUS',
-      price: '۷۵۰۰۰۰۰',
-      canceledDate: '1403/04/10',
-    },
-    {
-      id: 2,
-      date: '1403/04/01',
-      code: '211-002',
-      model: 'ThinkPad',
-      device: 'Lenovo',
-      price: '۸۵۰۰۰۰۰',
-      canceledDate: '1403/04/05',
-    },
-  ];
+export default function CanceledOrdersScreen({ navigation }) {
+  const dispatch = useDispatch();
+  const orders = useSelector(state => state.orders?.data);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchOrders());
+  }, [dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchOrders());
+    }, [dispatch])
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await dispatch(fetchOrders());
+    setRefreshing(false);
+  };
 
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={'لغو شده ها'} />
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <Text style={[NewStyles.text10, { textAlign: 'center' }]}>لغو شده</Text>
-        </View>
 
-        {canceledOrders.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Text style={[NewStyles.text10]}>
-              تاریخ ثبت سفارش: <Text style={styles.value}>{item.date}</Text>
-            </Text>
-            <Text style={[NewStyles.text10]}>
-              کد پیگیری: <Text style={[NewStyles.text10]}>{item.code}</Text>
-            </Text>
-            <Text style={[NewStyles.text10]}>
-              نام دستگاه: <Text style={[NewStyles.text10]}>{item.device}</Text>
-            </Text>
-            <Text style={[NewStyles.text10]}>
-              مدل دستگاه: <Text style={[NewStyles.text10]}>{item.model}</Text>
-            </Text>
-            <Text style={[NewStyles.text10]}>
-              مبلغ پرداختی: <Text style={[NewStyles.text10]}>{item.price} ریال</Text>
-            </Text>
-            <Text style={[NewStyles.text10]}>
-              تاریخ لغو: <Text style={[NewStyles.text10]}>{item.canceledDate}</Text>
-            </Text>
-
-            <TouchableOpacity style={styles.viewBtn}>
-              <Text style={[NewStyles.text10, { textAlign: 'center' }]}>مشاهده سفارش</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        contentContainerStyle={{  paddingVertical: 20, gap: 15 }}
+        data={orders?.filter(order => (order.status == 3 || order.status == 4 || order.status == 5 || order.status == 6))}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponentStyle={{paddingHorizontal: '5%',}}
+        ListHeaderComponent={() => {
+          return (
+            <View style={styles.header}>
+              <Text style={[NewStyles.text10, { textAlign: 'center' }]}>لغو شده</Text>
+            </View>
+          )
+        }}
+        renderItem={({ item }) => {
+          return (
+            <OrderItem item={item} navigation={navigation} />
+          )
+        }}
+      />
 
     </SafeAreaView>
   );

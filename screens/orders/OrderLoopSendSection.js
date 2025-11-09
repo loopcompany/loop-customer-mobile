@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         minHeight: 100,
         fontSize: 14,
-        fontFamily: 'Vazir-Light',
+        fontFamily: 'VazirLight',
         color: themeColor0.bgColor(1),
         textAlign: 'right',
     },

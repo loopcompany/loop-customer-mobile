@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, ImageBackground, FlatList, RefreshControl } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  FlatList,
+  RefreshControl,
+} from "react-native";
 import Folder from "../components/Folder";
 import NewStyles from "../styles/NewStyles";
-import CustomStatusBar from './../components/CustomStatusBar';
-import { handleError, showToastOrAlert } from './../helpers/Common';
+import CustomStatusBar from "./../components/CustomStatusBar";
+import { handleError, showToastOrAlert } from "./../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
-import categoriesAPI from '../services/CategoriesApi';
-import { useDispatch } from 'react-redux';
-import { fetchSteps } from '../slices/stepSlice';
+import categoriesAPI from "../services/CategoriesApi";
+import { useDispatch } from "react-redux";
+import { fetchSteps } from "../slices/stepSlice";
 import { setCategory } from "../slices/categorySlice";
 import Loader from "../components/Loader";
+import { ImageBackground } from "expo-image";
 
 export default function FolderScreen({ navigation }) {
-
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
@@ -24,58 +30,114 @@ export default function FolderScreen({ navigation }) {
       try {
         const res = await categoriesAPI.getCategories();
         // API shape: { success: true, data: [...] }
-        const categories = Array.isArray(res.data) ? res.data : (res.data || res.data?.data || []);
+        const categories = Array.isArray(res.data)
+          ? res.data
+          : res.data || res.data?.data || [];
         if (mounted) setFolders(categories);
       } catch (err) {
-        console.error('Failed to load categories:', err);
-        showToastOrAlert('خطا در دریافت دسته‌ها');
+        console.error("Failed to load categories:", err);
+        showToastOrAlert("خطا در دریافت دسته‌ها");
       } finally {
         setRefreshing(false);
         setLoader(false);
       }
     };
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [refreshing]);
 
   if (loader) {
-    return (
-      <Loader />
-    )
+    return <Loader />;
   }
 
   return (
-    <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
+    <SafeAreaView
+      style={NewStyles.container}
+      edges={{ top: "off", bottom: "off" }}
+    >
       <ImageBackground
+        cachePolicy={"memory-disk"}
         source={require("../assets/moon.jpg")}
-        style={NewStyles.container}
+        style={[NewStyles.container, { backgroundColor: "#020305" }]}
+        contentPosition={"center"}
+        contentFit="contain"
       >
         <CustomStatusBar />
         <View style={{ flex: 1 }}>
           {/* لوگو بالا */}
           <View style={styles.logoWrapper}>
-            <Image source={require("../assets/logo.png")} style={NewStyles.logo} />
+            <Image
+              source={require("../assets/logo.png")}
+              style={NewStyles.logo}
+            />
           </View>
           <FlatList
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                }}
+              />
+            }
             data={folders}
             renderItem={({ item }) => {
-              return <Folder title={item?.title} image={item?.image_path} onPress={() => {
-                if (item?.has_subcategory === 1) {
-                  // اگر دارای زیر دسته است، به SubCategories برو
-                  navigation.push('SubCategories', { categoryId: item.id, categoryTitle: item.title });
-                } else {
-                  // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
-                  dispatch(fetchSteps(item.id));
-                  dispatch(setCategory(item));
-                  navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
-                }
-              }} />;
+              return (
+                <Folder
+                  title={item?.title}
+                  image={item?.image_path}
+                  onPress={async () => {
+                    if (item?.has_subcategory === 1) {
+                      // اگر دارای زیر دسته است، به SubCategories برو
+                      console.log(
+                        "📂 [FolderScreen] باز کردن زیر دسته:",
+                        item.title
+                      );
+                      navigation.push("SubCategories", {
+                        categoryId: item.id,
+                        categoryTitle: item.title,
+                      });
+                    } else {
+                      // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
+                      console.log(
+                        "🎯 [FolderScreen] انتخاب دسته‌بندی نهایی:",
+                        item.title
+                      );
+                      console.log(
+                        "🎯 [FolderScreen] اطلاعات کامل آیتم:",
+                        JSON.stringify(item, null, 2)
+                      );
+                      console.log(
+                        "🎯 [FolderScreen] شروع دریافت مراحل برای ID:",
+                        item.id
+                      );
+
+                      try {
+                        const result = await dispatch(fetchSteps(item.id));
+                        console.log(
+                          "🎯 [FolderScreen] نتیجه dispatch:",
+                          result
+                        );
+                        dispatch(setCategory(item));
+                        navigation.navigate("Steps", {
+                          categoryId: item.id,
+                          categoryTitle: item.title,
+                        });
+                      } catch (error) {
+                        console.log(
+                          "❌ [FolderScreen] خطا در dispatch fetchSteps:",
+                          error
+                        );
+                      }
+                    }
+                  }}
+                />
+              );
             }}
-            keyExtractor={item => item?.id?.toString()}
+            keyExtractor={(item) => item?.id?.toString()}
           />
-
-
         </View>
       </ImageBackground>
     </SafeAreaView>

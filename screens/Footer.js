@@ -32,7 +32,7 @@ export default function Footer() {
       screen: "TrainingRegistrationScreen",
     },
     { id: 11, title: "فکروبکر", screen: "Fekrobekr" },
-    { id: 12, title: "طرح‌های تشویقی", screen: "IncentivePlansScreen" },
+    { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
     { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
     { id: 14, title: "نرخنامه", screen: "RateListScreen" },
     { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },

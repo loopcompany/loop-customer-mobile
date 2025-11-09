@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
-import { setToken, removeToken, setAuthLoading } from '../slices/authSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setToken, removeToken, setAuthLoading, setUserType } from '../slices/authSlice';
 import { fetchUser } from '../slices/userSlice';
 import TokenManager from '../services/TokenManager';
 import CustomStatusBar from '../components/CustomStatusBar';
@@ -32,6 +33,13 @@ export const AuthProvider = ({ children }) => {
         
         // Set token in Redux
         dispatch(setToken(authCheck.token));
+        
+        // Restore userType from AsyncStorage
+        const accountType = await AsyncStorage.getItem('accountType');
+        if (accountType) {
+          dispatch(setUserType(accountType));
+          console.log('✅ User type restored:', accountType);
+        }
         
         // Fetch user data
         const userResult = await dispatch(fetchUser(authCheck.token));

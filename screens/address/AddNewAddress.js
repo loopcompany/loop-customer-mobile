@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor6 } from '../../theme/Color';
+import { themeColor0, themeColor3, themeColor6, themeColor4 } from '../../theme/Color';
 import Button from '../../components/Button';
 import { uri } from '../../services/URL';
 import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile } from '../../slices/addressSlice';
@@ -23,29 +23,129 @@ export default function AddNewAddress({ navigation }) {
             <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
 
                 <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
-                    <Text style={NewStyles.text}>عنوان آدرس خود را وارد کنید. <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='مانند: منزل، شرکت، فروشگاه و ...' placeholderTextColor={themeColor3.bgColor(1)} maxLength={30} value={address?.title} onChangeText={(text) => { dispatch(setTitle(text)) }} />
+                    
+                    <Text style={NewStyles.text}>
+                        نام آدرس منتخب
+                        <Text style={styles.required}>* </Text>
+                    </Text>
+                    <TextInput 
+                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
+                        keyboardType='default' 
+                        placeholder='مانند: منزل، شرکت، فروشگاه و ...' 
+                        placeholderTextColor={themeColor3.bgColor(1)} 
+                        maxLength={30} 
+                        value={address?.title} 
+                        onChangeText={(text) => { dispatch(setTitle(text)) }} 
+                    />
 
-                    <Text style={NewStyles.text}>نام <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='نام' placeholderTextColor={themeColor3.bgColor(1)} value={address?.fname} onChangeText={(text) => { dispatch(setFname(text)) }} />
+                    <Text style={NewStyles.text}>
+                        نام
+                        <Text style={styles.required}>* </Text>
+                    </Text>
+                    <TextInput 
+                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
+                        keyboardType='default' 
+                        placeholder='نام' 
+                        placeholderTextColor={themeColor3.bgColor(1)} 
+                        value={address?.fname || ''} 
+                        onChangeText={(text) => { dispatch(setFname(text)) }} 
+                    />
 
-                    <Text style={NewStyles.text}>نام خانوادگی <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='نام خانوادگی' placeholderTextColor={themeColor3.bgColor(1)} value={address?.lname} onChangeText={(text) => { dispatch(setLname(text)) }} />
+                    <Text style={NewStyles.text}>
+                        نام خانوادگی
+                        <Text style={styles.required}>* </Text>
+                    </Text>
+                    <TextInput 
+                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
+                        keyboardType='default' 
+                        placeholder='نام خانوادگی' 
+                        placeholderTextColor={themeColor3.bgColor(1)} 
+                        value={address?.lname || ''} 
+                        onChangeText={(text) => { dispatch(setLname(text)) }} 
+                    />
 
                     <Text style={NewStyles.text}>تلفن ثابت</Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='phone-pad' placeholder='02112345678' placeholderTextColor={themeColor3.bgColor(1)} value={address?.telephone} onChangeText={(text) => { dispatch(setTelephone(text)) }} />
+                    <View style={styles.row}>
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]}
+                            placeholder="شماره تماس ثابت"
+                            keyboardType="phone-pad"
+                            placeholderTextColor={themeColor3.bgColor(1)}
+                            value={address?.telephone ? address.telephone.replace(/^021/, '') : ''}
+                            onChangeText={(text) => { dispatch(setTelephone('021' + text)) }}
+                        />
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}
+                            value="021"
+                            editable={false}
+                        />
+                    </View>
 
-                    <Text style={NewStyles.text}>شماره موبایل <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='phone-pad' placeholder='09123456789' placeholderTextColor={themeColor3.bgColor(1)} value={address?.mobile} onChangeText={(text) => { dispatch(setMobile(text)) }} />
+                    <Text style={NewStyles.text}>
+                        شماره موبایل
+                        <Text style={styles.required}>* </Text>
+                    </Text>
+                    <View style={styles.row}>
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]}
+                            placeholder="شماره موبایل"
+                            keyboardType="phone-pad"
+                            placeholderTextColor={themeColor3.bgColor(1)}
+                            value={address?.mobile ? address.mobile.replace(/^09/, '') : ''}
+                            onChangeText={(text) => { dispatch(setMobile('09' + text)) }}
+                            maxLength={9}
+                        />
+                        <TextInput
+                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}
+                            value="09"
+                            editable={false}
+                        />
+                    </View>
 
-                    <Text style={NewStyles.text}>شهر <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='تهران' placeholderTextColor={themeColor3.bgColor(1)} value={address?.city} onChangeText={(text) => { dispatch(setCity(text)) }} />
+                    <View style={styles.row}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text}>
+                                منطقه
+                                <Text style={styles.required}>* </Text>
+                            </Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+                                placeholder="منطقه"
+                                keyboardType="phone-pad"
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                value={address?.region}
+                                onChangeText={(text) => { dispatch(setRegion(text)) }}
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text}>
+                                شهر
+                                <Text style={styles.required}>* </Text>
+                            </Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+                                placeholder="شهر"
+                                keyboardType='default'
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                value={address?.city}
+                                onChangeText={(text) => { dispatch(setCity(text)) }}
+                            />
+                        </View>
+                    </View>
 
-                    <Text style={NewStyles.text}>منطقه <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='منطقه 1' placeholderTextColor={themeColor3.bgColor(1)} value={address?.region} onChangeText={(text) => { dispatch(setRegion(text)) }} />
-
-                    <Text style={NewStyles.text}>آدرس پستی خود را وارد کنید. <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View></Text>
-                    <TextInput style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'auto' }]} keyboardType='default' placeholder='آدرس پستی' placeholderTextColor={themeColor3.bgColor(1)} value={address?.address} onChangeText={(text) => { dispatch(setAddress(text)) }} />
+                    <Text style={NewStyles.text}>
+                        آدرس با جزئیات کامل
+                        <Text style={styles.required}>* </Text>
+                    </Text>
+                    <TextInput 
+                        style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.multiLine]} 
+                        keyboardType='default' 
+                        placeholder='آدرس با جزئیات کامل' 
+                        placeholderTextColor={themeColor3.bgColor(1)} 
+                        value={address?.address} 
+                        onChangeText={(text) => { dispatch(setAddress(text)) }} 
+                        multiline
+                    />
                 </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
                 <Button title={'مرحله بعد'} onPress={() => {
@@ -70,7 +170,20 @@ const styles = StyleSheet.create({
         paddingVertical: '5%',
         gap: 10,
     },
-    inputSearchStyle: {
-        borderWidth: 0,
-    }
+    row: {
+        flexDirection: 'row-reverse',
+        gap: 10,
+    },
+    prefixInput: {
+        width: 70,
+        backgroundColor: themeColor4.bgColor(0.5),
+    },
+    multiLine: {
+        height: 100,
+        textAlignVertical: 'top',
+    },
+    required: {
+        color: '#d32f2f',
+        fontSize: 16,
+    },
 });

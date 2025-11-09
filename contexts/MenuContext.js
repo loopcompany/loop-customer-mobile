@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,9 +11,12 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { themeColor0, themeColor10, themeColor13, themeColor4 } from '../theme/Color';
+import { useSelector } from 'react-redux';
+import { Ionicons } from '@expo/vector-icons';
+import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1 } from '../theme/Color';
 import NewStyles from '../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import useLogout from '../hooks/useLogout';
 
 // Create Context
 const MenuContext = createContext();
@@ -21,8 +24,16 @@ const MenuContext = createContext();
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
     const navigation = useNavigation();
+    const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
-    const [menuItems] = useState([
+    
+    // Get user type from Redux
+    const userType = useSelector(state => state.auth.userType);
+    
+    // Base menu items
+    const baseMenuItems = [
+        { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
+        { id: 22, title: "کیف پول لوپ", screen: "Increase" },
         { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
         { id: 20, title: "قوانین / درباره لوپ", screen: "AboutScreen" },
         { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
@@ -32,10 +43,11 @@ export const MenuProvider = ({ children }) => {
         { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
         { id: 14, title: "نرخنامه", screen: "RateListScreen" },
         { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
-        { id: 12, title: "طرح‌های تشویقی", screen: "IncentivePlansScreen" },
-        { id: 11, title: "فکروبکر", screen: "Fekrobekr" },
+        { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
+        { id: 11, title: "فکروبکر", screen: "GameMenu" },
         { id: 10, title: "ثبت‌نام دوره‌های آموزشی ", screen: "TrainingRegistrationScreen", },
         { id: 9, title: "آدرس‌های منتخب", screen: "AddressScreen" },
+        { id: 8, title: "قراردادنامه", screen: "OrganizationContract", organizationOnly: true },
         { id: 7, title: "حساب کاربری", screen: "Profile" },
         { id: 6, title: "پیام", screen: "MessageScreen" },
         { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
@@ -43,7 +55,21 @@ export const MenuProvider = ({ children }) => {
         { id: 3, title: "سفارش‌ها", screen: "OrdersScreen" },
         { id: 2, title: "سازمانی / شرکتی", screen: "CorporateScreen" },
         { id: 1, title: "سفارش‌های جاری / رزرو", screen: "DeviceOrderSummary" },
-    ]);
+    ];
+    
+    // Filter menu items based on user type
+    const menuItems = useMemo(() => {
+        console.log('🔍 [MenuContext] Current userType:', userType);
+        if (userType === 'organization') {
+            console.log('✅ [MenuContext] Showing organization menu items');
+            // Show all items including organization-only items
+            return baseMenuItems;
+        } else {
+            console.log('ℹ️ [MenuContext] Filtering out organization-only items');
+            // Filter out organization-only items
+            return baseMenuItems.filter(item => !item.organizationOnly);
+        }
+    }, [userType]);
 
     const openMenu = () => {
         setMenuVisible(true);
@@ -122,6 +148,20 @@ export const MenuProvider = ({ children }) => {
                                     contentContainerStyle={styles.list}
                                     showsVerticalScrollIndicator={false}
                                 />
+                                
+                                {/* دکمه خروج */}
+                                <View style={styles.logoutContainer}>
+                                    <TouchableOpacity
+                                        style={[styles.logoutBtn, isLoggingOut && styles.logoutBtnDisabled]}
+                                        onPress={logoutWithConfirmation}
+                                        disabled={isLoggingOut}
+                                    >
+                                        <Ionicons name="power" size={20} color="#fff" />
+                                        <Text style={styles.logoutText}>
+                                            {isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -176,5 +216,27 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 20,
         width: "100%",
+    },
+    logoutContainer: {
+        padding: 10,
+        backgroundColor: themeColor0.bgColor(1),
+    },
+    logoutBtn: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#d32f2f',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        gap: 8,
+    },
+    logoutBtnDisabled: {
+        backgroundColor: '#999',
+    },
+    logoutText: {
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: 'VazirBold',
     },
 });

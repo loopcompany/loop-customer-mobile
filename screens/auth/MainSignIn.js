@@ -17,10 +17,10 @@ import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "../../theme/Color";
 import { authAPI } from "../../services/Api";
-import AuthManager from "../../services/AuthManager";
 import { showToastOrAlert } from "../../helpers/Common";
 import CustomStatusBar from "../../components/CustomStatusBar";
 import InviteCodeInput from "../../components/InviteCodeInput";
+import LocationPicker from "../../components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 // Form state management with useReducer
 const initialState = {
@@ -30,6 +30,9 @@ const initialState = {
     otherReferralCode: '',
     captchaInput: '',
     captcha: Math.floor(1000 + Math.random() * 9000).toString(),
+    province: null,
+    city: null,
+    region: null,
     errors: {},
     isLoading: false,
 };
@@ -93,6 +96,17 @@ export default function MainSignIn({ navigation }) {
         } else if (!emailRegex.test(state.email)) {
             errors.email = 'فرمت ایمیل صحیح نیست';
         }
+
+        // Location validation
+        if (!state.province) {
+            errors.province = 'انتخاب استان الزامی است';
+        }
+        if (!state.city) {
+            errors.city = 'انتخاب شهر الزامی است';
+        }
+        if (!state.region) {
+            errors.region = 'انتخاب منطقه الزامی است';
+        }
         
         // Captcha validation
         if (!state.captchaInput) {
@@ -120,6 +134,9 @@ export default function MainSignIn({ navigation }) {
                 melicode: state.melicode,
                 phone: state.phone,
                 email: state.email,
+                province_id: state.province?.id,
+                city_id: state.city?.id,
+                region_id: state.region?.id,
                 other_referral_code: state.otherReferralCode ? `${inviteLetter}${state.otherReferralCode}` : null,
             };
 
@@ -259,6 +276,24 @@ export default function MainSignIn({ navigation }) {
                             {state.errors.email && (
                                 <Text style={styles.fieldErrorText}>{state.errors.email}</Text>
                             )}
+                        </View>
+
+                        {/* Location Picker - Province, City, Region */}
+                        <View style={styles.inputContainer}>
+                            <LocationPicker
+                                selectedProvince={state.province}
+                                selectedCity={state.city}
+                                selectedRegion={state.region}
+                                onProvinceChange={(province) => dispatch({ type: 'SET_FIELD', field: 'province', value: province })}
+                                onCityChange={(city) => dispatch({ type: 'SET_FIELD', field: 'city', value: city })}
+                                onRegionChange={(region) => dispatch({ type: 'SET_FIELD', field: 'region', value: region })}
+                                errors={{
+                                    province: state.errors.province,
+                                    city: state.errors.city,
+                                    region: state.errors.region
+                                }}
+                                required={true}
+                            />
                         </View>
 
                         {/* Captcha */}

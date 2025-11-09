@@ -33,7 +33,7 @@ export const API_ENDPOINTS = {
   // Orders endpoints
   ORDERS: {
     LIST: '/orders',
-    CREATE: '/orders/create',
+    CREATE: '/orders/',  // ✅ POST /api/orders/ (با / در انتها)
     DETAILS: '/orders/{id}',
     CANCEL: '/orders/{id}/cancel',
     TRACK: '/orders/{id}/track',
@@ -72,6 +72,7 @@ export const API_ENDPOINTS = {
     VALIDATE_TOKEN: '/organization/validate-token',
     LOGOUT: '/organization/logout',
     LOGOUT_ALL: '/organization/logout-all',
+    WARRANTY: '/info/warranties',
   }
 };
 
