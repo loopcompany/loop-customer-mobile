@@ -6,7 +6,7 @@ import { ImageBackground } from "expo-image";
 
 export default function SignInLanding({ navigation }) {
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"contain"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
 
       <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain" />
       <Button
