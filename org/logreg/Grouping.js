@@ -112,6 +112,7 @@ const Grouping = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
+          
                 سازمانی / دولتی
               </Text>
               {/* Arrow down */}
@@ -170,81 +171,7 @@ const Grouping = ({ navigation }) => {
               alignItems: "center",
             }}
           >
-            {/* Main header - شرکتی / خصوصی */}
-            <View
-              style={{
-                width: "75%",
-                backgroundColor: "#1a4480",
-                borderRadius: 12,
-                paddingVertical: 18,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 8,
-                shadowColor: "#1a4480",
-                shadowOpacity: 0.5,
-                shadowRadius: 8,
-                position: "relative",
-                marginBottom: 8,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#ffeb3b",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
-                }}
-              >
-                شرکتی / خصوصی
-              </Text>
-              {/* Arrow down */}
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -10,
-                  alignSelf: "center",
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 12,
-                  borderRightWidth: 12,
-                  borderTopWidth: 10,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderTopColor: "#1a4480",
-                }}
-              />
-            </View>
 
-            {/* Login button for company */}
-            <TouchableOpacity
-              onPress={handleCompanyLogin}
-              style={{
-                width: "60%",
-                backgroundColor: "#4a90e2",
-                borderRadius: 8,
-                paddingVertical: 10,
-                marginTop: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 4,
-                shadowColor: "#4a90e2",
-                shadowOpacity: 0.4,
-                shadowRadius: 5,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
-                }}
-              >
-                ورود به حساب کاربری
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
 

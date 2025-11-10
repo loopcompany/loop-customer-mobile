@@ -1,20 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
+import {
+  CodeField,
+  Cursor,
+  useBlurOnFulfill,
+  useClearByFocusCell,
+} from 'react-native-confirmation-code-field';
 
 const OTPVerification = ({ route, navigation }) => {
   const { phone, organizationCode, userId, organizationId } = route.params;
 
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const CELL_COUNT = 6;
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(120); // 2 minutes
-  const inputRefs = useRef([]);
+  
+  const ref = useBlurOnFulfill({ value: code, cellCount: CELL_COUNT });
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value: code,
+    setValue: setCode,
+  });
 
   useEffect(() => {
     // Start countdown timer
@@ -31,30 +43,8 @@ const OTPVerification = ({ route, navigation }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleCodeChange = (text, index) => {
-    // Only allow numbers
-    if (!/^\d*$/.test(text)) return;
-
-    const newCode = [...code];
-    newCode[index] = text;
-    setCode(newCode);
-
-    // Auto-focus next input
-    if (text && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
   const handleVerify = async () => {
-    const verificationCode = code.join('');
-    
-    if (verificationCode.length !== 6) {
+    if (code.length !== 6) {
       showAlert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
       return;
     }
@@ -64,7 +54,7 @@ const OTPVerification = ({ route, navigation }) => {
     try {
       const response = await axios.post(`${uri}/organization/verify-phone`, {
         phone: phone,
-        code: verificationCode,
+        code: code,
       });
 
       console.log('✅ Verification response:', response.data);
@@ -143,7 +133,7 @@ const OTPVerification = ({ route, navigation }) => {
       if (response.data.status === 'success') {
         showAlert('موفق', 'کد تایید مجددا ارسال شد');
         setTimer(120); // Reset timer
-        setCode(['', '', '', '', '', '']); // Clear inputs (6 digits)
+        setCode(''); // Clear inputs
       }
     } catch (error) {
       console.error('Resend error:', error);
@@ -242,35 +232,49 @@ const OTPVerification = ({ route, navigation }) => {
           </View>
 
           {/* OTP Input */}
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'center', 
-            marginBottom: 30,
-            gap: 10
-          }}>
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => (inputRefs.current[index] = ref)}
-                value={code[index]}
-                onChangeText={(text) => handleCodeChange(text, index)}
-                onKeyPress={(e) => handleKeyPress(e, index)}
-                keyboardType="number-pad"
-                maxLength={1}
-                style={{
-                  width: 45,
-                  height: 55,
-                  backgroundColor: '#fff',
-                  borderRadius: 10,
-                  borderWidth: 2,
-                  borderColor: code[index] ? '#1976d2' : '#ccc',
-                  fontSize: 22,
-                  fontFamily: 'VazirBold',
-                  textAlign: 'center',
-                  elevation: 2,
-                }}
-              />
-            ))}
+          <View style={{ marginBottom: 30 }}>
+            <CodeField
+              ref={ref}
+              {...props}
+              value={code}
+              onChangeText={setCode}
+              cellCount={CELL_COUNT}
+              rootStyle={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 10,
+              }}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              renderCell={({ index, symbol, isFocused }) => (
+                <View
+                  key={index}
+                  onLayout={getCellOnLayoutHandler(index)}
+                  style={{
+                    width: 45,
+                    height: 55,
+                    backgroundColor: '#fff',
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: isFocused ? '#1976d2' : (symbol ? '#1976d2' : '#ccc'),
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    elevation: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 22,
+                      fontFamily: 'VazirBold',
+                      textAlign: 'center',
+                      color: '#000',
+                    }}
+                  >
+                    {symbol || (isFocused ? <Cursor /> : null)}
+                  </Text>
+                </View>
+              )}
+            />
           </View>
 
           {/* Timer */}
@@ -289,15 +293,15 @@ const OTPVerification = ({ route, navigation }) => {
           {/* Verify Button */}
           <TouchableOpacity
             onPress={handleVerify}
-            disabled={loading || code.join('').length !== 6}
+            disabled={loading || code.length !== 6}
             style={{
-              backgroundColor: loading || code.join('').length !== 6 ? '#90caf9' : '#1976d2',
+              backgroundColor: loading || code.length !== 6 ? '#90caf9' : '#1976d2',
               borderRadius: 10,
               paddingVertical: 15,
               marginBottom: 15,
               alignItems: 'center',
               elevation: 3,
-              opacity: loading || code.join('').length !== 6 ? 0.7 : 1
+              opacity: loading || code.length !== 6 ? 0.7 : 1
             }}
           >
             {loading ? (

@@ -454,14 +454,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.organizationName ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             {errors.organizationName && (
@@ -480,14 +480,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.familyName ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             {errors.familyName && (
@@ -508,14 +508,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             {errors.nationalCode && (
@@ -536,7 +536,7 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 paddingLeft: 45,
                 borderWidth: 1, 
@@ -544,13 +544,13 @@ const Register = ({ navigation }) => {
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             <View style={{ 
               position: 'absolute', 
               left: 8, 
-              top: 8, 
+              top: 11, 
               zIndex: 1,
               backgroundColor: '#ffeb3b',
               borderRadius: 4,
@@ -573,11 +573,11 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.birthDate ? '#ff0000' : '#ccc',
-                height: 40,
+                minHeight: 48,
                 justifyContent: 'center'
               }}
             >
@@ -608,14 +608,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.organizationEmail ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             {errors.organizationEmail && (
@@ -637,14 +637,14 @@ const Register = ({ navigation }) => {
                   style={{ 
                     backgroundColor: '#f5f5f5', 
                     borderRadius: 8, 
-                    paddingVertical: 10, 
+                    paddingVertical: 12, 
                     paddingHorizontal: 12,
                     borderWidth: 1, 
                     borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    height: 40
+                    minHeight: 48
                   }}
                 />
               </View>
@@ -655,7 +655,7 @@ const Register = ({ navigation }) => {
                 paddingVertical: 2,
                 alignItems: 'center',
                 justifyContent: 'center',
-                height: 40,
+                minHeight: 48,
                 minWidth: 50
               }}>
                 <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
@@ -678,7 +678,7 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 paddingLeft: 45,
                 borderWidth: 1, 
@@ -686,7 +686,7 @@ const Register = ({ navigation }) => {
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             <TouchableOpacity 
@@ -694,7 +694,7 @@ const Register = ({ navigation }) => {
               style={{ 
                 position: 'absolute', 
                 left: 12, 
-                top: 10, 
+                top: 13, 
                 zIndex: 1 
               }}
             >
@@ -740,14 +740,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 60,
+                minHeight: 70,
                 textAlignVertical: 'top'
               }}
             />
@@ -769,14 +769,14 @@ const Register = ({ navigation }) => {
               style={{ 
                 backgroundColor: '#f5f5f5', 
                 borderRadius: 8, 
-                paddingVertical: 10, 
+                paddingVertical: 12, 
                 paddingHorizontal: 12,
                 borderWidth: 1, 
                 borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                height: 40
+                minHeight: 48
               }}
             />
             {errors.organizationPostalCode && (
@@ -805,7 +805,7 @@ const Register = ({ navigation }) => {
                   flex: 1,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: 36,
+                  minHeight: 48,
                   flexDirection: 'row'
                 }}
               >
@@ -832,14 +832,14 @@ const Register = ({ navigation }) => {
                   style={{ 
                     backgroundColor: '#f5f5f5', 
                     borderRadius: 8, 
-                    paddingVertical: 8, 
+                    paddingVertical: 12, 
                     paddingHorizontal: 10,
                     borderWidth: 1, 
                     borderColor: errors.securityCode ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    height: 36
+                    minHeight: 48
                   }}
                 />
               </View>

@@ -163,14 +163,14 @@ const LocationPicker = ({
         style={{
           backgroundColor: disabled ? '#e0e0e0' : '#f5f5f5',
           borderRadius: 8,
-          paddingVertical: 10,
+          paddingVertical: 12,
           paddingHorizontal: 12,
           borderWidth: 1,
           borderColor: error ? '#ff0000' : '#ccc',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          height: 40,
+          minHeight: 48,
           opacity: disabled ? 0.6 : 1
         }}
       >
