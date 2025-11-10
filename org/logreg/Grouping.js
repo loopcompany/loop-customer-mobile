@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "../../screens/Footer";
 import ScreenHeaders from "../../components/ScreenHeaders";
@@ -31,37 +31,40 @@ const Grouping = ({ navigation }) => {
       {/* Background with image */}
       <ImageBackground
         cachePolicy={"memory-disk"}
-        source={require("../../assets/moon.jpg")}
+        source={Platform.OS === 'web' 
+          ? require("../../assets/loopbackground.webp")
+          : require("../../assets/moon.jpg")
+        }
         style={[NewStyles.container, { backgroundColor: "#020305" }]}
         contentPosition={"center"}
-        contentFit="contain"
+        contentFit="cover"
       >
         {/* Top section with header text */}
         <View
           style={{
             alignItems: "center",
-            paddingTop: 30,
-            paddingBottom: 30,
+            paddingTop: 15,
+            paddingBottom: 15,
             paddingHorizontal: 25,
           }}
         >
           <View
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.95)",
-              borderRadius: 8,
-              paddingVertical: 6,
-              paddingHorizontal: 15,
-              borderWidth: 1.5,
+              borderRadius: 6,
+              paddingVertical: 4,
+              paddingHorizontal: 12,
+              borderWidth: 1,
               borderColor: "#333",
             }}
           >
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 10,
                 fontFamily: "VazirBold",
                 textAlign: "center",
                 color: "#333",
-                lineHeight: 18,
+                lineHeight: 16,
               }}
             >
               قوانین و مقررات سامانه در پنل سازمانی / شرکتی
@@ -82,31 +85,32 @@ const Grouping = ({ navigation }) => {
           <View
             style={{
               width: "100%",
-              marginBottom: 50,
+              marginBottom: 30,
               alignItems: "center",
             }}
           >
             {/* Main header - سازمانی / دولتی */}
             <View
               style={{
-                width: "75%",
+                width: "65%",
+                maxWidth: 280,
                 backgroundColor: "#1a4480",
-                borderRadius: 12,
-                paddingVertical: 18,
+                borderRadius: 10,
+                paddingVertical: 12,
                 alignItems: "center",
                 justifyContent: "center",
-                elevation: 8,
+                elevation: 6,
                 shadowColor: "#1a4480",
-                shadowOpacity: 0.5,
-                shadowRadius: 8,
+                shadowOpacity: 0.4,
+                shadowRadius: 6,
                 position: "relative",
-                marginBottom: 8,
+                marginBottom: 6,
               }}
             >
               <Text
                 style={{
                   color: "#ffeb3b",
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: "bold",
                   fontFamily: "VazirBold",
                   textAlign: "center",
@@ -119,13 +123,13 @@ const Grouping = ({ navigation }) => {
               <View
                 style={{
                   position: "absolute",
-                  bottom: -10,
+                  bottom: -8,
                   alignSelf: "center",
                   width: 0,
                   height: 0,
-                  borderLeftWidth: 12,
-                  borderRightWidth: 12,
-                  borderTopWidth: 10,
+                  borderLeftWidth: 10,
+                  borderRightWidth: 10,
+                  borderTopWidth: 8,
                   borderLeftColor: "transparent",
                   borderRightColor: "transparent",
                   borderTopColor: "#1a4480",
@@ -137,23 +141,24 @@ const Grouping = ({ navigation }) => {
             <TouchableOpacity
               onPress={handleOrganizationalLogin}
               style={{
-                width: "60%",
+                width: "55%",
+                maxWidth: 240,
                 backgroundColor: "#4a90e2",
                 borderRadius: 8,
-                paddingVertical: 10,
-                marginTop: 8,
+                paddingVertical: 8,
+                marginTop: 6,
                 alignItems: "center",
                 justifyContent: "center",
-                elevation: 4,
+                elevation: 3,
                 shadowColor: "#4a90e2",
-                shadowOpacity: 0.4,
-                shadowRadius: 5,
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
               }}
             >
               <Text
                 style={{
                   color: "#fff",
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: "bold",
                   fontFamily: "VazirBold",
                   textAlign: "center",
@@ -179,16 +184,20 @@ const Grouping = ({ navigation }) => {
         <View
           style={{
             position: "absolute",
-            bottom: 20,
+            bottom: 10,
             right: 0,
             left: 0,
+            ...(Platform.OS === 'web' && {
+              alignSelf: 'center',
+              maxWidth: 600,
+            }),
           }}
         >
           {/* First yellow section - Accordion Guide */}
           <View
             style={{
               width: "100%",
-              marginBottom: 10,
+              marginBottom: 8,
             }}
           >
             {/* Header - clickable */}
@@ -197,7 +206,7 @@ const Grouping = ({ navigation }) => {
               style={{
                 width: "100%",
                 backgroundColor: "#ffeb3b",
-                paddingVertical: 8,
+                paddingVertical: 6,
                 flexDirection: "row",
                 alignItems: "center",
                 paddingHorizontal: 10,
@@ -207,15 +216,15 @@ const Grouping = ({ navigation }) => {
               <View
                 style={{
                   flex: 1,
-                  borderTopWidth: 2,
+                  borderTopWidth: 1.5,
                   borderTopColor: "#000",
                   borderStyle: "dotted",
-                  marginRight: 10,
+                  marginRight: 8,
                 }}
               />
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 10,
                   fontFamily: "VazirBold",
                   color: "#000",
                   textAlign: "center",
@@ -226,20 +235,20 @@ const Grouping = ({ navigation }) => {
               {/* Red arrow pointing down or up based on state */}
               <View
                 style={{
-                  marginLeft: 15,
+                  marginLeft: 12,
                   width: 0,
                   height: 0,
-                  borderLeftWidth: 8,
-                  borderRightWidth: 8,
+                  borderLeftWidth: 6,
+                  borderRightWidth: 6,
                   ...(isOrganizationalGuideOpen
                     ? {
-                        borderBottomWidth: 12,
+                        borderBottomWidth: 10,
                         borderLeftColor: "transparent",
                         borderRightColor: "transparent",
                         borderBottomColor: "#ff0000",
                       }
                     : {
-                        borderTopWidth: 12,
+                        borderTopWidth: 10,
                         borderLeftColor: "transparent",
                         borderRightColor: "transparent",
                         borderTopColor: "#ff0000",
@@ -254,19 +263,19 @@ const Grouping = ({ navigation }) => {
                 style={{
                   width: "100%",
                   backgroundColor: "rgba(255, 235, 59, 0.95)",
-                  paddingVertical: 12,
-                  paddingHorizontal: 15,
-                  borderBottomWidth: 2,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderBottomWidth: 1.5,
                   borderBottomColor: "#000",
                 }}
               >
                 <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: 9,
                     fontFamily: "VazirBold",
                     color: "#000",
                     textAlign: "right",
-                    lineHeight: 20,
+                    lineHeight: 16,
                   }}
                 >
                   پنل سازمانی / شرکتی لوپ برای کاربرانی که دارای تعداد زیادی از محصولات / دستگاه / قطعات کامپیوتری می‌باشد و ثبت نام در این پنل به منظور تسریع در انجام خدمات و نیز کاهش درصد هزینه‌ها انجام گردیده است.
