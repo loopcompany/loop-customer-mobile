@@ -12,7 +12,6 @@ import NewStyles from "../styles/NewStyles";
 import { imageUri } from "../services/URL";
 
 export default function Folder({ onPress, title, style, loading, image }) {
-console.log(image);
 
   return (
     <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style]} onPress={onPress}>
@@ -27,19 +26,10 @@ console.log(image);
 const styles = StyleSheet.create({
   button: {
     backgroundColor: themeColor10.bgColor(0.2),
-    // borderColor: themeColor0.bgColor(1),
-    // borderWidth: 2,
-    // borderRadius: 10,
-    // paddingVertical: 12,
     paddingHorizontal: 40,
     marginVertical: 10,
-    // shadowColor: "#00f",
-    // shadowOffset: { width: 0, height: 0 },
-    // shadowOpacity: 0.9,
-    // shadowRadius: 10,
-    // elevation: 5,
-    width: "40%",
-    height: 70,
+    width: 150,
+    height: 100,
     alignItems: "flex-end",
   },
   folderIcon: {

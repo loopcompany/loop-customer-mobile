@@ -5,6 +5,7 @@ import {
   Image,
   FlatList,
   RefreshControl,
+  Platform,
 } from "react-native";
 import Folder from "../components/Folder";
 import NewStyles from "../styles/NewStyles";
@@ -57,22 +58,16 @@ export default function FolderScreen({ navigation }) {
       style={NewStyles.container}
       edges={{ top: "off", bottom: "off" }}
     >
-      <ImageBackground
-        cachePolicy={"memory-disk"}
-        source={require("../assets/moon.jpg")}
-        style={[NewStyles.container, { backgroundColor: "#020305" }]}
-        contentPosition={"center"}
-        contentFit="contain"
-      >
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/webbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
-        <View style={{ flex: 1 }}>
-          {/* لوگو بالا */}
           <View style={styles.logoWrapper}>
             <Image
               source={require("../assets/logo.png")}
               style={NewStyles.logo}
             />
           </View>
+        <View style={{ flex: 1, alignItems:'flex-start' }}>
+          {/* لوگو بالا */}
           <FlatList
             refreshControl={
               <RefreshControl
@@ -100,20 +95,6 @@ export default function FolderScreen({ navigation }) {
                         categoryTitle: item.title,
                       });
                     } else {
-                      // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
-                      console.log(
-                        "🎯 [FolderScreen] انتخاب دسته‌بندی نهایی:",
-                        item.title
-                      );
-                      console.log(
-                        "🎯 [FolderScreen] اطلاعات کامل آیتم:",
-                        JSON.stringify(item, null, 2)
-                      );
-                      console.log(
-                        "🎯 [FolderScreen] شروع دریافت مراحل برای ID:",
-                        item.id
-                      );
-
                       try {
                         const result = await dispatch(fetchSteps(item.id));
                         console.log(

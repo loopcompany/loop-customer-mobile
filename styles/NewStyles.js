@@ -316,7 +316,7 @@ const NewStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     width: "100%",
-    maxWidth: 400,
+    maxWidth: 800,
   },
 
   profileImage: {

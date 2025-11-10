@@ -20,31 +20,26 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
 
     return (
 
-        <>
-            {/* <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={[styles.headerWrapper, NewStyles.shadow, NewStyles.rowWrapper]}>
-                <Pressable style={[NewStyles.rowWrapper, { gap: 5 }]} onPress={() => { navigation.goBack(); dispatch(emptySteps()); dispatch(emptyAddress()); dispatch(emptyCategory()) }}>
-                    <Ionicons name="arrow-forward-outline" size={24} color={themeColor0.bgColor(1)} />
-                    <Text style={NewStyles.title}>{(category?.data?.title?.length > 20) ? category?.data?.title?.substr(0, 20) + '...' : category?.data?.title?.substr(0, 20)}</Text>
-                </Pressable>
-                <Text style={NewStyles.text} onPress={() => { navigation.goBack(); dispatch(emptySteps()); dispatch(emptyAddress()); dispatch(emptyCategory()); }}>لغو سفارش</Text>
-            </SafeAreaView> */}
-            <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={[styles.header, NewStyles.rowWrapper, {
+        <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={[styles.header, NewStyles.rowWrapper, {
 
-            }]}>
-                {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
-                    <Image source={require("../assets/next.png")} style={styles.arrow} />
-                </TouchableOpacity>
-                    :
-                    <View style={styles.iconContainer} />
-                }
-                <View style={styles.titleContainer}>
-                    <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
-                </View>
-                <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
+        }]}>
+            {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
+
+                <Image source={require("../assets/next.png")} style={styles.arrow} />
+                <Text style={styles.titleText}>قبلی</Text>
+            </TouchableOpacity>
+                :
+                <View style={styles.iconContainer} />
+            }
+            <View style={styles.titleContainer}>
+                <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
+            </View>
+            <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
                 <Image source={require("../assets/back.png")} style={styles.arrow} />
-                </TouchableOpacity>
-            </SafeAreaView>
-        </>
+                <Text style={styles.titleText}>بعدی</Text>
+            </TouchableOpacity>
+        </SafeAreaView>
+
     )
 }
 
@@ -58,11 +53,17 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         paddingHorizontal: 10,
     },
+    titleText: {
+        textAlign: "center",
+        fontSize: 12,
+        fontFamily: 'VazirBold',
+    },
     iconContainer: {
         width: 50,
         height: 50,
         justifyContent: "center",
         alignItems: "center",
+        ...NewStyles.row
     },
     arrow: {
         width: 30,

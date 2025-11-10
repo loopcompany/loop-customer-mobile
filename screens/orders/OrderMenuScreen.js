@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, StyleSheet, ScrollView, Linking, } from "react-native";
+import { View, Image, StyleSheet, ScrollView, Linking, Platform, } from "react-native";
 import Menuitem from "../../components/Menuitem";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
@@ -9,7 +9,7 @@ const callSupport = () => {
 
 export default function OrderMenuScreen({ navigation }) {
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit="contain"  >
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={Platform.OS==='web' ? "cover":  "contain"}>
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"

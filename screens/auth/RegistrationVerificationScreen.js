@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -30,6 +29,7 @@ import { setToken } from '../../slices/authSlice';
 import { fetchUser } from '../../slices/userSlice';
 import { showToastOrAlert, formatTime } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ImageBackground } from 'expo-image';
 
 export default function RegistrationVerificationScreen({ route, navigation }) {
   const dispatch = useDispatch();
@@ -97,19 +97,19 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         }
 
         showToastOrAlert('شماره موبایل با موفقیت تایید شد');
-        navigation.navigate('MainApp',{screen:'FolderScreen'}); // Navigate to main app
+        navigation.navigate('MainApp', { screen: 'FolderScreen' }); // Navigate to main app
       } else {
         setError(response.message || 'کد وارد شده صحیح نیست');
         setVerificationCode('');
       }
     } catch (error) {
       console.error('Verification error:', error);
-      
+
       let errorMessage = 'خطا در تایید کد. لطفاً مجدداً تلاش کنید';
-      
+
       if (error.response?.data) {
         const errorData = error.response.data;
-        
+
         if (errorData.errors) {
           // Handle Laravel validation errors
           const validationErrors = Object.values(errorData.errors).flat();
@@ -117,13 +117,13 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         } else if (errorData.message) {
           errorMessage = errorData.message;
         }
-        
+
         // Show specific error for 422
         if (error.response?.status === 422) {
           errorMessage = errorMessage || 'اطلاعات وارد شده صحیح نیست';
         }
       }
-      
+
       setError(errorMessage);
       setVerificationCode('');
     } finally {
@@ -148,12 +148,12 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
       }
     } catch (error) {
       console.error('Resend code error:', error);
-      
+
       let errorMessage = 'خطا در ارسال مجدد کد';
-      
+
       if (error.response?.data) {
         const errorData = error.response.data;
-        
+
         if (errorData.errors) {
           // Handle Laravel validation errors
           const validationErrors = Object.values(errorData.errors).flat();
@@ -162,7 +162,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
           errorMessage = errorData.message;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -181,16 +181,14 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView edges={{top:'off', bottom:'additive'}} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
       <ScreenHeaders
         title="تایید شماره موبایل"
         onPressLeft={() => navigation.goBack()}
         showLeftIcon={true}
       />
-      <ImageBackground
-        source={require('../../assets/moon.jpg')}
-        style={styles.background}
-      >
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"contain"}>
+
         <CustomStatusBar />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

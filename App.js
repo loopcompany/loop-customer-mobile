@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Platform } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FolderScreen from "./screens/FolderScreen";
@@ -146,7 +147,9 @@ const App = () => {
   }
 
   // Simple linking configuration for web only
+  // در وب، linking را غیرفعال می‌کنیم تا بعد از ریلود به صفحه اصلی برگردد
   const linking = Platform.OS === 'web' ? {
+    enabled: false, // غیرفعال کردن deep linking در وب
     prefixes: ['http://localhost:8081', 'http://localhost:8082', 'https://loop.app'],
     config: {
       screens: {
@@ -234,27 +237,28 @@ const App = () => {
   } : undefined;
 
   return (
-    <NavigationContainer 
-      ref={navigationRef}
-      linking={linking}
-      initialState={initialState}
-      fallback={<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><Text>Loading...</Text></View>}
-      documentTitle={{
-        formatter: (options, route) => `لوپ - ${route?.name || 'خانه'}`
-      }}
-      onStateChange={(state) => {
-        // Only save state for native platforms in dev mode
-        if (state && Platform.OS !== 'web' && __DEV__) {
-          AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
-        }
-      }}
-    >
-      <Provider store={store}>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
+    <SafeAreaProvider>
+      <NavigationContainer 
+        ref={navigationRef}
+        linking={linking}
+        initialState={initialState}
+        fallback={<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><Text>Loading...</Text></View>}
+        documentTitle={{
+          formatter: (options, route) => `لوپ - ${route?.name || 'خانه'}`
+        }}
+        onStateChange={(state) => {
+          // Only save state for native platforms in dev mode
+          if (state && Platform.OS !== 'web' && __DEV__) {
+            AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
+          }
+        }}
+      >
+        <Provider store={store}>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
           {/* Auth screens (NO MenuProvider) */}
           <Stack.Screen component={Landing} name="Landing" options={{ headerShown: false, }} />
           <Stack.Screen component={Welcome} name="Welcome" options={{ headerShown: false, }} />
@@ -682,6 +686,7 @@ const App = () => {
         </Stack.Navigator>
       </Provider>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, ImageBackground, FlatList, RefreshControl } from "react-native";
+import { View, StyleSheet, Image, FlatList, RefreshControl, Platform } from "react-native";
 import Folder from "../../components/Folder";
 import NewStyles from "../../styles/NewStyles";
 import CustomStatusBar from '../../components/CustomStatusBar';
@@ -11,6 +11,7 @@ import { fetchSteps } from '../../slices/stepSlice';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { setCategory } from "../../slices/categorySlice";
 import Loader from "../../components/Loader";
+import { ImageBackground } from "expo-image";
 
 const SubCategories = ({ navigation, route }) => {
   const { categoryId, categoryTitle } = route.params;
@@ -28,12 +29,12 @@ const SubCategories = ({ navigation, route }) => {
         console.log(res.data?.children);
 
         const categories = Array.isArray(res.data?.children) ? res.data?.children : (res.data?.children || res.data || []);
-        
+
         if (mounted) setSubCategories(categories);
       } catch (err) {
         console.error('Failed to load subcategories:', err);
         showToastOrAlert('خطا در دریافت زیردسته‌ها');
-      }finally{
+      } finally {
         setRefreshing(false);
         setLoader(false);
       }
@@ -50,10 +51,8 @@ const SubCategories = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
-      <ImageBackground
-        source={require("../../assets/moon.jpg")}
-        style={NewStyles.container}
-      >
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
+
         <CustomStatusBar />
         <View style={{ flex: 1 }}>
           {/* Header */}
@@ -69,7 +68,7 @@ const SubCategories = ({ navigation, route }) => {
           </View>
 
           <FlatList
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={()=>{setRefreshing(true)}} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
             data={subCategories}
             renderItem={({ item }) => {
               return <Folder title={item?.title} image={item?.image_path} onPress={async () => {
@@ -82,12 +81,11 @@ const SubCategories = ({ navigation, route }) => {
                   console.log('🎯 [SubCategories] انتخاب دسته‌بندی نهایی:', item.title);
                   console.log('🎯 [SubCategories] اطلاعات کامل آیتم:', JSON.stringify(item, null, 2));
                   console.log('🎯 [SubCategories] شروع دریافت مراحل برای ID:', item.id);
-                  
+
                   try {
                     const result = await dispatch(fetchSteps(item.id));
-                    console.log('🎯 [SubCategories] نتیجه dispatch:', result);
                     dispatch(setCategory(item));
-                    
+
                     navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
                   } catch (error) {
                     console.log('❌ [SubCategories] خطا در dispatch fetchSteps:', error);

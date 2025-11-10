@@ -290,7 +290,7 @@ export default function LoginScreen({ navigation }) {
     checkAutoLogin();
   }, []);
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"contain"}>
       <CustomStatusBar />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
         <ScrollView

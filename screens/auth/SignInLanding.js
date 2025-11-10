@@ -1,4 +1,4 @@
-import { StyleSheet, Image } from "react-native";
+import { StyleSheet, Image, Platform } from "react-native";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
@@ -6,8 +6,9 @@ import { ImageBackground } from "expo-image";
 
 export default function SignInLanding({ navigation }) {
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
-      <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain"/>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"contain"}>
+
+      <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain" />
       <Button
         style={{ width: "70%" }}
         title={"ورود"}

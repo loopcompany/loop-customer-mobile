@@ -69,10 +69,85 @@ const token = useSelector(state => state.auth.token);
 ```bash
 # Start development server
 npm start
-# or platform-specific
+
+# Platform-specific
 npm run android
 npm run ios
 npm run web
+
+# Clear cache and restart
+npx expo start -c
+
+# Web-specific
+npx expo start --web
+```
+
+## Web App Specific Configuration
+
+### Map Implementation (Leaflet for Web)
+**CRITICAL**: Never directly import Leaflet CSS in JavaScript files
+```javascript
+// ❌ WRONG - Causes Metro bundler error
+import 'leaflet/dist/leaflet.css';
+
+// ✅ CORRECT - Load via CDN in HTML
+// Add to web/index.html or public/index.html:
+// <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+```
+
+**Map File Structure:**
+- `components/MapView.web.js` - Leaflet for web
+- `components/MapView.js` - React Native Maps for mobile
+- `components/MapView.simple.js` - Simple fallback
+
+**Usage:**
+```javascript
+import MapView from '../components/MapView';
+
+<MapView
+  center={[35.6892, 51.3890]}
+  zoom={13}
+  onLocationSelect={(location) => console.log(location)}
+/>
+```
+
+### Navigation & Browser History
+- React Navigation handles URL updates automatically
+- Browser back button works out of the box
+- **DO NOT** override `popstate` events
+- **DO NOT** use `window.history.pushState` manually
+- Linking configuration in `App.js` handles deep links
+
+**Linking Config Pattern:**
+```javascript
+const linking = Platform.OS === 'web' ? {
+  prefixes: ['http://localhost:8081', 'http://localhost:8082'],
+  config: {
+    screens: {
+      Landing: '',
+      MainApp: {
+        screens: {
+          Profile: 'profile',
+          Settings: 'settings',
+        }
+      }
+    }
+  }
+} : undefined;
+```
+
+### State Persistence
+- Only enabled in `__DEV__` mode for native platforms
+- Web uses URL-based state restoration via linking
+- **DO NOT** persist state in production for mobile (causes reload issues)
+
+```javascript
+onStateChange={(state) => {
+  // Only save for native in dev mode
+  if (state && Platform.OS !== 'web' && __DEV__) {
+    AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
+  }
+}}
 ```
 
 ## Critical Implementation Notes

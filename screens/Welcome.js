@@ -5,6 +5,7 @@ import {
   Image,
   StyleSheet,
   TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import NewStyles from "../styles/NewStyles";
 import { themeColor0, themeColor10 } from "../theme/Color";
@@ -12,7 +13,7 @@ import { ImageBackground } from "expo-image";
 
 export default function Welcome({ navigation }) {
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit="contain" >
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/webbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={Platform.OS==='web' ? "cover":  "contain"}>
       <TouchableWithoutFeedback
         onPress={() => {
           navigation.navigate("OrderMenuScreen");

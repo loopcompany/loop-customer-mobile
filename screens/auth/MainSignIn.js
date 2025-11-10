@@ -4,7 +4,6 @@ import {
     Text,
     TextInput,
     Image,
-    ImageBackground,
     TouchableOpacity,
     StyleSheet,
     ScrollView,
@@ -22,6 +21,7 @@ import CustomStatusBar from "../../components/CustomStatusBar";
 import InviteCodeInput from "../../components/InviteCodeInput";
 import LocationPicker from "../../components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
+import { ImageBackground } from "expo-image";
 // Form state management with useReducer
 const initialState = {
     melicode: '',
@@ -40,14 +40,14 @@ const initialState = {
 const formReducer = (state, action) => {
     switch (action.type) {
         case 'SET_FIELD':
-            return { 
-                ...state, 
+            return {
+                ...state,
                 [action.field]: action.value,
                 errors: { ...state.errors, [action.field]: null }
             };
         case 'SET_ERROR':
-            return { 
-                ...state, 
+            return {
+                ...state,
                 errors: { ...state.errors, [action.field]: action.error }
             };
         case 'SET_ERRORS':
@@ -55,8 +55,8 @@ const formReducer = (state, action) => {
         case 'SET_LOADING':
             return { ...state, isLoading: action.isLoading };
         case 'GENERATE_CAPTCHA':
-            return { 
-                ...state, 
+            return {
+                ...state,
                 captcha: Math.floor(1000 + Math.random() * 9000).toString(),
                 captchaInput: ''
             };
@@ -74,21 +74,21 @@ export default function MainSignIn({ navigation }) {
     // Form validation
     const validateForm = () => {
         const errors = {};
-        
+
         // Melicode validation (10 digits)
         if (!state.melicode) {
             errors.melicode = 'کد ملی الزامی است';
         } else if (state.melicode.length !== 10 || !/^\d{10}$/.test(state.melicode)) {
             errors.melicode = 'کد ملی باید 10 رقم باشد';
         }
-        
+
         // Phone validation (11 digits starting with 09)
         if (!state.phone) {
             errors.phone = 'شماره موبایل الزامی است';
         } else if (state.phone.length !== 11 || !/^09\d{9}$/.test(state.phone)) {
             errors.phone = 'شماره موبایل باید 11 رقم و با 09 شروع شود';
         }
-        
+
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!state.email) {
@@ -107,21 +107,21 @@ export default function MainSignIn({ navigation }) {
         if (!state.region) {
             errors.region = 'انتخاب منطقه الزامی است';
         }
-        
+
         // Captcha validation
         if (!state.captchaInput) {
             errors.captchaInput = 'کد امنیتی الزامی است';
         } else if (state.captchaInput !== state.captcha) {
             errors.captchaInput = 'کد امنیتی صحیح نیست';
         }
-        
+
         return errors;
     };
 
     // Handle form submission
     const handleRegistration = async () => {
         const errors = validateForm();
-        
+
         if (Object.keys(errors).length > 0) {
             dispatch({ type: 'SET_ERRORS', errors });
             return;
@@ -141,26 +141,26 @@ export default function MainSignIn({ navigation }) {
             };
 
             const response = await authAPI.register(userData);
-            
+
             if (response.success) {
                 showToastOrAlert('کد تایید به شماره موبایل شما ارسال شد');
-                
+
                 // Navigate to verification screen
                 navigation.navigate('RegistrationVerificationScreen', {
                     phone: state.phone,
                     userData
                 });
             } else {
-                dispatch({ 
-                    type: 'SET_ERROR', 
-                    field: 'general', 
+                dispatch({
+                    type: 'SET_ERROR',
+                    field: 'general',
                     error: response.message || 'خطا در ثبت نام'
                 });
             }
         } catch (error) {
             console.log('Registration error:', error);
             let errorMessage = 'خطا در ثبت نام. لطفاً مجدداً تلاش کنید';
-            
+
             if (error.response?.data?.errors) {
                 // Handle field-specific errors from backend
                 const backendErrors = {};
@@ -170,7 +170,7 @@ export default function MainSignIn({ navigation }) {
                 dispatch({ type: 'SET_ERRORS', errors: backendErrors });
                 return;
             }
-            
+
             dispatch({ type: 'SET_ERROR', field: 'general', error: errorMessage });
         } finally {
             dispatch({ type: 'SET_LOADING', isLoading: false });
@@ -182,11 +182,11 @@ export default function MainSignIn({ navigation }) {
     };
 
     return (
-        <ImageBackground source={require("../../assets/moon.jpg")} style={styles.background}>
+        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/webbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"contain"}>
             <CustomStatusBar />
-            <KeyboardAvoidingView 
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-                style={{ flex: 1 }}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1, width: '100%' }}
             >
                 <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                     <View style={[styles.card, NewStyles.center]}>
@@ -201,13 +201,13 @@ export default function MainSignIn({ navigation }) {
                         <View style={styles.inputContainer}>
                             <TextInput
                                 style={[
-                                    NewStyles.textInput, 
-                                    NewStyles.text10, 
-                                    NewStyles.border10, 
+                                    NewStyles.textInput,
+                                    NewStyles.text10,
+                                    NewStyles.border10,
                                     { width: '100%', textAlign: 'right' },
                                     state.errors.melicode && styles.inputError
                                 ]}
-                                placeholder="کد ملی :"
+                                placeholder="کد ملی"
                                 placeholderTextColor={themeColor10.bgColor(0.9)}
                                 value={state.melicode}
                                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
@@ -225,9 +225,9 @@ export default function MainSignIn({ navigation }) {
                         <View style={styles.inputContainer}>
                             <TextInput
                                 style={[
-                                    NewStyles.textInput, 
-                                    NewStyles.text10, 
-                                    NewStyles.border10, 
+                                    NewStyles.textInput,
+                                    NewStyles.text10,
+                                    NewStyles.border10,
                                     { width: '100%', textAlign: 'right' },
                                     state.errors.phone && styles.inputError
                                 ]}
@@ -258,13 +258,13 @@ export default function MainSignIn({ navigation }) {
                         <View style={styles.inputContainer}>
                             <TextInput
                                 style={[
-                                    NewStyles.textInput, 
-                                    NewStyles.text10, 
-                                    NewStyles.border10, 
+                                    NewStyles.textInput,
+                                    NewStyles.text10,
+                                    NewStyles.border10,
                                     { width: '100%', textAlign: 'right' },
                                     state.errors.email && styles.inputError
                                 ]}
-                                placeholder="آدرس ایمیل : *"
+                                placeholder="آدرس ایمیل*"
                                 placeholderTextColor={themeColor10.bgColor(0.9)}
                                 value={state.email}
                                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
@@ -299,22 +299,22 @@ export default function MainSignIn({ navigation }) {
                         {/* Captcha */}
                         <View style={styles.inputContainer}>
                             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-                                <TextInput 
+                                <TextInput
                                     style={[
-                                        NewStyles.textInput, 
-                                        NewStyles.text10, 
-                                        NewStyles.border10, 
+                                        NewStyles.textInput,
+                                        NewStyles.text10,
+                                        NewStyles.border10,
                                         { width: '50%', textAlign: 'right' },
                                         state.errors.captchaInput && styles.inputError
-                                    ]} 
-                                    placeholderTextColor={themeColor10.bgColor(0.9)} 
+                                    ]}
+                                    placeholderTextColor={themeColor10.bgColor(0.9)}
                                     placeholder="کد امنیتی"
                                     value={state.captchaInput}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'captchaInput', value })}
                                     keyboardType="number-pad"
                                     maxLength={4}
                                 />
-                                
+
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                                     <TouchableOpacity onPress={generateCaptcha}>
                                         <Ionicons name={"reload"} size={24} color={themeColor4.bgColor(1)} />
@@ -336,10 +336,10 @@ export default function MainSignIn({ navigation }) {
                             onPress={handleRegistration}
                             style={styles.submitButton}
                         />
-                        
+
                         {/* Login Link */}
-                        <TouchableOpacity 
-                            style={{ marginTop: 15 }} 
+                        <TouchableOpacity
+                            style={{ marginTop: 15 }}
                             onPress={() => navigation.navigate('LoginScreen')}
                             disabled={state.isLoading}
                         >
@@ -365,6 +365,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 20,
         paddingVertical: 40,
+        width: '100%'
     },
     logo: {
         width: 200,
@@ -413,7 +414,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 10,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.04)'
+        borderColor: 'rgba(255,255,255,0.04)',
+        maxWidth: 800,
+
     },
     codeBox: {
         width: 40,

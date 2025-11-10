@@ -1,4 +1,4 @@
-import { View, FlatList, BackHandler, StyleSheet, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, FlatList, BackHandler, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Image } from 'expo-image';
@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { imageUri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles';
-import { emptySteps, removeTime } from '../../slices/stepSlice';
+import { emptySteps, removeTime, fetchSteps } from '../../slices/stepSlice';
 import { emptyCategory } from '../../slices/categorySlice';
 import { isMoreThan4HoursFromNow, showToastOrAlert } from '../../helpers/Common';
 import { themeColor0, themeColor3 } from '../../theme/Color';
@@ -28,7 +28,7 @@ import ServiceSchedule from '../../components/ServiceSchedule';
 import { emptyAddress } from '../../slices/addressSlice';
 import StepsHeader from '../../components/StepsHeader';
 
-export default function Steps({ navigation }) {
+export default function Steps({ navigation, route }) {
 
     const dispatch = useDispatch();
     const [step, setStep] = useState(0);
@@ -36,12 +36,17 @@ export default function Steps({ navigation }) {
     const length = steps?.data?.length;
     const [loading, setLoading] = useState(false);
 
+    // دریافت categoryId از route params
+    const categoryId = route?.params?.categoryId;
+    const categoryTitle = route?.params?.categoryTitle;
+
     // لاگ کردن مراحل بعد از دریافت
     useEffect(() => {
         console.log('🎯 [Steps] کامپوننت Steps لود شد');
         console.log('📋 [Steps] تعداد کل مراحل:', length);
         console.log('📋 [Steps] مرحله فعلی:', step);
-        console.log('📦 [Steps] داده‌های کامل مراحل:', JSON.stringify(steps, null, 2));
+        console.log('📦 [Steps] categoryId از route:', categoryId);
+        console.log('� [Steps] داده‌های کامل مراحل:', JSON.stringify(steps, null, 2));
         
         if (steps?.data && steps.data.length > 0) {
             console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
@@ -67,13 +72,8 @@ export default function Steps({ navigation }) {
 
 
     function required(step) {
-        console.log('━━━━━━━━━ VALIDATION START ━━━━━━━━━');
-        console.log('🔍 [Steps.required] بررسی validation برای step:', step);
-        console.log('📦 [Steps.required] داده این step:', JSON.stringify(steps.data?.[step], null, 2));
         
         const result = steps.data?.[step].every(item => {
-            console.log(`\n🔍 [Steps.required] بررسی item: ${item.type} (id: ${item.id})`);
-            console.log(`   is_required: ${item.is_required}`);
             
             if (["date", "time", "address", "gender"].includes(item.type) && item.is_required == 1) {
                 const isValid = !!item.value;
@@ -238,15 +238,6 @@ export default function Steps({ navigation }) {
                         }}
                     />
                 </ScrollView>
-
-                {/* <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
-                    <View style={{ flex: 1 }}>
-                        <Button title={'مرحله بعد'} loading={step == steps?.data?.length || loading} onPress={() => handleNextStep()} />
-                    </View>
-                    {step != 0 && <View style={{ flex: 1 }}>
-                        <Button title={'مرحله قبل'} loading={step == steps?.data?.length} onPress={() => { setStep((currStep) => currStep - 1); }} />
-                    </View>}
-                </View> */}
             </KeyboardAvoidingView>
         </View>
     )
@@ -255,6 +246,7 @@ export default function Steps({ navigation }) {
 const styles = StyleSheet.create({
     flatListContainer: {
         gap: 20,
+        paddingHorizontal:Platform.OS==='web' ? '20%' : 0
     },
 
     separator: {
