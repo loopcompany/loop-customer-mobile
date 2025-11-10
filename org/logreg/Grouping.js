@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "../../screens/Footer";
 import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
@@ -19,7 +20,7 @@ const Grouping = ({ navigation }) => {
   };
 
   return (
-    <View style={[NewStyles.container, { flex: 1 }]}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / شرکتی"
@@ -73,9 +74,8 @@ const Grouping = ({ navigation }) => {
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             paddingHorizontal: 20,
-            paddingTop: 100,
           }}
         >
           {/* Organizational Section */}
@@ -113,7 +113,7 @@ const Grouping = ({ navigation }) => {
                 }}
               >
           
-                سازمانی / دولتی
+                سازمانی / شرکتی
               </Text>
               {/* Arrow down */}
               <View
@@ -276,54 +276,10 @@ const Grouping = ({ navigation }) => {
           </View>
 
           {/* Second yellow section - Full width banner */}
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: "#ffeb3b",
-              paddingVertical: 8,
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 10,
-            }}
-          >
-            {/* Dotted line */}
-            <View
-              style={{
-                flex: 1,
-                borderTopWidth: 2,
-                borderTopColor: "#000",
-                borderStyle: "dotted",
-                marginRight: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: "VazirBold",
-                color: "#000",
-                textAlign: "center",
-              }}
-            >
-              راهنمای پنل شرکتی / خصوصی ۱
-            </Text>
-            {/* Red arrow pointing down */}
-            <View
-              style={{
-                marginLeft: 15,
-                width: 0,
-                height: 0,
-                borderLeftWidth: 8,
-                borderRightWidth: 8,
-                borderTopWidth: 12,
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                borderTopColor: "#ff0000",
-              }}
-            />
-          </View>
+         
         </View>
       </ImageBackground>
-    </View>
+    </SafeAreaView>
   );
 };
 
