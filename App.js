@@ -89,97 +89,7 @@ import GameMenuScreen from './screens/game/GameMenuScreen';
 import GamePlayScreen from './screens/game/GamePlayScreen';
 import GameResultScreen from './screens/game/GameResultScreen';
 import WebViewScreen from './screens/WebViewScreen';
-import OrganizationProfileScreen from './screens/organization/OrganizationProfileScreen';
-import OrganizationContractScreen from './screens/organization/OrganizationContractScreen';
-import TestAPIScreen from './screens/TestAPIScreen';
-
-// Import HOC and access control components
-import { withOrganizationAccess, ACCESS_PRESETS } from './components/withOrganizationAccess';
-
-// Create protected components for order-related screens
-const ProtectedOrderMenuScreen = withOrganizationAccess(OrderMenuScreen, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'OrderMenuScreen'
-});
-
-const ProtectedFolderScreen = withOrganizationAccess(FolderScreen, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'FolderScreen'
-});
-
-const ProtectedSubCategories = withOrganizationAccess(SubCategories, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'SubCategories'
-});
-
-const ProtectedSteps = withOrganizationAccess(Steps, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'Steps'
-});
-
-const ProtectedPreview = withOrganizationAccess(Preview, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'Preview'
-});
-
-const ProtectedDetails = withOrganizationAccess(Details, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'Details'
-});
-
-// Always allowed screens for organization users
-const AlwaysAllowedProfile = withOrganizationAccess(Profile, {
-  ...ACCESS_PRESETS.ORGANIZATION_ALWAYS_ALLOWED,
-  screenName: 'Profile'
-});
-
-// 🔒 Organization-only screens (فقط کاربران سازمانی لاگین شده)
-const ProtectedOrganizationProfile = withOrganizationAccess(OrganizationProfileScreen, {
-  allowOrganizationAccess: true,
-  requireCompleteAccess: false, // نمیخواد تایید کامل باشه
-  customAccessCheck: ({ isOrganizationUser, accessStatus, profileStatus, contractStatus, hasCompleteAccess }) => {
-    console.log('🔍 OrganizationProfile customAccessCheck:', {
-      isOrganizationUser,
-      profileStatus,
-      contractStatus,
-      hasCompleteAccess,
-      accessStatus: accessStatus ? 'exists' : 'null'
-    });
-    
-    // فقط کاربران سازمانی دسترسی دارند
-    if (!isOrganizationUser) {
-      console.log('❌ OrganizationProfile: Not organization user');
-      return {
-        allowed: false,
-        title: "دسترسی محدود",
-        message: "این بخش فقط برای کاربران سازمانی است. لطفا ابتدا به عنوان کاربر سازمانی وارد شوید.",
-        showRetry: false
-      };
-    }
-    // کاربر سازمانی است - دسترسی آزاد (حتی اگر تایید نشده باشد)
-    console.log('✅ OrganizationProfile: Organization user - allowing access');
-    return { allowed: true };
-  }
-});
-
-const ProtectedOrganizationContract = withOrganizationAccess(OrganizationContractScreen, {
-  allowOrganizationAccess: true,
-  requireCompleteAccess: false, // نمیخواد تایید کامل باشه
-  customAccessCheck: ({ isOrganizationUser, accessStatus }) => {
-    // فقط کاربران سازمانی دسترسی دارند
-    if (!isOrganizationUser) {
-      return {
-        allowed: false,
-        title: "دسترسی محدود",
-        message: "این بخش فقط برای کاربران سازمانی است. لطفا ابتدا به عنوان کاربر سازمانی وارد شوید.",
-        showRetry: false
-      };
-    }
-    // کاربر سازمانی است - دسترسی آزاد (حتی اگر تایید نشده باشد)
-    return { allowed: true };
-  }
-});
-
+import ScreenHeaders from "./components/ScreenHeaders";
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
@@ -187,8 +97,6 @@ SplashScreen.setOptions({
   duration: 2000,
   fade: true,
 });
-
-const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
 const App = () => {
   const navigationRef = useRef(null);
@@ -199,29 +107,12 @@ const App = () => {
   });
   
   const [isReady, setIsReady] = useState(false);
-  const [initialState, setInitialState] = useState();
 
   useEffect(() => {
-    const restoreState = async () => {
-      try {
-        // Only restore state in development mode for native platforms
-        if (__DEV__ && Platform.OS !== 'web') {
-          const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
-          const state = savedStateString ? JSON.parse(savedStateString) : undefined;
-
-          if (state !== undefined) {
-            setInitialState(state);
-          }
-        }
-      } finally {
-        setIsReady(true);
-      }
-    };
-
-    if (!isReady) {
-      restoreState();
-    }
-  }, [isReady]);
+    // غیرفعال کردن state persistence
+    // هر بار که اپ باز می‌شه، از صفحه اول شروع می‌شه
+    setIsReady(true);
+  }, []);
 
   useEffect(() => {
     if (loaded || error) {
@@ -238,9 +129,7 @@ const App = () => {
   }
 
   // Simple linking configuration for web only
-  // در وب، linking را غیرفعال می‌کنیم تا بعد از ریلود به صفحه اصلی برگردد
   const linking = Platform.OS === 'web' ? {
-    enabled: false, // غیرفعال کردن deep linking در وب
     prefixes: ['http://localhost:8081', 'http://localhost:8082', 'https://loop.app'],
     config: {
       screens: {
@@ -332,16 +221,9 @@ const App = () => {
       <NavigationContainer 
         ref={navigationRef}
         linking={linking}
-        initialState={initialState}
         fallback={<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><Text>Loading...</Text></View>}
         documentTitle={{
           formatter: (options, route) => `لوپ - ${route?.name || 'خانه'}`
-        }}
-        onStateChange={(state) => {
-          // Only save state for native platforms in dev mode
-          if (state && Platform.OS !== 'web' && __DEV__) {
-            AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
-          }
         }}
       >
         <Provider store={store}>
@@ -430,24 +312,6 @@ const App = () => {
               headerShown: false,
             }}
           />
-          {/* Organization profile and contract screens - 🔒 Protected */}
-          <Stack.Screen 
-            component={ProtectedOrganizationProfile} 
-            name="OrganizationProfile" 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            component={ProtectedOrganizationContract} 
-            name="OrganizationContract" 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen
-            component={TestAPIScreen}
-            name="TestAPIScreen"
-            options={{
-              headerShown: false,
-            }}
-          />
           <Stack.Screen
             component={Grouping}
             name="Grouping"
@@ -470,7 +334,7 @@ const App = () => {
               headerShown: false,
             }}
           />
-          <Stack.Screen component={ProtectedOrderMenuScreen} name="OrderMenuScreen" options={{ headerShown: false, }} />
+          <Stack.Screen component={OrderMenuScreen} name="OrderMenuScreen" options={{ headerShown: false, }} />
 <Stack.Screen
                     component={List}
                     name="List"
@@ -484,8 +348,8 @@ const App = () => {
             {() => (
               <MenuProvider>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
-                  <Stack.Screen component={ProtectedFolderScreen} name="FolderScreen" options={{ headerShown: false, }} />
-                  <Stack.Screen component={ProtectedSubCategories} name="SubCategories" options={{ headerShown: false }}/>
+                  <Stack.Screen component={FolderScreen} name="FolderScreen" options={{ headerShown: false, }} />
+                  <Stack.Screen component={SubCategories} name="SubCategories" options={{ headerShown: false }}/>
                   <Stack.Screen
                     component={ContractScreen}
                     name="ContractScreen"
@@ -493,10 +357,10 @@ const App = () => {
                       headerShown: false,
                     }}
                   />
-                  <Stack.Screen name='Add New Address' component={AddNewAddress} options={{ headerShown: true, header: () => <SubcategoryHeader title={'افزودن آدرس'} />, }} />
-                  <Stack.Screen name='Map' component={Map} options={{ headerShown: true, header: () => <SubcategoryHeader title={'موقعیت مکانی'} />, }} />
-                  <Stack.Screen component={ProtectedPreview} name="Preview" options={{ headerShown: false }}/>
-                  <Stack.Screen component={ProtectedDetails} name="Details" options={{ headerShown: false }}/>
+                  <Stack.Screen name='Add New Address' component={AddNewAddress} options={{ headerShown: false }} />
+                  <Stack.Screen name='Map' component={Map} options={{ headerShown: true, header: () => <ScreenHeaders title={'موقعیت مکانی'} />, }} />
+                  <Stack.Screen component={Preview} name="Preview" options={{ headerShown: false }}/>
+                  <Stack.Screen component={Details} name="Details" options={{ headerShown: false }}/>
                   <Stack.Screen component={Invoice} name="Invoice" options={{ headerShown: false }}/>
                   <Stack.Screen component={Increase} name="Increase" options={{ headerShown: false }}/>
                   <Stack.Screen component={PaymentScreen} name="PaymentScreen" options={{ headerShown: false }}/>
@@ -509,7 +373,7 @@ const App = () => {
                     component={DiscountCodeScreen}
                     name="DiscountCodeScreen"
                     options={{ headerShown: false, }} />
-                  <Stack.Screen name='Steps' component={ProtectedSteps} options={{ headerShown: false,  gestureEnabled: false }} />
+                  <Stack.Screen name='Steps' component={Steps} options={{ headerShown: false,  gestureEnabled: false }} />
 
                   <Stack.Screen
                     component={TechnicianVisitScreen}
@@ -620,7 +484,7 @@ const App = () => {
                     }}
                   />
                   <Stack.Screen
-                    component={AlwaysAllowedProfile}
+                    component={Profile}
                     name="Profile"
                     options={{
                       headerShown: false,

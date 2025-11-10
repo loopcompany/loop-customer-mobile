@@ -95,7 +95,8 @@ const NewStyles = StyleSheet.create({
   nav: {
     gap: 50,
     paddingHorizontal: '5%',
-    backgroundColor: themeColor4.bgColor(0)
+    backgroundColor: themeColor4.bgColor(0),
+    
   },
   categoriesWrapper: {
     justifyContent: "flex-start",
@@ -316,7 +317,7 @@ const NewStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     width: "100%",
-    maxWidth: 800,
+    // maxWidth: 800,
   },
 
   profileImage: {

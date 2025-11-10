@@ -117,7 +117,7 @@ export default function Map({ route, navigation }) {
             >
                 <MarkerIcon />
             </View>
-            <View style={{ position: 'absolute', backgroundColor: 'transparent', width: '100%', bottom: 0, paddingHorizontal: '5%', alignItems: 'flex-end' }}>
+            <View style={{ position: 'absolute', backgroundColor: 'transparent', width: '100%', bottom: 0, paddingHorizontal: '5%', alignItems: Platform.OS==='web' ? 'center' : 'flex-end' }}>
                 <Pressable style={[styles.locateBtn, NewStyles.center, NewStyles.shadow, NewStyles.border100]} onPress={() => { getLocation() }}>
                     <Ionicons name="locate" size={24} color={themeColor0.bgColor(1)} />
                 </Pressable>

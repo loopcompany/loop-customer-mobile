@@ -13,7 +13,7 @@ import CustomStatusBar from "./../components/CustomStatusBar";
 import { handleError, showToastOrAlert } from "./../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import categoriesAPI from "../services/CategoriesApi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchSteps } from "../slices/stepSlice";
 import { setCategory } from "../slices/categorySlice";
 import Loader from "../components/Loader";
@@ -24,30 +24,34 @@ export default function FolderScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
+  const user = useSelector(state => state?.user);
+  console.log(user);
+  
+  const loadCategories = async () => {
+    try {
+      const res = await categoriesAPI.getCategories();
+      // API shape: { success: true, data: [...] }
+      const categories = Array.isArray(res.data)
+        ? res.data
+        : res.data || res.data?.data || [];
+      setFolders(categories);
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+      showToastOrAlert("خطا در دریافت دسته‌ها");
+    } finally {
+      setRefreshing(false);
+      setLoader(false);
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        const res = await categoriesAPI.getCategories();
-        // API shape: { success: true, data: [...] }
-        const categories = Array.isArray(res.data)
-          ? res.data
-          : res.data || res.data?.data || [];
-        if (mounted) setFolders(categories);
-      } catch (err) {
-        console.error("Failed to load categories:", err);
-        showToastOrAlert("خطا در دریافت دسته‌ها");
-      } finally {
-        setRefreshing(false);
-        setLoader(false);
-      }
-    };
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [refreshing]);
+    loadCategories();
+  }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadCategories();
+  };
 
   if (loader) {
     return <Loader />;
@@ -60,23 +64,22 @@ export default function FolderScreen({ navigation }) {
     >
       <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/webbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
-          <View style={styles.logoWrapper}>
-            <Image
-              source={require("../assets/logo.png")}
-              style={NewStyles.logo}
-            />
-          </View>
-        <View style={{ flex: 1, alignItems:'flex-start' }}>
+        <View style={styles.logoWrapper}>
+          <Image
+            source={require("../assets/logo.png")}
+            style={NewStyles.logo}
+          />
+        </View>
+        <View style={{ flex: 1, alignItems: 'flex-start' }}>
           {/* لوگو بالا */}
           <FlatList
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
-                onRefresh={() => {
-                  setRefreshing(true);
-                }}
+                onRefresh={handleRefresh}
               />
             }
+            style={{ width: '100%' }}
             data={folders}
             renderItem={({ item }) => {
               return (

@@ -4,37 +4,16 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   Platform,
 } from "react-native";
-import { useSelector } from "react-redux";
 import NewStyles from "../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor4, themeColor10 } from "../theme/Color";
+import { themeColor0, themeColor10 } from "../theme/Color";
 import { ImageBackground } from "expo-image";
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function Welcome({ navigation }) {
-  const { isAuthenticated } = useSelector(state => state.auth);
-
-  const handleMainPress = () => {
-    // 🔒 چک کنیم کاربر لاگین کرده یا نه
-    if (isAuthenticated) {
-      // کاربر لاگین کرده → به صفحه اصلی بره
-      navigation.navigate("MainApp", { screen: 'FolderScreen' });
-    } else {
-      // کاربر لاگین نکرده → به صفحه لاگین فردی بره
-      navigation.navigate("SignInLanding");
-    }
-  };
-
-  const handleOrganizationPress = () => {
-    // هدایت به صفحه انتخاب نوع سازمانی
-    navigation.navigate("Grouping");
-  };
-
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/webbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={Platform.OS === 'web' ? "cover" : "contain"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/webbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={Platform.OS==='web' ? "cover":  "contain"}>
       <TouchableWithoutFeedback
         onPress={() => {
           navigation.navigate("OrderMenuScreen");
@@ -48,19 +27,22 @@ export default function Welcome({ navigation }) {
               resizeMode="contain"
             />
           </View>
-
-          {/* دکمه ورود سازمانی */}
-          <View style={styles.organizationButtonContainer}>
-            <TouchableOpacity
-              style={styles.organizationButton}
-              onPress={handleOrganizationPress}
+          <View style={[{ flex: 2, gap: 15 }]}>
+            <Text
+              style={[NewStyles.title4, { textAlign: "center", fontSize: 40 }]}
             >
-              <Icon name="business" size={24} color={themeColor4.color} />
-              <Text style={styles.organizationButtonText}>
-                ورود سازمانی / شرکتی
-              </Text>
-              <Icon name="arrow-back" size={24} color={themeColor4.color} />
-            </TouchableOpacity>
+              سلام
+            </Text>
+            <Text
+              style={[NewStyles.title1, { textAlign: "center", fontSize: 45 }]}
+            >
+              به جوهر آینده
+            </Text>
+            <Text
+              style={[NewStyles.title4, { textAlign: "center", fontSize: 40 }]}
+            >
+              خوش آمدید
+            </Text>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -69,36 +51,8 @@ export default function Welcome({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  organizationButtonContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-  },
-  organizationButton: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: themeColor1.bgColor(0.9),
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: themeColor4.bgColor(0.3),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
-  },
-  organizationButtonText: {
-    fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-    color: themeColor4.color,
-    textAlign: 'center',
-    flex: 1,
+  logo: {
+    width: 200,
+    height: 100,
   },
 });

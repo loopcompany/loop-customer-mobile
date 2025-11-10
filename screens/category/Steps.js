@@ -40,18 +40,23 @@ export default function Steps({ navigation, route }) {
     const categoryId = route?.params?.categoryId;
     const categoryTitle = route?.params?.categoryTitle;
 
-    // لاگ کردن مراحل بعد از دریافت
+    // بازیابی داده‌ها در صورت ریلود صفحه در وب
     useEffect(() => {
         console.log('🎯 [Steps] کامپوننت Steps لود شد');
         console.log('📋 [Steps] تعداد کل مراحل:', length);
         console.log('📋 [Steps] مرحله فعلی:', step);
         console.log('📦 [Steps] categoryId از route:', categoryId);
-        console.log('� [Steps] داده‌های کامل مراحل:', JSON.stringify(steps, null, 2));
+        
+        // اگر در وب هستیم و داده‌ها خالی است (بعد از ریلود)، دوباره fetchSteps را صدا بزنیم
+        if (Platform.OS === 'web' && (!steps?.data || steps.data.length === 0) && categoryId) {
+            console.log('🔄 [Steps] داده‌ها خالی است، دوباره fetchSteps صدا زده می‌شود...');
+            dispatch(fetchSteps(categoryId));
+        }
         
         if (steps?.data && steps.data.length > 0) {
             console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
         }
-    }, [steps, step, length]);
+    }, [categoryId]);
 
     useFocusEffect(
         useCallback(() => {
@@ -165,7 +170,6 @@ export default function Steps({ navigation, route }) {
             return true;
         });
         
-        console.log('━━━━━━━━━ VALIDATION RESULT:', result ? '✅ VALID' : '❌ INVALID', '━━━━━━━━━');
         return result;
     }
 

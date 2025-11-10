@@ -22,7 +22,7 @@ export const fetchOrders = createAsyncThunk(
                 }
             });
 
-            // console.log('Orders API response:', response.data);
+            console.log('Orders API response:', response.data);
 
             if (response.data?.success) {
                 return response.data.data || [];

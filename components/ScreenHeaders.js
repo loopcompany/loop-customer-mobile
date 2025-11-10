@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, StatusBar,
 import React from "react";
 import NewStyles from "../styles/NewStyles";
 import { themeColor4 } from "../theme/Color";
+import { useNavigation } from "@react-navigation/native";
 
 const ScreenHeaders = ({ 
   title, 
@@ -14,10 +15,10 @@ const ScreenHeaders = ({
 }) => {
   const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
-  
+  const navigation = useNavigation()
   // Priority: new API > old API > empty function
   // For RTL apps: back button should be on the right side
-  const handleBack = onBackPress || onPressRight || (() => {});
+  const handleBack = onBackPress || onPressRight || (() => {navigation.goBack()});
   const handleNext = onNextPress || onPressLeft || (() => {});
   
   return (
@@ -41,13 +42,13 @@ const ScreenHeaders = ({
       </View>
       
       {/* Left side: Next button (RTL) */}
-      <TouchableOpacity 
+      {/* <TouchableOpacity 
         onPress={handleNext} 
         style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
       >
         <Text style={styles.titleText}>بعدی</Text>
         <Image source={require("../assets/next.png")} style={styles.arrow} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

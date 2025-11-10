@@ -54,9 +54,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     titleText: {
+        ...NewStyles.title10,
         textAlign: "center",
         fontSize: 12,
-        fontFamily: 'VazirBold',
     },
     iconContainer: {
         width: 50,
@@ -76,8 +76,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 10,
     },
-    titleText: {
-        textAlign: "center",
-        fontSize: 16,
-    },
+    
 });

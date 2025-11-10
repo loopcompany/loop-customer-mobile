@@ -38,6 +38,7 @@ export default function Landing({ navigation }) {
         // Set token in Redux
         dispatch(setToken(authStatus.token));
         dispatch(fetchAddresses(authStatus.token));
+        await dispatch(fetchUser(authStatus.token));
         // Fetch user data if needed
         if (authStatus.user) {
           console.log('✅ Landing: User data available, redirecting to main app');

@@ -225,7 +225,7 @@ export default function Preview({ navigation }) {
             console.log('📦 [Preview] payload نهایی:', JSON.stringify(payload, null, 2));
 
             // ✅ Route صحیح: POST /api/orders/ (با / در انتها)
-            const response = await axios.post(`${uri}/orders/`, payload, { 
+            const response = await axios.post(`${uri}/orders/submit`, payload, { 
                 headers: { 
                     'Accept': 'application/json', 
                     'Authorization': `Bearer ${token}`,
@@ -284,7 +284,7 @@ export default function Preview({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth:800 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={NewStyles.rowWrapper}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
@@ -422,7 +422,7 @@ export default function Preview({ navigation }) {
                 {imagePath && <Image style={[{ height: 250, margin: '5%' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, alignItems:'center' }}>
                     <Button title={'ثبت نهایی سفارش'} textStyle={NewStyles.text4} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>
             </View>

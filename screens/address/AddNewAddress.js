@@ -10,6 +10,7 @@ import { uri } from '../../services/URL';
 import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile } from '../../slices/addressSlice';
 import { showToastOrAlert } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function AddNewAddress({ navigation }) {
 
@@ -20,6 +21,7 @@ export default function AddNewAddress({ navigation }) {
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} mode='padding' style={NewStyles.container}>
+            <ScreenHeaders title={'ثبت آدرس'}/>
             <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
 
                 <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
@@ -147,7 +149,7 @@ export default function AddNewAddress({ navigation }) {
                         multiline
                     />
                 </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
+            <View style={[NewStyles.row, NewStyles.nav, {alignItems:'center', justifyContent:'center'}]}>
                 <Button title={'مرحله بعد'} onPress={() => {
                     if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address) {
                         showToastOrAlert('لطفا فیلدهای الزامی را پر کنید.')
@@ -168,6 +170,9 @@ const styles = StyleSheet.create({
     contentContainerStyle: {
         paddingHorizontal: '5%',
         paddingVertical: '5%',
+        maxWidth:800,
+        alignSelf:'center',
+        width:'90%',
         gap: 10,
     },
     row: {

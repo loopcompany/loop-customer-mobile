@@ -1,4 +1,4 @@
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -87,20 +87,7 @@ export default function Address({ step, data, navigation }) {
                                         dispatch(setAddressId(item?.id))
                                         dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
                                     }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && {backgroundColor:themeColor1.bgColor(1)}]}>
-                            {/* <View>
-                                <BouncyCheckbox
-                                    size={25}
-                                    fillColor={themeColor0.bgColor(1)}
-                                    unFillColor={themeColor5.bgColor(1)}
-                                    iconStyle={{ borderColor: themeColor0.bgColor(1) }}
-                                    innerIconStyle={{ borderWidth: 1 }}
-                                    isChecked={addressId == item?.id}
-                                    onPress={() => {
-                                        dispatch(setAddressId(item?.id))
-                                        dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
-                                    }}
-                                />
-                            </View> */}
+                           
                             <View style={{ flex: 1 }}>
                                 {renderRow(`${item?.title}`, '')}
                                 {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }])}
@@ -128,7 +115,7 @@ const styles = StyleSheet.create({
         backgroundColor: themeColor4.bgColor(1)
     },
     itemWrapper: {
-        width: deviceWidth * 0.9,
+        width:Platform.OS === 'web' ? '100%' : deviceWidth * 0.9,
         backgroundColor: themeColor4.bgColor(1),
         paddingHorizontal: '5%',
         paddingVertical: 15,
