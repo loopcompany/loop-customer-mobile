@@ -40,7 +40,8 @@ const ScreenHeaders = ({
       <View style={styles.titleContainer}>
         <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
       </View>
-      
+
+      <View style={{ flex: 1 }} />
       {/* Left side: Next button (RTL) */}
       {/* <TouchableOpacity 
         onPress={handleNext} 

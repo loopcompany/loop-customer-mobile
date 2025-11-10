@@ -222,7 +222,11 @@ export default function Preview({ navigation }) {
                 console.log('ℹ️ [Preview] کاربر سازمانی است اما مرحله service_schedule ندارد');
             }
 
-            console.log('📦 [Preview] payload نهایی:', JSON.stringify(payload, null, 2));
+            // 🔍 لاگ کردن دیتای کامل ارسال به API
+            console.log('📦 [Preview] payload نهایی برای ارسال به API:', JSON.stringify(payload, null, 2));
+            console.log('🌐 [Preview] URL ارسال:', `${uri}/orders/submit`);
+            console.log('🔐 [Preview] Authorization Header:', token ? 'Token exists' : 'No token');
+            console.log('📊 [Preview] Payload size:', JSON.stringify(payload).length, 'characters');
 
             // ✅ Route صحیح: POST /api/orders/ (با / در انتها)
             const response = await axios.post(`${uri}/orders/submit`, payload, { 
@@ -233,7 +237,10 @@ export default function Preview({ navigation }) {
                 } 
             });
 
-            console.log('✅ [Preview] پاسخ سرور:', response.status, response.data);
+            // 📥 لاگ کردن پاسخ کامل از API
+            console.log('✅ [Preview] پاسخ سرور - Status:', response.status);
+            console.log('✅ [Preview] پاسخ سرور - Headers:', JSON.stringify(response.headers, null, 2));
+            console.log('✅ [Preview] پاسخ سرور - Data:', JSON.stringify(response.data, null, 2));
 
             if (response.status == 200 || response.status == 201) {
                 showToastOrAlert(response?.data?.message);
@@ -246,8 +253,11 @@ export default function Preview({ navigation }) {
                 });
             }
         } catch (error) {
-            console.error('❌ [Preview] خطا در ثبت سفارش:', error);
-            console.error('❌ [Preview] جزئیات خطا:', error.response?.data);
+            console.error('❌ [Preview] خطا در ثبت سفارش:', error.message);
+            console.error('❌ [Preview] Error Status:', error.response?.status);
+            console.error('❌ [Preview] Error Headers:', JSON.stringify(error.response?.headers, null, 2));
+            console.error('❌ [Preview] Error Data:', JSON.stringify(error.response?.data, null, 2));
+            console.error('❌ [Preview] Full Error Object:', JSON.stringify(error, null, 2));
             
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
             showToastOrAlert(message);

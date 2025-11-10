@@ -3024,10 +3024,10 @@ getenv@^2.0.0:
   resolved "https://registry.yarnpkg.com/getenv/-/getenv-2.0.0.tgz#b1698c7b0f29588f4577d06c42c73a5b475c69e0"
   integrity sha512-VilgtJj/ALgGY77fiLam5iD336eSWi96Q15JSAG1zi8NRBysm3LXKdGnHb4m5cuyxvOLQQKWpBZAT6ni4FI2iQ==
 
-gifted-charts-core@0.1.66:
-  version "0.1.66"
-  resolved "https://registry.yarnpkg.com/gifted-charts-core/-/gifted-charts-core-0.1.66.tgz#738a16b013bd472329eb12e7c288c71821c584ce"
-  integrity sha512-qbfgxjrInrWpnomvrjVARF76uPj3JllKySxMgslQRKIe0ehIuD58mRY5qP3iFzD96ngPcxsTy5M0cFbXqykJdA==
+gifted-charts-core@0.1.67:
+  version "0.1.67"
+  resolved "https://registry.yarnpkg.com/gifted-charts-core/-/gifted-charts-core-0.1.67.tgz#2428df878adbe11b1de075ad899bf531a9ed714b"
+  integrity sha512-5JVZOj7horLQj8QGCQa3wCLYva1g6pEa3hAybTL2kk3Ok6jaz0kLcTy7iVQXQhVBqcC47V+nhBbUglBf+2a7hg==
 
 glob@^10.3.10, glob@^10.4.2:
   version "10.4.5"
@@ -4464,11 +4464,11 @@ react-native-gesture-handler@~2.24.0:
     invariant "^2.2.4"
 
 react-native-gifted-charts@^1.4.64:
-  version "1.4.64"
-  resolved "https://registry.yarnpkg.com/react-native-gifted-charts/-/react-native-gifted-charts-1.4.64.tgz#405860ca3f0f3e24e2b24ea5a38b4ecd6c60131a"
-  integrity sha512-jbr6RZ/61skhC7z5BKAu4e5jsWgVnmjU5UoVW3DO9rcqDpeqdIQzNoqmazjuHa7NvDjfKNey6FdblFTkvnBHdQ==
+  version "1.4.65"
+  resolved "https://registry.yarnpkg.com/react-native-gifted-charts/-/react-native-gifted-charts-1.4.65.tgz#cd2f10fd34d4bb53793cb0e1d83a9637d43645da"
+  integrity sha512-00+BrSYsIJR6H5KE0sqilGfvELP05+uG5DWCyq5UQUu/2tcgaLcVcinE7VQyBNFD71TXd6u+PqqC51yLke19+Q==
   dependencies:
-    gifted-charts-core "0.1.66"
+    gifted-charts-core "0.1.67"
 
 react-native-is-edge-to-edge@^1.1.6, react-native-is-edge-to-edge@^1.1.7, react-native-is-edge-to-edge@^1.2.1:
   version "1.2.1"
