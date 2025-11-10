@@ -41,6 +41,24 @@ const ScreenHeaders = ({
         <Image source={require("../assets/back.png")} style={styles.arrow} />
         <Text style={[NewStyles.title10,styles.titleText]}>قبلی</Text>
       </TouchableOpacity>
+<<<<<<< HEAD
+=======
+      
+      {/* Center: Title */}
+      <View style={styles.titleContainer}>
+        <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
+      </View>
+
+      <View style={{ flex: 1 }} />
+      {/* Left side: Next button (RTL) */}
+      {/* <TouchableOpacity 
+        onPress={handleNext} 
+        style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
+      >
+        <Text style={styles.titleText}>بعدی</Text>
+        <Image source={require("../assets/next.png")} style={styles.arrow} />
+      </TouchableOpacity> */}
+>>>>>>> 06a1cfc5ada77ac4f49bf7964d377b4134caf787
     </View>
   );
 };
