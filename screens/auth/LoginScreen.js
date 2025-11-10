@@ -13,6 +13,7 @@ import { themeColor0, themeColor1, themeColor10, themeColor4 } from "../../theme
 import { useTranslation } from "react-i18next";
 import { setToken, setUserType } from "../../slices/authSlice";
 import { fetchUser } from "../../slices/userSlice";
+import { fetchAddresses } from "../../slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 const initialState = {
@@ -166,6 +167,7 @@ export default function LoginScreen({ navigation }) {
         reduxDispatch(setToken(token));
         reduxDispatch(setUserType('individual')); // کاربر فردی
         reduxDispatch(fetchUser(token));
+        reduxDispatch(fetchAddresses(token));
 
         showToastOrAlert('ورود با موفقیت انجام شد');
 

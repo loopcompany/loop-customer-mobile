@@ -481,17 +481,41 @@ export default function Details({ route, navigation }) {
                     <AccordionHeader
                         title="اطلاعات تکنسین"
                         isActive={data?.technician}
-                        isOpen={showTechnician}
+                        isOpen={showTechnician || data?.technician_cancel_reason}
                         onPress={() => {
                             if (data?.technician) {
-                                setShowTechnician(!showTechnician)
+                                // اگر علت لغو وجود داره، accordion رو نبندیم
+                                if (!data?.technician_cancel_reason) {
+                                    setShowTechnician(!showTechnician)
+                                }
                             } else {
                                 showToastOrAlert('هنوز تکنسینی به سفارش شما اختصاص داده نشده است.')
                             }
                         }}
                     />
-                    {showTechnician && data?.technician && (
-                        <TechnicianDetailsComponent navigation={navigation} data={data} renderRow={renderRow} />
+                    {(showTechnician || data?.technician_cancel_reason) && data?.technician && (
+                        <View>
+                            <TechnicianDetailsComponent navigation={navigation} data={data} renderRow={renderRow} />
+                            
+                            {/* علت لغو توسط متخصص */}
+                            {data?.technician_cancel_reason && (
+                                <View style={[{ backgroundColor: themeColor6.bgColor(0.1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10, marginTop: 10 }, NewStyles.border10]}>
+                                    <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
+                                        <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor6.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
+                                            <View style={[NewStyles.row, { gap: 5 }]}>
+                                                <Ionicons name="close-circle-outline" size={24} color={themeColor6.color} />
+                                                <Text style={[NewStyles.title, { color: themeColor6.color }]}>علت لغو سفارش توسط متخصص</Text>
+                                            </View>
+                                        </View>
+                                        <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.border10]}>
+                                            <Text style={[NewStyles.text10, { textAlign: 'right', lineHeight: 24 }]}>
+                                                {data?.technician_cancel_reason}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
+                        </View>
                     )}
 
                     <AccordionHeader
