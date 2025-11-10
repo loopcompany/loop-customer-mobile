@@ -1,76 +1,76 @@
 const palate = [
   {
-    //neon blue
+    // 0 - neon blue
     color: "#002b54",
     bgColor: (opacity) => `rgba(0, 72, 143, ${opacity})`,
   },
   {
-    //yellow
+    // 1 - yellow
     color: "#ffd700ff",
     bgColor: (opacity) => `rgba(255, 215, 0, ${opacity})`,
   },
   {
-    //blue
+    // 2 - blue
     color: "#082D81",
     bgColor: (opacity) => `rgba(8, 45, 129, ${opacity})`,
   },
   {
-    //gray
+    // 3 - gray
     color: "#999999",
     bgColor: (opacity) => `rgba(153, 153, 153, ${opacity})`,
   },
   {
-    //white
+    // 4 - white
     color: "#FFFFFF",
     bgColor: (opacity) => `rgba(255, 255, 255, ${opacity})`,
   },
   {
-    //background white
+    // 5 - background white
     color: "#FAFAFA",
     bgColor: (opacity) => `rgba(250, 250, 250, ${opacity})`,
   },
   {
-    //red
+    // 6 - red
     color: "#D12929",
     bgColor: (opacity) => `rgba(209, 41, 41, ${opacity})`,
   },
   {
-    //green
+    // 7 - green
     color: "#2e7d32",
     bgColor: (opacity) => `rgba(46, 125, 50, ${opacity})`,
   },
   {
-    //blue
+    // 8 - blue
     color: "#6495ED",
     bgColor: (opacity) => `rgba(100, 149, 237, ${opacity})`,
   },
   {
-    //purple
+    // 9 - purple
     color: "#6C3BAA",
     bgColor: (opacity) => `rgba(108, 59, 170, ${opacity})`,
   },
   {
-    //black
+    // 10 - black
     color: "#000000",
     bgColor: (opacity) => `rgba(0, 0, 0, ${opacity})`,
   },
   {
-    //orange
+    // 11 - orange
     color: "#ee8a00",
     bgColor: (opacity) => `rgba(238, 138, 0, ${opacity})`,
   },
   {
-    //dark gray
+    // 12 - dark gray
     color: "#1c1c1e",
     bgColor: (opacity) => `rgba(28, 28, 30, ${opacity})`,
   },
   {
-    //dark blue
+    // 13 - dark blue
     color: "#003448",
     bgColor: (opacity) => `rgba(0, 52, 72, ${opacity})`,
   },
   {
-    //light blue
+    // 14 - light blue
     color: "#d1e9ff",
     bgColor: (opacity) => `rgba(209, 233, 255, ${opacity})`,
   },
