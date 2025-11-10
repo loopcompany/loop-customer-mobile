@@ -11,7 +11,7 @@ import { showToastOrAlert } from "../../helpers/Common";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor0, themeColor1, themeColor10, themeColor4 } from "../../theme/Color";
 import { useTranslation } from "react-i18next";
-import { setToken } from "../../slices/authSlice";
+import { setToken, setUserType } from "../../slices/authSlice";
 import { fetchUser } from "../../slices/userSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
@@ -164,6 +164,7 @@ export default function LoginScreen({ navigation }) {
 
         // Update Redux store
         reduxDispatch(setToken(token));
+        reduxDispatch(setUserType('individual')); // کاربر فردی
         reduxDispatch(fetchUser(token));
 
         showToastOrAlert('ورود با موفقیت انجام شد');
@@ -264,6 +265,7 @@ export default function LoginScreen({ navigation }) {
 
               // Update Redux store
               reduxDispatch(setToken(savedToken));
+              reduxDispatch(setUserType('individual')); // کاربر فردی
               reduxDispatch(fetchUser(savedToken));
 
               showToastOrAlert('ورود خودکار انجام شد');
