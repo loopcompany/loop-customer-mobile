@@ -10,16 +10,14 @@ const ScreenHeaders = ({
   onPressLeft,    
   onPressRight,
   // New API (recommended - more clear naming)
-  onBackPress,
-  onNextPress
+  onBackPress
 }) => {
   const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
-  const navigation = useNavigation()
-  // Priority: new API > old API > empty function
-  // For RTL apps: back button should be on the right side
-  const handleBack = onBackPress || onPressRight || (() => {navigation.goBack()});
-  const handleNext = onNextPress || onPressLeft || (() => {});
+  const navigation = useNavigation();
+  
+  // Priority: new API > old API > default navigation.goBack()
+  const handleBack = onBackPress || onPressLeft || (() => {navigation.goBack()});
   
   return (
     <View style={[styles.header, NewStyles.rowWrapper, { 
@@ -27,28 +25,22 @@ const ScreenHeaders = ({
       paddingTop: statusBarHeight,
       height: 50 + statusBarHeight
     }]}>
-      {/* Right side: Back button (RTL) */}
+      {/* Right side: Empty space for symmetry */}
+      <View style={styles.iconContainer} />
+      
+      {/* Center: Title */}
+      <View style={styles.titleContainer}>
+        <Text style={[NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
+      </View>
+      
+      {/* Left side: Back button (RTL) */}
       <TouchableOpacity 
         onPress={handleBack} 
         style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
       >
         <Image source={require("../assets/back.png")} style={styles.arrow} />
-        <Text style={styles.titleText}>قبلی</Text>
+        <Text style={[NewStyles.title10,styles.titleText]}>قبلی</Text>
       </TouchableOpacity>
-      
-      {/* Center: Title */}
-      <View style={styles.titleContainer}>
-        <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
-      </View>
-      
-      {/* Left side: Next button (RTL) */}
-      {/* <TouchableOpacity 
-        onPress={handleNext} 
-        style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
-      >
-        <Text style={styles.titleText}>بعدی</Text>
-        <Image source={require("../assets/next.png")} style={styles.arrow} />
-      </TouchableOpacity> */}
     </View>
   );
 };
@@ -86,6 +78,6 @@ const styles = StyleSheet.create({
   titleText: {
     textAlign: "center",
     fontSize: 12,
-    fontFamily: 'VazirBold',
+    // fontFamily: 'VazirBold',
   },
 });
