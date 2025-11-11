@@ -257,11 +257,14 @@ import MapView from '../components/MapView';
     <Stack.Screen name="Landing" />
     <Stack.Screen name="Welcome" />
     
-    {/* All Screens - Flat Structure */}
-    <Stack.Screen name="FolderScreen" />
-    <Stack.Screen name="Profile" />
-    <Stack.Screen name="OrdersScreen" />
-    {/* ... all other screens ... */}
+    {/* Main App Screens */}
+    <Stack.Screen name="MainApp">
+      <Stack.Navigator>
+        <Stack.Screen name="FolderScreen" />
+        <Stack.Screen name="Profile" />
+        {/* ... */}
+      </Stack.Navigator>
+    </Stack.Screen>
   </Stack.Navigator>
 </NavigationContainer>
 ```
@@ -274,11 +277,13 @@ const linking = {
     screens: {
       Landing: '',
       Welcome: 'welcome',
-      // Flat structure - all screens at same level
-      FolderScreen: 'folder',
-      Profile: 'profile',
-      OrdersScreen: 'orders',
-      // ...
+      MainApp: {
+        screens: {
+          FolderScreen: 'folder',
+          Profile: 'profile',
+          // ...
+        }
+      }
     }
   }
 };

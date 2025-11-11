@@ -53,7 +53,7 @@
 ### کلیک روی بقیه صفحه (Main Area):
 ```javascript
 if (isAuthenticated) {
-  navigate('FolderScreen');
+  navigate('MainApp/FolderScreen');
 } else {
   navigate('SignInLanding'); // ورود فردی
 }
@@ -75,7 +75,7 @@ Grouping (انتخاب نوع سازمانی)
   ↓
 Login (ورود سازمانی)
   ↓
-FolderScreen (اپلیکیشن اصلی)
+MainApp (اپلیکیشن اصلی)
 ```
 
 ---
@@ -126,13 +126,13 @@ const styles = StyleSheet.create({
 1. باز کردن اپ → Welcome
 2. کلیک روی دکمه "ورود سازمانی" → Grouping
 3. انتخاب نوع سازمانی → Login
-4. ورود → FolderScreen
+4. ورود → MainApp
 ```
 
 ### ✅ سناریو 3: کاربر لاگین کرده
 ```
 1. باز کردن اپ → Welcome
-2. کلیک روی بقیه صفحه → FolderScreen
+2. کلیک روی بقیه صفحه → MainApp/FolderScreen
 ```
 
 ---

@@ -125,12 +125,12 @@ const linking = Platform.OS === 'web' ? {
   config: {
     screens: {
       Landing: '',
-      Welcome: 'welcome',
-      // Flat structure - all screens at root level
-      FolderScreen: 'folder',
-      Profile: 'profile',
-      OrdersScreen: 'orders',
-      // No nested MainApp navigator
+      MainApp: {
+        screens: {
+          Profile: 'profile',
+          Settings: 'settings',
+        }
+      }
     }
   }
 } : undefined;

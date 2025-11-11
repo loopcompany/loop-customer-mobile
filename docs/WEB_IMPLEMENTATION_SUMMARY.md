@@ -171,7 +171,7 @@ Ctrl+H → Find: Alert.alert( → Replace: showAlert(
 
 ### ✅ حتماً انجام دهید:
 1. Route Map ها را **دقیق** تنظیم کنید
-2. همه screens را به صورت flat در Navigator قرار دهید (بدون nested MainApp)
+2. تمام screen های MainApp را در `MAIN_APP_SCREENS` بگذارید
 3. از `replaceState` استفاده کنید (نه `pushState`)
 4. Flag ها را برای جلوگیری از loop استفاده کنید
 5. تابع `showAlert` را دقیقاً کپی کنید
