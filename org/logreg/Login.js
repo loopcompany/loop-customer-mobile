@@ -132,18 +132,10 @@ const Login = ({ navigation }) => {
             {
               text: 'تایید',
               onPress: () => {
-                // Navigate to FolderScreen inside MainApp
+                // Navigate to FolderScreen
                 navigation.reset({
                   index: 0,
-                  routes: [
-                    {
-                      name: 'MainApp',
-                      state: {
-                        routes: [{ name: 'FolderScreen' }],
-                        index: 0,
-                      },
-                    },
-                  ],
+                  routes: [{ name: 'FolderScreen' }],
                 });
               },
             },

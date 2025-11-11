@@ -97,7 +97,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         }
 
         showToastOrAlert('شماره موبایل با موفقیت تایید شد');
-        navigation.navigate('MainApp', { screen: 'FolderScreen' }); // Navigate to main app
+        navigation.navigate('FolderScreen'); // Navigate to main app
       } else {
         setError(response.message || 'کد وارد شده صحیح نیست');
         setVerificationCode('');

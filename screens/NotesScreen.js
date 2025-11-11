@@ -88,7 +88,7 @@ export default function NotesScreen({ route, navigation }) {
   };
 
   const handleAddNew = () => {
-    navigation.navigate('AddEditNote');
+    navigation.navigate('AddEditNoteScreen');
   };
 
   const formatDate = (dateString) => {

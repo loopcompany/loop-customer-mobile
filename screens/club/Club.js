@@ -194,10 +194,10 @@ export default function Club({ navigation }) {
       <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
         <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
           <View style={NewStyles.rowWrapper}>
-            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('Gem Transactions')}>
+            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('GemTransactions')}>
               <Text style={NewStyles.text}>تاریخچه گردونه شما</Text>
             </Pressable>
-            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('User Discounts')}>
+            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('UserDiscounts')}>
               <Text style={NewStyles.text}>جوایز دریافت شده</Text>
             </Pressable >
           </View>

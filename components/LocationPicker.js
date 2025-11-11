@@ -177,7 +177,7 @@ const LocationPicker = ({
         <Text style={{
           fontSize: 14,
           fontFamily: 'VazirLight',
-          color: selectedItem ? '#000' : '#999',
+          color: selectedItem ? '#000' : '#666',
           textAlign: 'right',
           flex: 1
         }}>

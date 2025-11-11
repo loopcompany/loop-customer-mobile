@@ -8,17 +8,12 @@
 
 ```javascript
 // با URL پیش‌فرض (localhost:8081)
-navigation.navigate('MainApp', {
-  screen: 'WebView'
-});
+navigation.navigate(screen: 'WebView');
 
 // با URL سفارشی
-navigation.navigate('MainApp', {
-  screen: 'WebView',
-  params: {
-    url: 'http://localhost:8081/rates'
-  }
-});
+navigation.navigate('WebView',{
+    url: 'http://localhost:8081/rates'}
+);
 ```
 
 ### 2. مثال: اضافه کردن دکمه به Menu
@@ -35,12 +30,10 @@ const menuItems = [
     title: 'نمایش وب اپ',
     icon: 'globe',
     onPress: () => {
-      navigation.navigate('MainApp', {
-        screen: 'WebView',
-        params: {
+      navigation.navigate( 'WebView',{
           url: 'http://localhost:8081'
         }
-      });
+      );
     }
   }
 ];

@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
+import {View,Text,ActivityIndicator,StyleSheet,} from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { setToken } from '../slices/authSlice';
@@ -78,7 +73,7 @@ export default function Landing({ navigation }) {
   const navigateToMainApp = () => {
     setTimeout(() => {
       setChecking(false);
-      navigation.replace('MainApp', { screen: 'FolderScreen' });
+      navigation.replace('FolderScreen');
     }, 1000);
   };
 
