@@ -167,6 +167,11 @@ export default function LoginScreen({ navigation }) {
         // Update Redux store
         reduxDispatch(setToken(token));
         reduxDispatch(setUserType('individual')); // کاربر فردی
+        
+        // Save account type to AsyncStorage for next app launch
+        await AsyncStorage.setItem('accountType', 'individual');
+        console.log('💾 [LoginScreen] accountType ذخیره شد: individual');
+        
         reduxDispatch(fetchUser(token));
         reduxDispatch(fetchAddresses(token));
 
@@ -269,6 +274,11 @@ export default function LoginScreen({ navigation }) {
               // Update Redux store
               reduxDispatch(setToken(savedToken));
               reduxDispatch(setUserType('individual')); // کاربر فردی
+              
+              // Save account type to AsyncStorage for next app launch
+              await AsyncStorage.setItem('accountType', 'individual');
+              console.log('💾 [LoginScreen Auto-Login] accountType ذخیره شد: individual');
+              
               reduxDispatch(fetchUser(savedToken));
 
               showToastOrAlert('ورود خودکار انجام شد');

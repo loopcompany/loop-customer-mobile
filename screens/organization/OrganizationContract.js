@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import moment from 'moment';
+import jalaali from 'jalaali-js';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateContractStatus } from '../../slices/organizationSlice';
 import { useOrganizationAccess } from '../../hooks/useOrganizationAccess';
@@ -21,7 +23,7 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import NewStyles from '../../styles/NewStyles';
 import { showAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor3, themeColor4 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4 } from '../../theme/Color';
 import { uri } from '../../services/URL';
 
 const OrganizationContract = ({ navigation }) => {
@@ -39,6 +41,37 @@ const OrganizationContract = ({ navigation }) => {
   // User uploaded contract
   const [uploadedContract, setUploadedContract] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // Helper function برای تبدیل تاریخ میلادی به شمسی
+  const toJalaliDate = (dateString) => {
+    try {
+      if (!dateString) return '';
+      
+      const date = new Date(dateString);
+      
+      // بررسی اعتبار تاریخ
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date string:', dateString);
+        return dateString;
+      }
+      
+      const jalaaliDate = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      
+      // فرمت: ۱۴۰۳/۰۸/۲۱ (اعداد فارسی)
+      const year = jalaaliDate.jy.toString();
+      const month = jalaaliDate.jm.toString().padStart(2, '0');
+      const day = jalaaliDate.jd.toString().padStart(2, '0');
+      
+      // تبدیل اعداد انگلیسی به فارسی
+      const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      const jalaliDateStr = `${year}/${month}/${day}`;
+      
+      return jalaliDateStr.replace(/[0-9]/g, (digit) => persianNumbers[parseInt(digit)]);
+    } catch (error) {
+      console.error('Error converting date to Jalaali:', error);
+      return dateString;
+    }
+  };
 
   useEffect(() => {
     loadContractData();
@@ -75,7 +108,7 @@ const OrganizationContract = ({ navigation }) => {
           description: contract.description,
           file_url: contract.pdf_url,
           file_name: contract.title + '.pdf',
-          uploaded_at: new Date(contract.created_at).toLocaleDateString('fa-IR'),
+          uploaded_at: toJalaliDate(contract.created_at),
         });
       }
 
@@ -98,15 +131,21 @@ const OrganizationContract = ({ navigation }) => {
           id: latestUpload.id,
           file_url: latestUpload.contract_url,
           file_name: 'قرارداد امضا شده',
-          uploaded_at: new Date(latestUpload.uploaded_at).toLocaleDateString('fa-IR'),
+          uploaded_at: toJalaliDate(latestUpload.uploaded_at),
           status: latestUpload.status,
           status_label: latestUpload.status_label,
           rejection_reason: latestUpload.rejection_reason,
-          reviewed_at: latestUpload.reviewed_at ? new Date(latestUpload.reviewed_at).toLocaleDateString('fa-IR') : null,
+          reviewed_at: latestUpload.reviewed_at ? toJalaliDate(latestUpload.reviewed_at) : null,
           can_edit: latestUpload.can_edit,
         };
         
         console.log('✅ Setting uploadedContract:', uploadedData);
+        console.log('📅 Date conversion test:', {
+          original_uploaded_at: latestUpload.uploaded_at,
+          converted_uploaded_at: uploadedData.uploaded_at,
+          original_reviewed_at: latestUpload.reviewed_at,
+          converted_reviewed_at: uploadedData.reviewed_at
+        });
         setUploadedContract(uploadedData);
         
         // 🔥 آپدیت Redux state با وضعیت واقعی قرارداد از API
@@ -167,6 +206,18 @@ const OrganizationContract = ({ navigation }) => {
   // انتخاب فایل قرارداد امضا شده
   const handlePickDocument = async () => {
     console.log('🔵 handlePickDocument called!');
+    console.log('🔍 Current state:', {
+      loading,
+      uploadingContract,
+      uploadedContract: uploadedContract ? {
+        status: uploadedContract.status,
+        filename: uploadedContract.filename
+      } : null,
+      selectedFile: selectedFile ? {
+        name: selectedFile.name,
+        size: selectedFile.size
+      } : null
+    });
     
     try {
       // بررسی امکان آپلود
@@ -231,8 +282,21 @@ const OrganizationContract = ({ navigation }) => {
 
   // آپلود قرارداد امضا شده
   const handleUploadContract = async () => {
+    console.log('🔵 handleUploadContract called!');
+    console.log('🔍 Upload state check:', {
+      selectedFile: selectedFile ? {
+        name: selectedFile.name,
+        size: selectedFile.size,
+        mimeType: selectedFile.mimeType,
+        uri: selectedFile.uri
+      } : null,
+      uploadingContract,
+      loading
+    });
+    
     try {
       if (!selectedFile) {
+        console.log('❌ No file selected');
         showAlert('خطا', 'لطفا ابتدا فایل قرارداد امضا شده را انتخاب کنید');
         return;
       }
@@ -241,29 +305,38 @@ const OrganizationContract = ({ navigation }) => {
       const token = await AsyncStorage.getItem('userToken');
       
       if (!token) {
+        console.log('❌ No token found');
         showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        setUploadingContract(false);
         return;
       }
 
+      console.log('🔑 Token found, preparing FormData...');
       const formData = new FormData();
       
-      formData.append('contract_file', {
+      const fileData = {
         uri: selectedFile.uri,
         type: 'application/pdf',
         name: selectedFile.name || 'contract.pdf',
+      };
+      
+      console.log('📁 File data for upload:', fileData);
+      formData.append('contract_file', fileData);
+
+      const uploadUrl = `${uri}/organization/contracts/upload`;
+      console.log('🌐 Upload URL:', uploadUrl);
+      console.log('🔄 Starting upload...');
+
+      const response = await axios.post(uploadUrl, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+        },
+        timeout: 30000, // 30 second timeout
       });
 
-      const response = await axios.post(
-        `${uri}/organization/contracts/upload`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json',
-          }
-        }
-      );
+      console.log('✅ Upload request completed!');
 
       console.log('📤 Upload API Response:', JSON.stringify(response.data, null, 2));
 
@@ -307,19 +380,45 @@ const OrganizationContract = ({ navigation }) => {
       }
 
     } catch (error) {
-      console.error('Error uploading contract:', error);
+      console.error('❌ Upload Error Details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers
+        }
+      });
       
       if (error.response?.status === 400) {
+        console.log('❌ 400 Bad Request');
         showAlert('خطا', error.response.data.message || 'شما یک قرارداد تایید شده دارید و امکان بارگذاری مجدد وجود ندارد.');
       } else if (error.response?.status === 422) {
+        console.log('❌ 422 Validation Error');
         // Validation errors
         const errors = error.response.data.errors;
         const errorMessages = Object.values(errors).flat().join('\n');
         showAlert('خطای اعتبارسنجی', errorMessages);
       } else if (error.response?.status === 404) {
+        console.log('❌ 404 Not Found');
         showAlert('خطا', 'اطلاعات سازمان یافت نشد.');
+      } else if (error.response?.status === 401) {
+        console.log('❌ 401 Unauthorized');
+        showAlert('خطا', 'احراز هویت ناموفق. لطفا مجدداً وارد شوید.');
+      } else if (error.response?.status === 413) {
+        console.log('❌ 413 File Too Large');
+        showAlert('خطا', 'حجم فایل بیش از حد مجاز است.');
+      } else if (error.code === 'ECONNABORTED') {
+        console.log('❌ Request Timeout');
+        showAlert('خطا', 'زمان درخواست به پایان رسید. لطفا دوباره تلاش کنید.');
+      } else if (error.message.includes('Network Error')) {
+        console.log('❌ Network Error');
+        showAlert('خطا', 'مشکل در ارتباط با سرور. اتصال اینترنت خود را بررسی کنید.');
       } else {
-        showAlert('خطا', error.response?.data?.message || 'خطا در آپلود قرارداد');
+        console.log('❌ Other Error');
+        showAlert('خطا', error.response?.data?.message || error.message || 'خطا در آپلود قرارداد');
       }
     } finally {
       setUploadingContract(false);
@@ -443,9 +542,9 @@ const OrganizationContract = ({ navigation }) => {
                 disabled={uploadingContract}
               >
                 {uploadingContract ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color="#000000ff" />
                 ) : (
-                  <Ionicons name="cloud-upload" size={20} color="#fff" />
+                  <Ionicons name="cloud-upload" size={20} color="#000000ff" />
                 )}
                 <Text style={styles.uploadBtnText}>
                   {uploadingContract ? 'در حال آپلود...' : 'آپلود قرارداد'}
@@ -749,7 +848,7 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   uploadBtnText: {
-    color: '#fff',
+    color: themeColor10.bgColor(1),
     fontSize: 15,
     fontFamily: 'VazirBold',
     marginRight: 8,

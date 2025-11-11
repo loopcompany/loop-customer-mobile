@@ -96,20 +96,31 @@ const AccessRestrictedScreen = ({
    * ناوبری به صفحه مربوطه
    */
   const handleNavigation = (action) => {
+    console.log('🚀 AccessRestrictedScreen navigation:', action);
+    
     switch (action) {
       case 'edit_profile':
+        console.log('📱 Navigating to OrganizationProfile');
         navigation.navigate('OrganizationProfile');
         break;
       case 'upload_contract':
+        console.log('📱 Navigating to OrganizationContract');
         navigation.navigate('OrganizationContract');
         break;
+      case 'edit_account':
+        console.log('📱 Navigating to Profile');
+        navigation.navigate('Profile');
+        break;
       case 'go_back':
+        console.log('📱 Going back');
         navigation.goBack();
         break;
       case 'go_home':
+        console.log('📱 Navigating to Home');
         navigation.navigate('Home');
         break;
       default:
+        console.log('❌ Unknown navigation action:', action);
         break;
     }
   };
@@ -121,6 +132,19 @@ const AccessRestrictedScreen = ({
     contractStatus,
     showRetryButton,
     hasRetryFunction: !!onRetry
+  });
+
+  // Debug: بررسی نمایش دکمه‌ها
+  const shouldShowEditProfile = (profileStatus === 'rejected' || profileStatus === 'not_uploaded' || profileStatus === null);
+  const shouldShowUploadContract = (contractStatus === 'rejected' || contractStatus === 'not_uploaded' || contractStatus === null);
+  const shouldShowViewContract = (contractStatus === 'pending' || contractStatus === 'approved');
+  
+  console.log('🎯 Button visibility:', {
+    shouldShowEditProfile,
+    shouldShowUploadContract,
+    shouldShowViewContract,
+    profileStatus,
+    contractStatus
   });
 
   return (
@@ -200,6 +224,17 @@ const AccessRestrictedScreen = ({
 
         {/* دکمه‌های عملیاتی */}
         <View style={styles.actionsContainer}>
+          {/* دکمه ویرایش اطلاعات حساب - همیشه در بالا نمایش داده شود */}
+          <TouchableOpacity 
+            style={[styles.actionButtonCustom, { backgroundColor: themeColor10.bgColor(1) }]}
+            onPress={() => handleNavigation('edit_account')}
+          >
+            <Icon name="account-circle" size={24} color={themeColor4.color} />
+            <Text style={[styles.actionButtonText, { color: themeColor4.color }]}>
+              ویرایش اطلاعات حساب
+            </Text>
+          </TouchableOpacity>
+
           {/* دکمه ویرایش پروفایل - فقط اگه رد شده یا آپلود نشده */}
           {(profileStatus === 'rejected' || profileStatus === 'not_uploaded' || profileStatus === null) && (
             <Button
@@ -233,10 +268,10 @@ const AccessRestrictedScreen = ({
             />
           )}
 
-          {/* دکمه رفرش کنترل */}
+          {/* دکمه بررسی وضعیت */}
           {showRetryButton && onRetry && (
             <Button
-              title="رفرش کنترل"
+              title="بررسی وضعیت"
               onPress={onRetry}
               backgroundColor={themeColor2.bgColor(1)}
               textColor={themeColor4.bgColor(1)}
@@ -387,6 +422,28 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: 15,
+  },
+  actionButtonCustom: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontFamily: 'Vazir-Bold',
+    marginRight: 10,
   },
   backButton: {
     flexDirection: 'row-reverse',

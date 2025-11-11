@@ -12,6 +12,7 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import { setCategory } from "../../slices/categorySlice";
 import Loader from "../../components/Loader";
 import { ImageBackground } from "expo-image";
+import { withOrganizationAccess, ACCESS_PRESETS } from "../../components/withOrganizationAccess";
 
 const SubCategories = ({ navigation, route }) => {
   const { categoryId, categoryTitle } = route.params;
@@ -101,7 +102,11 @@ const SubCategories = ({ navigation, route }) => {
   );
 };
 
-export default SubCategories;
+// محافظت از صفحه انتخاب زیردسته - بخشی از جریان ثبت سفارش
+export default withOrganizationAccess(SubCategories, {
+  ...ACCESS_PRESETS.ORDER_RELATED,
+  screenName: 'SubCategories'
+});
 
 const styles = StyleSheet.create({
   container: {

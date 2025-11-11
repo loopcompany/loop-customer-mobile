@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
@@ -19,7 +20,7 @@ import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Preview({ navigation }) {
+function Preview({ navigation }) {
 
     const dispatch = useDispatch();
     const { t } = useTranslation();
@@ -456,3 +457,9 @@ const styles = StyleSheet.create({
         marginBottom: 1
     },
 })
+
+// محافظت از صفحه ثبت سفارش - نیاز به تایید کامل برای کاربران سازمانی
+export default withOrganizationAccess(Preview, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'Preview'
+});

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from '../services/URL';
 import { 
   setAccessStatus, 
@@ -9,6 +10,12 @@ import {
   updateContractStatus,
   clearAccessData
 } from '../slices/organizationSlice';
+import { setUserType } from '../slices/authSlice';
+import { 
+  useDebouncedCallback, 
+  organizationAccessCache,
+  PERFORMANCE_CONFIGS 
+} from '../utils/performanceOptimization';
 
 /**
  * Hook برای کنترل دسترسی کاربران سازمانی
@@ -52,8 +59,9 @@ export const useOrganizationAccess = () => {
       return false;
     }
     
-    // اگر userType هنوز مشخص نیست، محدود باشه
+    // اگر userType هنوز مشخص نیست، سعی کن از AsyncStorage بخونی
     if (!userType || userType === null) {
+      // برای امنیت، در حالی که userType load می‌شه، دسترسی محدود باشد
       return false;
     }
     
@@ -72,9 +80,9 @@ export const useOrganizationAccess = () => {
   })();
   
   /**
-   * دریافت وضعیت دسترسی از سرور
+   * دریافت وضعیت دسترسی از سرور (با performance optimization)
    */
-  const fetchAccessStatus = useCallback(async (forceRefresh = false) => {
+  const fetchAccessStatus = useDebouncedCallback(async (forceRefresh = false) => {
     // 🔒 SECURITY: فقط کاربران فردی احراز هویت شده دسترسی آزاد دارند
     // اگر token نداریم یا authenticated نیستیم، هیچ دسترسی نمی‌دهیم
     if (!token || !isAuthenticated) {
@@ -102,12 +110,14 @@ export const useOrganizationAccess = () => {
       return;
     }
 
-    // بررسی cache - اگر کمتر از 5 دقیقه پیش چک کرده‌ایم و forceRefresh نیست
-    if (!forceRefresh && lastStatusCheck) {
-      const timeDiff = new Date() - new Date(lastStatusCheck);
-      const fiveMinutes = 5 * 60 * 1000;
-      if (timeDiff < fiveMinutes) {
-        return; // استفاده از داده‌های cache شده
+    // بررسی cache با استفاده از performanceOptimization
+    const cacheKey = `org_access_${token?.slice(-10)}`;
+    if (!forceRefresh) {
+      const cachedData = organizationAccessCache.get(cacheKey);
+      if (cachedData) {
+        console.log('📱 Using cached organization access data');
+        dispatch(setAccessStatus(cachedData));
+        return cachedData;
       }
     }
     
@@ -127,6 +137,9 @@ export const useOrganizationAccess = () => {
       if (response.data.success) {
         console.log('📥 Dispatching setAccessStatus with data:', response.data.data);
         dispatch(setAccessStatus(response.data.data));
+        
+        // Cache the successful result
+        organizationAccessCache.set(cacheKey, response.data.data, PERFORMANCE_CONFIGS.CACHE_TTL);
       } else {
         throw new Error(response.data.message || 'خطا در دریافت اطلاعات');
       }
@@ -155,20 +168,57 @@ export const useOrganizationAccess = () => {
     } finally {
       dispatch(setAccessLoading(false));
     }
-  }, [userType, token, isAuthenticated, lastStatusCheck, dispatch]);
+  }, PERFORMANCE_CONFIGS.API_DEBOUNCE_DELAY, [userType, token, isAuthenticated, dispatch]);
+
+  /**
+   * Load userType از AsyncStorage اگر null باشه
+   */
+  useEffect(() => {
+    const loadUserType = async () => {
+      if (!userType && isAuthenticated && token) {
+        try {
+          const savedUserType = await AsyncStorage.getItem('accountType');
+          if (savedUserType) {
+            console.log('📱 Loading userType from AsyncStorage:', savedUserType);
+            dispatch(setUserType(savedUserType));
+          } else {
+            // اگر userType در AsyncStorage نیست، default individual فرض کن
+            console.log('📱 No userType in AsyncStorage, defaulting to individual');
+            dispatch(setUserType('individual'));
+            await AsyncStorage.setItem('accountType', 'individual');
+          }
+        } catch (error) {
+          console.error('📱 Error loading userType from AsyncStorage:', error);
+          // در صورت خطا، individual فرض کن
+          dispatch(setUserType('individual'));
+        }
+      }
+    };
+
+    loadUserType();
+  }, [userType, isAuthenticated, token, dispatch]);
 
   /**
    * پاک کردن داده‌های دسترسی (برای logout)
    */
   const clearAccess = useCallback(() => {
     dispatch(clearAccessData());
-  }, [dispatch]);
+    
+    // Clear cache on logout
+    const cacheKey = `org_access_${token?.slice(-10)}`;
+    organizationAccessCache.delete(cacheKey);
+  }, [dispatch, token]);
   
   /**
    * چک کردن دسترسی به صفحه خاص
    */
   const canAccessScreen = useCallback((screenName) => {
-    // 🔒 اگر userType هنوز مشخص نیست، دسترسی ندهیم
+    // � اگر لاگین نکرده، اجازه دسترسی بده (صفحه لاگین نشون میده)
+    if (!isAuthenticated || !token) {
+      return true;
+    }
+    
+    // �🔒 اگر userType هنوز مشخص نیست، دسترسی ندهیم
     if (!userType || userType === null) {
       return false;
     }
@@ -190,13 +240,44 @@ export const useOrganizationAccess = () => {
     
     // صفحات همیشه مجاز برای کاربران سازمانی
     const alwaysAllowedScreens = [
+      // صفحات مربوط به مدیریت حساب سازمانی
       'OrganizationProfile',
       'OrganizationContract', 
       'AccountSettings',
       'Profile',
       'Settings',
+      
+      // صفحات مربوط به مدیریت حساب شخصی
+      'AddressScreen',
+      'PaymentScreen',
+      'Increase', // افزایش اعتبار
+      
+      // صفحات عمومی
       'Landing',
-      'Welcome'
+      'Welcome',
+      
+      // صفحات مربوط به احراز هویت
+      'Login',
+      'LoginScreen', 
+      'Register',
+      'SignInLanding',
+      'MainSignIn',
+      'RegistrationVerificationScreen',
+      'ForgotPassword',
+      'ResetPasswordScreen',
+      
+      // صفحات resources و اطلاعات
+      'PrivacyScreen',
+      'LearnMoreScreen',
+      'AboutScreen',
+      'WarrantyScreen',
+      
+      // صفحات پشتیبانی
+      'ViolationReportScreen',
+      'FeedbackSurveyScreen',
+      
+      // صفحه محدودیت دسترسی خود
+      'AccessRestrictedScreen'
     ];
     
     return alwaysAllowedScreens.includes(screenName);
@@ -206,7 +287,12 @@ export const useOrganizationAccess = () => {
    * چک کردن امکان ثبت سفارش
    */
   const canPlaceOrder = useCallback(() => {
-    // 🔒 اگر userType هنوز مشخص نیست، دسترسی ندهیم
+    // � اگر لاگین نکرده، اجازه دسترسی بده (صفحه لاگین نشون میده)
+    if (!isAuthenticated || !token) {
+      return true;
+    }
+    
+    // �🔒 اگر userType هنوز مشخص نیست، دسترسی ندهیم
     if (!userType || userType === null) {
       return false;
     }
@@ -315,7 +401,7 @@ export const useOrganizationAccess = () => {
     
     // وضعیت‌های محاسبه شده
     hasCompleteAccess: actualHasCompleteAccess,
-    isOrganizationUser: userType === 'organization',
+    isOrganizationUser: isAuthenticated && token && userType === 'organization',
     
     // وضعیت‌های جزئی
     profileStatus,
@@ -348,6 +434,7 @@ export const useOrganizationAccess = () => {
     
     // Cache info
     lastStatusCheck,
+    cacheStats: organizationAccessCache.getStats(),
   };
 };
 

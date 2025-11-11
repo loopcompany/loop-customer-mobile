@@ -27,8 +27,9 @@ import Gender from '../../components/Gender';
 import ServiceSchedule from '../../components/ServiceSchedule';
 import { emptyAddress } from '../../slices/addressSlice';
 import StepsHeader from '../../components/StepsHeader';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
-export default function Steps({ navigation, route }) {
+function Steps({ navigation, route }) {
 
     const dispatch = useDispatch();
     const [step, setStep] = useState(0);
@@ -258,3 +259,9 @@ const styles = StyleSheet.create({
         borderBottomColor: themeColor0.bgColor(0.1),
     },
 })
+
+// محافظت از صفحه مراحل ثبت سفارش - قلب فرآیند سفارش‌دهی
+export default withOrganizationAccess(Steps, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'Steps'
+});

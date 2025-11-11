@@ -3,11 +3,12 @@ import { View, Image, StyleSheet, ScrollView, Linking, Platform, } from "react-n
 import Menuitem from "../../components/Menuitem";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
+import { withOrganizationAccess, ACCESS_PRESETS } from "../../components/withOrganizationAccess";
 const callSupport = () => {
   Linking.openURL("tel:09012955939"); // شماره دلخواهت
 };
 
-export default function OrderMenuScreen({ navigation }) {
+function OrderMenuScreen({ navigation }) {
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <ScrollView
@@ -115,4 +116,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+});
+
+// محافظت از صفحه منوی سفارشات - نقطه ورود به مدیریت سفارشات
+export default withOrganizationAccess(OrderMenuScreen, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'OrderMenuScreen'
 });

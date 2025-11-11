@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setNavigationRef } from "./services/axiosConfig";
 import FolderScreen from "./screens/FolderScreen";
 import SubCategories from "./screens/category/SubCategories";
 import SignInLanding from "./screens/auth/SignInLanding";
@@ -90,6 +91,7 @@ import GamePlayScreen from './screens/game/GamePlayScreen';
 import GameResultScreen from './screens/game/GameResultScreen';
 import WebViewScreen from './screens/WebViewScreen';
 import ScreenHeaders from "./components/ScreenHeaders";
+import AccessRestrictedScreen from "./components/AccessRestrictedScreen";
 const Stack = createNativeStackNavigator();
 I18nManager.forceRTL(false);
 SplashScreen.preventAutoHideAsync();
@@ -117,6 +119,11 @@ const App = () => {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
+
+  useEffect(() => {
+    // تنظیم navigation reference برای API error handling
+    setNavigationRef(navigationRef);
+  }, []);
 
   if (!loaded && !error) {
     return null;
@@ -254,6 +261,13 @@ const App = () => {
             <Stack.Screen
               component={LoginScreen}
               name="LoginScreen"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={AccessRestrictedScreen}
+              name="AccessRestrictedScreen"
               options={{
                 headerShown: false,
               }}
