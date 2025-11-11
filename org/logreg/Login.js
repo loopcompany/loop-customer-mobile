@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { setToken, setUserType } from '../../slices/authSlice';
 import { setOrganizationData } from '../../slices/organizationSlice';
+import { fetchAddresses } from '../../slices/addressSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
@@ -104,6 +105,9 @@ const Login = ({ navigation }) => {
         
         dispatch(setOrganizationData(response.data.data.organization));
         console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
+        
+        dispatch(fetchAddresses(response.data.data.token));
+        console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
 
         if (rememberPassword) {
           await AsyncStorage.setItem('savedOrganizationCode', organizationCode);

@@ -53,8 +53,8 @@ export const MenuProvider = ({ children }) => {
         { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
         { id: 4, title: "تراکنش‌ها", screen: "TransactionsScreen" },
         { id: 3, title: "سفارش‌ها", screen: "OrdersScreen" },
-        { id: 2, title: "سازمانی / شرکتی", screen: "CorporateScreen" },
-        { id: 1, title: "سفارش‌های جاری / رزرو", screen: "DeviceOrderSummary" },
+        // { id: 2, title: "سازمانی / شرکتی", screen: "CorporateScreen" },
+        // { id: 1, title: "سفارش‌های جاری / رزرو", screen: "DeviceOrderSummary" },
     ];
     
     // Filter menu items based on user type
