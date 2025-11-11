@@ -55,7 +55,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                             if (male > 0) details.push(`${male} آقا`);
                             if (female > 0) details.push(`${female} خانم`);
 
-                            return `${total} تکنسین` + (details.length > 0 ? ` (${details.join(' ')} الزامی)` : '');
+                            return `${total} تکنسین` + (details.length > 0 ? ` (${details.join(' ')} )` : '');
                         })()
                     )
                 )}
