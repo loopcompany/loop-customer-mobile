@@ -71,7 +71,7 @@ export default function Address({ step, data, navigation }) {
 
     return (
         <View style={NewStyles.seperator1}>
-            <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('Add New Address')}>
+            <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('AddNewAddress')}>
                 <Ionicons name="add" size={24} color={themeColor4.bgColor(1)} />
                 <Text style={NewStyles.title4}>افزودن آدرس جدید</Text>
             </Pressable>

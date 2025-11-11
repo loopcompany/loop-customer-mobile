@@ -69,7 +69,7 @@ export default function GameResultScreen({ route, navigation }) {
   };
 
   const handleBackToMenu = () => {
-    navigation.navigate('MainApp', { screen: 'FolderScreen' });
+    navigation.navigate('FolderScreen');
   };
 
   return (

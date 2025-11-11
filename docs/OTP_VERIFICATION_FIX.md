@@ -62,10 +62,10 @@ if (organizationId) {
 
 **قبل:**
 ```javascript
-// بعد از verify مستقیم به MainApp می‌رفت
+// بعد از verify مستقیم به FolderScreen می‌رفت
 navigation.reset({
   index: 0,
-  routes: [{ name: 'MainApp' }],
+  routes: [{ name: 'FolderScreen' }],
 });
 ```
 
@@ -156,7 +156,7 @@ try {
 [API: /organization/login]
     ↓ برگشت: token, user data
     ↓
-[MainApp / Dashboard]
+[FolderScreen / Dashboard]
 ```
 
 ---
@@ -167,7 +167,7 @@ try {
 |------|-----|-----|
 | ذخیره token | همیشه (حتی null) | فقط اگر وجود داشته باشد |
 | ذخیره user data | همیشه (حتی null) | فقط اگر وجود داشته باشد |
-| بعد از verify | MainApp | Login Screen |
+| بعد از verify | FolderScreen | Login Screen |
 | ترتیب اینپوت | راست→چپ | چپ→راست ✅ |
 | پاک کردن در resend | 5 خانه | 6 خانه ✅ |
 | مدیریت خطا | ساده | کامل با دسته‌بندی ✅ |

@@ -34,7 +34,7 @@ export default function OrderItem({ item, navigation }) {
             const response = await axios.post(`${uri}/orders/cancel`, { orderId: item?.id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 200) {
                 dispatch(fetchOrders(token));
-                navigation.navigate('MainApp', { screen: 'CanceledOrdersScreen' });
+                navigation.navigate('CanceledOrdersScreen');
             }
         } catch (error) {
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
@@ -127,12 +127,10 @@ export default function OrderItem({ item, navigation }) {
 
                     dispatch(fetchSteps(item?.category_id))
                     dispatch(setCategory(item?.category))
-                    navigation.navigate('MainApp', {
-                        screen: 'Steps', params: {
+                    navigation.navigate('Steps', {
                             categoryId: item?.category_id,
-                            categoryTitle: item?.category?.title
-                        }
-                    });
+                            categoryTitle: item?.category?.title}
+                    );
                 },
                 onPress2: () => { },
                 loading1: loading,

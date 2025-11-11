@@ -248,9 +248,7 @@ export default function Preview({ navigation }) {
                 dispatch(emptySteps());
                 dispatch(emptyCategory());
                 dispatch(emptyAddress());
-                navigation.replace('MainApp', {
-                    screen: 'OrdersScreen'
-                });
+                navigation.replace('OrdersScreen');
             }
         } catch (error) {
             console.error('❌ [Preview] خطا در ثبت سفارش:', error.message);

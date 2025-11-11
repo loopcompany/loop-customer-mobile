@@ -136,7 +136,7 @@ export const uri = 'http://YOUR_SERVER_IP:8000/api';
 - `Register`
 - `Login`
 - `OTPVerification`
-- `MainApp` (صفحه اصلی بعد از ورود)
+- `FolderScreen` (صفحه اصلی بعد از ورود)
 
 ---
 

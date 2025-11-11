@@ -392,7 +392,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
               shadowOpacity: 0.3,
               shadowRadius: 4
             }}
-            onPress={() => navigation.navigate('MainApp',{screen:'OrderSummary'})}
+            onPress={() => navigation.navigate('OrderSummaryScreen')}
           >
             <Text style={{ 
               color: '#fff', 

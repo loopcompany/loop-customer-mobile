@@ -197,7 +197,7 @@ export default function AddressScreen({ route, navigation }) {
 
       <View style={styles.footer}>
         
-        <Button title="افزودن آدرس جدید" onPress={() => navigation.navigate('Add New Address')} />
+        <Button title="افزودن آدرس جدید" onPress={() => navigation.navigate('AddNewAddress')} />
       </View>
     </SafeAreaView>
   );

@@ -60,24 +60,21 @@ const PATH_MAP = Object.entries(ROUTE_MAP).reduce((acc, [path, screen]) => {
   return acc;
 }, {});
 
-// List of screens that are inside MainApp navigator
+// List of main app screens (no longer nested in MainApp)
 const MAIN_APP_SCREENS = [
-  'Home',
+  'FolderScreen',
   'Profile',
-  'Orders',
-  'OrderDetails',
-  'Contracts',
-  'ContractDetails',
-  'Messages',
-  'Notifications',
-  'Settings',
-  'About',
-  'Support',
+  'OrdersScreen',
+  'Details',
+  'ContractScreen',
+  'MessageScreen',
   'NotesScreen',
   'AddEditNoteScreen',
-  'MapScreen',
+  'Map',
   'AddressScreen',
-  // Add all MainApp screens here...
+  'Club',
+  'Steps',
+  // All screens are now flat in the navigator
 ];
 ```
 
@@ -131,13 +128,8 @@ useEffect(() => {
           console.log('✅ NAVIGATING TO:', screenName);
           
           try {
-            if (MAIN_APP_SCREENS.includes(screenName)) {
-              navigationRef.current.navigate('MainApp', {
-                screen: screenName
-              });
-            } else {
-              navigationRef.current.navigate(screenName);
-            }
+            // All screens are now flat - no nested navigation needed
+            navigationRef.current.navigate(screenName);
           } catch (error) {
             console.error('❌ Navigation error on popstate:', error);
           }
@@ -245,23 +237,7 @@ const linking = Platform.OS === 'web' ? {
       return undefined;
     }
     
-    // Check if it's a MainApp screen
-    if (MAIN_APP_SCREENS.includes(screenName)) {
-      return {
-        routes: [
-          {
-            name: 'MainApp',
-            state: {
-              routes: [{ name: screenName }],
-              index: 0
-            }
-          }
-        ],
-        index: 0
-      };
-    }
-    
-    // It's a top-level screen
+    // All screens are now flat - no nested navigation
     return {
       routes: [{ name: screenName }],
       index: 0
@@ -276,22 +252,18 @@ const linking = Platform.OS === 'web' ? {
       OTPVerification: 'otp',
       OrganizationForgotPassword: 'forgotpassword',
       OrganizationResetPassword: 'resetpassword',
-      MainApp: {
-        path: 'app',
-        screens: {
-          Home: 'home',
-          OrganizationProfile: 'profile',
-          Orders: 'orders',
-          OrderDetails: 'orderdetails',
-          Contracts: 'contracts',
-          ContractDetails: 'contractdetails',
-          NotesScreen: 'notes',
-          AddEditNoteScreen: 'addeditnote',
-          MapScreen: 'map',
-          AddressScreen: 'address',
-          // Add all your MainApp screens...
-        }
-      }
+      // All screens are now flat - no nested MainApp
+      FolderScreen: 'folder',
+      Profile: 'profile',
+      OrdersScreen: 'orders',
+      Details: 'order-details',
+      ContractScreen: 'contract',
+      NotesScreen: 'notes',
+      AddEditNoteScreen: 'note',
+      Map: 'map',
+      AddressScreen: 'address',
+      Club: 'club',
+      Steps: 'steps'
     }
   }
 } : undefined;

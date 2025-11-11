@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,12 +11,13 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1 } from '../theme/Color';
 import NewStyles from '../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useLogout from '../hooks/useLogout';
+import { fetchContacts } from '../slices/contactSlice';
 
 // Create Context
 const MenuContext = createContext();
@@ -26,10 +27,10 @@ export const MenuProvider = ({ children }) => {
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
-    
+
     // Get user type from Redux
     const userType = useSelector(state => state.auth.userType);
-    
+
     // Base menu items
     const baseMenuItems = [
         { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
@@ -56,7 +57,13 @@ export const MenuProvider = ({ children }) => {
         // { id: 2, title: "سازمانی / شرکتی", screen: "CorporateScreen" },
         // { id: 1, title: "سفارش‌های جاری / رزرو", screen: "DeviceOrderSummary" },
     ];
-    
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(fetchContacts());
+    }, [])
+    const contact = useSelector(state => state.contacts);
+
     // Filter menu items based on user type
     const menuItems = useMemo(() => {
         console.log('🔍 [MenuContext] Current userType:', userType);
@@ -80,7 +87,7 @@ export const MenuProvider = ({ children }) => {
     };
 
     const navigateToScreen = (screenName) => {
-        navigation.navigate('MainApp', { screen: screenName });
+        navigation.navigate(screenName);
         closeMenu();
     };
 
@@ -113,11 +120,14 @@ export const MenuProvider = ({ children }) => {
 
                 {/* Global Footer - همیشه در پایین تمام صفحات نمایش داده می‌شود */}
                 <View style={[styles.footer, NewStyles.rowWrapper]}>
-                    <TouchableOpacity onPress={callSupport}>
-                        <Text style={NewStyles.text4}>21164552</Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                            contact?.data?.data?.link && Linking.openURL(`${contact?.data?.data?.link}`)
+                        }}
+                    >
+                        <Text style={NewStyles.text4}>{contact?.data?.data?.name}</Text>
                     </TouchableOpacity>
-                    <Text style={NewStyles.text4}>فا</Text>
-                    <TouchableOpacity style={styles.supportButton}>
+                    <TouchableOpacity style={styles.supportButton} onPress={()=>{navigation.navigate('MessageScreen')}}>
                         <Text style={NewStyles.text4}>پشتیبانی</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={openMenu}>
@@ -139,7 +149,7 @@ export const MenuProvider = ({ children }) => {
                 <TouchableWithoutFeedback onPress={closeMenu}>
                     <View style={styles.coverlist2}>
                         <View style={styles.coverlist}>
-                            <View style={{backgroundColor:themeColor0.bgColor(1)}}>
+                            <View style={{ backgroundColor: themeColor0.bgColor(1) }}>
                                 <FlatList
                                     inverted
                                     data={menuItems}
@@ -148,7 +158,7 @@ export const MenuProvider = ({ children }) => {
                                     contentContainerStyle={styles.list}
                                     showsVerticalScrollIndicator={false}
                                 />
-                                
+
                                 {/* دکمه خروج */}
                                 <View style={styles.logoutContainer}>
                                     <TouchableOpacity
@@ -186,7 +196,7 @@ const styles = StyleSheet.create({
         width: '80%',
         backgroundColor: themeColor0.bgColor(0),
         height: '92%',
-        justifyContent:'flex-end'
+        justifyContent: 'flex-end'
     },
     coverlist2: {
         flex: 1

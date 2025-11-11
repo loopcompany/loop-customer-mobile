@@ -94,7 +94,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
           setTimeout(() => {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'MainApp', params: { screen: 'FolderScreen' } }],
+              routes: [{ name: 'FolderScreen' }],
             });
           }, 1500);
         }

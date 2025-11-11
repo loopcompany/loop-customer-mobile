@@ -4,8 +4,10 @@ import { uri } from '../services/URL';
 
 export const fetchContacts = createAsyncThunk('contact/fetchContacts', async () => {
     return await axios
-        .get(`${uri}/fetch_contacts`)
-        .then(response => response.data)
+        .get(`${uri}/contact/phone`)
+        .then(response => {
+            return response.data;
+        })
         .catch(error => { console.log(error); })
 })
 

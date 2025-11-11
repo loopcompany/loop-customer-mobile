@@ -36,7 +36,7 @@ const { isAuthenticated } = useSelector(state => state.auth);
 const handlePress = () => {
   if (isAuthenticated) {
     // کاربر لاگین کرده → به صفحه اصلی
-    navigation.navigate("MainApp", { screen: 'FolderScreen' });
+    navigation.navigate("FolderScreen");
   } else {
     // کاربر لاگین نکرده → به صفحه لاگین
     navigation.navigate("SignInLanding");
@@ -61,7 +61,7 @@ const handlePress = () => {
 ```
 1. App باز میشه → Landing
 2. Landing چک می‌کنه: isAuthenticated = true
-3. ✅ هدایت مستقیم به MainApp/FolderScreen (صفحه اصلی)
+3. ✅ هدایت مستقیم به FolderScreen (صفحه اصلی)
 ```
 
 ### سناریو 3: کاربر در Welcome کلیک می‌کنه (لاگین کرده)
@@ -69,7 +69,7 @@ const handlePress = () => {
 1. کاربر در صفحه Welcome
 2. کلیک روی صفحه
 3. چک: isAuthenticated = true
-4. ✅ هدایت به MainApp/FolderScreen
+4. ✅ هدایت به FolderScreen
 ```
 
 ---
@@ -103,7 +103,7 @@ const handlePress = () => {
 - ✅ دریافت `isAuthenticated` از Redux state
 - ✅ تابع `handlePress()` با چک authentication
 - ✅ هدایت به `SignInLanding` برای کاربران لاگین نکرده
-- ✅ هدایت به `MainApp/FolderScreen` برای کاربران لاگین کرده
+- ✅ هدایت به `FolderScreen` برای کاربران لاگین کرده
 
 **حذف شد:**
 - ❌ Navigation مستقیم به `OrderMenuScreen`

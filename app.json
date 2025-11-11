@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.clpiran.loop"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -29,7 +30,14 @@
     },
     "plugins": [
       "expo-font",
-      "expo-video"
-    ]
+      "expo-video",
+      "expo-asset",
+      "expo-audio"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5d21e6f4-d400-4208-b7d5-f63c3941acf1"
+      }
+    }
   }
 }

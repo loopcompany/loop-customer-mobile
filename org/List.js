@@ -10,7 +10,7 @@ const List = ({ navigation }) => {
 
   const handleNavigation = (screenName) => {
     // Navigate to respective screen
-    navigation.navigate('MainApp',{screen:'screenName'});
+    navigation.navigate(screenName);
   };
 
   const menuItems = [
