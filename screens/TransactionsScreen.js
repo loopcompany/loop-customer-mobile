@@ -110,7 +110,7 @@ export default function TransactionsScreen() {
           />
         }
       >
-        {transactions.length === 0 ? (
+        {transactions.length == 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
               تراکنشی یافت نشد
@@ -128,45 +128,45 @@ export default function TransactionsScreen() {
                 ]}
               >
                 <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text4, { flex: 1 }]}>
+                  <Text style={[NewStyles.text10, { flex: 1 }]}>
                     {formatDateTime(item.created_at)}
                   </Text>
-                  <Text style={[NewStyles.text4, styles.statusBadge]}>
+                  <Text style={[NewStyles.text10, styles.statusBadge]}>
                     {getStatusText(item.status)}
                   </Text>
                 </View>
 
                 <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text10, { color: '#fff' }]}>
+                  <Text style={[NewStyles.text10]}>
                     مبلغ:
                   </Text>
-                  <Text style={[NewStyles.title10, { color: '#fff' }]}>
+                  <Text style={[NewStyles.title10]}>
                     {formatPrice(item.price * 10)} ریال
                   </Text>
                 </View>
 
                 <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text10, { color: '#fff' }]}>
+                  <Text style={[NewStyles.text10]}>
                     نوع:
                   </Text>
-                  <Text style={[NewStyles.text10, { color: '#fff' }]}>
+                  <Text style={[NewStyles.text10]}>
                     {getTypeText(item.type)}
                   </Text>
                 </View>
 
                 {item.referenceId && (
                   <View style={styles.transactionRow}>
-                    <Text style={[NewStyles.text3, { color: '#fff', fontSize: 11 }]}>
+                    <Text style={[NewStyles.text10]}>
                       شماره پیگیری:
                     </Text>
-                    <Text style={[NewStyles.text3, { color: '#fff', fontSize: 11 }]}>
+                    <Text style={[NewStyles.text10]}>
                       {item.referenceId}
                     </Text>
                   </View>
                 )}
 
                 {item.description && (
-                  <Text style={[NewStyles.text3, { color: '#fff', marginTop: 5, fontSize: 11 }]}>
+                  <Text style={[NewStyles.text10]}>
                     {item.description}
                   </Text>
                 )}
