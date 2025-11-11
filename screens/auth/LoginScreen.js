@@ -20,6 +20,7 @@ const initialState = {
   phone: '',
   password: '',
   rememberMe: false,
+  showPassword: false,
   captchaInput: '',
   captcha: Math.floor(1000 + Math.random() * 9000).toString(),
   errors: {},
@@ -349,22 +350,40 @@ export default function LoginScreen({ navigation }) {
 
           {/* Password Input */}
           <View style={styles.inputGroup}>
-            <TextInput
-              style={[
-                NewStyles.textInput,
-                NewStyles.border10,
-                NewStyles.text10,
-                { textAlign: 'right' },
-                state.errors.password && styles.inputError
-              ]}
-              placeholder="رمز عبور (حداقل 6 کاراکتر)"
-              placeholderTextColor={themeColor10.bgColor(0.7)}
-              secureTextEntry
-              value={state.password}
-              onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'password', value })}
-              accessibilityLabel="رمز عبور"
-              accessibilityHint="رمز عبور حداقل 6 کاراکتری خود را وارد کنید"
-            />
+            <View style={{ position: 'relative', width: '100%' }}>
+              <TextInput
+                style={[
+                  NewStyles.textInput,
+                  NewStyles.border10,
+                  NewStyles.text10,
+                  { textAlign: 'right', paddingLeft: 45 },
+                  state.errors.password && styles.inputError
+                ]}
+                placeholder="رمز عبور (حداقل 6 کاراکتر)"
+                placeholderTextColor={themeColor10.bgColor(0.7)}
+                secureTextEntry={!state.showPassword}
+                value={state.password}
+                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'password', value })}
+                accessibilityLabel="رمز عبور"
+                accessibilityHint="رمز عبور حداقل 6 کاراکتری خود را وارد کنید"
+              />
+              <TouchableOpacity
+                onPress={() => dispatch({ type: 'SET_FIELD', field: 'showPassword', value: !state.showPassword })}
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  top: '50%',
+                  transform: [{ translateY: -12 }],
+                  zIndex: 1
+                }}
+              >
+                <Ionicons
+                  name={state.showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={22}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
             {state.errors.password && (
               <Text style={styles.fieldErrorText}>{state.errors.password}</Text>
             )}
