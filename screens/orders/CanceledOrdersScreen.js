@@ -7,8 +7,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchOrders } from '../../slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import OrderItem from '../../components/OrderItem';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
-export default function CanceledOrdersScreen({ navigation }) {
+function CanceledOrdersScreen({ navigation }) {
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
 
@@ -109,4 +110,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+});
+
+// محافظت از صفحه سفارشات لغو شده - بخشی از مدیریت سفارشات
+export default withOrganizationAccess(CanceledOrdersScreen, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'CanceledOrdersScreen'
 });

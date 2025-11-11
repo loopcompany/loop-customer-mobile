@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -10,7 +11,7 @@ import { fetchOrders } from '../../slices/ordersSlice';
 import OrderItem from '../../components/OrderItem';
 import BlankScreen from '../../components/BlankScreen';
 
-export default function OrdersScreen({ navigation }) {
+function OrdersScreen({ navigation }) {
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
   
@@ -59,4 +60,10 @@ export default function OrdersScreen({ navigation }) {
 
 const styles = StyleSheet.create({
  
+});
+
+// محافظت از صفحه لیست سفارشات - نیاز به تایید کامل
+export default withOrganizationAccess(OrdersScreen, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'OrdersScreen'
 });

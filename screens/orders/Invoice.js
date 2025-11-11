@@ -13,10 +13,11 @@ import { uri } from '../../services/URL';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 import Loader from '../../components/Loader';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 
-export default function Invoice({ route }) {
+function Invoice({ route }) {
 
     const dispatch = useDispatch()
     const { t } = useTranslation();
@@ -231,3 +232,9 @@ export default function Invoice({ route }) {
         </View>
     )
 }
+
+// محافظت از صفحه فاکتور سفارش - نیاز به تایید کامل
+export default withOrganizationAccess(Invoice, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'Invoice'
+});

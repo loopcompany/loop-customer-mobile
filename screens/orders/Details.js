@@ -18,6 +18,7 @@ import Button from '../../components/Button';
 import OrderExtraServices from './OrderExtraServices';
 import OrderReviewSection from './OrderReviewSection';
 import OrderReviewRatingSection from './OrderReviewRatingSection';
+import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
@@ -150,7 +151,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
 }
 
 
-export default function Details({ route, navigation }) {
+function Details({ route, navigation }) {
 
     const dispatch = useDispatch();
     const orderId = route?.params?.orderId;
@@ -881,3 +882,9 @@ const styles = StyleSheet.create({
         fontFamily: 'VazirLight',
     }
 })
+
+// محافظت از صفحه جزئیات سفارش - نیاز به تایید کامل
+export default withOrganizationAccess(Details, {
+    ...ACCESS_PRESETS.ORDER_RELATED,
+    screenName: 'Details'
+});

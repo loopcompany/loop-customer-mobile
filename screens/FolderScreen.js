@@ -18,8 +18,9 @@ import { fetchSteps } from "../slices/stepSlice";
 import { setCategory } from "../slices/categorySlice";
 import Loader from "../components/Loader";
 import { ImageBackground } from "expo-image";
+import { withOrganizationAccess, ACCESS_PRESETS } from "../components/withOrganizationAccess";
 
-export default function FolderScreen({ navigation }) {
+function FolderScreen({ navigation }) {
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
@@ -229,4 +230,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
     color: "#000",
   },
+});
+
+// محافظت از صفحه اصلی انتخاب دسته‌بندی - نقطه شروع ثبت سفارش
+export default withOrganizationAccess(FolderScreen, {
+  ...ACCESS_PRESETS.ORDER_RELATED,
+  screenName: 'FolderScreen'
 });

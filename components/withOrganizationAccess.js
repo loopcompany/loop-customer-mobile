@@ -3,6 +3,9 @@ import { useSelector } from 'react-redux';
 import { useOrganizationAccess } from '../hooks/useOrganizationAccess';
 import AccessRestrictedScreen from '../components/AccessRestrictedScreen';
 import Loader from '../components/Loader';
+import LoadingScreen from '../components/LoadingScreen';
+import ErrorScreen from '../components/ErrorScreen';
+import { useIntersectionObserver } from '../utils/performanceOptimization';
 
 /**
  * Higher-Order Component برای محافظت از صفحات در برابر دسترسی غیرمجاز کاربران سازمانی
@@ -52,12 +55,23 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       error
     });
 
+    // 🔒 CRITICAL: اگر کاربر لاگین نکرده، کامپوننت اصلی رو نشون بده (نه AccessRestrictedScreen)
+    if (!isAuthenticated) {
+      console.log(`🔓 User not authenticated for ${screenName}, allowing access to original component`);
+      return <WrappedComponent {...props} />;
+    }
+
     // 🔒 SECURITY: اگر userType هنوز مشخص نیست، منتظر بمانیم
     if (isAuthenticated && (!userType || userType === null)) {
       if (loadingComponent) {
         return loadingComponent;
       }
-      return <Loader />;
+      return (
+        <LoadingScreen 
+          title="بررسی نوع حساب کاربری"
+          message="در حال تشخیص نوع حساب کاربری شما..."
+        />
+      );
     }
 
     // Loading state - فقط برای کاربران سازمانی
@@ -65,16 +79,33 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       if (loadingComponent) {
         return loadingComponent;
       }
-      return <Loader />;
+      return (
+        <LoadingScreen 
+          title="بررسی وضعیت دسترسی"
+          message="در حال بررسی وضعیت تایید حساب سازمانی شما..."
+        />
+      );
     }
 
     // Error state - اگر خطا داریم ولی کاربر فردی است، بگذار صفحه نمایش داده شود
     if (error && isOrganizationUser) {
+      // تشخیص نوع خطا برای نمایش مناسب
+      let errorType = 'general';
+      if (error.includes('شبکه') || error.includes('اینترنت')) {
+        errorType = 'network';
+      } else if (error.includes('سرور')) {
+        errorType = 'server';
+      } else if (error.includes('احراز هویت') || error.includes('لاگین')) {
+        errorType = 'auth';
+      } else if (error.includes('timeout') || error.includes('زمان')) {
+        errorType = 'timeout';
+      }
+
       return (
-        <AccessRestrictedScreen
-          type="error"
-          title="خطا در دریافت اطلاعات"
+        <ErrorScreen
+          title="خطا در بررسی دسترسی"
           message={error}
+          errorType={errorType}
           onRetry={refetch}
           showRetryButton={true}
         />
@@ -188,7 +219,29 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       );
     }
 
+    // Lazy loading wrapper برای بهبود performance
+    const LazyWrapper = ({ children }) => {
+      const [ref, isVisible] = useIntersectionObserver({
+        threshold: 0.1,
+        rootMargin: '50px'
+      });
+
+      return (
+        <div ref={ref}>
+          {isVisible ? children : <LoadingScreen title="در حال بارگذاری..." />}
+        </div>
+      );
+    };
+
     // اگر همه چیز مرتب بود، کامپوننت اصلی را نمایش بده
+    if (options.enableLazyLoading) {
+      return (
+        <LazyWrapper>
+          <WrappedComponent {...props} />
+        </LazyWrapper>
+      );
+    }
+    
     return <WrappedComponent {...props} />;
   };
 
