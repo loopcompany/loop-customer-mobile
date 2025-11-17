@@ -11,6 +11,7 @@ import DatePickerModal from '../../components/DatePickerModal';
 import LocationPicker from '../../components/LocationPicker';
 import { uri } from '../../services/URL';
 import { jalaliToGregorian, showAlert } from '../../helpers/Common';
+import NewStyles from '../../styles/NewStyles';
 
 const Register = ({ navigation }) => {
   // Form states
@@ -880,10 +881,8 @@ const Register = ({ navigation }) => {
             }}
           >
             <Text style={{
-              color: '#fff',
+              ...NewStyles.title4,
               fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
               textAlign: 'center'
             }}>ورود به حساب کاربری</Text>
           </TouchableOpacity>

@@ -53,7 +53,14 @@ export const useLogout = () => {
                 window.alert(result.message || 'با موفقیت خارج شدید');
               }
               // Navigate to Welcome screen after alert
-              navigation.replace('Welcome');
+              if (navigation.replace) {
+                navigation.replace('Welcome');
+              } else {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Welcome' }],
+                });
+              }
             })
             .catch((error) => {
               if (window.alert) {
@@ -66,7 +73,14 @@ export const useLogout = () => {
         console.warn('window.confirm not available, logging out without confirmation');
         logout()
           .then(() => {
-            navigation.replace('Welcome');
+            if (navigation.replace) {
+              navigation.replace('Welcome');
+            } else {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              });
+            }
           })
           .catch(error => console.error('Logout error:', error));
       }
@@ -91,7 +105,14 @@ export const useLogout = () => {
                     text: 'باشه',
                     onPress: () => {
                       // Navigate to Welcome screen after showing alert
-                      navigation.replace('Welcome');
+                      if (navigation.replace) {
+                        navigation.replace('Welcome');
+                      } else {
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: 'Welcome' }],
+                        });
+                      }
                     }
                   }
                 ]);
@@ -144,7 +165,14 @@ export const useLogout = () => {
                 window.alert(result.message || 'با موفقیت از همه دستگاه‌ها خارج شدید');
               }
               // Navigate to Welcome screen after alert
-              navigation.replace('Welcome');
+              if (navigation.replace) {
+                navigation.replace('Welcome');
+              } else {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Welcome' }],
+                });
+              }
             })
             .catch((error) => {
               if (window.alert) {
@@ -157,7 +185,14 @@ export const useLogout = () => {
         console.warn('window.confirm not available, logging out from all devices without confirmation');
         logoutFromAllDevices()
           .then(() => {
-            navigation.replace('Welcome');
+            if (navigation.replace) {
+              navigation.replace('Welcome');
+            } else {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              });
+            }
           })
           .catch(error => console.error('Logout all error:', error));
       }
@@ -182,7 +217,14 @@ export const useLogout = () => {
                     text: 'باشه',
                     onPress: () => {
                       // Navigate to Welcome screen after showing alert
-                      navigation.replace('Welcome');
+                      if (navigation.replace) {
+                        navigation.replace('Welcome');
+                      } else {
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: 'Welcome' }],
+                        });
+                      }
                     }
                   }
                 ]);
@@ -207,7 +249,14 @@ export const useLogout = () => {
       dispatch(setToken(null));
       
       // Navigate to Welcome screen
-      navigation.replace('Welcome');
+      if (navigation.replace) {
+        navigation.replace('Welcome');
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        });
+      }
       
       return result;
     } catch (error) {

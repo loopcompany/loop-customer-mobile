@@ -12,6 +12,8 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import NewStyles from '../../styles/NewStyles';
+import { themeColor4 } from '../../theme/Color';
 
 const OTPVerification = ({ route, navigation }) => {
   const { phone, organizationCode, userId, organizationId } = route.params;
@@ -197,7 +199,7 @@ const OTPVerification = ({ route, navigation }) => {
 
           {/* Organization Code Display */}
           <View style={{ 
-            backgroundColor: '#fff', 
+            backgroundColor: themeColor4.bgColor(1), 
             borderRadius: 10, 
             padding: 15, 
             marginBottom: 30,
@@ -221,9 +223,7 @@ const OTPVerification = ({ route, navigation }) => {
               {organizationCode}
             </Text>
             <Text style={{ 
-              fontSize: 12, 
-              fontFamily: 'VazirLight',
-              color: '#999',
+              ...NewStyles.title6,
               marginTop: 8,
               textAlign: 'center'
             }}>

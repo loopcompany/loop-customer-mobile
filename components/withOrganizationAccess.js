@@ -55,14 +55,31 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       error
     });
 
-    // 🔒 CRITICAL: اگر کاربر لاگین نکرده، کامپوننت اصلی رو نشون بده (نه AccessRestrictedScreen)
+    // 🔒 CRITICAL: اگر کاربر لاگین نکرده و صفحه نیاز به احراز هویت دارد
     if (!isAuthenticated) {
+      // اگر صفحه نیاز به دسترسی کامل دارد، باید لاگین کند
+      if (requireCompleteAccess) {
+        console.log(`🔒 User not authenticated for ${screenName}, redirecting to login`);
+        return (
+          <AccessRestrictedScreen
+            type="login_required"
+            title="نیاز به ورود"
+            message="برای دسترسی به این بخش، ابتدا باید وارد حساب کاربری خود شوید"
+            nextSteps={[
+              { text: "ورود به حساب کاربری", action: "login" }
+            ]}
+          />
+        );
+      }
+      // برای صفحات عمومی، اجازه دسترسی بده
       console.log(`🔓 User not authenticated for ${screenName}, allowing access to original component`);
       return <WrappedComponent {...props} />;
     }
 
     // 🔒 SECURITY: اگر userType هنوز مشخص نیست، منتظر بمانیم
+    // این شرط مهم است چون بعد از ریلود، userType null است تا از AsyncStorage لود شود
     if (isAuthenticated && (!userType || userType === null)) {
+      console.log(`⏳ Waiting for userType to load for ${screenName}`);
       if (loadingComponent) {
         return loadingComponent;
       }

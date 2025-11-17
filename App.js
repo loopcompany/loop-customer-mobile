@@ -110,6 +110,38 @@ const App = () => {
   });
 
   const [isReady, setIsReady] = useState(false);
+  const [authInitialized, setAuthInitialized] = useState(false);
+
+  // 🔒 SECURITY: Initialize auth state before rendering app
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const TokenManager = (await import('./services/TokenManager')).default;
+        const { setToken, setUserType } = await import('./slices/authSlice');
+        const { default: storeInstance } = await import('./store');
+
+        const authStatus = await TokenManager.isAuthenticated();
+        
+        if (authStatus.authenticated) {
+          console.log('🔐 App: Restoring auth state from AsyncStorage');
+          storeInstance.dispatch(setToken(authStatus.token));
+          
+          // Also restore userType if available
+          const savedUserType = await AsyncStorage.getItem('accountType');
+          if (savedUserType) {
+            console.log('👤 App: Restoring userType:', savedUserType);
+            storeInstance.dispatch(setUserType(savedUserType));
+          }
+        }
+      } catch (err) {
+        console.error('❌ App: Failed to initialize auth:', err);
+      } finally {
+        setAuthInitialized(true);
+      }
+    };
+
+    initializeAuth();
+  }, []);
 
   useEffect(() => {
     setIsReady(true);
@@ -130,7 +162,7 @@ const App = () => {
     return null;
   }
 
-  if (!isReady) {
+  if (!isReady || !authInitialized) {
     return null;
   }
 
