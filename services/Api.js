@@ -566,6 +566,16 @@ export const infoAPI = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Get Organization Terms
+  getOrganizationTerms: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.INFO.ORGANIZATION_TERMS);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

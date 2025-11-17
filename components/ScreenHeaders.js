@@ -36,7 +36,7 @@ const ScreenHeaders = ({
       {/* Left side: Back button (RTL) */}
       <TouchableOpacity 
         onPress={handleBack} 
-        style={[styles.iconContainer, { flexDirection: 'row', alignItems: 'center' }]}
+        style={[styles.iconContainer, NewStyles.row]}
       >
         <Image source={require("../assets/back.png")} style={styles.arrow} />
         <Text style={[NewStyles.title10,styles.titleText]}>قبلی</Text>
@@ -52,9 +52,6 @@ const styles = StyleSheet.create({
     backgroundColor: themeColor4.bgColor(1),
     height: 50,
     width: "100%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
     paddingHorizontal: 10,
   },
   iconContainer: {

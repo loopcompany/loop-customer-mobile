@@ -7,6 +7,7 @@ import NewStyles from "../../styles/NewStyles";
 import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
 import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
+import Button from "../../components/Button";
 
 const Grouping = ({ navigation }) => {
   const [isOrganizationalGuideOpen, setIsOrganizationalGuideOpen] = useState(false);
@@ -14,279 +15,61 @@ const Grouping = ({ navigation }) => {
     navigation.navigate("Login");
   };
 
-  const handleCompanyLogin = () => {
-    // Navigate to company login
-    navigation.navigate("Login"); // You can create a separate company login screen if needed
-  };
 
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <CustomStatusBar />
-      <ScreenHeaders
-        title="سازمانی / شرکتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
-      />
+      <ScreenHeaders title="سازمانی / شرکتی" onPressLeft={() => navigation.goBack()} onPressRight={() => { }} />
+      <ImageBackground cachePolicy={"memory-disk"} source={Platform.OS === 'web' ? require("../../assets/loopbackground.webp") : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: "#020305" }]} contentPosition={"center"} contentFit="cover">
 
-      {/* Background with image */}
-      <ImageBackground
-        cachePolicy={"memory-disk"}
-        source={Platform.OS === 'web' 
-          ? require("../../assets/loopbackground.webp")
-          : require("../../assets/moon.jpg")
-        }
-        style={[NewStyles.container, { backgroundColor: "#020305" }]}
-        contentPosition={"center"}
-        contentFit="cover"
-      >
-        {/* Top section with header text */}
-        <View
-          style={{
-            alignItems: "center",
-            paddingTop: 15,
-            paddingBottom: 15,
-            paddingHorizontal: 25,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-              borderRadius: 6,
-              paddingVertical: 4,
-              paddingHorizontal: 12,
-              borderWidth: 1,
-              borderColor: "#333",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 10,
-                fontFamily: "VazirBold",
-                textAlign: "center",
-                color: "#333",
-                lineHeight: 16,
-              }}
-            >
-              قوانین و مقررات سامانه در پنل سازمانی / شرکتی
-            </Text>
-          </View>
-        </View>
-
-        {/* Central tower-like structure */}
         <View
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "center",
             paddingHorizontal: 20,
           }}
         >
-          {/* Organizational Section */}
-          <View
-            style={{
-              width: "100%",
-              marginBottom: 30,
-              alignItems: "center",
-            }}
-          >
-            {/* Main header - سازمانی / دولتی */}
-            <View
-              style={{
-                width: "65%",
-                maxWidth: 280,
-                backgroundColor: "#1a4480",
-                borderRadius: 10,
-                paddingVertical: 12,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 6,
-                shadowColor: "#1a4480",
-                shadowOpacity: 0.4,
-                shadowRadius: 6,
-                position: "relative",
-                marginBottom: 6,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#ffeb3b",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
-                }}
-              >
-          
-                سازمانی / شرکتی
-              </Text>
-              {/* Arrow down */}
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -8,
-                  alignSelf: "center",
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 10,
-                  borderRightWidth: 10,
-                  borderTopWidth: 8,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderTopColor: "#1a4480",
-                }}
-              />
-            </View>
 
-            {/* Login button for organizational */}
+
+          {/* <Button title={'سازمانی / شرکتی'} /> */}
+          <Button title={'ورود به حساب کاربری'} onPress={handleOrganizationalLogin} />
+          <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10, maxWidth:400 }}>
+            <Text style={{ ...NewStyles.title10, textAlign: "center", }}>راهنمای پنل سازمانی / دولتی </Text>
+
+            <Text style={[NewStyles.text10, { fontSize: 12, textAlign: 'center' }]}>پنل سازمانی / شرکتی لوپ برای کاربرانی که دارای تعداد زیادی از محصولات / دستگاه / قطعات کامپیوتری می‌باشد و ثبت نام در این پنل به منظور تسریع در انجام خدمات و نیز کاهش درصد هزینه‌ها انجام گردیده است.</Text>
             <TouchableOpacity
-              onPress={handleOrganizationalLogin}
+              onPress={() => navigation.navigate('OrganizationTermsScreen')}
               style={{
-                width: "55%",
-                maxWidth: 240,
-                backgroundColor: "#4a90e2",
-                borderRadius: 8,
-                paddingVertical: 8,
-                marginTop: 6,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 3,
-                shadowColor: "#4a90e2",
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderRadius: 6,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+                borderWidth: 1,
+                borderColor: themeColor3.bgColor(1),
+                marginVertical: 10
               }}
             >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 12,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
-                }}
-              >
-                ورود به حساب کاربری
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Company Section */}
-          <View
-            style={{
-              width: "100%",
-              alignItems: "center",
-            }}
-          >
-
-          </View>
-        </View>
-
-        {/* Bottom yellow sections with arrows - positioned absolutely */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 10,
-            right: 0,
-            left: 0,
-            ...(Platform.OS === 'web' && {
-              alignSelf: 'center',
-              maxWidth: 600,
-            }),
-          }}
-        >
-          {/* First yellow section - Accordion Guide */}
-          <View
-            style={{
-              width: "100%",
-              marginBottom: 8,
-            }}
-          >
-            {/* Header - clickable */}
-            <TouchableOpacity
-              onPress={() => setIsOrganizationalGuideOpen(!isOrganizationalGuideOpen)}
-              style={{
-                width: "100%",
-                backgroundColor: "#ffeb3b",
-                paddingVertical: 6,
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-              }}
-            >
-              {/* Dotted line */}
-              <View
-                style={{
-                  flex: 1,
-                  borderTopWidth: 1.5,
-                  borderTopColor: "#000",
-                  borderStyle: "dotted",
-                  marginRight: 8,
-                }}
-              />
               <Text
                 style={{
                   fontSize: 10,
                   fontFamily: "VazirBold",
-                  color: "#000",
                   textAlign: "center",
+                  color: "#333",
+                  lineHeight: 16,
                 }}
-              >
-                راهنمای پنل سازمانی / دولتی ۱
-              </Text>
-              {/* Red arrow pointing down or up based on state */}
-              <View
-                style={{
-                  marginLeft: 12,
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 6,
-                  borderRightWidth: 6,
-                  ...(isOrganizationalGuideOpen
-                    ? {
-                        borderBottomWidth: 10,
-                        borderLeftColor: "transparent",
-                        borderRightColor: "transparent",
-                        borderBottomColor: "#ff0000",
-                      }
-                    : {
-                        borderTopWidth: 10,
-                        borderLeftColor: "transparent",
-                        borderRightColor: "transparent",
-                        borderTopColor: "#ff0000",
-                      }),
-                }}
-              />
+              >قوانین و مقررات سامانه در پنل سازمانی / شرکتی</Text>
             </TouchableOpacity>
-
-            {/* Content - collapsible */}
-            {isOrganizationalGuideOpen && (
-              <View
-                style={{
-                  width: "100%",
-                  backgroundColor: "rgba(255, 235, 59, 0.95)",
-                  paddingVertical: 10,
-                  paddingHorizontal: 12,
-                  borderBottomWidth: 1.5,
-                  borderBottomColor: "#000",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 9,
-                    fontFamily: "VazirBold",
-                    color: "#000",
-                    textAlign: "right",
-                    lineHeight: 16,
-                  }}
-                >
-                  پنل سازمانی / شرکتی لوپ برای کاربرانی که دارای تعداد زیادی از محصولات / دستگاه / قطعات کامپیوتری می‌باشد و ثبت نام در این پنل به منظور تسریع در انجام خدمات و نیز کاهش درصد هزینه‌ها انجام گردیده است.
-                </Text>
-              </View>
-            )}
           </View>
 
-          {/* Second yellow section - Full width banner */}
-         
+
+
+
+
         </View>
+
+
+        {/* First yellow section - Accordion Guide */}
+
       </ImageBackground>
     </SafeAreaView>
   );

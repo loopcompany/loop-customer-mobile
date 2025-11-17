@@ -27,36 +27,66 @@ export const MenuProvider = ({ children }) => {
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
+    const [currentRouteName, setCurrentRouteName] = useState('');
 
-    // Get user type from Redux
+    // Get user type and auth token from Redux
     const userType = useSelector(state => state.auth.userType);
+    const token = useSelector(state => state.auth.token);
+    const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
 
-    // Base menu items
-    const baseMenuItems = [
-        { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
-        { id: 22, title: "کیف پول لوپ", screen: "Increase" },
-        { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
-        { id: 20, title: "قوانین / درباره لوپ", screen: "AboutScreen" },
-        { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
-        { id: 18, title: "یادداشت", screen: "NotesScreen" },
-        { id: 17, title: " ضمانت نامه / گارانتی", screen: "WarrantyScreen" },
-        { id: 16, title: "نظرات و پیشنهادات", screen: "FeedbackSurveyScreen" },
-        { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
-        { id: 14, title: "نرخنامه", screen: "RateListScreen" },
-        { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
-        { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
-        { id: 11, title: "فکروبکر", screen: "GameMenu" },
-        { id: 10, title: "ثبت‌نام دوره‌های آموزشی ", screen: "TrainingRegistrationScreen", },
-        { id: 9, title: "آدرس‌های منتخب", screen: "AddressScreen" },
-        { id: 8, title: "قراردادنامه", screen: "OrganizationContract", organizationOnly: true },
-        { id: 7, title: "حساب کاربری", screen: "Profile" },
-        { id: 6, title: "پیام", screen: "MessageScreen" },
-        { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
-        { id: 4, title: "تراکنش‌ها", screen: "TransactionsScreen" },
-        { id: 3, title: "سفارش‌ها", screen: "OrdersScreen" },
-        // { id: 2, title: "سازمانی / شرکتی", screen: "CorporateScreen" },
-        // { id: 1, title: "سفارش‌های جاری / رزرو", screen: "DeviceOrderSummary" },
+    // صفحاتی که نباید Footer و Menu نمایش داده شود
+    const screensWithoutMenu = [
+        'Landing',
+        'Welcome',
+        'SignInLanding',
+        'MainSignIn',
+        'RegistrationVerificationScreen',
+        'LoginScreen',
+        'Login',
+        'Register',
+        'OTPVerification',
+        'TestConnection',
+        'OrganizationForgotPassword',
+        'OrganizationResetPassword',
+        'OrgPrivacy',
+        'Grouping',
+        'Method',
+        'ForgotPassword',
+        'ResetPasswordScreen',
+        'AccessRestrictedScreen',
+        'OrderMenuScreen',
     ];
+
+    // Track current route
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('state', () => {
+            const currentRoute = navigation.getCurrentRoute();
+            setCurrentRouteName(currentRoute?.name || '');
+        });
+
+        // Set initial route
+        const currentRoute = navigation.getCurrentRoute();
+        setCurrentRouteName(currentRoute?.name || '');
+
+        return unsubscribe;
+    }, [navigation]);
+
+    // Check if current screen should show menu
+    const shouldShowMenu = useMemo(() => {
+        // اگر در لیست صفحات بدون منو باشد، منو نشان نده
+        if (screensWithoutMenu.includes(currentRouteName)) {
+            return false;
+        }
+        
+        // اگر در صفحه قوانین سازمانی هستیم و کاربر لاگین نکرده، منو نشان نده
+        if (currentRouteName === 'OrganizationTermsScreen' && !isLoggedIn) {
+            return false;
+        }
+        
+        // در غیر این صورت منو را نشان بده
+        return true;
+    }, [currentRouteName, isLoggedIn]);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -64,9 +94,39 @@ export const MenuProvider = ({ children }) => {
     }, [])
     const contact = useSelector(state => state.contacts);
 
-    // Filter menu items based on user type
+    // Generate menu items dynamically based on user type
     const menuItems = useMemo(() => {
         console.log('🔍 [MenuContext] Current userType:', userType);
+        
+        const baseMenuItems = [
+            { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
+            { id: 22, title: "کیف پول لوپ", screen: "Increase" },
+            { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
+            // برای سازمانی: قوانین سازمانی | برای عادی: قوانین عمومی
+            { 
+                id: 20, 
+                title: userType === 'organization' ? "قوانین و مقررات سازمانی" : "قوانین / درباره لوپ", 
+                screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen"
+            },
+            { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
+            { id: 18, title: "یادداشت", screen: "NotesScreen" },
+            { id: 17, title: " ضمانت نامه / گارانتی", screen: "WarrantyScreen" },
+            { id: 16, title: "نظرات و پیشنهادات", screen: "FeedbackSurveyScreen" },
+            { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
+            { id: 14, title: "نرخنامه", screen: "RateListScreen" },
+            { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
+            { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
+            { id: 11, title: "فکروبکر", screen: "GameMenu" },
+            { id: 10, title: "ثبت‌نام دوره‌های آموزشی ", screen: "TrainingRegistrationScreen", },
+            { id: 9, title: "آدرس‌های منتخب", screen: "AddressScreen" },
+            { id: 8, title: "قراردادنامه", screen: "OrganizationContract", organizationOnly: true },
+            { id: 7, title: "حساب کاربری", screen: "Profile" },
+            { id: 6, title: "پیام", screen: "MessageScreen" },
+            { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
+            { id: 4, title: "تراکنش‌ها", screen: "TransactionsScreen" },
+            { id: 3, title: "سفارش‌ها", screen: "OrdersScreen" },
+        ];
+
         if (userType === 'organization') {
             console.log('✅ [MenuContext] Showing organization menu items');
             // Show all items including organization-only items
@@ -118,25 +178,27 @@ export const MenuProvider = ({ children }) => {
             <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={{ flex: 1 }}>
                 {children}
 
-                {/* Global Footer - همیشه در پایین تمام صفحات نمایش داده می‌شود */}
-                <View style={[styles.footer, NewStyles.rowWrapper]}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            contact?.data?.data?.link && Linking.openURL(`${contact?.data?.data?.link}`)
-                        }}
-                    >
-                        <Text style={NewStyles.text4}>{contact?.data?.data?.name}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.supportButton} onPress={()=>{navigation.navigate('MessageScreen')}}>
-                        <Text style={NewStyles.text4}>پشتیبانی</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={openMenu}>
-                        <Image
-                            source={require("../assets/logo.png")}
-                            style={styles.footerLogo}
-                        />
-                    </TouchableOpacity>
-                </View>
+                {/* Global Footer - فقط در صفحات مجاز نمایش داده می‌شود */}
+                {shouldShowMenu && (
+                    <View style={[styles.footer, NewStyles.rowWrapper]}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                contact?.data?.data?.link && Linking.openURL(`${contact?.data?.data?.link}`)
+                            }}
+                        >
+                            <Text style={NewStyles.text4}>{contact?.data?.data?.name}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.supportButton} onPress={()=>{navigation.navigate('MessageScreen')}}>
+                            <Text style={NewStyles.text4}>پشتیبانی</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={openMenu}>
+                            <Image
+                                source={require("../assets/logo.png")}
+                                style={styles.footerLogo}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
             </SafeAreaView>
 
             {/* Menu Modal */}

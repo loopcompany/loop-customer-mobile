@@ -61,6 +61,7 @@ export const API_ENDPOINTS = {
     FAQS: '/info/faqs',
     TERMS: '/info/terms', 
     PRIVACY: '/info/privacy',
+    ORGANIZATION_TERMS: '/info/organization-terms',
   },
 
   // Organization endpoints

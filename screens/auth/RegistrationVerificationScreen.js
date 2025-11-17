@@ -181,7 +181,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
         title="تایید شماره موبایل"
         onPressLeft={() => navigation.goBack()}
@@ -191,7 +191,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
         <CustomStatusBar />
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
           style={{ flex: 1 }}
         >
           <ScrollView
