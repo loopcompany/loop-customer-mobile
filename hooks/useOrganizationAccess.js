@@ -172,6 +172,7 @@ export const useOrganizationAccess = () => {
 
   /**
    * Load userType از AsyncStorage اگر null باشه
+   * 🔒 SECURITY FIX: اگر در AsyncStorage نبود، از API بپرس (نه اینکه default individual فرض کنیم)
    */
   useEffect(() => {
     const loadUserType = async () => {
@@ -182,15 +183,41 @@ export const useOrganizationAccess = () => {
             console.log('📱 Loading userType from AsyncStorage:', savedUserType);
             dispatch(setUserType(savedUserType));
           } else {
-            // اگر userType در AsyncStorage نیست، default individual فرض کن
-            console.log('📱 No userType in AsyncStorage, defaulting to individual');
-            dispatch(setUserType('individual'));
-            await AsyncStorage.setItem('accountType', 'individual');
+            // 🔒 SECURITY: اگر userType در AsyncStorage نیست، از API بپرس
+            console.log('⚠️ No userType in AsyncStorage, fetching from API...');
+            try {
+              // سعی کن از endpoint سازمانی بپرسیم
+              const orgResponse = await axios.get(`${uri}/organization/profile/status`, {
+                headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Accept': 'application/json'
+                }
+              });
+              
+              if (orgResponse.data.success) {
+                // کاربر سازمانی است
+                console.log('✅ User is organization type');
+                dispatch(setUserType('organization'));
+                await AsyncStorage.setItem('accountType', 'organization');
+              } else {
+                throw new Error('Not an organization user');
+              }
+            } catch (apiError) {
+              // اگر API سازمانی جواب نداد، پس فردی است
+              if (apiError.response?.status === 403 || apiError.response?.status === 404) {
+                console.log('✅ User is individual type (org API returned 403/404)');
+                dispatch(setUserType('individual'));
+                await AsyncStorage.setItem('accountType', 'individual');
+              } else {
+                console.error('❌ Error determining user type from API:', apiError);
+                // در صورت خطای شبکه، منتظر بمانیم (نه اینکه individual فرض کنیم)
+                setError('خطا در تشخیص نوع حساب کاربری. لطفا دوباره تلاش کنید.');
+              }
+            }
           }
         } catch (error) {
           console.error('📱 Error loading userType from AsyncStorage:', error);
-          // در صورت خطا، individual فرض کن
-          dispatch(setUserType('individual'));
+          setError('خطا در بارگذاری اطلاعات حساب کاربری');
         }
       }
     };
@@ -213,14 +240,15 @@ export const useOrganizationAccess = () => {
    * چک کردن دسترسی به صفحه خاص
    */
   const canAccessScreen = useCallback((screenName) => {
-    // � اگر لاگین نکرده، اجازه دسترسی بده (صفحه لاگین نشون میده)
+    // 🔓 اگر لاگین نکرده، اجازه دسترسی بده (صفحه لاگین نشون میده)
     if (!isAuthenticated || !token) {
       return true;
     }
     
-    // �🔒 اگر userType هنوز مشخص نیست، دسترسی ندهیم
+    // 🔒 اگر userType هنوز مشخص نیست، بگذار withOrganizationAccess loading نشون بده
+    // بنابراین true برمی‌گردانیم تا به withOrganizationAccess برسد و آنجا loading نمایش دهد
     if (!userType || userType === null) {
-      return false;
+      return true; // تغییر از false به true
     }
     
     // کاربران فردی دسترسی آزاد دارند

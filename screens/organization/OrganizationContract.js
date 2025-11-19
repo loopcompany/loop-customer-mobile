@@ -242,7 +242,8 @@ const OrganizationContract = ({ navigation }) => {
           name: file.name,
           size: file.size,
           mimeType: file.mimeType,
-          uri: file.uri
+          uri: file.uri,
+          hasFileObject: !!file.file
         });
         
         // Check file size (max 500MB according to API docs)
@@ -260,7 +261,18 @@ const OrganizationContract = ({ navigation }) => {
         }
 
         console.log('✅ Validation passed, setting selectedFile');
-        setSelectedFile(file);
+        
+        // 🌐 در وب، باید File object واقعی رو هم ذخیره کنیم
+        if (Platform.OS === 'web' && file.file) {
+          console.log('📁 Web: Storing File object');
+          setSelectedFile({
+            ...file,
+            file: file.file // File object واقعی برای آپلود
+          });
+        } else {
+          setSelectedFile(file);
+        }
+        
         showAlert('موفق', `فایل ${file.name} انتخاب شد`);
       } else {
         console.log('⚠️ File selection canceled or no file');
@@ -314,25 +326,60 @@ const OrganizationContract = ({ navigation }) => {
       console.log('🔑 Token found, preparing FormData...');
       const formData = new FormData();
       
-      const fileData = {
-        uri: selectedFile.uri,
-        type: 'application/pdf',
-        name: selectedFile.name || 'contract.pdf',
-      };
-      
-      console.log('📁 File data for upload:', fileData);
-      formData.append('contract_file', fileData);
+      // 🌐 Platform-specific file handling
+      if (Platform.OS === 'web') {
+        // در وب، selectedFile.file یک File object واقعی است
+        console.log('📁 Web: Appending File object directly');
+        
+        // بررسی وجود file object
+        if (selectedFile.file) {
+          formData.append('contract_file', selectedFile.file, selectedFile.name);
+          console.log('✅ File appended:', {
+            name: selectedFile.name,
+            size: selectedFile.size,
+            type: selectedFile.mimeType
+          });
+        } else if (selectedFile.uri) {
+          // fallback: اگر file object نداریم، از uri استفاده می‌کنیم (fetch blob)
+          console.log('⚠️ No file object, fetching blob from URI...');
+          const response = await fetch(selectedFile.uri);
+          const blob = await response.blob();
+          formData.append('contract_file', blob, selectedFile.name || 'contract.pdf');
+          console.log('✅ Blob appended from URI');
+        } else {
+          throw new Error('فایل معتبر نیست');
+        }
+      } else {
+        // در React Native، از uri استفاده می‌کنیم
+        console.log('� Mobile: Using URI-based file data');
+        const fileData = {
+          uri: selectedFile.uri,
+          type: 'application/pdf',
+          name: selectedFile.name || 'contract.pdf',
+        };
+        formData.append('contract_file', fileData);
+        console.log('✅ File data appended:', fileData);
+      }
 
       const uploadUrl = `${uri}/organization/contracts/upload`;
       console.log('🌐 Upload URL:', uploadUrl);
       console.log('🔄 Starting upload...');
 
+      // 🌐 Headers - در وب نباید Content-Type دستی تنظیم بشه
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      };
+      
+      // فقط در React Native باید Content-Type تنظیم بشه
+      if (Platform.OS !== 'web') {
+        headers['Content-Type'] = 'multipart/form-data';
+      }
+      
+      console.log('📤 Request headers:', headers);
+
       const response = await axios.post(uploadUrl, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
-        },
+        headers,
         timeout: 30000, // 30 second timeout
       });
 
@@ -434,7 +481,6 @@ const OrganizationContract = ({ navigation }) => {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <CustomStatusBar />
-        <ScreenHeaders navigation={navigation} screenTitle="قراردادنامه" />
         <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
         <Text style={styles.loadingText}>در حال بارگذاری...</Text>
       </View>
@@ -447,7 +493,7 @@ const OrganizationContract = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <CustomStatusBar />
-      <ScreenHeaders navigation={navigation} screenTitle="قراردادنامه سازمانی" />
+      <ScreenHeaders title="قراردادنامه سازمانی" />
       
       <ScrollView 
         style={styles.scrollView}

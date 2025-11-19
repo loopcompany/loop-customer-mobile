@@ -119,7 +119,28 @@ const styles = StyleSheet.create({
 });
 
 // محافظت از صفحه منوی سفارشات - نقطه ورود به مدیریت سفارشات
+// نکته: OrderMenuScreen برای کاربران لاگین نکرده هم باید در دسترس باشد
 export default withOrganizationAccess(OrderMenuScreen, {
-    ...ACCESS_PRESETS.ORDER_RELATED,
+    allowOrganizationAccess: true,
+    requireCompleteAccess: false, // کاربران لاگین نکرده هم می‌توانند ببینند
+    customAccessCheck: ({ hasCompleteAccess, isOrganizationUser, isAuthenticated }) => {
+      // اگر کاربر لاگین نکرده، اجازه دسترسی بده (بعداً در FolderScreen چک می‌شود)
+      if (!isAuthenticated) {
+        return { allowed: true };
+      }
+      
+      // اگر کاربر فردی است، دسترسی آزاد
+      if (!isOrganizationUser) {
+        return { allowed: true };
+      }
+      
+      // اگر کاربر سازمانی است، باید تایید کامل داشته باشد
+      return {
+        allowed: hasCompleteAccess,
+        title: "نیاز به تایید کامل",
+        message: "برای مشاهده منوی سفارشات، باید هم پروفایل و هم قرارداد شما تایید شده باشد",
+        showRetry: true
+      };
+    },
     screenName: 'OrderMenuScreen'
 });

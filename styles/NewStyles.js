@@ -65,7 +65,7 @@ const NewStyles = StyleSheet.create({
   },
   title6: {
     fontSize: 14,
-    fontFamily: 'iransans',
+    fontFamily: 'VazirBold',
     color: themeColor6.bgColor(1),
     textAlign: 'right',
   },

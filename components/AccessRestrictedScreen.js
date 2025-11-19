@@ -11,12 +11,13 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from './Button';
 import CustomStatusBar from './CustomStatusBar';
-import { 
-  themeColor0, themeColor1, themeColor2, themeColor3, themeColor4, 
-  themeColor6, themeColor7, themeColor8, themeColor10, themeColor11, 
+import {
+  themeColor0, themeColor1, themeColor2, themeColor3, themeColor4,
+  themeColor6, themeColor7, themeColor8, themeColor10, themeColor11,
   themeColor5
 } from '../theme/Color';
-import { NewStyles } from '../styles/NewStyles';
+import NewStyles from '../styles/NewStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -58,6 +59,8 @@ const AccessRestrictedScreen = ({
         return { name: 'block', color: themeColor6.color, size: 80 };
       case 'incomplete_access':
         return { name: 'hourglass-empty', color: themeColor11.color, size: 80 };
+      case 'login_required':
+        return { name: 'login', color: themeColor2.color, size: 80 };
       case 'custom':
         return { name: 'info-outline', color: themeColor2.color, size: 80 };
       default:
@@ -97,7 +100,7 @@ const AccessRestrictedScreen = ({
    */
   const handleNavigation = (action) => {
     console.log('🚀 AccessRestrictedScreen navigation:', action);
-    
+
     switch (action) {
       case 'edit_profile':
         console.log('📱 Navigating to OrganizationProfile');
@@ -119,6 +122,10 @@ const AccessRestrictedScreen = ({
         console.log('📱 Navigating to Home');
         navigation.navigate('Home');
         break;
+      case 'login':
+        console.log('📱 Navigating to Login');
+        navigation.navigate('MainSignIn');
+        break;
       default:
         console.log('❌ Unknown navigation action:', action);
         break;
@@ -138,7 +145,7 @@ const AccessRestrictedScreen = ({
   const shouldShowEditProfile = (profileStatus === 'rejected' || profileStatus === 'not_uploaded' || profileStatus === null);
   const shouldShowUploadContract = (contractStatus === 'rejected' || contractStatus === 'not_uploaded' || contractStatus === null);
   const shouldShowViewContract = (contractStatus === 'pending' || contractStatus === 'approved');
-  
+
   console.log('🎯 Button visibility:', {
     shouldShowEditProfile,
     shouldShowUploadContract,
@@ -148,10 +155,10 @@ const AccessRestrictedScreen = ({
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={styles.container}>
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} barStyle="dark-content" />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -173,51 +180,57 @@ const AccessRestrictedScreen = ({
         {/* وضعیت پروفایل و قرارداد */}
         <View style={styles.statusContainer}>
           <Text style={styles.statusTitle}>وضعیت فعلی:</Text>
-            
-            <View style={styles.statusItem}>
-              <View style={styles.statusRow}>
-                <Icon name="person-outline" size={24} color={themeColor3.color} />
-                <Text style={styles.statusLabel}>اطلاعات پروفایل:</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(profileStatus || 'unknown') }]}>
-                  <Text style={styles.statusBadgeText}>
-                    {profileStatus ? getStatusText(profileStatus) : 'در حال بررسی...'}
-                  </Text>
-                </View>
-              </View>
-              {profileRejectionReason && profileStatus === 'rejected' && (
-                <Text style={styles.rejectionReason} numberOfLines={3}>
-                  دلیل رد: {profileRejectionReason}
-                </Text>
-              )}
-            </View>
 
-            <View style={styles.statusItem}>
-              <View style={styles.statusRow}>
-                <Icon name="description" size={24} color={themeColor3.color} />
-                <Text style={styles.statusLabel}>قرارداد:</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(contractStatus || 'unknown') }]}>
-                  <Text style={styles.statusBadgeText}>
-                    {contractStatus ? getStatusText(contractStatus) : 'در حال بررسی...'}
-                  </Text>
-                </View>
-              </View>
-              {contractRejectionReason && contractStatus === 'rejected' && (
-                <Text style={styles.rejectionReason} numberOfLines={3}>
-                  دلیل رد: {contractRejectionReason}
+          <View style={styles.statusItem}>
+            <View style={styles.statusRow}>
+              <Icon name="person-outline" size={24} color={themeColor3.color} />
+              <Text style={styles.statusLabel}>اطلاعات پروفایل:</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(profileStatus || 'unknown') }]}>
+                <Text style={styles.statusBadgeText}>
+                  {profileStatus ? getStatusText(profileStatus) : 'در حال بررسی...'}
                 </Text>
-              )}
+              </View>
             </View>
+            {profileRejectionReason && profileStatus === 'rejected' && (
+              <Text style={styles.rejectionReason} numberOfLines={3}>
+                دلیل رد: {profileRejectionReason}
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.statusItem}>
+            <View style={styles.statusRow}>
+              <Icon name="description" size={24} color={themeColor3.color} />
+              <Text style={styles.statusLabel}>قرارداد:</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(contractStatus || 'unknown') }]}>
+                <Text style={styles.statusBadgeText}>
+                  {contractStatus ? getStatusText(contractStatus) : 'در حال بررسی...'}
+                </Text>
+              </View>
+            </View>
+            {contractRejectionReason && contractStatus === 'rejected' && (
+              <Text style={styles.rejectionReason} numberOfLines={3}>
+                دلیل رد: {contractRejectionReason}
+              </Text>
+            )}
+          </View>
         </View>
 
         {/* مراحل بعدی */}
-        {nextSteps.length > 0 && (
+        {nextSteps && nextSteps.length > 0 && (
           <View style={styles.nextStepsContainer}>
             <Text style={styles.nextStepsTitle}>مراحل بعدی:</Text>
             {nextSteps.map((step, index) => (
-              <View key={index} style={styles.stepItem}>
+              <TouchableOpacity
+                key={index}
+                style={styles.stepItem}
+                onPress={() => step.action && handleNavigation(step.action)}
+              >
                 <Icon name="chevron-left" size={20} color={themeColor0.color} />
-                <Text style={styles.stepText}>{step}</Text>
-              </View>
+                <Text style={styles.stepText}>
+                  {typeof step === 'string' ? step : step.text || step}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -225,14 +238,12 @@ const AccessRestrictedScreen = ({
         {/* دکمه‌های عملیاتی */}
         <View style={styles.actionsContainer}>
           {/* دکمه ویرایش اطلاعات حساب - همیشه در بالا نمایش داده شود */}
-          <TouchableOpacity 
-            style={[styles.actionButtonCustom, { backgroundColor: themeColor10.bgColor(1) }]}
+          <TouchableOpacity
+            style={[styles.actionButtonCustom, { backgroundColor: themeColor0.bgColor(1) }]}
             onPress={() => handleNavigation('edit_account')}
           >
             <Icon name="account-circle" size={24} color={themeColor4.color} />
-            <Text style={[styles.actionButtonText, { color: themeColor4.color }]}>
-              ویرایش اطلاعات حساب
-            </Text>
+            <Text style={[styles.actionButtonText, { color: themeColor4.color }]}>ویرایش اطلاعات حساب</Text>
           </TouchableOpacity>
 
           {/* دکمه ویرایش پروفایل - فقط اگه رد شده یا آپلود نشده */}
@@ -256,7 +267,7 @@ const AccessRestrictedScreen = ({
               style={styles.actionButton}
             />
           )}
-          
+
           {/* دکمه مشاهده قرارداد - اگه pending یا approved باشه */}
           {(contractStatus === 'pending' || contractStatus === 'approved') && (
             <Button
@@ -280,12 +291,12 @@ const AccessRestrictedScreen = ({
           )}
 
           {/* دکمه بازگشت */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => handleNavigation('go_back')}
           >
-            <Icon name="arrow-back" size={24} color={themeColor0.color} />
             <Text style={styles.backButtonText}>بازگشت</Text>
+            <Icon name="arrow-back" size={24} color={themeColor0.color} />
           </TouchableOpacity>
         </View>
 
@@ -301,7 +312,7 @@ const AccessRestrictedScreen = ({
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -324,16 +335,15 @@ const styles = StyleSheet.create({
     backgroundColor: themeColor5.bgColor(1),
   },
   title: {
+    ...NewStyles.title10,
     fontSize: 24,
-    fontFamily: 'Vazir-Bold',
     color: themeColor10.color,
     textAlign: 'center',
     marginBottom: 15,
   },
   message: {
+    ...NewStyles.text3,
     fontSize: 16,
-    fontFamily: 'Vazir-Light',
-    color: themeColor3.color,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 30,
@@ -347,9 +357,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   statusTitle: {
+    ...NewStyles.title10,
     fontSize: 18,
-    fontFamily: 'Vazir-Bold',
-    color: themeColor10.color,
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -363,9 +372,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   statusLabel: {
+    ...NewStyles.text10,
     fontSize: 16,
-    fontFamily: 'Vazir-Light',
-    color: themeColor10.color,
     flex: 1,
     textAlign: 'right',
     marginRight: 10,
@@ -376,14 +384,13 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   statusBadgeText: {
+    ...NewStyles.title4,
     fontSize: 12,
-    fontFamily: 'Vazir-Bold',
     color: themeColor4.color,
   },
   rejectionReason: {
+    ...NewStyles.text6,
     fontSize: 14,
-    fontFamily: 'Vazir-Light',
-    color: themeColor6.color,
     marginTop: 8,
     marginRight: 35,
     textAlign: 'right',
@@ -397,21 +404,18 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   nextStepsTitle: {
+    ...NewStyles.title,
     fontSize: 18,
-    fontFamily: 'Vazir-Bold',
-    color: themeColor0.color,
     marginBottom: 15,
     textAlign: 'center',
   },
   stepItem: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
+    ...NewStyles.row,
     paddingVertical: 8,
   },
   stepText: {
+    ...NewStyles.text10,
     fontSize: 16,
-    fontFamily: 'Vazir-Light',
-    color: themeColor10.color,
     marginRight: 10,
     textAlign: 'right',
     flex: 1,
@@ -419,43 +423,36 @@ const styles = StyleSheet.create({
   actionsContainer: {
     width: '100%',
     marginBottom: 30,
+    alignItems: 'center',
   },
   actionButton: {
     marginBottom: 15,
   },
   actionButtonCustom: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...NewStyles.row,
+    ...NewStyles.center,
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 12,
     marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    gap: 10,
+    ...NewStyles.shadow,
+    maxWidth:400,
+    width:'100%'
   },
   actionButtonText: {
+    ...NewStyles.title10,
     fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-    marginRight: 10,
   },
   backButton: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...NewStyles.row,
+    ...NewStyles.center,
     paddingVertical: 15,
     marginTop: 10,
   },
   backButtonText: {
+    ...NewStyles.text,
     fontSize: 16,
-    fontFamily: 'Vazir-Light',
-    color: themeColor0.color,
     marginRight: 10,
   },
   helpContainer: {
@@ -466,22 +463,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   helpTitle: {
+    ...NewStyles.title,
     fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-    color: themeColor10.color,
     marginBottom: 10,
   },
   helpText: {
+    ...NewStyles.text3,
     fontSize: 14,
-    fontFamily: 'Vazir-Light',
-    color: themeColor3.color,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 15,
   },
   helpButton: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
+    ...NewStyles.row,
+    ...NewStyles.center,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -489,9 +484,8 @@ const styles = StyleSheet.create({
     borderColor: themeColor0.color,
   },
   helpButtonText: {
+    ...NewStyles.text,
     fontSize: 14,
-    fontFamily: 'Vazir-Light',
-    color: themeColor0.color,
     marginRight: 10,
   },
 });
