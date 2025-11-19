@@ -295,8 +295,8 @@ const AccessRestrictedScreen = ({
             style={styles.backButton}
             onPress={() => handleNavigation('go_back')}
           >
-            <Icon name="arrow-back" size={24} color={themeColor0.color} />
             <Text style={styles.backButtonText}>بازگشت</Text>
+            <Icon name="arrow-back" size={24} color={themeColor0.color} />
           </TouchableOpacity>
         </View>
 
