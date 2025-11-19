@@ -84,7 +84,7 @@ export default function DiscountDetail({ route, navigation }) {
                     <Text style={NewStyles.title}>{data?.gems} <Text style={NewStyles.title}>امتیاز مورد نیاز</Text></Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                    <Button title={'دریافت تخفیف'} loading={loading} onPress={() => getDiscount()} />
+                    <Button title={'دریافت تخفیف'} loading={loading} onPress={() => getDiscount()} textStyle={[NewStyles.title1, { fontSize: 14 }]}/>
                 </View>
             </View>
 

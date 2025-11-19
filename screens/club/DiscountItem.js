@@ -8,12 +8,12 @@ import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from
 
 export default function DiscountItem({ item, navigation }) {
     return (
-        <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('Discount Detail', { discountId: item.id })}>
+        <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item.id })}>
             <View style={[styles.discountWrapper, NewStyles.rowWrapper]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}> 
                     <Text style={NewStyles.text10}>{item?.title}</Text>
-                    <Text style={NewStyles.text}>{item?.gems} پا مورد نیاز</Text>
+                    <Text style={NewStyles.text}>{item?.gems} امتیاز مورد نیاز</Text>
                 </View>
             </View> 
             <View style={NewStyles.rowWrapper}>
@@ -65,5 +65,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: Platform.OS == 'android' ? themeColor3.bgColor(1) : themeColor3.bgColor(0.5),
         borderStyle: Platform.OS == 'android' ? 'dashed' : 'solid',
+        marginVertical: 10
     },
 })

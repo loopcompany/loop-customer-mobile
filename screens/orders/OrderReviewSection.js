@@ -143,7 +143,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
                 title="تایید سفارش"
                 onPress={() => setAcceptModal(true)}
                 loading={loadingAccept}
-                textStyle={NewStyles.text4}
+                textStyle={[NewStyles.text4, { fontSize: 15 }]}
                 style={{ backgroundColor: themeColor7.bgColor(1) }}
               />
             </View>
