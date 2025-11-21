@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { setToken, setUserType } from '../../slices/authSlice';
 import { setOrganizationData } from '../../slices/organizationSlice';
 import { fetchAddresses } from '../../slices/addressSlice';
+import { fetchOrganizationUser } from '../../slices/organizationUserSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
@@ -79,6 +80,7 @@ const Login = ({ navigation }) => {
       if (response.data.status === 'success') {
         console.log('✅ [Login] ورود موفق - شروع ذخیره‌سازی اطلاعات...');
         console.log('🔑 [Login] توکن دریافتی:', response.data.data.token ? `${response.data.data.token.substring(0, 20)}...` : 'null');
+        console.log('🖼️ [Login] تصویر پروفایل در response:', response.data.data.organization?.profile_image);
         
         // Save token and user data
         await AsyncStorage.setItem('userToken', response.data.data.token);
@@ -88,7 +90,7 @@ const Login = ({ navigation }) => {
         console.log('💾 [Login] userData ذخیره شد');
         
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
-        console.log('💾 [Login] organizationData ذخیره شد');
+        console.log('💾 [Login] organizationData ذخیره شد:', JSON.stringify(response.data.data.organization, null, 2));
         
         await AsyncStorage.setItem('accountType', 'organization');
         console.log('💾 [Login] accountType ذخیره شد: organization');
@@ -105,6 +107,9 @@ const Login = ({ navigation }) => {
         
         dispatch(setOrganizationData(response.data.data.organization));
         console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
+        
+        dispatch(fetchOrganizationUser(response.data.data.token));
+        console.log('📦 [Login] بارگذاری اطلاعات کاربر سازمانی آغاز شد');
         
         dispatch(fetchAddresses(response.data.data.token));
         console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');

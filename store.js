@@ -11,6 +11,7 @@ import stepSlice from './slices/stepSlice';
 import orderSlice from './slices/orderSlice';
 import ordersSlice from './slices/ordersSlice';
 import organizationSlice from './slices/organizationSlice';
+import organizationUserSlice from './slices/organizationUserSlice';
 
 export default configureStore({
   reducer: {
@@ -26,5 +27,6 @@ export default configureStore({
     order: orderSlice,
     orders: ordersSlice,
     organization: organizationSlice,
+    organizationUser: organizationUserSlice,
   }
 })

@@ -146,22 +146,22 @@ export default function LoginScreen({ navigation }) {
         const userData = response.data.user;
         const token = response.data.token;
 
-        // Always save token for current session
-
+        // **همیشه** توکن را در AsyncStorage ذخیره کن (برای تمام کاربران)
+        await TokenManager.saveAuthData(token, userData);
+        console.log('✅ Token and user data saved to AsyncStorage');
 
         // Save additional data and enable auto-login only if user wants to remember login
         if (state.rememberMe) {
           await AsyncStorage.setItem('savedPhone', state.phone);
           await AsyncStorage.setItem('rememberLogin', 'true');
           await AsyncStorage.setItem('autoLoginEnabled', 'true');
-          await TokenManager.saveAuthData(token, userData);
-          console.log('✅ Auto-login enabled and login data saved');
+          console.log('✅ Auto-login enabled');
         } else {
           // Remove any previous auto-login settings
           await AsyncStorage.removeItem('savedPhone');
           await AsyncStorage.removeItem('rememberLogin');
           await AsyncStorage.removeItem('autoLoginEnabled');
-          console.log('✅ Token saved but auto-login disabled');
+          console.log('✅ Auto-login disabled');
         }
 
         // Update Redux store

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, RefreshControl, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -63,7 +63,9 @@ export default function DiscountDetail({ route, navigation }) {
     return (
         <SafeAreaView edges={{top:'off'}} style={NewStyles.container}>
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
-                <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
+                <View style={Platform.OS === 'web' ? styles.imageContainer : {}}>
+                    <Image style={{ maxWidth: 600, height: 250, width: '100%',resizeMode:"contain" }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
+                </View>
                 <View style={[NewStyles.spacing, { gap: 10 }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name='ticket-outline' size={24} color={themeColor0.bgColor(1)} />
@@ -97,6 +99,12 @@ const styles = StyleSheet.create({
     contentContainerStyle: {
         gap: 10,
         // paddingVertical: '5%'
+    },
+    imageContainer: {
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '100%',
+        marginTop: 20,
     },
     gemImage: {
         height: 30,

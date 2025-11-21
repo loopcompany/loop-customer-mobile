@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
     TERMS: '/info/terms', 
     PRIVACY: '/info/privacy',
     ORGANIZATION_TERMS: '/info/organization-terms',
+    WARRANTY: '/info/warranties',
   },
 
   // Organization endpoints
@@ -73,7 +74,6 @@ export const API_ENDPOINTS = {
     VALIDATE_TOKEN: '/organization/validate-token',
     LOGOUT: '/organization/logout',
     LOGOUT_ALL: '/organization/logout-all',
-    WARRANTY: '/info/warranties',
   }
 };
 

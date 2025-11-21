@@ -29,6 +29,7 @@ export default function Landing({ navigation }) {
 
       if (authStatus.authenticated) {
         console.log('✅ Landing: User is authenticated');
+console.log(authStatus.token);
 
         // Set token in Redux
         dispatch(setToken(authStatus.token));

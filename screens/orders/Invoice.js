@@ -71,15 +71,33 @@ function Invoice({ route }) {
         dispatch(fetchUser(token))
     }, [refreshing]);
 
-    const totalDiscountedPrice = useMemo(() => {
-        const basePrice = Number(data?.technician_price ?? data?.pakar_price);
-        return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price);
-    }, [data]);
-
+    // محاسبه مبلغ کل بدون تخفیف
     const totalPrice = useMemo(() => {
         const basePrice = Number(data?.technician_price ?? data?.pakar_price);
         return Number(basePrice) + Number(data?.extra_price);
     }, [data]);
+
+    // محاسبه مبلغ تخفیف واقعی
+    const actualDiscountAmount = useMemo(() => {
+        if (data?.discount_info) {
+            // اگر discount_amount در discount_info موجود است
+            if (data.discount_info.discount_amount) {
+                return Number(data.discount_info.discount_amount);
+            }
+            // اگر فقط درصد تخفیف موجود است، آن را محاسبه می‌کنیم
+            if (data.discount_info.discount_percent && totalPrice > 0) {
+                return Math.round((totalPrice * Number(data.discount_info.discount_percent)) / 100);
+            }
+        }
+        // اگر discount_info نبود، از discount_price استفاده می‌کنیم
+        return Number(data?.discount_price || 0);
+    }, [data, totalPrice]);
+
+    // محاسبه مبلغ نهایی با تخفیف
+    const totalDiscountedPrice = useMemo(() => {
+        const total = totalPrice - actualDiscountAmount;
+        return Math.max(0, total); // حداقل مبلغ صفر باشد
+    }, [totalPrice, actualDiscountAmount]);
 
     const renderRow = (text1, text2, textStyle1, textStyle2) => (
         <View style={NewStyles.rowWrapper}>
@@ -168,9 +186,102 @@ function Invoice({ route }) {
                         {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
                         {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ نهایی تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                         {(data?.extra_price > 0) && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-                        {(data?.discount_price > 0) && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
-                        {(totalPrice > totalDiscountedPrice > 0) && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
+                        
+                        {/* نمایش مبلغ کل قبل از تخفیف */}
+                        {(actualDiscountAmount > 0 && totalPrice > 0) && (
+                            <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1) }]}>
+                                <Text style={[NewStyles.text]}>مبلغ کل قبل از تخفیف</Text>
+                                <Text style={[NewStyles.text10, { textDecorationLine: 'line-through', color: themeColor0.bgColor(0.5) }]}>
+                                    {formatPrice(totalPrice)} تومان
+                                </Text>
+                            </View>
+                        )}
+                        
+                        {/* نمایش اطلاعات تخفیف - برای سفارشات جدید با discount_info کامل */}
+                        {(data?.discount_info) && (
+                            <View style={{ 
+                                backgroundColor: themeColor6.bgColor(0.1), 
+                                padding: 12, 
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                borderColor: themeColor6.bgColor(0.3),
+                                gap: 8
+                            }}>
+                                <View style={[NewStyles.row, { gap: 5 }]}>
+                                    <Ionicons name="pricetag" size={18} color={themeColor6.bgColor(1)} />
+                                    <Text style={[NewStyles.title, { color: themeColor6.bgColor(1), fontSize: 14 }]}>
+                                        کد تخفیف استفاده شده
+                                    </Text>
+                                </View>
+                                
+                                <View style={NewStyles.rowWrapper}>
+                                    <Text style={[NewStyles.text10]}>کد تخفیف:</Text>
+                                    <View style={{
+                                        backgroundColor: themeColor6.bgColor(1),
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 4,
+                                        borderRadius: 6
+                                    }}>
+                                        <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>
+                                            {data.discount_info.code}
+                                        </Text>
+                                    </View>
+                                </View>
+                                
+                                <View style={NewStyles.rowWrapper}>
+                                    <Text style={[NewStyles.text10]}>درصد تخفیف:</Text>
+                                    <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
+                                        {data.discount_info.discount_percent}%
+                                    </Text>
+                                </View>
+                                
+                                <View style={NewStyles.rowWrapper}>
+                                    <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
+                                    <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
+                                        {formatPrice(actualDiscountAmount)} تومان
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+                        
+                        {/* نمایش تخفیف برای سفارشات قدیمی - فقط با discount_price */}
+                        {(actualDiscountAmount > 0 && !data?.discount_info) && (
+                            <View style={{ 
+                                backgroundColor: themeColor6.bgColor(0.1), 
+                                padding: 12, 
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                borderColor: themeColor6.bgColor(0.3),
+                                gap: 8
+                            }}>
+                                <View style={[NewStyles.row, { gap: 5 }]}>
+                                    <Ionicons name="pricetag" size={18} color={themeColor6.bgColor(1)} />
+                                    <Text style={[NewStyles.title, { color: themeColor6.bgColor(1), fontSize: 14 }]}>
+                                        تخفیف اعمال شده
+                                    </Text>
+                                </View>
+                                
+                                <View style={NewStyles.rowWrapper}>
+                                    <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
+                                    <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
+                                        {formatPrice(actualDiscountAmount)} تومان
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+                        
+                        {/* مبلغ قابل پرداخت - نمایش برای سفارشات با تخفیف یا بدون تخفیف */}
+                        {(data?.status > 0) && (
+                            <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 2, borderTopColor: themeColor7.bgColor(0.3) }]}>
+                                <Text style={[NewStyles.title, { color: themeColor7.bgColor(1), fontSize: 16 }]}>
+                                    {actualDiscountAmount > 0 ? 'مبلغ قابل پرداخت (پس از تخفیف)' : 'مبلغ قابل پرداخت'}
+                                </Text>
+                                <Text style={[NewStyles.title, { color: themeColor7.bgColor(1), fontSize: 16 }]}>
+                                    {formatPrice(totalDiscountedPrice)} تومان
+                                </Text>
+                            </View>
+                        )}
+                        
                         {renderRow('موجودی کیف پول شما: ', formatPrice(user?.wallet ?? 0) + ' تومان')}
 
                         {/* نمایش هزینه‌های اضافی */}
@@ -220,7 +331,7 @@ function Invoice({ route }) {
                     :
                     <>
                         <View style={{ flex: 1 }}>
-                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14, }, NewStyles.text4]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
+                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={{ flex: 1 }}>
                             <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />

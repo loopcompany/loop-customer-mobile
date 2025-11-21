@@ -55,7 +55,7 @@ export default function DiscountModal({ discountModal, setDiscountModal, code })
                                     NewStyles.center
                                 ]}
                                 onPress={() => { copyToClipboard() }}>
-                                {!pending && <Text style={NewStyles.text4}>کپی کردن</Text>}
+                                {!pending && <Text style={[NewStyles.text4, {textAlign: 'center'}]}>کپی کردن</Text>}
                                 {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                             </Pressable>
                         </View>

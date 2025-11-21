@@ -8,6 +8,7 @@ import {
     Pressable,
     Dimensions,
     Easing,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { G, Path, Text as SvgText, Circle, Polygon } from 'react-native-svg';
@@ -16,7 +17,8 @@ import { themeColor0, themeColor1, themeColor6, themeColor7 } from '../theme/Col
 import NewStyles from '../styles/NewStyles';
 
 const { width } = Dimensions.get('window');
-const WHEEL_SIZE = width * 0.75;
+// اندازه گردونه: برای وب کوچکتر (350px) و برای موبایل 75% عرض صفحه
+const WHEEL_SIZE = Platform.OS === 'web' ? Math.min(350, width * 0.6) : width * 0.75;
 const CENTER = WHEEL_SIZE / 2;
 
 const LuckyWheel = ({ prizes, onSpinStart, spinning, disabled }) => {

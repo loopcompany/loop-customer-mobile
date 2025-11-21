@@ -92,7 +92,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
 
                         <View style={styles.qrWrapper}>
                             <QRCode
-                                value="http://192.168.21.123:8000/"
+                                value={`${mainUri}/technician/${data?.technician?.id}`}
                                 size={200}
                                 color={themeColor0.bgColor(1)}
                                 backgroundColor={themeColor4.bgColor(1)}
