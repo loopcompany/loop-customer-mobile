@@ -207,7 +207,7 @@ function Invoice({ route }) {
                         {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
                         {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ نهایی تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                         {(data?.extra_price > 0) && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-                        
+
                         {/* نمایش مبلغ کل قبل از تخفیف */}
                         {(actualDiscountAmount > 0 && totalPrice > 0) && (
                             <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1) }]}>
@@ -217,12 +217,12 @@ function Invoice({ route }) {
                                 </Text>
                             </View>
                         )}
-                        
+
                         {/* نمایش اطلاعات تخفیف - برای سفارشات جدید با discount_info کامل */}
                         {(data?.discount_info) && (
-                            <View style={{ 
-                                backgroundColor: themeColor6.bgColor(0.1), 
-                                padding: 12, 
+                            <View style={{
+                                backgroundColor: themeColor6.bgColor(0.1),
+                                padding: 12,
                                 borderRadius: 8,
                                 borderWidth: 1,
                                 borderColor: themeColor6.bgColor(0.3),
@@ -234,7 +234,7 @@ function Invoice({ route }) {
                                         کد تخفیف استفاده شده
                                     </Text>
                                 </View>
-                                
+
                                 <View style={NewStyles.rowWrapper}>
                                     <Text style={[NewStyles.text10]}>کد تخفیف:</Text>
                                     <View style={{
@@ -248,14 +248,14 @@ function Invoice({ route }) {
                                         </Text>
                                     </View>
                                 </View>
-                                
+
                                 <View style={NewStyles.rowWrapper}>
                                     <Text style={[NewStyles.text10]}>درصد تخفیف:</Text>
                                     <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
                                         {data.discount_info.discount_percent}%
                                     </Text>
                                 </View>
-                                
+
                                 <View style={NewStyles.rowWrapper}>
                                     <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
                                     <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
@@ -264,12 +264,12 @@ function Invoice({ route }) {
                                 </View>
                             </View>
                         )}
-                        
+
                         {/* نمایش تخفیف برای سفارشات قدیمی - فقط با discount_price */}
                         {(actualDiscountAmount > 0 && !data?.discount_info) && (
-                            <View style={{ 
-                                backgroundColor: themeColor6.bgColor(0.1), 
-                                padding: 12, 
+                            <View style={{
+                                backgroundColor: themeColor6.bgColor(0.1),
+                                padding: 12,
                                 borderRadius: 8,
                                 borderWidth: 1,
                                 borderColor: themeColor6.bgColor(0.3),
@@ -281,7 +281,7 @@ function Invoice({ route }) {
                                         تخفیف اعمال شده
                                     </Text>
                                 </View>
-                                
+
                                 <View style={NewStyles.rowWrapper}>
                                     <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
                                     <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
@@ -290,7 +290,7 @@ function Invoice({ route }) {
                                 </View>
                             </View>
                         )}
-                        
+
                         {/* مبلغ قابل پرداخت - نمایش برای سفارشات با تخفیف یا بدون تخفیف */}
                         {(data?.status > 0) && (
                             <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 2, borderTopColor: themeColor7.bgColor(0.3) }]}>
@@ -302,7 +302,7 @@ function Invoice({ route }) {
                                 </Text>
                             </View>
                         )}
-                        
+
                         {renderRow('موجودی کیف پول شما: ', formatPrice(user?.wallet ?? 0) + ' تومان')}
 
                         {/* نمایش هزینه‌های اضافی */}
@@ -346,8 +346,13 @@ function Invoice({ route }) {
 
             {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10 }]}>
                 {data?.payment_status > 0 ?
-                    <View style={{ flex: 1 }}>
-                        <Button title={'پرداخت شده'} backgroundColor={themeColor7.bgColor(1)} />
+                    <View style={[{ flex: 1, gap: 10 }, NewStyles.rowWrapper]}>
+                        <View style={{ flex: 1 }}>
+                            <Button title={'پرداخت شده'} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={NewStyles.title4} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Button title={'ذخیره فاکتور'} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+                        </View>
                     </View>
                     :
                     <>
