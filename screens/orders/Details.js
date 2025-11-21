@@ -65,7 +65,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                 {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
                 {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                 {data?.extra_price > 0 && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-                
+
                 {/* نمایش مبلغ کل قبل از تخفیف */}
                 {(actualDiscountAmount > 0 && totalPrice > 0) && (
                     <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1) }]}>
@@ -75,12 +75,12 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                         </Text>
                     </View>
                 )}
-                
+
                 {/* نمایش اطلاعات تخفیف - برای سفارشات جدید با discount_info کامل */}
                 {(data?.discount_info) && (
-                    <View style={{ 
-                        backgroundColor: themeColor6.bgColor(0.1), 
-                        padding: 12, 
+                    <View style={{
+                        backgroundColor: themeColor6.bgColor(0.1),
+                        padding: 12,
                         borderRadius: 8,
                         borderWidth: 1,
                         borderColor: themeColor6.bgColor(0.3),
@@ -93,7 +93,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                                 کد تخفیف استفاده شده
                             </Text>
                         </View>
-                        
+
                         <View style={NewStyles.rowWrapper}>
                             <Text style={[NewStyles.text10]}>کد تخفیف:</Text>
                             <View style={{
@@ -107,14 +107,14 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                                 </Text>
                             </View>
                         </View>
-                        
+
                         <View style={NewStyles.rowWrapper}>
                             <Text style={[NewStyles.text10]}>درصد تخفیف:</Text>
                             <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
                                 {data.discount_info.discount_percent}%
                             </Text>
                         </View>
-                        
+
                         <View style={NewStyles.rowWrapper}>
                             <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
                             <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
@@ -123,12 +123,12 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                         </View>
                     </View>
                 )}
-                
+
                 {/* نمایش تخفیف برای سفارشات قدیمی - فقط با discount_price */}
                 {(actualDiscountAmount > 0 && !data?.discount_info) && (
-                    <View style={{ 
-                        backgroundColor: themeColor6.bgColor(0.1), 
-                        padding: 12, 
+                    <View style={{
+                        backgroundColor: themeColor6.bgColor(0.1),
+                        padding: 12,
                         borderRadius: 8,
                         borderWidth: 1,
                         borderColor: themeColor6.bgColor(0.3),
@@ -141,7 +141,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                                 تخفیف اعمال شده
                             </Text>
                         </View>
-                        
+
                         <View style={NewStyles.rowWrapper}>
                             <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
                             <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
@@ -150,7 +150,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                         </View>
                     </View>
                 )}
-                
+
                 {/* مبلغ قابل پرداخت */}
                 {data?.status > 0 && (
                     <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 2, borderTopColor: themeColor7.bgColor(0.3) }]}>
@@ -567,7 +567,7 @@ function Details({ route, navigation }) {
                         isOpen={showDetails}
                         onPress={() => setShowDetails(!showDetails)}
                     />
-                {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} actualDiscountAmount={actualDiscountAmount} />}                    {/* مرحله بررسی / جایگزین / */}
+                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} actualDiscountAmount={actualDiscountAmount} />}                    {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
                         title="بررسی / جایگزین / پیش رسید"
                         isActive={(data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
@@ -607,7 +607,7 @@ function Details({ route, navigation }) {
                     {(showTechnician || data?.technician_cancel_reason) && data?.technician && (
                         <View>
                             <TechnicianDetailsComponent navigation={navigation} data={data} renderRow={renderRow} />
-                            
+
                             {/* علت لغو توسط متخصص */}
                             {data?.technician_cancel_reason && (
                                 <View style={[{ backgroundColor: themeColor6.bgColor(0.1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10, marginTop: 10 }, NewStyles.border10]}>
