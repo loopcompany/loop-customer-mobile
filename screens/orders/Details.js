@@ -567,7 +567,9 @@ function Details({ route, navigation }) {
                         isOpen={showDetails}
                         onPress={() => setShowDetails(!showDetails)}
                     />
-                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} actualDiscountAmount={actualDiscountAmount} />}                    {/* مرحله بررسی / جایگزین / */}
+                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} actualDiscountAmount={actualDiscountAmount} />}
+                    
+                    {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
                         title="بررسی / جایگزین / پیش رسید"
                         isActive={(data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}

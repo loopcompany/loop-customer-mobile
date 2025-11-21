@@ -86,7 +86,6 @@ import UserDiscounts from './screens/club/UserDiscounts';
 import NotesScreen from './screens/NotesScreen';
 import AddEditNoteScreen from './screens/notes/AddEditNoteScreen';
 import WarrantyScreen from "./screens/resources/WarrantyScreen";
-import OrganizationTermsScreen from "./screens/resources/OrganizationTermsScreen";
 import GameMenuScreen from './screens/game/GameMenuScreen';
 import GamePlayScreen from './screens/game/GamePlayScreen';
 import GameResultScreen from './screens/game/GameResultScreen';
@@ -110,38 +109,6 @@ const App = () => {
   });
 
   const [isReady, setIsReady] = useState(false);
-  const [authInitialized, setAuthInitialized] = useState(false);
-
-  // 🔒 SECURITY: Initialize auth state before rendering app
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const TokenManager = (await import('./services/TokenManager')).default;
-        const { setToken, setUserType } = await import('./slices/authSlice');
-        const { default: storeInstance } = await import('./store');
-
-        const authStatus = await TokenManager.isAuthenticated();
-        
-        if (authStatus.authenticated) {
-          console.log('🔐 App: Restoring auth state from AsyncStorage');
-          storeInstance.dispatch(setToken(authStatus.token));
-          
-          // Also restore userType if available
-          const savedUserType = await AsyncStorage.getItem('accountType');
-          if (savedUserType) {
-            console.log('👤 App: Restoring userType:', savedUserType);
-            storeInstance.dispatch(setUserType(savedUserType));
-          }
-        }
-      } catch (err) {
-        console.error('❌ App: Failed to initialize auth:', err);
-      } finally {
-        setAuthInitialized(true);
-      }
-    };
-
-    initializeAuth();
-  }, []);
 
   useEffect(() => {
     setIsReady(true);
@@ -162,7 +129,7 @@ const App = () => {
     return null;
   }
 
-  if (!isReady || !authInitialized) {
+  if (!isReady) {
     return null;
   }
 
@@ -241,7 +208,6 @@ const App = () => {
         NotesScreen: 'notes',
         AddEditNoteScreen: 'note',
         WarrantyScreen: 'warranty',
-        OrganizationTermsScreen: 'organization-terms',
         GameMenu: 'game',
         GamePlay: 'game-play',
         GameResult: 'game-result',
@@ -268,90 +234,195 @@ const App = () => {
                 headerShown: false,
               }}
             >
-              
-              <Stack.Screen component={Landing} name="Landing" options={{ headerShown: false, }} />
-              <Stack.Screen component={Welcome} name="Welcome" options={{ headerShown: false, }} />
-              <Stack.Screen component={SignInLanding} name="SignInLanding" options={{ headerShown: false, }} />
-              <Stack.Screen component={MainSignIn} name="MainSignIn" options={{ headerShown: false, }} />
-              <Stack.Screen component={RegistrationVerificationScreen} name="RegistrationVerificationScreen" options={{ headerShown: false, }} />
-              <Stack.Screen component={LoginScreen} name="LoginScreen" options={{ headerShown: false, }} />
-              <Stack.Screen component={AccessRestrictedScreen} name="AccessRestrictedScreen" options={{ headerShown: false, }} />
-              <Stack.Screen component={Login} name="Login" options={{ headerShown: false, }} />
-              <Stack.Screen component={Register} name="Register" options={{ headerShown: false, }} />
-              <Stack.Screen component={OTPVerification} name="OTPVerification" options={{ headerShown: false, }} />
-              <Stack.Screen component={TestConnection} name="TestConnection" options={{ headerShown: false, }} />
-              <Stack.Screen component={OrganizationForgotPassword} name="OrganizationForgotPassword" options={{ headerShown: false, }} />
-              <Stack.Screen component={OrganizationResetPassword} name="OrganizationResetPassword" options={{ headerShown: false, }} />
-              
-              <Stack.Screen component={OrgPrivacy} name="OrgPrivacy" options={{ headerShown: false, }} />
-              <Stack.Screen component={Grouping} name="Grouping" options={{ headerShown: false, }} />
-              <Stack.Screen component={Method} name="Method" options={{ headerShown: false, }} />
-              <Stack.Screen component={ForgotPassword} name="ForgotPassword" options={{ headerShown: false, }} />
-              <Stack.Screen component={ResetPasswordScreen} name="ResetPasswordScreen" options={{ headerShown: false, }} />
-              <Stack.Screen component={OrderMenuScreen} name="OrderMenuScreen" options={{ headerShown: false, }} />
-              <Stack.Screen component={List} name="List" options={{ headerShown: false, }} />
+              {/* Auth screens */}
+            <Stack.Screen component={Landing} name="Landing" options={{ headerShown: false, }} />
+            <Stack.Screen component={Welcome} name="Welcome" options={{ headerShown: false, }} />
+            <Stack.Screen
+              component={SignInLanding}
+              name="SignInLanding"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={MainSignIn}
+              name="MainSignIn"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={RegistrationVerificationScreen}
+              name="RegistrationVerificationScreen"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={LoginScreen}
+              name="LoginScreen"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={AccessRestrictedScreen}
+              name="AccessRestrictedScreen"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={Login}
+              name="Login"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={Register}
+              name="Register"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={OTPVerification}
+              name="OTPVerification"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={TestConnection}
+              name="TestConnection"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={OrganizationForgotPassword}
+              name="OrganizationForgotPassword"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={OrganizationResetPassword}
+              name="OrganizationResetPassword"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={OrgPrivacy}
+              name="OrgPrivacy"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={Grouping}
+              name="Grouping"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              component={Method}
+              name="Method"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen component={ForgotPassword} name="ForgotPassword" options={{ headerShown: false, }} />
+            <Stack.Screen
+              component={ResetPasswordScreen}
+              name="ResetPasswordScreen"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen component={OrderMenuScreen} name="OrderMenuScreen" options={{ headerShown: false, }} />
+            <Stack.Screen
+              component={List}
+              name="List"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-              {/* Main app screens - flat structure */}
-              <Stack.Screen component={FolderScreen} name="FolderScreen" />
-              <Stack.Screen component={SubCategories} name="SubCategories" />
-              <Stack.Screen component={ContractScreen} name="ContractScreen" />
-              <Stack.Screen component={AddNewAddress} name="AddNewAddress" />
-              <Stack.Screen component={Map} name="Map" options={{ headerShown: true, header: () => <ScreenHeaders title={'موقعیت مکانی'} /> }} />
-              <Stack.Screen component={Preview} name="Preview" />
-              <Stack.Screen component={Details} name="Details" />
-              <Stack.Screen component={Invoice} name="Invoice" />
-              <Stack.Screen component={Increase} name="Increase" />
-              <Stack.Screen component={PaymentScreen} name="PaymentScreen" />
-              <Stack.Screen component={ChatRoom} name="ChatRoom" />
-              <Stack.Screen component={Club} name="Club" />
-              <Stack.Screen component={DiscountDetail} name="DiscountDetail" />
-              <Stack.Screen component={GemTransactions} name="GemTransactions" />
-              <Stack.Screen component={UserDiscounts} name="UserDiscounts" />
-              <Stack.Screen component={DiscountCodeScreen} name="DiscountCodeScreen" />
-              <Stack.Screen component={Steps} name="Steps" options={{ gestureEnabled: false }} />
+            {/* Main app screens - flat structure */}
+            <Stack.Screen component={FolderScreen} name="FolderScreen" />
+            <Stack.Screen component={SubCategories} name="SubCategories" />
+            <Stack.Screen component={ContractScreen} name="ContractScreen" />
+            <Stack.Screen component={AddNewAddress} name="AddNewAddress" />
+            <Stack.Screen 
+              component={Map} 
+              name="Map" 
+              options={{ 
+                headerShown: true, 
+                header: () => <ScreenHeaders title={'موقعیت مکانی'} /> 
+              }} 
+            />
+            <Stack.Screen component={Preview} name="Preview" />
+            <Stack.Screen component={Details} name="Details" />
+            <Stack.Screen component={Invoice} name="Invoice" />
+            <Stack.Screen component={Increase} name="Increase" />
+            <Stack.Screen component={PaymentScreen} name="PaymentScreen" />
+            <Stack.Screen component={ChatRoom} name="ChatRoom" />
+            <Stack.Screen component={Club} name="Club" />
+            <Stack.Screen component={DiscountDetail} name="DiscountDetail" />
+            <Stack.Screen component={GemTransactions} name="GemTransactions" />
+            <Stack.Screen component={UserDiscounts} name="UserDiscounts" />
+            <Stack.Screen component={DiscountCodeScreen} name="DiscountCodeScreen" />
+            <Stack.Screen 
+              component={Steps} 
+              name="Steps" 
+              options={{ gestureEnabled: false }} 
+            />
 
-              <Stack.Screen component={TechnicianVisitScreen} name="TechnicianVisitScreen" />
-              <Stack.Screen component={HardwareSelectionScreen} name="HardwareSelectionScreen" />
-              <Stack.Screen component={ComprehensiveSelectionScreen} name="ComprehensiveSelectionScreen" />
-              <Stack.Screen component={GuideScreen} name="GuideScreen" />
-              <Stack.Screen component={HardwareIssueScreen} name="HardwareIssueScreen" />
-              <Stack.Screen component={WindowsInstallScreen} name="WindowsInstallScreen" />
-              <Stack.Screen component={SoftwareInstallScreen} name="SoftwareInstallScreen" />
-              <Stack.Screen component={OrderTrackingScreen} name="OrderTrackingScreen" />
-              <Stack.Screen component={OrderSummaryScreen} name="OrderSummaryScreen" />
-              <Stack.Screen component={PartsSupplyScreen} name="PartsSupplyScreen" />
-              <Stack.Screen component={TechnicianBookingScreen} name="TechnicianBookingScreen" />
-              <Stack.Screen component={DeviceModelInfoScreen} name="DeviceModelInfoScreen" />
-              <Stack.Screen component={DeviceOrderSummary} name="DeviceOrderSummary" />
-              <Stack.Screen component={Footer} name="Footer" />
-              <Stack.Screen component={AddressScreen} name="AddressScreen" />
-              <Stack.Screen component={Profile} name="Profile" />
-              <Stack.Screen component={OrganizationContract} name="OrganizationContract" />
-              <Stack.Screen component={MessageScreen} name="MessageScreen" />
-              <Stack.Screen component={TransactionsScreen} name="TransactionsScreen" />
-              <Stack.Screen component={OrdersScreen} name="OrdersScreen" />
-              <Stack.Screen component={CanceledOrdersScreen} name="CanceledOrdersScreen" />
-              <Stack.Screen component={Fekrobekr} name="Fekrobekr" />
-              <Stack.Screen component={ViolationReportScreen} name="ViolationReportScreen" />
-              <Stack.Screen component={ViolationReportsListScreen} name="ViolationReportsListScreen" />
-              <Stack.Screen component={FeedbackSurveyScreen} name="FeedbackSurveyScreen" />
-              <Stack.Screen component={RateListScreen} name="RateListScreen" />
-              <Stack.Screen component={ProductIssueScreen} name="ProductIssueScreen" />
-              <Stack.Screen component={IncentivePlansScreen} name="IncentivePlansScreen" />
-              <Stack.Screen component={TrainingRegistrationScreen} name="TrainingRegistrationScreen" />
-              <Stack.Screen component={NotesScreen} name="NotesScreen" />
-              <Stack.Screen component={AddEditNoteScreen} name="AddEditNoteScreen" />
-              <Stack.Screen component={LearnMoreScreen} name="LearnMoreScreen" />
-              <Stack.Screen component={AboutScreen} name="AboutScreen" />
-              <Stack.Screen component={PrivacyScreen} name="PrivacyScreen" />
-              <Stack.Screen component={WarrantyScreen} name="WarrantyScreen" />
-              <Stack.Screen component={OrganizationTermsScreen} name="OrganizationTermsScreen" />
-              <Stack.Screen component={GameMenuScreen} name="GameMenu" />
-              <Stack.Screen component={GamePlayScreen} name="GamePlay" />
-              <Stack.Screen component={GameResultScreen} name="GameResult" />
-              <Stack.Screen component={WebViewScreen} name="WebView" />
-              <Stack.Screen component={MapPickerScreen} name="MapPickerScreen" />
-            </Stack.Navigator>
+            <Stack.Screen component={TechnicianVisitScreen} name="TechnicianVisitScreen" />
+            <Stack.Screen component={HardwareSelectionScreen} name="HardwareSelectionScreen" />
+            <Stack.Screen component={ComprehensiveSelectionScreen} name="ComprehensiveSelectionScreen" />
+            <Stack.Screen component={GuideScreen} name="GuideScreen" />
+            <Stack.Screen component={HardwareIssueScreen} name="HardwareIssueScreen" />
+            <Stack.Screen component={WindowsInstallScreen} name="WindowsInstallScreen" />
+            <Stack.Screen component={SoftwareInstallScreen} name="SoftwareInstallScreen" />
+            <Stack.Screen component={OrderTrackingScreen} name="OrderTrackingScreen" />
+            <Stack.Screen component={OrderSummaryScreen} name="OrderSummaryScreen" />
+            <Stack.Screen component={PartsSupplyScreen} name="PartsSupplyScreen" />
+            <Stack.Screen component={TechnicianBookingScreen} name="TechnicianBookingScreen" />
+            <Stack.Screen component={DeviceModelInfoScreen} name="DeviceModelInfoScreen" />
+            <Stack.Screen component={DeviceOrderSummary} name="DeviceOrderSummary" />
+            <Stack.Screen component={Footer} name="Footer" />
+            <Stack.Screen component={AddressScreen} name="AddressScreen" />
+            <Stack.Screen component={Profile} name="Profile" />
+            <Stack.Screen component={OrganizationContract} name="OrganizationContract" />
+            <Stack.Screen component={MessageScreen} name="MessageScreen" />
+            <Stack.Screen component={TransactionsScreen} name="TransactionsScreen" />
+            <Stack.Screen component={OrdersScreen} name="OrdersScreen" />
+            <Stack.Screen component={CanceledOrdersScreen} name="CanceledOrdersScreen" />
+            <Stack.Screen component={Fekrobekr} name="Fekrobekr" />
+            <Stack.Screen component={ViolationReportScreen} name="ViolationReportScreen" />
+            <Stack.Screen component={ViolationReportsListScreen} name="ViolationReportsListScreen" />
+            <Stack.Screen component={FeedbackSurveyScreen} name="FeedbackSurveyScreen" />
+            <Stack.Screen component={RateListScreen} name="RateListScreen" />
+            <Stack.Screen component={ProductIssueScreen} name="ProductIssueScreen" />
+            <Stack.Screen component={IncentivePlansScreen} name="IncentivePlansScreen" />
+            <Stack.Screen component={TrainingRegistrationScreen} name="TrainingRegistrationScreen" />
+            <Stack.Screen component={NotesScreen} name="NotesScreen" />
+            <Stack.Screen component={AddEditNoteScreen} name="AddEditNoteScreen" />
+            <Stack.Screen component={LearnMoreScreen} name="LearnMoreScreen" />
+            <Stack.Screen component={AboutScreen} name="AboutScreen" />
+            <Stack.Screen component={PrivacyScreen} name="PrivacyScreen" />
+            <Stack.Screen component={WarrantyScreen} name="WarrantyScreen" />
+            <Stack.Screen component={GameMenuScreen} name="GameMenu" />
+            <Stack.Screen component={GamePlayScreen} name="GamePlay" />
+            <Stack.Screen component={GameResultScreen} name="GameResult" />
+            <Stack.Screen component={WebViewScreen} name="WebView" />
+            <Stack.Screen component={MapPickerScreen} name="MapPickerScreen" />
+          </Stack.Navigator>
           </MenuProvider>
         </Provider>
       </NavigationContainer>

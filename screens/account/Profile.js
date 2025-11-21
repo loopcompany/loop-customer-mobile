@@ -399,8 +399,8 @@ export default function Profile() {
 
                         {/* تاریخ تولد */}
                         <TouchableOpacity onPress={() => setDatePickerModal(true)} style={[NewStyles.textInput, NewStyles.border10]}>
-                            <Text style={NewStyles.text10}>
-                                {birthDate}
+                            <Text style={[NewStyles.text10, !birthDate && { color: themeColor10.bgColor(0.5) }]}>
+                                {birthDate || 'تاریخ تولد'}
                             </Text>
                         </TouchableOpacity>
 

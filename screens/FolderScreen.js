@@ -63,7 +63,7 @@ function FolderScreen({ navigation }) {
       style={NewStyles.container}
       edges={{ top: "off", bottom: "off" }}
     >
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom:30 }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
         <View style={styles.logoWrapper}>
           <Image

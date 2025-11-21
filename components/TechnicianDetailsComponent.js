@@ -1,4 +1,4 @@
-import { Image, Linking, StyleSheet, Text, View, Modal, TouchableOpacity, Share } from 'react-native'
+import { Image, Linking, StyleSheet, Text, View, Modal, TouchableOpacity, Share, Platform } from 'react-native'
 import React, { useState } from 'react'
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6 } from '../theme/Color'
 import NewStyles from '../styles/NewStyles'
@@ -12,16 +12,33 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
     const [showQRModal, setShowQRModal] = useState(false);
     const handleShare = async () => {
         const message = ` من از عملکرد ${data?.technician?.name}، تکنسین لوپ راضی هستم و به شما هم توصیه می‌کنم از خدمات او استفاده کنید! ${mainUri}/technician/${data?.technician?.id} `;
+        const url = `${mainUri}/technician/${data?.technician?.id}`;
+        
         try {
-            const result = await Share.share({ message });
-            if (result.action == Share.sharedAction) {
-
-            } else if (result.action == Share.dismissedAction) {
-                //
+            if (Platform.OS === 'web') {
+                // برای وب - استفاده از Web Share API یا کپی به کلیپبورد
+                if (navigator.share) {
+                    await navigator.share({
+                        title: 'معرفی تکنسین لوپ',
+                        text: message,
+                        url: url
+                    });
+                    showToastOrAlert('با موفقیت به اشتراک گذاشته شد');
+                } else {
+                    // Fallback: کپی لینک به کلیپبورد
+                    await navigator.clipboard.writeText(url);
+                    showToastOrAlert('لینک کپی شد! می‌توانید آن را برای دوستان خود ارسال کنید');
+                }
+            } else {
+                // برای موبایل - استفاده از Share API ری‌اکت نیتیو
+                const result = await Share.share({ message });
+                if (result.action == Share.sharedAction) {
+                    showToastOrAlert('با موفقیت به اشتراک گذاشته شد');
+                }
             }
-        } catch {
-            const message = t('An unexpected error occurred!');
-            showToastOrAlert(message);
+        } catch (error) {
+            console.error('Share error:', error);
+            showToastOrAlert('خطا در به اشتراک‌گذاری!');
         }
     };
     return (
