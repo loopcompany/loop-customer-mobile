@@ -109,8 +109,8 @@ function Invoice({ route }) {
     const walletPayment = async () => {
         setLoading1(true);
         try {
-            const response = await axios.post(`${uri}/payment/wallet`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
-            if (response.status == 201) {
+            const response = await axios.post(`${uri}/wallet/pay-order`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            if (response.status == 201 || response.status == 200) {
                 showToastOrAlert(response?.data?.message);
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
@@ -146,15 +146,36 @@ function Invoice({ route }) {
         setLoading2(true);
         try {
             _addLinkingListener()
-            let result = await Linking.openURL(`${uri}/payment/gateway?linkingUri=${redirectUrl}&orderId=${orderId}&userId=${user?.id}`);
-            let redirectData;
-            if (result.url) {
-                redirectData = Linking.parse(result.url);
+            const response = await axios.post(
+                `${uri}/orders/gateway-payment`,
+                { 
+                    linkingUri: redirectUrl,
+                    order_id: orderId,
+                    userId: user?.id
+                },
+                { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    } 
+                }
+            );
+            
+            console.log('Gateway Payment Response:', response.data);
+            
+            // چک کردن همه حالات ممکن برای URL درگاه
+            const paymentUrl = response.data?.payment_url || response.data?.url || response.data?.gateway_url || response.data?.data?.payment_url;
+            
+            if (paymentUrl) {
+                await Linking.openURL(paymentUrl);
+            } else {
+                showToastOrAlert('لینک درگاه پرداخت دریافت نشد');
+                setLoading2(false);
             }
         } catch (error) {
-            showToastOrAlert('خطا در اتصال به درگاه پرداخت')
-            setLoading2(false);
-        } finally {
+            console.log('Gateway Payment Error:', error?.response?.data);
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه';
+            showToastOrAlert(message)
             setLoading2(false);
         }
     };
@@ -331,10 +352,10 @@ function Invoice({ route }) {
                     :
                     <>
                         <View style={{ flex: 1 }}>
-                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
+                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1), alignItems: 'center', justifyContent: 'center' }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
+                            <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }} loading={loading2} onPress={() => gatewayPayment()} />
                         </View>
                     </>
                 }

@@ -22,7 +22,7 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import DatePickerModal from '../../components/DatePickerModal';
 import LocationPicker from '../../components/LocationPicker';
-import { showAlert, jalaliToGregorian } from '../../helpers/Common';
+import { showAlert } from '../../helpers/Common';
 import useLogout from '../../hooks/useLogout';
 import { uri, imageUri } from '../../services/URL';
 import { fetchOrganizationUser } from '../../slices/organizationUserSlice';
@@ -177,12 +177,9 @@ const OrganizationProfile = () => {
         formData.append('region_id', selectedRegion.id);
       }
       
-      // تبدیل تاریخ شمسی به میلادی برای ارسال به API
+      // تاریخ شمسی - تبدیل فرمت از YYYY/MM/DD به YYYY-MM-DD برای API
       if (birthDate) {
-        const gregorianDate = jalaliToGregorian(birthDate);
-        if (gregorianDate) {
-          formData.append('manager_birthdate', gregorianDate);
-        }
+        formData.append('manager_birthdate', birthDate.replace(/\//g, '-'));
       }
       
       // آپلود تصویر
