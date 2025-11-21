@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Linking } from 'react-native'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
@@ -121,11 +121,17 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
-      <View style={{ width: '100%' }}>
-        <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+      <View style={[{ width: '100%', gap:10 }, NewStyles.row]}>
+        <View style={{flex:1}}>
+          <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+        </View>
+        <View style={{flex:1}}>
+          <Button title={'ذخیره فاکتور'} style={{backgroundColor:themeColor7.bgColor(1)}} textStyle={NewStyles.text4} onPress={() => {  Linking.openURL(`${uri}/orders/${orderId}/invoice`)}} />
+
+        </View>
       </View>
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
-      {(data?.technician_des || data?.is_time_changed==1) && (
+      {(data?.technician_des || data?.is_time_changed == 1) && (
         isLocked ? (
           <View style={[styles.lockedBox, NewStyles.center, NewStyles.border10]}>
             <Ionicons name="checkmark-circle" size={40} color={themeColor0.bgColor(1)} />

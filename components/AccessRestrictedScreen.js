@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,6 +19,7 @@ import {
 } from '../theme/Color';
 import NewStyles from '../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,15 +40,7 @@ const AccessRestrictedScreen = ({
 }) => {
   const navigation = useNavigation();
 
-  console.log('🎨 AccessRestrictedScreen props received:', {
-    type,
-    profileStatus,
-    contractStatus,
-    showRetryButton,
-    hasRetryFunction: !!onRetry,
-    title,
-    message
-  });
+  const contacts = useSelector(state => state.contacts?.data)
 
   /**
    * آیکون بر اساس نوع صفحه
@@ -290,14 +284,7 @@ const AccessRestrictedScreen = ({
             />
           )}
 
-          {/* دکمه بازگشت */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => handleNavigation('go_back')}
-          >
-            <Text style={styles.backButtonText}>بازگشت</Text>
-            <Icon name="arrow-back" size={24} color={themeColor0.color} />
-          </TouchableOpacity>
+
         </View>
 
         {/* راهنمای کمک */}
@@ -306,7 +293,7 @@ const AccessRestrictedScreen = ({
           <Text style={styles.helpText}>
             در صورت داشتن سوال یا مشکل، می‌توانید با پشتیبانی تماس بگیرید.
           </Text>
-          <TouchableOpacity style={styles.helpButton}>
+          <TouchableOpacity style={styles.helpButton} onPress={()=>{Linking.openURL(contacts?.data?.link)}}>
             <Icon name="support-agent" size={20} color={themeColor0.color} />
             <Text style={styles.helpButtonText}>تماس با پشتیبانی</Text>
           </TouchableOpacity>
@@ -437,8 +424,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     gap: 10,
     ...NewStyles.shadow,
-    maxWidth:400,
-    width:'100%'
+    maxWidth: 400,
+    width: '100%'
   },
   actionButtonText: {
     ...NewStyles.title10,
