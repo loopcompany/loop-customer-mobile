@@ -170,7 +170,8 @@ export default function LoginScreen({ navigation }) {
         
         // Save account type to AsyncStorage for next app launch
         await AsyncStorage.setItem('accountType', 'individual');
-        console.log('💾 [LoginScreen] accountType ذخیره شد: individual');
+        await AsyncStorage.setItem('userType', 'individual');
+        console.log('💾 [LoginScreen] accountType و userType ذخیره شد: individual');
         
         reduxDispatch(fetchUser(token));
         reduxDispatch(fetchAddresses(token));
@@ -277,7 +278,8 @@ export default function LoginScreen({ navigation }) {
               
               // Save account type to AsyncStorage for next app launch
               await AsyncStorage.setItem('accountType', 'individual');
-              console.log('💾 [LoginScreen Auto-Login] accountType ذخیره شد: individual');
+              await AsyncStorage.setItem('userType', 'individual');
+              console.log('💾 [LoginScreen Auto-Login] accountType و userType ذخیره شد: individual');
               
               reduxDispatch(fetchUser(savedToken));
 

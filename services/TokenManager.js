@@ -167,6 +167,7 @@ export class TokenManager {
         'savedPhone',              // Clear saved phone
         'rememberLogin',           // Clear remember login flag
         'accountType',             // Clear account type (organization/individual)
+        'userType',                // Clear user type
         'organizationData',        // Clear organization data
         'organizationCode'         // Clear organization code
       ]);

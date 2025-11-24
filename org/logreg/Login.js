@@ -95,6 +95,9 @@ const Login = ({ navigation }) => {
         await AsyncStorage.setItem('accountType', 'organization');
         console.log('💾 [Login] accountType ذخیره شد: organization');
         
+        await AsyncStorage.setItem('userType', 'organization');
+        console.log('💾 [Login] userType ذخیره شد: organization');
+        
         await AsyncStorage.setItem('organizationCode', organizationCode);
         console.log('💾 [Login] organizationCode ذخیره شد');
         

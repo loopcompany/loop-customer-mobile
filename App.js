@@ -92,6 +92,7 @@ import GameResultScreen from './screens/game/GameResultScreen';
 import WebViewScreen from './screens/WebViewScreen';
 import ScreenHeaders from "./components/ScreenHeaders";
 import AccessRestrictedScreen from "./components/AccessRestrictedScreen";
+import AuthInitializer from "./components/AuthInitializer";
 const Stack = createNativeStackNavigator();
 I18nManager.forceRTL(false);
 SplashScreen.preventAutoHideAsync();
@@ -228,8 +229,9 @@ const App = () => {
         }}
       >
         <Provider store={store}>
-          <MenuProvider>
-            <Stack.Navigator
+          <AuthInitializer>
+            <MenuProvider>
+              <Stack.Navigator
               screenOptions={{
                 headerShown: false,
               }}
@@ -423,7 +425,8 @@ const App = () => {
             <Stack.Screen component={WebViewScreen} name="WebView" />
             <Stack.Screen component={MapPickerScreen} name="MapPickerScreen" />
           </Stack.Navigator>
-          </MenuProvider>
+            </MenuProvider>
+          </AuthInitializer>
         </Provider>
       </NavigationContainer>
     </SafeAreaProvider>

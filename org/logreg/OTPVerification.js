@@ -64,6 +64,7 @@ const OTPVerification = ({ route, navigation }) => {
       if (response.data.status === 'success') {
         // Save organization info (token might not be provided in verify step)
         await AsyncStorage.setItem('accountType', 'organization');
+        await AsyncStorage.setItem('userType', 'organization');
         await AsyncStorage.setItem('organizationCode', organizationCode);
         
         // Save token only if provided

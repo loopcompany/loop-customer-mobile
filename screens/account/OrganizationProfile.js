@@ -184,13 +184,21 @@ const OrganizationProfile = () => {
       
       // آپلود تصویر
       if (hasNewImage) {
-        const uriParts = profileImage.uri.split('.');
-        const fileType = uriParts[uriParts.length - 1];
-        formData.append('profile_image', {
-          uri: profileImage.uri,
-          name: `profile.${fileType}`,
-          type: `image/${fileType}`,
-        });
+        if (Platform.OS === 'web') {
+          // برای وب - تبدیل به blob
+          const response = await fetch(profileImage.uri);
+          const blob = await response.blob();
+          formData.append('profile_image', blob, 'profile.jpg');
+        } else {
+          // برای موبایل
+          const uriParts = profileImage.uri.split('.');
+          const fileType = uriParts[uriParts.length - 1];
+          formData.append('profile_image', {
+            uri: profileImage.uri,
+            name: `profile.${fileType}`,
+            type: `image/${fileType}`,
+          });
+        }
       }
 
       // ارسال مستقیم با axios
