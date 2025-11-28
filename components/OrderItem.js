@@ -117,7 +117,7 @@ export default function OrderItem({ item, navigation }) {
         }
         if (status >= 3) {
             return {
-                text1: 'تکرار سفارش',
+                text1: '',
                 text2: item?.status == 3 ? 'لغو شده توسط شما' : item?.status == 4 ? 'لغو شده توسط تکنسین' : item?.status == 5 ? 'لغو توسط لوپ' : item?.status == 6 ? 'لغو به علت پایان زمان سفارش' : 'لغو شده',
                 onPress1: () => {
                     // if (!user?.city_id) {
