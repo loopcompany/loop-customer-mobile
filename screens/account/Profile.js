@@ -16,6 +16,8 @@ import { showToastOrAlert } from '../../helpers/Common';
 import DatePickerModal from '../../components/DatePickerModal';
 import { Ionicons } from '@expo/vector-icons';
 import OrganizationProfile from './OrganizationProfile';
+import * as ImagePicker from 'expo-image-picker';
+import { imageUri } from '../../services/URL';
 
 export default function Profile() {
     const navigation = useNavigation();
@@ -62,6 +64,34 @@ export default function Profile() {
     const [captcha, setCaptcha] = useState(() => Math.floor(1000 + Math.random() * 9000).toString());
     const [captchaInput, setCaptchaInput] = useState('');
     const [autoLoginEnabled, setAutoLoginEnabled] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
+    const [birthDateChanged, setBirthDateChanged] = useState(false);
+
+    // Helper function to get full image URL
+    const getImageUrl = (path) => {
+        if (!path) {
+            console.log('🖼️ getImageUrl: No path provided');
+            return null;
+        }
+        
+        // اگر URI محلی است (file://, blob:, content://)
+        if (path.startsWith('file://') || path.startsWith('blob:') || path.startsWith('content://')) {
+            console.log('🖼️ getImageUrl: Local URI:', path);
+            return path;
+        }
+        
+        // اگر URL کامل است (http, https)
+        if (path.startsWith('http')) {
+            console.log('🖼️ getImageUrl: Full URL:', path);
+            return path;
+        }
+        
+        // اگر relative path است از سرور
+        const fullUrl = `${imageUri}/${path}`;
+        console.log('🖼️ getImageUrl: Building URL from path:', path, '→', fullUrl);
+        return fullUrl;
+    };
+
     // Check user type on mount
     useEffect(() => {
         checkUserType();
@@ -146,6 +176,37 @@ export default function Profile() {
         }
     };
 
+    // Pick profile image
+    const pickProfileImage = async () => {
+        try {
+            // Request permission
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                showToastOrAlert('برای انتخاب عکس، دسترسی به گالری نیاز است');
+                return;
+            }
+
+            // Launch image picker
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const selectedImage = result.assets[0];
+                console.log('📷 Selected image URI:', selectedImage.uri);
+                console.log('📱 Platform:', Platform.OS);
+                setProfileImage(selectedImage.uri);
+                showToastOrAlert('عکس انتخاب شد. برای ذخیره، دکمه "ذخیره اطلاعات پروفایل" را بزنید');
+            }
+        } catch (error) {
+            console.log('Error picking image:', error);
+            showToastOrAlert('خطا در انتخاب عکس');
+        }
+    };
+
     // Load user profile
     const loadProfile = async () => {
         try {
@@ -173,6 +234,11 @@ export default function Profile() {
                 if (user.birth_date) {
                     setBirthDate(user.birth_date);
                 }
+
+                // Set profile image if available
+                if (user.profile_photo_path) {
+                    setProfileImage(user.profile_photo_path);
+                }
             }
         } catch (error) {
             showToastOrAlert('خطا در بارگذاری اطلاعات پروفایل');
@@ -184,79 +250,210 @@ export default function Profile() {
         try {
             setIsLoading(true);
 
-            // Prepare data for API (remove empty fields and phone as it's readonly)
-            const updateData = {};
-            Object.keys(profileData).forEach(key => {
-                if (key !== 'phone' && profileData[key] && profileData[key].trim() !== '') {
-                    updateData[key] = profileData[key].trim();
+            // بررسی اینکه آیا عکس جدید انتخاب شده
+            const hasNewImage = profileImage && !profileImage.startsWith('http');
+
+            if (hasNewImage) {
+                // استفاده از FormData برای آپلود عکس
+                const formData = new FormData();
+
+                // Laravel نیاز به _method برای PUT با FormData دارد
+                formData.append('_method', 'PUT');
+
+                // اضافه کردن عکس با نام profile_image
+                if (Platform.OS === 'web') {
+                    // برای وب: تبدیل blob به File
+                    try {
+                        const response = await fetch(profileImage);
+                        const blob = await response.blob();
+                        const fileName = `profile_${Date.now()}.${blob.type.split('/')[1]}`;
+                        const file = new File([blob], fileName, { type: blob.type });
+                        formData.append("profile_photo_path", file);
+                        console.log('📷 Web: Image converted to File object');
+                    } catch (err) {
+                        console.error('❌ Error converting image:', err);
+                        showToastOrAlert('خطا در پردازش عکس');
+                        return;
+                    }
+                } else {
+                    // برای موبایل: از URI استفاده می‌کنیم
+                    let finalUri = profileImage;
+                    if (Platform.OS === "android" && !finalUri.startsWith("file://")) {
+                        finalUri = "file://" + finalUri;
+                    }
+
+                    const fileName = finalUri.split("/").pop();
+                    const ext = fileName.split('.').pop();
+                    const type = `image/${ext}`;
+
+                    formData.append("profile_photo_path", {
+                        uri: finalUri,
+                        name: fileName,
+                        type,
+                    });
+                    console.log('📱 Native: Image added to FormData');
                 }
-            });
 
-            // Add birth date if selected
-            if (birthDate && birthDate.trim() !== '') {
-                console.log('Original birthDate value:', birthDate);
-                console.log('Trimmed birthDate value:', birthDate.trim());
-                updateData.birth_date = birthDate.trim();
-                console.log('Sending birth_date to API:', updateData.birth_date);
-            }
+                // اضافه کردن همه فیلدهای پروفایل (سرور نیاز دارد حداقل یک فیلد داشته باشیم)
+                let addedFields = 0;
+                Object.keys(profileData).forEach(key => {
+                    if (key !== 'phone') {
+                        const value = (profileData[key] || '').toString().trim();
+                        formData.append(key, value);
+                        if (value) addedFields++;
+                        console.log(`📝 Field ${key}: ${value || '(empty)'}`);
+                    }
+                });
 
-            if (Object.keys(updateData).length === 0) {
-                showToastOrAlert('هیچ اطلاعاتی برای بروزرسانی وجود ندارد');
-                return;
-            }
+                // اضافه کردن تاریخ تولد (تبدیل - به /)
+                if (birthDate && birthDate.trim() !== '') {
+                    // سرور انتظار فرمت 1370/05/15 دارد (با /)
+                    const formattedDate = birthDate.trim().replace(/-/g, '/');
+                    formData.append('birth_date', formattedDate);
+                    addedFields++;
+                    console.log(`📝 Field birth_date: ${formattedDate} (original: ${birthDate})`);
+                }
 
-            console.log('Complete updateData to be sent to API:', updateData);
+                console.log(`📊 Total non-empty fields: ${addedFields}`);
+                console.log('📤 Sending FormData with image to server...');
 
-            const response = await userAPI.updateProfile(updateData);
+                const response = await userAPI.updateProfile(formData);
 
-            if (response.success) {
-                showToastOrAlert(response.message);
+                if (response.success) {
+                    showToastOrAlert(response.message);
 
-                // Update local state with response data
-                if (response.data?.user) {
-                    const user = response.data.user;
-                    setProfileData(prev => ({
-                        ...prev,
-                        name: user.name || prev.name,
-                        last_name: user.last_name || prev.last_name,
-                        email: user.email || prev.email,
-                        melicode: user.melicode || prev.melicode,
-                        mobile_number: user.mobile_number || prev.mobile_number,
-                        phone_number: user.phone_number || prev.phone_number,
-                        postal_code: user.postal_code || prev.postal_code,
-                        city: user.city || prev.city,
-                        region: user.region || prev.region,
+                    console.log('✅ Server response:', response);
+
+                    // بروزرسانی state محلی
+                    if (response.user) {
+                        const user = response.user;
+                        
+                        console.log('👤 User data from server:', user);
+                        console.log('📷 Profile photo path:', user.profile_photo_path);
+                        
+                        // بروزرسانی عکس پروفایل
+                        if (user.profile_photo_path) {
+                            setProfileImage(user.profile_photo_path);
+                            console.log('✅ Profile image updated to:', user.profile_photo_path);
+                        } else {
+                            console.log('⚠️ No profile_photo_path in response');
+                        }
+                        
+                        setProfileData(prev => ({
+                            ...prev,
+                            name: user.name || prev.name,
+                            last_name: user.last_name || prev.last_name,
+                            email: user.email || prev.email,
+                            melicode: user.melicode || prev.melicode,
+                            mobile_number: user.mobile_number || prev.mobile_number,
+                            phone_number: user.phone_number || prev.phone_number,
+                            postal_code: user.postal_code || prev.postal_code,
+                            city: user.city || prev.city,
+                            region: user.region || prev.region,
+                            home_address: user.home_address || prev.home_address,
+                            work_address: user.work_address || prev.work_address,
+                            card_number: user.card_number || prev.card_number,
+                            sheba_number: user.sheba_number || prev.sheba_number
+                        }));
+
+                        if (user.birth_date) {
+                            setBirthDate(user.birth_date);
+                        }
+                    }
+
+                    if (response.requires_verification) {
+                        showToastOrAlert('کد تایید به شماره جدید ارسال شد');
+                    }
+                }
+            } else {
+                // بدون عکس - فقط JSON
+                const updateData = {};
+                Object.keys(profileData).forEach(key => {
+                    if (key !== 'phone' && profileData[key] && profileData[key].trim() !== '') {
+                        updateData[key] = profileData[key].trim();
+                    }
+                });
+
+                if (birthDateChanged && birthDate && birthDate.trim() !== '') {
+                    // سرور انتظار فرمت 1370/05/15 دارد (با /)
+                    updateData.birth_date = birthDate.trim().replace(/-/g, '/');
+                }
+
+                if (Object.keys(updateData).length === 0) {
+                    showToastOrAlert('هیچ اطلاعاتی برای بروزرسانی وجود ندارد');
+                    return;
+                }
+
+                console.log('📤 Sending JSON data to server:', updateData);
+
+                const response = await userAPI.updateProfile(updateData);
+
+                if (response.success) {
+                    showToastOrAlert(response.message);
+
+                    setBirthDateChanged(false);
+
+                    if (response.user) {
+                        const user = response.user;
+                        
+                        if (user.profile_photo_path) {
+                            setProfileImage(user.profile_photo_path);
+                        }
+                        
+                        setProfileData(prev => ({
+                            ...prev,
+                            name: user.name || prev.name,
+                            last_name: user.last_name || prev.last_name,
+                            email: user.email || prev.email,
+                            melicode: user.melicode || prev.melicode,
+                            mobile_number: user.mobile_number || prev.mobile_number,
+                            phone_number: user.phone_number || prev.phone_number,
+                            postal_code: user.postal_code || prev.postal_code,
+                            city: user.city || prev.city,
+                            region: user.region || prev.region,
                         home_address: user.home_address || prev.home_address,
                         work_address: user.work_address || prev.work_address,
                         card_number: user.card_number || prev.card_number,
                         sheba_number: user.sheba_number || prev.sheba_number
                     }));
 
-                    // Update birth date if returned from API
                     if (user.birth_date) {
                         setBirthDate(user.birth_date);
                     }
                 }
 
-                // Check if verification is required
                 if (response.requires_verification) {
                     showToastOrAlert('کد تایید به شماره جدید ارسال شد');
-                    // Could navigate to verification screen here if needed
                 }
             }
+            }
         } catch (error) {
+            console.error('❌ Error updating profile:', error);
+            console.error('❌ Error response:', error.response);
 
-            if (error.response?.status === 422) {
-                // Handle validation errors
+            if (error.message === 'Network Error' || !error.response) {
+                showToastOrAlert('خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید');
+            } else if (error.response?.status === 401) {
+                showToastOrAlert('نشست شما منقضی شده است. لطفاً دوباره وارد شوید');
+            } else if (error.response?.status === 403) {
+                showToastOrAlert(error.response.data.message || 'دسترسی شما محدود شده است');
+            } else if (error.response?.status === 422) {
                 const errors = error.response.data.errors;
-                if (errors) {
-                    const firstError = Object.values(errors)[0][0];
+                if (errors && typeof errors === 'object') {
+                    const firstErrorKey = Object.keys(errors)[0];
+                    const firstError = errors[firstErrorKey][0];
                     showToastOrAlert(firstError);
+                } else {
+                    showToastOrAlert(error.response.data.message || 'خطا در اعتبارسنجی اطلاعات');
                 }
             } else if (error.response?.status === 400) {
                 showToastOrAlert(error.response.data.message || 'خطا در بروزرسانی اطلاعات');
+            } else if (error.response?.status === 413) {
+                showToastOrAlert('حجم فایل عکس بیش از حد مجاز است (حداکثر 5 مگابایت)');
+            } else if (error.response?.status >= 500) {
+                showToastOrAlert('خطای سرور. لطفاً بعداً تلاش کنید');
             } else {
-                showToastOrAlert('خطا در بروزرسانی اطلاعات');
+                showToastOrAlert(error.response?.data?.message || 'خطا در بروزرسانی اطلاعات');
             }
         } finally {
             setIsLoading(false);
@@ -371,10 +568,36 @@ export default function Profile() {
                 <ScrollView contentContainerStyle={styles.container}>
 
                     <View style={styles.header}>
-
                         <Text style={[NewStyles.text10]}>پروفایل من</Text>
-
                     </View>
+
+                    {/* Profile Image Section */}
+                    <View style={styles.profileImageContainer}>
+                        <TouchableOpacity 
+                            style={styles.profileImageWrapper}
+                            onPress={pickProfileImage}
+                        >
+                            {profileImage ? (
+                                <Image 
+                                    source={{ uri: getImageUrl(profileImage) }} 
+                                    style={styles.profileImagePreview}
+                                    onError={(e) => console.log('❌ Image load error:', e.nativeEvent.error, 'URI was:', getImageUrl(profileImage))}
+                                    onLoad={() => console.log('✅ Image loaded successfully:', getImageUrl(profileImage))}
+                                />
+                            ) : (
+                                <View style={styles.profileImagePlaceholder}>
+                                    <Ionicons name="person" size={50} color={themeColor10.bgColor(0.4)} />
+                                </View>
+                            )}
+                            <View style={styles.editIconContainer}>
+                                <Ionicons name="camera" size={20} color="#fff" />
+                            </View>
+                        </TouchableOpacity>
+                        <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 10, fontSize: 12, color: themeColor10.bgColor(0.6) }]}>
+                            برای تغییر عکس پروفایل کلیک کنید
+                        </Text>
+                    </View>
+
                     <View style={{ gap: 10 }}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
@@ -399,8 +622,8 @@ export default function Profile() {
 
                         {/* تاریخ تولد */}
                         <TouchableOpacity onPress={() => setDatePickerModal(true)} style={[NewStyles.textInput, NewStyles.border10]}>
-                            <Text style={[NewStyles.text10, !birthDate && { color: themeColor10.bgColor(0.5) }]}>
-                                {birthDate || 'تاریخ تولد'}
+                            <Text style={NewStyles.text10}>
+                                {birthDate}
                             </Text>
                         </TouchableOpacity>
 
@@ -594,7 +817,13 @@ export default function Profile() {
             </KeyboardAvoidingView>
             
             <View>
-                <DatePickerModal birthDate={birthDate} setBirthDate={setBirthDate} setDatePickerModal={setDatePickerModal} datePickerModal={datePickerModal} />
+                <DatePickerModal 
+                    birthDate={birthDate} 
+                    setBirthDate={setBirthDate} 
+                    setDatePickerModal={setDatePickerModal} 
+                    datePickerModal={datePickerModal}
+                    onDateChange={() => setBirthDateChanged(true)}
+                />
             </View>
         </SafeAreaView>
     );
@@ -713,5 +942,43 @@ const styles = StyleSheet.create({
         height: 18,
         backgroundColor: themeColor1.bgColor(1),
         borderRadius: 4,
+    },
+    profileImageContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    profileImageWrapper: {
+        position: 'relative',
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        overflow: 'hidden',
+        borderWidth: 3,
+        borderColor: themeColor4.bgColor(1),
+        backgroundColor: '#fff',
+    },
+    profileImagePreview: {
+        width: '100%',
+        height: '100%',
+    },
+    profileImagePlaceholder: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: themeColor10.bgColor(0.1),
+    },
+    editIconContainer: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: themeColor4.bgColor(1),
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#fff',
     },
 });

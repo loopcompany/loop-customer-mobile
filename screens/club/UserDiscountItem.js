@@ -16,7 +16,7 @@ export default function UserDiscountItem({ item, navigation }) {
     };
 
     return (
-        <Pressable style={[styles.discountItem, NewStyles.border10, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item?.club?.id })}>
+        <Pressable style={[styles.discountItem, NewStyles.border10, NewStyles.shadow]} onPress={() => navigation.navigate('Discount Detail', { discountId: item?.club?.id })}>
             <View style={[styles.discountWrapper, NewStyles.row]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.club?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}>

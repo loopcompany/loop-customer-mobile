@@ -185,7 +185,7 @@ export default function MainSignIn({ navigation }) {
         <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
             <CustomStatusBar />
             <KeyboardAvoidingView
-                behavior="padding"
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1, width: '100%' }}
             >
                 <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">

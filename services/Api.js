@@ -259,7 +259,25 @@ export const userAPI = {
   // Update user profile
   updateProfile: async (profileData) => {
     try {
-      // Filter out empty or undefined values
+      // اگر FormData است (برای آپلود عکس)
+      if (profileData instanceof FormData) {
+        console.log('📤 Sending FormData (with image) to server...');
+        // Laravel با FormData و _method=PUT نیاز به POST دارد
+        const response = await apiClient.post(
+          API_ENDPOINTS.USER.UPDATE_PROFILE,
+          profileData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            timeout: 30000, // 30 seconds for file upload
+          }
+        );
+        console.log('✅ Profile updated successfully with image');
+        return response.data;
+      }
+
+      // اگر JSON است (بدون عکس)
       const cleanData = {};
       Object.keys(profileData).forEach(key => {
         if (profileData[key] !== undefined && profileData[key] !== null && profileData[key] !== '') {
@@ -267,12 +285,13 @@ export const userAPI = {
         }
       });
 
-      console.log('Updating profile with data:', cleanData);
+      console.log('📤 Updating profile with JSON data:', cleanData);
 
       const response = await apiClient.put(API_ENDPOINTS.USER.UPDATE_PROFILE, cleanData);
+      console.log('✅ Profile updated successfully');
       return response.data;
     } catch (error) {
-      console.log('Update profile API error:', error);
+      console.error('❌ Update profile API error:', error);
       throw error;
     }
   },

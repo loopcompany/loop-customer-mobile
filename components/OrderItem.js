@@ -76,33 +76,15 @@ export default function OrderItem({ item, navigation }) {
         }
     };
 
-    // محاسبه مبلغ کل بدون تخفیف
+    const totalDiscountedPrice = useMemo(() => {
+        const basePrice = Number(item?.technician_price ?? item?.pakar_price);
+        return Number(basePrice) + Number(item?.extra_price) - Number(item?.discount_price);
+    }, [item]);
+
     const totalPrice = useMemo(() => {
         const basePrice = Number(item?.technician_price ?? item?.pakar_price);
         return Number(basePrice) + Number(item?.extra_price);
     }, [item]);
-
-    // محاسبه مبلغ تخفیف واقعی
-    const actualDiscountAmount = useMemo(() => {
-        if (item?.discount_info) {
-            // اگر discount_amount در discount_info موجود است
-            if (item.discount_info.discount_amount) {
-                return Number(item.discount_info.discount_amount);
-            }
-            // اگر فقط درصد تخفیف موجود است، آن را محاسبه می‌کنیم
-            if (item.discount_info.discount_percent && totalPrice > 0) {
-                return Math.round((totalPrice * Number(item.discount_info.discount_percent)) / 100);
-            }
-        }
-        // اگر discount_info نبود، از discount_price استفاده می‌کنیم
-        return Number(item?.discount_price || 0);
-    }, [item, totalPrice]);
-
-    // محاسبه مبلغ نهایی با تخفیف
-    const totalDiscountedPrice = useMemo(() => {
-        const total = totalPrice - actualDiscountAmount;
-        return Math.max(0, total); // حداقل مبلغ صفر باشد
-    }, [totalPrice, actualDiscountAmount]);
 
     const renderRow = (text1, text2, textStyle1, textStyle2) => (
         <View style={NewStyles.rowWrapper}>
@@ -181,8 +163,8 @@ export default function OrderItem({ item, navigation }) {
 
             {item?.status != 2 && renderRow(`زمان مراجعه تکنسین`, item?.is_urgent > 0 ? 'درخواست فوری ' : formatDate(item?.date) + ' ساعت ' + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
 
-            {actualDiscountAmount > 0 && renderRow('تخفیف نهایی شما از سفارش', formatPrice(actualDiscountAmount) + ' تومان', NewStyles.text, NewStyles.text10)}
-            {actualDiscountAmount > 0 && renderRow('قیمت بدون تخفیف', formatPrice(totalPrice) + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+            {item?.discount_price && renderRow('تخفیف نهایی شما از سفارش', formatPrice(item?.discount_price) + ' تومان', NewStyles.text, NewStyles.text10)}
+            {totalPrice > totalDiscountedPrice && renderRow('قیمت بدون تخفیف', formatPrice(totalPrice) + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
             {/* {item?.status == 2 && renderRow('وضعیت پرداخت', item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده', NewStyles.text, item?.payment_status > 0 ? NewStyles.text7 : NewStyles.text6)} */}
             {item?.status == 2 && <View style={NewStyles.rowWrapper}>
                 <Text style={[NewStyles.text10]}>وضعیت پرداخت</Text>

@@ -27,7 +27,7 @@ import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 
 
-const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actualDiscountAmount }) => {
+const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
     return (
         <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10 }, NewStyles.border10]}>
 
@@ -65,103 +65,9 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, actual
                 {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
                 {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                 {data?.extra_price > 0 && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-
-                {/* نمایش مبلغ کل قبل از تخفیف */}
-                {(actualDiscountAmount > 0 && totalPrice > 0) && (
-                    <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1) }]}>
-                        <Text style={[NewStyles.text]}>مبلغ کل قبل از تخفیف</Text>
-                        <Text style={[NewStyles.text10, { textDecorationLine: 'line-through', color: themeColor0.bgColor(0.5) }]}>
-                            {formatPrice(totalPrice)} تومان
-                        </Text>
-                    </View>
-                )}
-
-                {/* نمایش اطلاعات تخفیف - برای سفارشات جدید با discount_info کامل */}
-                {(data?.discount_info) && (
-                    <View style={{
-                        backgroundColor: themeColor6.bgColor(0.1),
-                        padding: 12,
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: themeColor6.bgColor(0.3),
-                        gap: 8,
-                        marginTop: 10
-                    }}>
-                        <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Ionicons name="pricetag" size={18} color={themeColor6.bgColor(1)} />
-                            <Text style={[NewStyles.title, { color: themeColor6.bgColor(1), fontSize: 14 }]}>
-                                کد تخفیف استفاده شده
-                            </Text>
-                        </View>
-
-                        <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text10]}>کد تخفیف:</Text>
-                            <View style={{
-                                backgroundColor: themeColor6.bgColor(1),
-                                paddingHorizontal: 10,
-                                paddingVertical: 4,
-                                borderRadius: 6
-                            }}>
-                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>
-                                    {data.discount_info.code}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text10]}>درصد تخفیف:</Text>
-                            <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
-                                {data.discount_info.discount_percent}%
-                            </Text>
-                        </View>
-
-                        <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
-                            <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
-                                {formatPrice(actualDiscountAmount)} تومان
-                            </Text>
-                        </View>
-                    </View>
-                )}
-
-                {/* نمایش تخفیف برای سفارشات قدیمی - فقط با discount_price */}
-                {(actualDiscountAmount > 0 && !data?.discount_info) && (
-                    <View style={{
-                        backgroundColor: themeColor6.bgColor(0.1),
-                        padding: 12,
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: themeColor6.bgColor(0.3),
-                        gap: 8,
-                        marginTop: 10
-                    }}>
-                        <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Ionicons name="pricetag" size={18} color={themeColor6.bgColor(1)} />
-                            <Text style={[NewStyles.title, { color: themeColor6.bgColor(1), fontSize: 14 }]}>
-                                تخفیف اعمال شده
-                            </Text>
-                        </View>
-
-                        <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text10]}>مبلغ تخفیف:</Text>
-                            <Text style={[NewStyles.text10, { color: themeColor6.bgColor(1), fontFamily: 'VazirBold' }]}>
-                                {formatPrice(actualDiscountAmount)} تومان
-                            </Text>
-                        </View>
-                    </View>
-                )}
-
-                {/* مبلغ قابل پرداخت */}
-                {data?.status > 0 && (
-                    <View style={[NewStyles.rowWrapper, { paddingTop: 10, marginTop: 10, borderTopWidth: 2, borderTopColor: themeColor7.bgColor(0.3) }]}>
-                        <Text style={[NewStyles.title, { color: themeColor7.bgColor(1), fontSize: 16 }]}>
-                            {actualDiscountAmount > 0 ? 'مبلغ قابل پرداخت (پس از تخفیف)' : 'مبلغ قابل پرداخت'}
-                        </Text>
-                        <Text style={[NewStyles.title, { color: themeColor7.bgColor(1), fontSize: 16 }]}>
-                            {formatPrice(totalDiscountedPrice)} تومان
-                        </Text>
-                    </View>
-                )}
+                {data?.discount_price > 0 && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
+                {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+                {data?.status > 0 && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
 
                 <View style={NewStyles.rowWrapper}>
                     <Text style={[NewStyles.text]}>وضعیت پرداخت</Text>
@@ -515,33 +421,15 @@ function Details({ route, navigation }) {
         }, [refreshing]
     ));
 
-    // محاسبه مبلغ کل بدون تخفیف
+    const totalDiscountedPrice = useMemo(() => {
+        const basePrice = Number(data?.technician_price ?? data?.pakar_price);
+        return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price);
+    }, [data]);
+
     const totalPrice = useMemo(() => {
         const basePrice = Number(data?.technician_price ?? data?.pakar_price);
         return Number(basePrice) + Number(data?.extra_price);
     }, [data]);
-
-    // محاسبه مبلغ تخفیف واقعی
-    const actualDiscountAmount = useMemo(() => {
-        if (data?.discount_info) {
-            // اگر discount_amount در discount_info موجود است
-            if (data.discount_info.discount_amount) {
-                return Number(data.discount_info.discount_amount);
-            }
-            // اگر فقط درصد تخفیف موجود است، آن را محاسبه می‌کنیم
-            if (data.discount_info.discount_percent && totalPrice > 0) {
-                return Math.round((totalPrice * Number(data.discount_info.discount_percent)) / 100);
-            }
-        }
-        // اگر discount_info نبود، از discount_price استفاده می‌کنیم
-        return Number(data?.discount_price || 0);
-    }, [data, totalPrice]);
-
-    // محاسبه مبلغ نهایی با تخفیف
-    const totalDiscountedPrice = useMemo(() => {
-        const total = totalPrice - actualDiscountAmount;
-        return Math.max(0, total); // حداقل مبلغ صفر باشد
-    }, [totalPrice, actualDiscountAmount]);
 
     // استفاده از useCallback برای جلوگیری از re-render غیرضروری
     const renderRow = useCallback((text1, text2, textStyle1, textStyle2) => (
@@ -561,14 +449,14 @@ function Details({ route, navigation }) {
 
                 <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
 
-                    <AccordionHeader
-                        title="جزئیات سفارش"
-                        isActive={true}
-                        isOpen={showDetails}
-                        onPress={() => setShowDetails(!showDetails)}
-                    />
-                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} actualDiscountAmount={actualDiscountAmount} />}
-                    
+                        <AccordionHeader
+                            title="جزئیات سفارش"
+                            isActive={true}
+                            isOpen={showDetails}
+                            onPress={() => setShowDetails(!showDetails)}
+                        />
+                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} />}
+
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
                         title="بررسی / جایگزین / پیش رسید"
@@ -609,7 +497,7 @@ function Details({ route, navigation }) {
                     {(showTechnician || data?.technician_cancel_reason) && data?.technician && (
                         <View>
                             <TechnicianDetailsComponent navigation={navigation} data={data} renderRow={renderRow} />
-
+                            
                             {/* علت لغو توسط متخصص */}
                             {data?.technician_cancel_reason && (
                                 <View style={[{ backgroundColor: themeColor6.bgColor(0.1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10, marginTop: 10 }, NewStyles.border10]}>

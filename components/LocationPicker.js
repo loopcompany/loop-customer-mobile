@@ -68,34 +68,6 @@ const LocationPicker = ({
     }
   }, [selectedCity?.id]);
 
-  // Auto-populate names from IDs when lists are loaded
-  useEffect(() => {
-    if (selectedProvince?.id && !selectedProvince?.title && provinces.length > 0) {
-      const province = provinces.find(p => p.id == selectedProvince.id);
-      if (province && onProvinceChange) {
-        onProvinceChange({ id: province.id, title: province.title });
-      }
-    }
-  }, [provinces, selectedProvince?.id]);
-
-  useEffect(() => {
-    if (selectedCity?.id && !selectedCity?.title && cities.length > 0) {
-      const city = cities.find(c => c.id == selectedCity.id);
-      if (city && onCityChange) {
-        onCityChange({ id: city.id, title: city.title });
-      }
-    }
-  }, [cities, selectedCity?.id]);
-
-  useEffect(() => {
-    if (selectedRegion?.id && !selectedRegion?.title && regions.length > 0) {
-      const region = regions.find(r => r.id == selectedRegion.id);
-      if (region && onRegionChange) {
-        onRegionChange({ id: region.id, title: region.title });
-      }
-    }
-  }, [regions, selectedRegion?.id]);
-
   // Fetch all provinces
   const fetchProvinces = async () => {
     setLoadingProvinces(true);
@@ -191,21 +163,21 @@ const LocationPicker = ({
         style={{
           backgroundColor: disabled ? '#e0e0e0' : '#f5f5f5',
           borderRadius: 8,
-          paddingVertical: 12,
+          paddingVertical: 10,
           paddingHorizontal: 12,
           borderWidth: 1,
           borderColor: error ? '#ff0000' : '#ccc',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          minHeight: 48,
+          height: 40,
           opacity: disabled ? 0.6 : 1
         }}
       >
         <Text style={{
           fontSize: 14,
           fontFamily: 'VazirLight',
-          color: selectedItem ? '#000' : '#666',
+          color: selectedItem ? '#000' : '#999',
           textAlign: 'right',
           flex: 1
         }}>

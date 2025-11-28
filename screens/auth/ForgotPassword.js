@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
 import { useDispatch } from "react-redux";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
@@ -124,16 +124,7 @@ export default function ForgotPassword({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-            <ImageBackground 
-                cachePolicy={'memory-disk'} 
-                source={Platform.OS === 'web' 
-                    ? require('../../assets/loopbackground.webp')
-                    : require("../../assets/moon.jpg")
-                } 
-                style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} 
-                contentPosition={'center'} 
-                contentFit="cover" 
-            >
+            <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
                 <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior='padding'>
                     <ScrollView
                         contentContainerStyle={styles.container}
@@ -142,14 +133,14 @@ export default function ForgotPassword({ navigation }) {
                         <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Image
                                 source={require("../../assets/logo.png")}
-                                style={styles.logoSmall}
+                                style={NewStyles.logo}
                                 resizeMode="contain"
                             />
                         </View>
 
 
                         {/* Form Section */}
-                        <View style={[styles.formCard, NewStyles.center]}>
+                        <View style={[{ flex: 2, width: '100%', gap: 15 }, NewStyles.center]}>
                             {/* National ID Input */}
                             <View style={styles.inputContainer}>
                                 <TextInput
@@ -254,18 +245,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 40,
     },
-    logoSmall: {
-        width: 140,
-        height: 70,
-        marginBottom: 10
-    },
-    formCard: {
-        width: '90%',
-        maxWidth: 500,
-        paddingVertical: 20,
-        paddingHorizontal: 15,
-        gap: 12,
-    },
     instructionsContainer: {
         width: '100%',
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -292,7 +271,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '100%',
-        marginBottom: 8,
+        marginBottom: 5,
     },
     inputError: {
         borderColor: '#e74c3c',

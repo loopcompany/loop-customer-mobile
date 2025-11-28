@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Platform } from "react-native";
+import { StyleSheet, Text, View, Platform, BackHandler, Alert } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -110,6 +110,7 @@ const App = () => {
   });
 
   const [isReady, setIsReady] = useState(false);
+  const [backPressCount, setBackPressCount] = useState(0);
 
   useEffect(() => {
     setIsReady(true);
@@ -124,6 +125,43 @@ const App = () => {
   useEffect(() => {
     // تنظیم navigation reference برای API error handling
     setNavigationRef(navigationRef);
+  }, []);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      const currentRoute = navigationRef.current?.getCurrentRoute()?.name;
+      
+      // لیست صفحاتی که در آن‌ها باید از اپ خارج شویم
+      const rootScreens = ['Landing', 'Welcome', 'FolderScreen'];
+      
+      if (rootScreens.includes(currentRoute)) {
+        // نمایش Alert تأیید خروج
+        Alert.alert(
+          'خروج از برنامه',
+          'آیا مطمئن به خروج هستید؟',
+          [
+            {
+              text: 'خیر',
+              onPress: () => null,
+              style: 'cancel'
+            },
+            {
+              text: 'بله',
+              onPress: () => BackHandler.exitApp()
+            }
+          ],
+          { cancelable: false }
+        );
+        return true; // جلوگیری از رفتار پیش‌فرض
+      }
+      
+      return false; // اجازه به رفتار پیش‌فرض (برگشت به صفحه قبل)
+    });
+
+    return () => backHandler.remove();
   }, []);
 
   if (!loaded && !error) {

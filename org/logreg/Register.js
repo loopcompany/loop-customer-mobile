@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { getFormatedDate } from 'react-native-modern-datepicker';
+import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
+import NewStyles from '../../styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import DatePickerModal from '../../components/DatePickerModal';
 import LocationPicker from '../../components/LocationPicker';
 import { uri } from '../../services/URL';
 import { jalaliToGregorian, showAlert } from '../../helpers/Common';
-import NewStyles from '../../styles/NewStyles';
 
 const Register = ({ navigation }) => {
   // Form states
@@ -30,11 +31,7 @@ const Register = ({ navigation }) => {
   const [organizationAddress, setOrganizationAddress] = useState('');
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');
   const [securityCode, setSecurityCode] = useState('');
-  const maxBirthDate = useMemo(() => {
-    const date18YearsAgo = new Date();
-    date18YearsAgo.setFullYear(date18YearsAgo.getFullYear() - 18);
-    return getFormatedDate(date18YearsAgo, 'jYYYY/jMM/jDD');
-  }, []);
+
   // Location states
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -69,8 +66,8 @@ const Register = ({ navigation }) => {
     const sum = code.split('').slice(0, 9)
       .reduce((acc, digit, i) => acc + parseInt(digit) * (10 - i), 0);
     const remainder = sum % 11;
-    return (remainder < 2 && check === remainder) ||
-      (remainder >= 2 && check === 11 - remainder);
+    return (remainder < 2 && check === remainder) || 
+           (remainder >= 2 && check === 11 - remainder);
   };
 
   const validateMobile = (mobile) => {
@@ -162,7 +159,7 @@ const Register = ({ navigation }) => {
   const pickImage = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+      
       if (permissionResult.granted === false) {
         showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
         return;
@@ -230,7 +227,7 @@ const Register = ({ navigation }) => {
       if (profileImage) {
         const uriParts = profileImage.uri.split('.');
         const fileType = uriParts[uriParts.length - 1];
-
+        
         formData.append('profile_image', {
           uri: profileImage.uri,
           name: `profile.${fileType}`,
@@ -252,7 +249,7 @@ const Register = ({ navigation }) => {
       formData.append('postal_code', organizationPostalCode);
       formData.append('password', password);
       formData.append('password_confirmation', password);
-
+      
       // Add location IDs
       if (selectedProvince) {
         formData.append('province_id', selectedProvince.id);
@@ -311,12 +308,12 @@ const Register = ({ navigation }) => {
           method: error.config.method,
         } : null
       });
-
+      
       if (error.response) {
         // Server responded with error (4xx, 5xx)
         console.log('Server response:', error.response.data);
         const errorData = error.response.data;
-
+        
         if (errorData.errors) {
           // Validation errors from server
           const serverErrors = {};
@@ -324,7 +321,7 @@ const Register = ({ navigation }) => {
             serverErrors[key] = errorData.errors[key][0];
           });
           setErrors(serverErrors);
-
+          
           showAlert('خطا در اعتبارسنجی', errorData.message || 'لطفا فیلدها را بررسی کنید');
         } else {
           showAlert('خطا', errorData.message || 'خطا در ثبت نام');
@@ -340,9 +337,9 @@ const Register = ({ navigation }) => {
           `3. دستگاه و سرور در یک شبکه باشند`,
           [
             { text: 'بستن' },
-            {
-              text: 'تلاش مجدد',
-              onPress: () => handleRegister()
+            { 
+              text: 'تلاش مجدد', 
+              onPress: () => handleRegister() 
             }
           ]
         );
@@ -357,7 +354,7 @@ const Register = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAvoidingView 
       style={{ flex: 1, backgroundColor: '#d1e9ff' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
@@ -369,67 +366,67 @@ const Register = ({ navigation }) => {
         onPressRight={() => navigation.navigate('TestConnection')}
         rightIcon="🔧"
       />
-
-      <ScrollView
+      
+      <ScrollView 
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Main header - اطلاعات تکمیلی */}
-        <View style={{
-          width: '90%',
-          alignSelf: 'center',
-          backgroundColor: '#1976d2',
-          borderRadius: 10,
-          paddingVertical: 12,
-          marginBottom: 15,
-          alignItems: 'center',
+        <View style={{ 
+          width: '90%', 
+          alignSelf: 'center', 
+          backgroundColor: '#1976d2', 
+          borderRadius: 10, 
+          paddingVertical: 12, 
+          marginBottom: 15, 
+          alignItems: 'center', 
           justifyContent: 'center',
           elevation: 3,
           shadowColor: '#1976d2',
           shadowOpacity: 0.3,
           shadowRadius: 4
         }}>
-          <Text style={{
-            color: '#fff',
-            fontSize: 16,
-            fontWeight: 'bold',
+          <Text style={{ 
+            color: '#fff', 
+            fontSize: 16, 
+            fontWeight: 'bold', 
             fontFamily: 'VazirBold',
-            textAlign: 'center'
+            textAlign: 'center' 
           }}>اطلاعات تکمیلی</Text>
         </View>
 
         {/* Form Container */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-
+          
           {/* تصویر پروفایل */}
-          <TouchableOpacity
+          <TouchableOpacity 
             onPress={pickImage}
-            style={{
+            style={{ 
               marginBottom: 15,
               alignItems: 'center',
               paddingVertical: 15,
-              backgroundColor: themeColor4.bgColor(1),
+              backgroundColor: '#f5f5f5',
               borderRadius: 8,
               borderWidth: 1,
-              borderColor: themeColor3.bgColor(0.5),
+              borderColor: '#ccc',
               borderStyle: 'dashed'
             }}
           >
             {profileImage ? (
-              <Image
-                source={{ uri: profileImage.uri }}
-                style={{
-                  width: 100,
-                  height: 100,
+              <Image 
+                source={{ uri: profileImage.uri }} 
+                style={{ 
+                  width: 100, 
+                  height: 100, 
                   borderRadius: 50,
                   marginBottom: 8
-                }}
+                }} 
               />
             ) : (
-              <View style={{
-                width: 100,
-                height: 100,
+              <View style={{ 
+                width: 100, 
+                height: 100, 
                 borderRadius: 50,
                 backgroundColor: '#e0e0e0',
                 justifyContent: 'center',
@@ -439,8 +436,8 @@ const Register = ({ navigation }) => {
                 <Text style={{ fontSize: 40 }}>👤</Text>
               </View>
             )}
-            <Text style={{
-              fontSize: 14,
+            <Text style={{ 
+              fontSize: 14, 
               fontFamily: 'VazirLight',
               color: '#666'
             }}>
@@ -453,22 +450,22 @@ const Register = ({ navigation }) => {
             <TextInput
               value={organizationName}
               onChangeText={setOrganizationName}
-              placeholder="نام سازمان *"
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              placeholder="نام سازمان * :"
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.organizationName ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.organizationName ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
             {errors.organizationName && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.organizationName}
               </Text>
             )}
@@ -479,22 +476,22 @@ const Register = ({ navigation }) => {
             <TextInput
               value={familyName}
               onChangeText={setFamilyName}
-              placeholder="نام و نام خانوادگی مدیر *"
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              placeholder="نام و نام خانوادگی مدیر * :"
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.familyName ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.familyName ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
             {errors.familyName && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.familyName}
               </Text>
             )}
@@ -505,24 +502,24 @@ const Register = ({ navigation }) => {
             <TextInput
               value={nationalCode}
               onChangeText={setNationalCode}
-              placeholder="شماره ملی مدیر *"
+              placeholder="شماره ملی مدیر * :"
               keyboardType="numeric"
               maxLength={10}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.nationalCode ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
             {errors.nationalCode && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.nationalCode}
               </Text>
             )}
@@ -536,23 +533,34 @@ const Register = ({ navigation }) => {
               placeholder="شماره تلفن همراه مدیر * (09xxxxxxxxx)"
               keyboardType="numeric"
               maxLength={11}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
                 paddingLeft: 45,
-                borderWidth: 1,
-                borderColor: errors.mobileNumber ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.mobileNumber ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
-
+            <View style={{ 
+              position: 'absolute', 
+              left: 8, 
+              top: 8, 
+              zIndex: 1,
+              backgroundColor: '#ffeb3b',
+              borderRadius: 4,
+              paddingHorizontal: 6,
+              paddingVertical: 2
+            }}>
+              <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>iran 98+</Text>
+            </View>
             {errors.mobileNumber && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.mobileNumber}
               </Text>
             )}
@@ -562,18 +570,18 @@ const Register = ({ navigation }) => {
           <View style={{ marginBottom: 8 }}>
             <TouchableOpacity
               onPress={() => setDatePickerModal(true)}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.birthDate ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
-                minHeight: 48,
+                borderWidth: 1, 
+                borderColor: errors.birthDate ? '#ff0000' : '#ccc',
+                height: 40,
                 justifyContent: 'center'
               }}
             >
-              <Text style={{
+              <Text style={{ 
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
@@ -583,7 +591,7 @@ const Register = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
             {errors.birthDate && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.birthDate}
               </Text>
             )}
@@ -597,21 +605,21 @@ const Register = ({ navigation }) => {
               placeholder="آدرس ایمیل سازمان * :"
               keyboardType="email-address"
               autoCapitalize="none"
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.organizationEmail ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.organizationEmail ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
             {errors.organizationEmail && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.organizationEmail}
               </Text>
             )}
@@ -626,24 +634,35 @@ const Register = ({ navigation }) => {
                   onChangeText={setOrganizationPhoneNumber}
                   placeholder=":شماره تلفن ثابت سازمان * "
                   keyboardType="phone-pad"
-                  style={{
-                    backgroundColor: themeColor4.bgColor(1),
-                    borderRadius: 8,
-                    paddingVertical: 12,
+                  style={{ 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: 8, 
+                    paddingVertical: 10, 
                     paddingHorizontal: 12,
-                    borderWidth: 1,
-                    borderColor: errors.organizationPhoneNumber ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                    borderWidth: 1, 
+                    borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    minHeight: 48
+                    height: 40
                   }}
                 />
               </View>
-
+              <View style={{ 
+                backgroundColor: '#ffeb3b',
+                borderRadius: 4,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 40,
+                minWidth: 50
+              }}>
+                <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
+              </View>
             </View>
             {errors.organizationPhoneNumber && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.organizationPhoneNumber}
               </Text>
             )}
@@ -656,37 +675,37 @@ const Register = ({ navigation }) => {
               onChangeText={setPassword}
               placeholder=":رمز عبور * (حداقل 8 کاراکتر)"
               secureTextEntry={!showPassword}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
                 paddingLeft: 45,
-                borderWidth: 1,
-                borderColor: errors.password ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.password ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={() => setShowPassword(!showPassword)}
-              style={{
-                position: 'absolute',
-                left: 12,
-                top: 13,
-                zIndex: 1
+              style={{ 
+                position: 'absolute', 
+                left: 12, 
+                top: 10, 
+                zIndex: 1 
               }}
             >
-              <Ionicons
-                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                size={22}
-                color="#666"
+              <Ionicons 
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'} 
+                size={22} 
+                color="#666" 
               />
             </TouchableOpacity>
             {errors.password && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.password}
               </Text>
             )}
@@ -718,22 +737,22 @@ const Register = ({ navigation }) => {
               placeholder="آدرس سازمان * :"
               multiline
               numberOfLines={2}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.organizationAddress ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 70,
+                height: 60,
                 textAlignVertical: 'top'
               }}
             />
             {errors.organizationAddress && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.organizationAddress}
               </Text>
             )}
@@ -747,21 +766,21 @@ const Register = ({ navigation }) => {
               placeholder="کد پستی سازمان * : (10 رقم)"
               keyboardType="numeric"
               maxLength={10}
-              style={{
-                backgroundColor: themeColor4.bgColor(1),
-                borderRadius: 8,
-                paddingVertical: 12,
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 8, 
+                paddingVertical: 10, 
                 paddingHorizontal: 12,
-                borderWidth: 1,
-                borderColor: errors.organizationPostalCode ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                borderWidth: 1, 
+                borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
                 textAlign: 'right',
-                minHeight: 48
+                height: 40
               }}
             />
             {errors.organizationPostalCode && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.organizationPostalCode}
               </Text>
             )}
@@ -771,12 +790,12 @@ const Register = ({ navigation }) => {
           <View style={{ marginBottom: 15 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
               {/* بروچر - دکمه سمت چپ */}
-              <TouchableOpacity
+              <TouchableOpacity 
                 onPress={() => {
                   setDisplayedCaptcha(generateCaptcha());
                   setSecurityCode('');
                 }}
-                style={{
+                style={{ 
                   backgroundColor: '#e3f2fd',
                   borderRadius: 8,
                   paddingVertical: 8,
@@ -786,11 +805,11 @@ const Register = ({ navigation }) => {
                   flex: 1,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minHeight: 48,
+                  height: 36,
                   flexDirection: 'row'
                 }}
               >
-                <Text style={{
+                <Text style={{ 
                   fontSize: 14,
                   fontFamily: 'VazirBold',
                   color: '#1976d2',
@@ -810,23 +829,23 @@ const Register = ({ navigation }) => {
                   onChangeText={setSecurityCode}
                   placeholder="کد امنیتی *"
                   autoCapitalize="characters"
-                  style={{
-                    backgroundColor: themeColor4.bgColor(1),
-                    borderRadius: 8,
-                    paddingVertical: 12,
+                  style={{ 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: 8, 
+                    paddingVertical: 8, 
                     paddingHorizontal: 10,
-                    borderWidth: 1,
-                    borderColor: errors.securityCode ? themeColor6.bgColor(1) : themeColor3.bgColor(0.5),
+                    borderWidth: 1, 
+                    borderColor: errors.securityCode ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    minHeight: 48
+                    height: 36
                   }}
                 />
               </View>
             </View>
             {errors.securityCode && (
-              <Text style={{ color: themeColor6.bgColor(1), fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
                 {errors.securityCode}
               </Text>
             )}
@@ -835,15 +854,15 @@ const Register = ({ navigation }) => {
 
         {/* ثبت نام section */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
-          <TouchableOpacity
+          <TouchableOpacity 
             onPress={handleRegister}
             disabled={loading}
-            style={{
-              backgroundColor: loading ? '#90caf9' : '#1976d2',
-              borderRadius: 10,
-              paddingVertical: 12,
-              marginBottom: 10,
-              alignItems: 'center',
+            style={{ 
+              backgroundColor: loading ? '#90caf9' : '#1976d2', 
+              borderRadius: 10, 
+              paddingVertical: 12, 
+              marginBottom: 10, 
+              alignItems: 'center', 
               justifyContent: 'center',
               elevation: 3,
               shadowColor: '#1976d2',
@@ -855,24 +874,24 @@ const Register = ({ navigation }) => {
             {loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={{
-                color: '#fff',
-                fontSize: 16,
-                fontWeight: 'bold',
+              <Text style={{ 
+                color: '#fff', 
+                fontSize: 16, 
+                fontWeight: 'bold', 
                 fontFamily: 'VazirBold',
-                textAlign: 'center'
+                textAlign: 'center' 
               }}>ثبت نام</Text>
             )}
           </TouchableOpacity>
 
           {/* دکمه ورود به حساب کاربری */}
-          <TouchableOpacity
+          <TouchableOpacity 
             onPress={() => navigation.navigate('Login')}
-            style={{
-              backgroundColor: '#1976d2',
-              borderRadius: 10,
-              paddingVertical: 12,
-              alignItems: 'center',
+            style={{ 
+              backgroundColor: '#1976d2', 
+              borderRadius: 10, 
+              paddingVertical: 12, 
+              alignItems: 'center', 
               justifyContent: 'center',
               elevation: 3,
               shadowColor: '#1976d2',
@@ -880,24 +899,24 @@ const Register = ({ navigation }) => {
               shadowRadius: 4
             }}
           >
-            <Text style={{
-              ...NewStyles.title4,
-              fontSize: 16,
-              textAlign: 'center'
+            <Text style={{ 
+              color: '#fff', 
+              fontSize: 16, 
+              fontWeight: 'bold', 
+              fontFamily: 'VazirBold',
+              textAlign: 'center' 
             }}>ورود به حساب کاربری</Text>
           </TouchableOpacity>
         </View>
 
       </ScrollView>
-
+      
       {/* DatePicker Modal */}
-      <DatePickerModal
+      <DatePickerModal 
         datePickerModal={datePickerModal}
         setDatePickerModal={setDatePickerModal}
         birthDate={birthDate}
         setBirthDate={setBirthDate}
-        maximumDate={maxBirthDate}
-        isCurrentDate={birthDate ? birthDate : maxBirthDate}
       />
     </KeyboardAvoidingView>
   );

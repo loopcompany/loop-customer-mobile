@@ -99,7 +99,7 @@ export default function AddNewAddress({ navigation }) {
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}
-                            value="09"
+                            value="+98"
                             editable={false}
                         />
                     </View>

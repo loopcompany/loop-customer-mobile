@@ -346,7 +346,7 @@ export default function LoginScreen({ navigation }) {
                 { textAlign: 'right' },
                 state.errors.phone && styles.inputError
               ]}
-              placeholder="شماره موبایل (09XXXXXXXXX)"
+              placeholder=" نام کاربری (09XXXXXXXXX)"
               placeholderTextColor={themeColor10.bgColor(0.9)}
               value={state.phone}
               onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
@@ -400,29 +400,23 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.fieldErrorText}>{state.errors.password}</Text>
             )}
 
-            {/* Remember Me & Forgot Password */}
-            <View style={NewStyles.rowWrapper}>
-              <View style={NewStyles.row}>
-                <TouchableOpacity
-                  onPress={() => dispatch({
-                    type: 'SET_FIELD',
-                    field: 'rememberMe',
-                    value: !state.rememberMe
-                  })}
-                  style={styles.checkbox}
-                >
-                  <View
-                    style={
-                      state.rememberMe ? styles.checkboxChecked : styles.checkboxEmpty
-                    }
-                  />
-                </TouchableOpacity>
-                <Text style={NewStyles.title4}>ذخیره اطلاعات ورود</Text>
-              </View>
-
-              <TouchableOpacity onPress={handleForgotPassword}>
-                <Text style={NewStyles.title4}>فراموشی رمز عبور</Text>
+            {/* Remember Me */}
+            <View style={NewStyles.row}>
+              <TouchableOpacity
+                onPress={() => dispatch({
+                  type: 'SET_FIELD',
+                  field: 'rememberMe',
+                  value: !state.rememberMe
+                })}
+                style={styles.checkbox}
+              >
+                <View
+                  style={
+                    state.rememberMe ? styles.checkboxChecked : styles.checkboxEmpty
+                  }
+                />
               </TouchableOpacity>
+              <Text style={NewStyles.title4}>ذخیره اطلاعات ورود</Text>
             </View>
           </View>
 
@@ -470,6 +464,14 @@ export default function LoginScreen({ navigation }) {
             onPress={handleLogin}
             disabled={state.isLoading}
           />
+
+          {/* Forgot Password Link */}
+          <TouchableOpacity 
+            onPress={handleForgotPassword}
+            style={styles.forgotPasswordButton}
+          >
+            <Text style={[NewStyles.title4, styles.forgotPasswordText]}>رمز عبور خود را فراموش کرده‌اید؟</Text>
+          </TouchableOpacity>
 
           {/* Register Link */}
           <TransparentButton
@@ -589,5 +591,15 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  forgotPasswordButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  forgotPasswordText: {
+    color: themeColor4.bgColor(1),
   },
 });

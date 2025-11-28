@@ -23,21 +23,21 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
         <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={[styles.header, NewStyles.rowWrapper, {
 
         }]}>
+            <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
+                <Image source={require("../assets/next.png")} style={styles.arrow} />
+                <Text style={styles.titleText}>بعدی</Text>
+            </TouchableOpacity>
+            <View style={styles.titleContainer}>
+                <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
+            </View>
             {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
 
-                <Image source={require("../assets/next.png")} style={styles.arrow} />
+                <Image source={require("../assets/back.png")} style={styles.arrow} />
                 <Text style={styles.titleText}>قبلی</Text>
             </TouchableOpacity>
                 :
                 <View style={styles.iconContainer} />
             }
-            <View style={styles.titleContainer}>
-                <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
-            </View>
-            <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
-                <Image source={require("../assets/back.png")} style={styles.arrow} />
-                <Text style={styles.titleText}>بعدی</Text>
-            </TouchableOpacity>
         </SafeAreaView>
 
     )

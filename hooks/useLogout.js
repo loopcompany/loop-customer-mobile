@@ -40,7 +40,7 @@ export const useLogout = () => {
   };
 
   // Logout with confirmation dialog
-  const logoutWithConfirmation = () => {
+  const logoutWithConfirmation = (options = {}) => {
     if (Platform.OS === 'web') {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
@@ -49,6 +49,9 @@ export const useLogout = () => {
         if (confirmed) {
           logout()
             .then((result) => {
+              if (typeof options.onSuccess === 'function') {
+                try { options.onSuccess(); } catch {}
+              }
               if (window.alert) {
                 window.alert(result.message || 'با موفقیت خارج شدید');
               }
@@ -73,6 +76,9 @@ export const useLogout = () => {
         console.warn('window.confirm not available, logging out without confirmation');
         logout()
           .then(() => {
+            if (typeof options.onSuccess === 'function') {
+              try { options.onSuccess(); } catch {}
+            }
             if (navigation.replace) {
               navigation.replace('Welcome');
             } else {
@@ -100,6 +106,9 @@ export const useLogout = () => {
             onPress: async () => {
               try {
                 const result = await logout();
+                if (typeof options.onSuccess === 'function') {
+                  try { options.onSuccess(); } catch {}
+                }
                 showAlert('موفق', result.message, [
                   {
                     text: 'باشه',

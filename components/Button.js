@@ -19,7 +19,7 @@ export default function Button({ onPress, title, style, loading , textStyle}) {
       {loading && (
         <ActivityIndicator size={"small"} color={themeColor4.bgColor(1)} />
       )}
-      {!loading && <Text style={[NewStyles.title1, textStyle, {width:'100%', textAlign:'center'}]}>{title}</Text>}
+      {!loading && <Text style={[NewStyles.title1,{width:'100%', textAlign:'center'},textStyle]}>{title}</Text>}
     </TouchableOpacity>
   );
 }

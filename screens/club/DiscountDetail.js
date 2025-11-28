@@ -47,14 +47,78 @@ export default function DiscountDetail({ route, navigation }) {
     const getDiscount = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/discounts/claim`, { discountId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(
+                `${uri}/discounts/claim`, 
+                { discountId }, 
+                { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    } 
+                }
+            );
+            
             if (response.status == 200) {
-                dispatch(fetchUser(token))
+                dispatch(fetchUser(token));
                 setCode(response?.data?.data?.code);
                 setDiscountModal(true);
             }
         } catch (error) {
-            handleError(error, t)
+            // ✅ بهبود یافته: استخراج دقیق پیام خطا از سرور
+            let errorMessage = t('An unexpected error occurred!');
+            
+            if (error?.response) {
+                // سرور پاسخ داده (4xx یا 5xx)
+                const status = error.response.status;
+                const serverMessage = error.response.data?.message;
+                
+                // اگر سرور پیام خاصی فرستاده، از آن استفاده کن
+                if (serverMessage) {
+                    errorMessage = serverMessage;
+                } else {
+                    // پیام‌های پیش‌فرض برای status code های مختلف
+                    switch (status) {
+                        case 400:
+                            // کاربر امتیاز کافی ندارد
+                            errorMessage = 'امتیاز کافی برای دریافت این تخفیف ندارید';
+                            break;
+                        case 403:
+                            // کاربر مجوز دریافت ندارد (قبلاً دریافت کرده یا VIP نیست)
+                            errorMessage = 'شما مجاز به دریافت این تخفیف نیستید';
+                            break;
+                        case 404:
+                            // تخفیف یافت نشد
+                            errorMessage = 'تخفیف مورد نظر یافت نشد';
+                            break;
+                        case 422:
+                            // داده‌های ارسالی نامعتبر
+                            errorMessage = 'اطلاعات ارسالی نامعتبر است';
+                            break;
+                        default:
+                            if (status >= 500) {
+                                // خطای سرور
+                                errorMessage = 'خطای سرور. لطفاً بعداً تلاش کنید';
+                            }
+                            break;
+                    }
+                }
+                
+                console.log('❌ [DiscountDetail.getDiscount] خطا در دریافت تخفیف:', {
+                    status,
+                    serverMessage,
+                    displayMessage: errorMessage,
+                    fullError: error.response.data
+                });
+            } else if (error?.request) {
+                // درخواست ارسال شده اما پاسخی دریافت نشد (مشکل شبکه)
+                errorMessage = t('Network error!');
+                console.log('❌ [DiscountDetail.getDiscount] خطای شبکه - پاسخی از سرور دریافت نشد');
+            } else {
+                // خطای دیگر (مثلاً خطای ساخت request)
+                console.log('❌ [DiscountDetail.getDiscount] خطای نامشخص:', error.message);
+            }
+            
+            showToastOrAlert(errorMessage);
         } finally {
             setLoading(false);
         }

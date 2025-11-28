@@ -225,7 +225,7 @@ export const MenuProvider = ({ children }) => {
                                 <View style={styles.logoutContainer}>
                                     <TouchableOpacity
                                         style={[styles.logoutBtn, isLoggingOut && styles.logoutBtnDisabled]}
-                                        onPress={logoutWithConfirmation}
+                                        onPress={() => logoutWithConfirmation({ onSuccess: closeMenu })}
                                         disabled={isLoggingOut}
                                     >
                                         <Ionicons name="power" size={20} color="#fff" />

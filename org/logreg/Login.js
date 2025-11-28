@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux';
 import { setToken, setUserType } from '../../slices/authSlice';
 import { setOrganizationData } from '../../slices/organizationSlice';
 import { fetchAddresses } from '../../slices/addressSlice';
-import { fetchOrganizationUser } from '../../slices/organizationUserSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
@@ -80,7 +79,6 @@ const Login = ({ navigation }) => {
       if (response.data.status === 'success') {
         console.log('✅ [Login] ورود موفق - شروع ذخیره‌سازی اطلاعات...');
         console.log('🔑 [Login] توکن دریافتی:', response.data.data.token ? `${response.data.data.token.substring(0, 20)}...` : 'null');
-        console.log('🖼️ [Login] تصویر پروفایل در response:', response.data.data.organization?.profile_image);
         
         // Save token and user data
         await AsyncStorage.setItem('userToken', response.data.data.token);
@@ -90,13 +88,10 @@ const Login = ({ navigation }) => {
         console.log('💾 [Login] userData ذخیره شد');
         
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
-        console.log('💾 [Login] organizationData ذخیره شد:', JSON.stringify(response.data.data.organization, null, 2));
+        console.log('💾 [Login] organizationData ذخیره شد');
         
         await AsyncStorage.setItem('accountType', 'organization');
         console.log('💾 [Login] accountType ذخیره شد: organization');
-        
-        await AsyncStorage.setItem('userType', 'organization');
-        console.log('💾 [Login] userType ذخیره شد: organization');
         
         await AsyncStorage.setItem('organizationCode', organizationCode);
         console.log('💾 [Login] organizationCode ذخیره شد');
@@ -110,9 +105,6 @@ const Login = ({ navigation }) => {
         
         dispatch(setOrganizationData(response.data.data.organization));
         console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
-        
-        dispatch(fetchOrganizationUser(response.data.data.token));
-        console.log('📦 [Login] بارگذاری اطلاعات کاربر سازمانی آغاز شد');
         
         dispatch(fetchAddresses(response.data.data.token));
         console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
@@ -241,6 +233,7 @@ const Login = ({ navigation }) => {
               value={organizationCode}
               onChangeText={setOrganizationCode}
               placeholder="کد سازمانی * (6 رقم)"
+              placeholderTextColor="#999"
               keyboardType="numeric"
               maxLength={6}
               style={{ 
@@ -269,6 +262,7 @@ const Login = ({ navigation }) => {
               value={password}
               onChangeText={setPassword}
               placeholder="رمز عبور * (حداقل 8 کاراکتر)"
+              placeholderTextColor="#999"
               secureTextEntry={!showPassword}
               style={{ 
                 backgroundColor: '#f5f5f5', 
@@ -390,6 +384,7 @@ const Login = ({ navigation }) => {
                   value={securityCode}
                   onChangeText={setSecurityCode}
                   placeholder="کد امنیتی"
+                  placeholderTextColor="#999"
                   autoCapitalize="characters"
                   style={{ 
                     backgroundColor: '#f5f5f5', 
