@@ -5,7 +5,7 @@ import { uri } from '../services/URL';
 // Async thunk for fetching orders
 export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
-    async (_, { getState, rejectWithValue }) => {
+    async (params = {}, { getState, rejectWithValue }) => {
         try {
             const token = getState().auth?.token;
             
@@ -14,8 +14,19 @@ export const fetchOrders = createAsyncThunk(
             }
 
             console.log('Fetching orders with token:', token ? 'Token exists' : 'No token');
+            console.log('Fetching orders with params:', params);
 
-            const response = await axios.get(`${uri}/orders`, {
+            // ساختن query string
+            const queryParams = new URLSearchParams();
+            if (params.from_date) queryParams.append('from_date', params.from_date);
+            if (params.to_date) queryParams.append('to_date', params.to_date);
+            if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
+            if (params.per_page) queryParams.append('per_page', params.per_page);
+            
+            const queryString = queryParams.toString();
+            const url = `${uri}/orders${queryString ? `?${queryString}` : ''}`;
+
+            const response = await axios.get(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',

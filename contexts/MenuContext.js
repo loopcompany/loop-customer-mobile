@@ -181,12 +181,10 @@ export const MenuProvider = ({ children }) => {
                 {/* Global Footer - فقط در صفحات مجاز نمایش داده می‌شود */}
                 {shouldShowMenu && (
                     <View style={[styles.footer, NewStyles.rowWrapper]}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                contact?.data?.data?.link && Linking.openURL(`${contact?.data?.data?.link}`)
-                            }}
-                        >
-                            <Text style={NewStyles.text4}>{contact?.data?.data?.name}</Text>
+                        <TouchableOpacity onPress={callSupport}>
+                            <Text style={NewStyles.text4}>
+                                {contact?.data?.data?.name || '021-21164552'}
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.supportButton} onPress={()=>{navigation.navigate('MessageScreen')}}>
                             <Text style={NewStyles.text4}>پشتیبانی</Text>
