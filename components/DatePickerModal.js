@@ -27,7 +27,8 @@ export default function DatePickerModal({
     setBirthDate,
     isCurrentDate,
     minimumDate = null, // تاریخ حداقل (اختیاری)
-    maximumDate = null  // تاریخ حداکثر (اختیاری)
+    maximumDate = null,  // تاریخ حداکثر (اختیاری)
+    onDateChange = null  // callback برای اطلاع از تغییر تاریخ
 }) {
 
     const date = useMemo(() => new Date(), []);
@@ -72,6 +73,9 @@ export default function DatePickerModal({
                                     maximumDate={maxDate}
                                     onSelectedChange={(p) => {
                                         setBirthDate(p.slice(0, 10));
+                                        if (onDateChange) {
+                                            onDateChange(p.slice(0, 10));
+                                        }
                                     }}
                                 />
                             </View>

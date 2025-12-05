@@ -84,7 +84,7 @@ export default function NotesScreen({ route, navigation }) {
   };
 
   const handleEdit = (note) => {
-    navigation.navigate('AddEditNote', { note });
+    navigation.navigate('AddEditNoteScreen', { note });
   };
 
   const handleAddNew = () => {

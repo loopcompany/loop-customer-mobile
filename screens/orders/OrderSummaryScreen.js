@@ -61,7 +61,16 @@ export default function OrderSummaryScreen({ navigation }) {
           <Text style={NewStyles.text4}>ویرایش اطلاعات</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.submitButton} onPress={() => { navigation.navigate('OrderTrackingScreen') }}>
+        <TouchableOpacity style={styles.submitButton} onPress={() => { 
+          navigation.replace('OrderTrackingScreen', {
+            orderData: {
+              orderNumber: '984876565', // اینجا از API دریافت کنید
+              userId: '211-5015',
+              phone: orderDetails.phone,
+              date: orderDetails.date,
+            }
+          });
+        }}>
           <Text style={NewStyles.text4}>ثبت نهایی سفارش</Text>
         </TouchableOpacity>
 

@@ -51,9 +51,12 @@ export default function GamePlayScreen({ route, navigation }) {
     setIsCorrect(correct);
     setShowFeedback(true);
 
+    // محاسبه امتیاز جدید
+    const newScore = correct ? score + 1 : score;
+
     if (correct) {
       // پاسخ درست
-      setScore(score + 1);
+      setScore(newScore);
       const encouragementMsg = getRandomEncouragement();
       setEncouragement(encouragementMsg);
       Vibration.vibrate(100); // ویبره کوتاه برای بازخورد
@@ -86,7 +89,7 @@ export default function GamePlayScreen({ route, navigation }) {
         ]),
       ]).start(() => {
         setShowFeedback(false);
-        moveToNextQuestion();
+        moveToNextQuestion(newScore);
       });
     } else {
       // پاسخ غلط - انیمیشن تکان خوردن
@@ -116,21 +119,21 @@ export default function GamePlayScreen({ route, navigation }) {
       ]).start(() => {
         setTimeout(() => {
           setShowFeedback(false);
-          moveToNextQuestion();
+          moveToNextQuestion(newScore);
         }, 800);
       });
     }
   };
 
-  const moveToNextQuestion = () => {
+  const moveToNextQuestion = (currentScore = score) => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // بازی تمام شد
-      const finalScore = Math.round((score / questions.length) * 100);
+      // بازی تمام شد - استفاده از currentScore به جای score
+      const finalScore = Math.round((currentScore / questions.length) * 100);
       navigation.replace('GameResult', {
         score: finalScore,
-        correctAnswers: score,
+        correctAnswers: currentScore,
         totalQuestions: questions.length,
         level,
       });

@@ -208,7 +208,7 @@ export default function MainSignIn({ navigation }) {
                                     state.errors.melicode && styles.inputError
                                 ]}
                                 placeholder="کد ملی"
-                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 value={state.melicode}
                                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
                                 keyboardType="number-pad"
@@ -232,7 +232,7 @@ export default function MainSignIn({ navigation }) {
                                     state.errors.phone && styles.inputError
                                 ]}
                                 placeholder="شماره موبایل : 09XXXXXXXXX"
-                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 value={state.phone}
                                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
                                 keyboardType="phone-pad"
@@ -265,7 +265,7 @@ export default function MainSignIn({ navigation }) {
                                     state.errors.email && styles.inputError
                                 ]}
                                 placeholder="آدرس ایمیل*"
-                                placeholderTextColor={themeColor10.bgColor(0.9)}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 value={state.email}
                                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
                                 keyboardType="email-address"
@@ -307,7 +307,7 @@ export default function MainSignIn({ navigation }) {
                                         { width: '50%', textAlign: 'right' },
                                         state.errors.captchaInput && styles.inputError
                                     ]}
-                                    placeholderTextColor={themeColor10.bgColor(0.9)}
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
                                     placeholder="کد امنیتی"
                                     value={state.captchaInput}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'captchaInput', value })}

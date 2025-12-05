@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import DiscountModal from './DiscountModal';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function DiscountDetail({ route, navigation }) {
     const { t } = useTranslation();
@@ -125,7 +126,8 @@ export default function DiscountDetail({ route, navigation }) {
     }
 
     return (
-        <SafeAreaView edges={{top:'off'}} style={NewStyles.container}>
+        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+            <ScreenHeaders title="جزئیات تخفیف" />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
                 <View style={Platform.OS === 'web' ? styles.imageContainer : {}}>
                     <Image style={{ maxWidth: 600, height: 250, width: '100%',resizeMode:"contain" }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
@@ -162,6 +164,7 @@ export default function DiscountDetail({ route, navigation }) {
 const styles = StyleSheet.create({
     contentContainerStyle: {
         gap: 10,
+        paddingTop: 10,
         // paddingVertical: '5%'
     },
     imageContainer: {

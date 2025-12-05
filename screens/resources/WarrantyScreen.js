@@ -34,11 +34,13 @@ export default function WarrantyScreen() {
           setExpandedItems({ [response.data[0].id]: true });
         }
       } else {
-        showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+        console.log('❌ Warranty response not successful:', response);
+        showToastOrAlert('خطا در بارگذاری ضمانت‌نامه');
       }
     } catch (error) {
-      console.error('Error loading warranties:', error);
-      showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+      console.error('❌ Error loading warranties:', error);
+      console.error('❌ Error response:', error.response);
+      showToastOrAlert('خطا در بارگذاری ضمانت‌نامه');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);

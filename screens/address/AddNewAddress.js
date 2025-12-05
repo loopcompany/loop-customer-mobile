@@ -2,6 +2,7 @@ import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } f
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor3, themeColor6, themeColor4 } from '../../theme/Color';
@@ -18,6 +19,20 @@ export default function AddNewAddress({ navigation }) {
     const { t } = useTranslation();
     const token = useSelector((state) => state?.auth?.token)
     const address = useSelector(state => state?.address);
+
+    // پاک کردن فرم هر بار که صفحه focus می‌شود
+    useFocusEffect(
+        React.useCallback(() => {
+            dispatch(setTitle(''));
+            dispatch(setFname(''));
+            dispatch(setLname(''));
+            dispatch(setTelephone(''));
+            dispatch(setMobile(''));
+            dispatch(setCity(''));
+            dispatch(setRegion(''));
+            dispatch(setAddress(''));
+        }, [dispatch])
+    );
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} mode='padding' style={NewStyles.container}>

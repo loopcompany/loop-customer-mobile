@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
     TERMS: '/info/terms', 
     PRIVACY: '/info/privacy',
     ORGANIZATION_TERMS: '/info/organization-terms',
+    WARRANTY: '/info/warranties',
   },
 
   // Organization endpoints

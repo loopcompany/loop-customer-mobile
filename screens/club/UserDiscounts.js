@@ -8,6 +8,7 @@ import NewStyles from '../../styles/NewStyles';
 import { useSelector } from 'react-redux';
 import UserDiscountItem from './UserDiscountItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function UserDiscounts({ navigation }) {
 
@@ -34,7 +35,8 @@ export default function UserDiscounts({ navigation }) {
     }, [refreshing]);
 
     return (
-        <SafeAreaView style={NewStyles.container}>
+        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+            <ScreenHeaders title="جوایز دریافت شده" />
             <FlatList
                 contentContainerStyle={[NewStyles.center, { gap: 10 }]}
                 showsVerticalScrollIndicator={false}

@@ -343,6 +343,15 @@ const stepSlice = createSlice({
 
         removeTime: (state, action) => {
             state.time = null;
+            // پاک کردن value از item مربوط به time
+            const newData = JSON.parse(JSON.stringify(state.data));
+            newData.forEach(step => {
+                const timeItem = step.find(item => item.type === 'time');
+                if (timeItem) {
+                    timeItem.value = null;
+                }
+            });
+            state.data = newData;
         },
 
         setAddressId: (state, action) => {

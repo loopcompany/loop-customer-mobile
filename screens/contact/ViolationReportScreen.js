@@ -5,7 +5,7 @@ import { View, TextInput, ScrollView, StyleSheet, I18nManager, KeyboardAvoidingV
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
-import { themeColor4 } from '../../theme/Color';
+import { themeColor4, themeColor10 } from '../../theme/Color';
 import Button from '../../components/Button';
 import violationReportAPI from '../../services/ViolationReportApi';
 import { showToastOrAlert } from '../../helpers/Common';
@@ -86,24 +86,28 @@ export default function ViolationReportScreen({navigation}) {
           <TextInput 
             style={styles.input} 
             placeholder="از تکنسین / پشتیبان لوپ / تراکنش / مشخص کنید" 
+            placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.type}
             onChangeText={(text) => handleChange('type', text)} 
           />
           <TextInput 
             style={styles.input} 
             placeholder="نام / کد تکنسین" 
+            placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.technician}
             onChangeText={(text) => handleChange('technician', text)} 
           />
           <TextInput 
             style={styles.input} 
             placeholder="تاریخ ثبت" 
+            placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.date}
             onChangeText={(text) => handleChange('date', text)} 
           />
           <TextInput 
             style={styles.input} 
             placeholder="مبلغ تراکنش" 
+            placeholderTextColor={themeColor10.bgColor(0.6)}
             keyboardType="numeric" 
             value={form.amount}
             onChangeText={(text) => handleChange('amount', text)} 
@@ -111,6 +115,7 @@ export default function ViolationReportScreen({navigation}) {
           <TextInput 
             style={[styles.input, styles.textarea]} 
             placeholder="توضیحات" 
+            placeholderTextColor={themeColor10.bgColor(0.6)}
             multiline 
             value={form.desc}
             onChangeText={(text) => handleChange('desc', text)} 

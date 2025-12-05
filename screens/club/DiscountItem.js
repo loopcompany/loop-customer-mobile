@@ -8,7 +8,7 @@ import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from
 
 export default function DiscountItem({ item, navigation }) {
     return (
-        <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('Discount Detail', { discountId: item.id })}>
+        <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item.id })}>
             <View style={[styles.discountWrapper, NewStyles.rowWrapper]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}> 

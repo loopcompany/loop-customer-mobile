@@ -19,6 +19,7 @@ import LuckyWheel from '../../components/LuckyWheel';
 import WinnerModal from '../../components/WinnerModal';
 import { getGemActions, spinWheel, canPlayWheel } from '../../services/GemApi';
 import { showToastOrAlert } from '../../helpers/Common';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function Club({ navigation }) {
 
@@ -190,7 +191,8 @@ export default function Club({ navigation }) {
   if (loading) return <Loader />;
 
   return (
-    <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
+      <ScreenHeaders title="باشگاه مشتریان" />
       <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
         <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
           <View style={NewStyles.rowWrapper}>

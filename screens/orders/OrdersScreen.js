@@ -105,7 +105,15 @@ function OrdersScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="تراکنش ها/سفارش‌ها" />
+      <ScreenHeaders 
+        title="تراکنش ها/سفارش‌ها" 
+        onBackPress={() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'FolderScreen' }],
+          });
+        }}
+      />
       
       {/* دکمه فیلتر */}
       <View style={styles.filterContainer}>
@@ -197,11 +205,15 @@ function OrdersScreen({ navigation }) {
                     mainColor: themeColor0.bgColor(1),
                     textSecondaryColor: '#999',
                   }}
-                  selected={tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                  onDateChange={(date) => {
+                  selected={fromDate ? moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
+                  onSelectedChange={(date) => {
                     const gregorian = convertJalaliToGregorian(date);
                     setTempFromDate(gregorian);
                     setShowFromPicker(false);
+                  }}
+                  onDateChange={(date) => {
+                    const gregorian = convertJalaliToGregorian(date);
+                    setTempFromDate(gregorian);
                   }}
                   style={{ borderRadius: 10 }}
                 />
@@ -231,11 +243,15 @@ function OrdersScreen({ navigation }) {
                     mainColor: themeColor0.bgColor(1),
                     textSecondaryColor: '#999',
                   }}
-                  selected={tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                  onDateChange={(date) => {
+                  selected={toDate ? moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
+                  onSelectedChange={(date) => {
                     const gregorian = convertJalaliToGregorian(date);
                     setTempToDate(gregorian);
                     setShowToPicker(false);
+                  }}
+                  onDateChange={(date) => {
+                    const gregorian = convertJalaliToGregorian(date);
+                    setTempToDate(gregorian);
                   }}
                   style={{ borderRadius: 10 }}
                 />

@@ -10,6 +10,7 @@ import GemTransactionItem from '../../components/GemTransactionItem';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function GemTransactions() {
 
@@ -38,13 +39,21 @@ export default function GemTransactions() {
     }, [refreshing]);
 
     return (
-        <SafeAreaView style={NewStyles.container}>
+        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+            <ScreenHeaders title="تاریخچه گردونه شانس" />
             <FlatList
                 contentContainerStyle={[styles.contentContainerStyle, NewStyles.center]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
                 data={data}
                 keyExtractor={(item) => item?.id?.toString()}
+                ListEmptyComponent={() => (
+                    <View style={[NewStyles.center, { paddingTop: 50 }]}>
+                        <Text style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6 }]}>
+                            شما هنوز گردونه شانس را نچرخاندید و امتیازی ندارید
+                        </Text>
+                    </View>
+                )}
                 renderItem={({ item }) => {
                     return (
                         <GemTransactionItem item={item} />

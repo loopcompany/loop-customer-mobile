@@ -428,7 +428,7 @@ function Preview({ navigation }) {
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{des}</Text>
                     </View>
                 </View>}
-                {imagePath && <Image style={[{ height: 250, margin: '5%' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
+                {imagePath && <Image style={[{ height: 250, margin: '5%', resizeMode: 'contain' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
                 <View style={{ flex: 1, alignItems:'center' }}>

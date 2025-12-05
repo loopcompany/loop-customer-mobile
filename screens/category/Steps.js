@@ -175,6 +175,12 @@ function Steps({ navigation, route }) {
     }
 
     const handleNextStep = () => {
+        // بررسی خطای validation زمان
+        if (timeValidationError) {
+            showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+            return;
+        }
+        
         if (!required(step)) {
             const message = 'لطفا فیلدهای الزامی را تکمیل نمایید.';
             showToastOrAlert(message);
@@ -189,13 +195,21 @@ function Steps({ navigation, route }) {
 
     const selectedDate = useSelector(state => state?.step?.date)
     const selectedTime = useSelector(state => state?.step?.time)
+    const [timeValidationError, setTimeValidationError] = useState(false);
+    
     useEffect(() => {
         if (selectedDate && selectedTime) {
             const result = isMoreThan4HoursFromNow(selectedDate, selectedTime);
             if (!result) {
                 dispatch(removeTime());
+                setTimeValidationError(true);
                 showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+            } else {
+                setTimeValidationError(false);
             }
+        } else if (selectedDate && !selectedTime) {
+            // اگر تاریخ انتخاب شده ولی زمان نه، خطا را پاک کن
+            setTimeValidationError(false);
         }
     }, [selectedDate, selectedTime]);
 

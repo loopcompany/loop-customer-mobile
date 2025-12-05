@@ -7,34 +7,72 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   ImageBackground,
 } from 'react-native';
-import Footer from '../Footer';
 import NewStyles from '../../styles/NewStyles';
 import CustomStatusBar from '../../components/CustomStatusBar';
-import ScreenTitle from '../../components/ScreenTitle';
-export default function OrderTrackingScreen() {
+import ScreenHeaders from '../../components/ScreenHeaders';
+import { themeColor0, themeColor4 } from '../../theme/Color';
+
+export default function OrderTrackingScreen({ navigation, route }) {
+  // دریافت اطلاعات سفارش از route params
+  const orderData = route?.params?.orderData || {
+    orderNumber: '984876565',
+    userId: '211-5015',
+    phone: '09123456789',
+    date: '1402/01/01',
+  };
+
+  const handleGoToOrders = () => {
+    // به لیست سفارشات برو و stack را پاک کن
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'OrdersScreen' }],
+    });
+  };
+
+  const handleNewOrder = () => {
+    // به صفحه اصلی برو برای ثبت سفارش جدید و stack را پاک کن
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'FolderScreen' }],
+    });
+  };
+
+  const handleBackPress = () => {
+    // به صفحه اصلی برو و stack را پاک کن
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'FolderScreen' }],
+    });
+  };
   return (
     <ImageBackground
       source={require('../../assets/moon.jpg')}
       style={NewStyles.container}
     >
-      <CustomStatusBar />
-      <View style={{ padding: 10 }}>
-        <ScreenTitle title={'شماره پیگیری ثبت سفارش'} />
-      </View>
+      <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} />
+      <ScreenHeaders 
+        title="شماره پیگیری ثبت سفارش"
+        onBackPress={handleBackPress}
+      />
       <ScrollView contentContainerStyle={styles.container}>
 
         <View style={styles.card}>
           <Text style={NewStyles.text10}>کاربر گرامی</Text>
           <Text style={NewStyles.text10}>ضمن تشکر از اعتماد شما</Text>
           <Text style={NewStyles.text10}>سفارش شما</Text>
-          <Text style={NewStyles.text10}>شماره سفارش: 984876565</Text>
-          <Text style={NewStyles.text10}>کد کاربری: 211-5015</Text>
-          <Text style={NewStyles.text10}>و شماره تماس: 09123456789</Text>
+          <Text style={[NewStyles.text10, styles.highlight]}>
+            شماره سفارش: {orderData.orderNumber}
+          </Text>
           <Text style={NewStyles.text10}>
-            در تاریخ 1402/01/01 ثبت و در دست بررسی می‌باشد.
+            کد کاربری: {orderData.userId}
+          </Text>
+          <Text style={NewStyles.text10}>
+            و شماره تماس: {orderData.phone}
+          </Text>
+          <Text style={NewStyles.text10}>
+            در تاریخ {orderData.date} ثبت و در دست بررسی می‌باشد.
           </Text>
           <Text style={NewStyles.text10}>
             شما می‌توانید مراحل سفارش خود را در بخش پیگیری سفارش‌های جاری در اپلیکیشن لوپ پیگیری کنید.
@@ -44,15 +82,19 @@ export default function OrderTrackingScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.greenButton}>
+        <TouchableOpacity 
+          style={styles.greenButton}
+          onPress={handleGoToOrders}
+        >
           <Text style={NewStyles.text4}>پیگیری سفارش های جاری</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.blueButton}>
+        <TouchableOpacity 
+          style={styles.blueButton}
+          onPress={handleNewOrder}
+        >
           <Text style={NewStyles.text4}>ثبت سفارش جدید</Text>
         </TouchableOpacity>
-
-       
       </ScrollView>
       
     </ImageBackground>
@@ -60,38 +102,20 @@ export default function OrderTrackingScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     padding: 10,
     alignItems: 'center',
   },
-  title: {
-    fontSize: 18,
-    backgroundColor: '#ADD8E6',
-    color: '#000',
-    fontWeight: 'bold',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 20,
-    textAlign: 'center',
-    width: '100%',
-  },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderRadius: 15,
-    padding: 15,
-    marginBottom: 50,
+    padding: 20,
+    marginBottom: 30,
     width: '100%',
   },
-  cardText: {
-    fontSize: 14,
-    color: '#000',
-    marginVertical: 4,
-    lineHeight: 22,
-    textAlign: 'right',
+  highlight: {
+    fontWeight: 'bold',
+    color: themeColor0.bgColor(1),
   },
   greenButton: {
     backgroundColor: '#4CAF50',
@@ -108,34 +132,5 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 30,
     alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  footer: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
-  },
-  footerLogo: {
-    width: 50,
-    height: 50,
-    resizeMode: 'contain',
-  },
-  supportText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  language: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  phone: {
-    color: '#fff',
-    fontSize: 16,
   },
 });

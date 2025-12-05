@@ -589,9 +589,7 @@ export default function Profile() {
                                     <Ionicons name="person" size={50} color={themeColor10.bgColor(0.4)} />
                                 </View>
                             )}
-                            <View style={styles.editIconContainer}>
-                                <Ionicons name="camera" size={20} color="#fff" />
-                            </View>
+                           
                         </TouchableOpacity>
                         <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 10, fontSize: 12, color: themeColor10.bgColor(0.6) }]}>
                             برای تغییر عکس پروفایل کلیک کنید
@@ -602,18 +600,21 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="نام *"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="نام خانوادگی *"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.last_name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره موبایل"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="phone-pad"
                             value={profileData.phone}
                             editable={false}
@@ -622,8 +623,8 @@ export default function Profile() {
 
                         {/* تاریخ تولد */}
                         <TouchableOpacity onPress={() => setDatePickerModal(true)} style={[NewStyles.textInput, NewStyles.border10]}>
-                            <Text style={NewStyles.text10}>
-                                {birthDate}
+                            <Text style={[NewStyles.text10, { color: birthDate ? themeColor10.bgColor(0.6) : themeColor10.bgColor(1) }]}>
+                                {birthDate || 'تاریخ تولد'}
                             </Text>
                         </TouchableOpacity>
 
@@ -631,6 +632,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس ایمیل"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="email-address"
                             value={profileData.email}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, email: text }))}
@@ -641,6 +643,7 @@ export default function Profile() {
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }]}
                                 placeholder="شماره تماس ثابت"
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
                                 value={profileData.phone_number}
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, phone_number: text }))}
@@ -653,6 +656,7 @@ export default function Profile() {
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }]}
                                 placeholder="شماره موبایل دوم"
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
                                 value={profileData.mobile_number}
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, mobile_number: text }))}
@@ -662,6 +666,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="کدپستی "
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="number-pad"
                             value={profileData.postal_code}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, postal_code: text }))}
@@ -672,12 +677,14 @@ export default function Profile() {
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
                                 placeholder="شهر "
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 value={profileData.city}
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, city: text }))}
                             />
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
                                 placeholder="منطقه"
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 value={profileData.region}
                                 keyboardType='number-pad'
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
@@ -688,6 +695,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس منزل"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             multiline
                             value={profileData.home_address}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, home_address: text }))}
@@ -697,6 +705,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس محل کار"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             multiline
                             value={profileData.work_address}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, work_address: text }))}
@@ -706,6 +715,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره کارت کاربر:(اختیاری)"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.card_number}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, card_number: text }))}
                             keyboardType="number-pad"
@@ -713,6 +723,7 @@ export default function Profile() {
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره شبا کاربر:(اختیاری)"
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.sheba_number}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, sheba_number: text }))}
                         />
@@ -728,7 +739,7 @@ export default function Profile() {
                         <View style={{ flex: 1 }}>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
-                                placeholderTextColor={themeColor10.bgColor(0.5)}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 placeholder="رمز عبور فعلی"
                                 secureTextEntry
                                 value={passwordData.currentPassword}
@@ -745,7 +756,7 @@ export default function Profile() {
                         <View style={{ flex: 1 }}>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
-                                placeholderTextColor={themeColor10.bgColor(0.5)}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
                                 placeholder="رمز عبور جدید"
                                 secureTextEntry
                                 value={passwordData.newPassword}
@@ -763,7 +774,7 @@ export default function Profile() {
                     <View style={[NewStyles.row, { marginTop: 10, gap: 30 }]}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '50%', textAlign: 'right' }]}
-                            placeholderTextColor={themeColor10.bgColor(0.9)}
+                            placeholderTextColor={themeColor10.bgColor(0.6)}
                             placeholder="کد امنیتی"
                             value={captchaInput}
                             onChangeText={setCaptchaInput}
@@ -803,10 +814,7 @@ export default function Profile() {
                     </View>
 
                     
-                    <Button
-                        style={{ backgroundColor: themeColor0.bgColor(1) }}
-                        title='ذخیره اطلاعات'
-                    />
+                   
                     <Button
                         style={{ backgroundColor: themeColor6.bgColor(1) }}
                         title={isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
@@ -822,7 +830,10 @@ export default function Profile() {
                     setBirthDate={setBirthDate} 
                     setDatePickerModal={setDatePickerModal} 
                     datePickerModal={datePickerModal}
-                    onDateChange={() => setBirthDateChanged(true)}
+                    onDateChange={(date) => {
+                        console.log('📅 Birth date changed to:', date);
+                        setBirthDateChanged(true);
+                    }}
                 />
             </View>
         </SafeAreaView>
@@ -979,6 +990,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#fff',
+        borderColor: '#000000ff',
     },
 });

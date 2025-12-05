@@ -211,7 +211,7 @@ export default function DeviceModelInfoScreen({ navigation }) {
           {/* ✅ نمایش / ثبت / استعلام → navigation */}
           <TouchableOpacity
             style={styles.sectionButton}
-            onPress={() => navigation.navigate('OrderSummaryScreen')}
+            onPress={() => navigation.replace('OrderSummaryScreen')}
           >
             <Text style={NewStyles.text4}>نمایش / استعلام / ثبت سفارش</Text>
           </TouchableOpacity>
