@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import UserDiscountItem from './UserDiscountItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
+import BlankScreen from './../../components/BlankScreen';
 
 export default function UserDiscounts({ navigation }) {
 
@@ -41,6 +42,11 @@ export default function UserDiscounts({ navigation }) {
                 contentContainerStyle={[NewStyles.center, { gap: 10 }]}
                 showsVerticalScrollIndicator={false}
                 data={data}
+                ListEmptyComponent={()=>{
+                    return(
+                        <BlankScreen/>
+                    )
+                }}
                 keyExtractor={(item) => item.id?.toString()}
                 renderItem={({ item }) => {
                     return (

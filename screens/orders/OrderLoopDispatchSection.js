@@ -312,7 +312,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                         title="تایید گزارش تحویل"
                         onPress={() => setConfirmModal(true)}
                         loading={confirming}
-                        textStyle={NewStyles.text4}
+                        textStyle={{color: themeColor4.bgColor(1)}}
                         style={{ backgroundColor: themeColor0.bgColor(1) }}
                     />
                     <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 8, color: themeColor0.bgColor(0.6) }]}>

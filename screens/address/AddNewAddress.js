@@ -89,11 +89,13 @@ export default function AddNewAddress({ navigation }) {
                             keyboardType="phone-pad"
                             placeholderTextColor={themeColor3.bgColor(1)}
                             value={address?.telephone ? address.telephone.replace(/^021/, '') : ''}
+                            maxLength={8}
                             onChangeText={(text) => { dispatch(setTelephone('021' + text)) }}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}
                             value="021"
+                            
                             editable={false}
                         />
                     </View>
@@ -108,9 +110,9 @@ export default function AddNewAddress({ navigation }) {
                             placeholder="شماره موبایل"
                             keyboardType="phone-pad"
                             placeholderTextColor={themeColor3.bgColor(1)}
-                            value={address?.mobile ? address.mobile.replace(/^09/, '') : ''}
-                            onChangeText={(text) => { dispatch(setMobile('09' + text)) }}
-                            maxLength={9}
+                            value={address?.mobile ? address.mobile.replace(/^0/, '') : ''}
+                            onChangeText={(text) => { dispatch(setMobile('0' + text)) }}
+                            maxLength={10}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}

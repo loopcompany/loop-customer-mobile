@@ -67,7 +67,6 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 {data?.extra_price > 0 && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                 {data?.discount_price > 0 && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
                 {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                {data?.status > 0 && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
 
                 <View style={NewStyles.rowWrapper}>
                     <Text style={[NewStyles.text]}>وضعیت پرداخت</Text>

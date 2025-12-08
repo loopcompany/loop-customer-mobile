@@ -29,8 +29,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     marginVertical: 10,
     width: 150,
-    height: 100,
+    // height: 150,
+    paddingVertical: 20,
     alignItems: "flex-end",
+    aspectRatio:1
   },
   folderIcon: {
     width: 30,

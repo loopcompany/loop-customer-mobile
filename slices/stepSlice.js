@@ -7,7 +7,6 @@ export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => 
     const token = await AsyncStorage.getItem('userToken');
     console.log('📋 [fetchSteps] شروع دریافت مراحل برای دسته‌بندی:', categoryId);
     console.log('🔑 [fetchSteps] توکن:', token ? `${token.substring(0, 20)}...` : 'null');
-    
     return await axios
         .post(`${uri}/steps/fetch`, 
             { categoryId: categoryId },
@@ -21,7 +20,6 @@ export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => 
         )
         .then(response => {
             console.log('✅ [fetchSteps] مراحل دریافت شد. تعداد مراحل:', response?.data?.length);
-            console.log('📊 [fetchSteps] ساختار کامل مراحل:', JSON.stringify(response?.data, null, 2));
             return response?.data;
         })
         .catch(error => {

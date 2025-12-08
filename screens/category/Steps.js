@@ -55,7 +55,7 @@ function Steps({ navigation, route }) {
         }
         
         if (steps?.data && steps.data.length > 0) {
-            console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
+            // console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
         }
     }, [categoryId]);
 

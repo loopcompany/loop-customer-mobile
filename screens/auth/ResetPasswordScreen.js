@@ -146,7 +146,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
     );
   };
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
         title="بازیابی رمز عبور"
         onPressLeft={() => navigation.goBack()}

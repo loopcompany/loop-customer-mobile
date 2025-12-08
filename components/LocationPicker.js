@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from '../services/URL';
 import { showAlert } from '../helpers/Common';
 
@@ -72,7 +73,15 @@ const LocationPicker = ({
   const fetchProvinces = async () => {
     setLoadingProvinces(true);
     try {
-      const response = await axios.get(`${uri}/locations/provinces`);
+      const token = await AsyncStorage.getItem('userToken');
+      const headers = {
+        'Accept': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${uri}/locations/provinces`, { headers });
       if (response.data.success) {
         setProvinces(response.data.data);
       }
@@ -92,7 +101,15 @@ const LocationPicker = ({
   const fetchCities = async (provinceId) => {
     setLoadingCities(true);
     try {
-      const response = await axios.get(`${uri}/locations/provinces/${provinceId}/cities`);
+      const token = await AsyncStorage.getItem('userToken');
+      const headers = {
+        'Accept': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${uri}/locations/provinces/${provinceId}/cities`, { headers });
       if (response.data.success) {
         setCities(response.data.data.cities);
       }
@@ -108,7 +125,15 @@ const LocationPicker = ({
   const fetchRegions = async (cityId) => {
     setLoadingRegions(true);
     try {
-      const response = await axios.get(`${uri}/locations/cities/${cityId}/regions`);
+      const token = await AsyncStorage.getItem('userToken');
+      const headers = {
+        'Accept': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${uri}/locations/cities/${cityId}/regions`, { headers });
       if (response.data.success) {
         setRegions(response.data.data.regions);
       }

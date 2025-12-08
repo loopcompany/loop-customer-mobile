@@ -17,11 +17,12 @@ export default function RadioButton({ step, data, setLoading }) {
     const dispatch = useDispatch();
     const category = useSelector(state => state.category?.data);
     const [show, setShow] = useState(false)
+    const token = useSelector(state => state.auth?.token);
     
     const fetchConditionalSteps = async (id) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id })
+            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id }, {headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }})
 
             dispatch(addStep({ fieldId: data?.id, fieldDetailId: id, step, steps: response.data }))
         } catch (error) {

@@ -126,7 +126,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
         </View>
         <View style={{flex:1}}>
-          <Button title={'ذخیره فاکتور'} style={{backgroundColor:themeColor7.bgColor(1)}} textStyle={NewStyles.text4} onPress={() => {  Linking.openURL(`${uri}/orders/${orderId}/invoice`)}} />
+          <Button title={'ذخیره فاکتور'} style={{backgroundColor:themeColor7.bgColor(1)}} textStyle={{color: themeColor4.bgColor(1)}} onPress={() => {  Linking.openURL(`${uri}/orders/${orderId}/invoice`)}} />
 
         </View>
       </View>
@@ -149,7 +149,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
                 title="تایید سفارش"
                 onPress={() => setAcceptModal(true)}
                 loading={loadingAccept}
-                textStyle={[NewStyles.text4, { fontSize: 15 }]}
+                textStyle={[{color: themeColor4.bgColor(1)}]}
                 style={{ backgroundColor: themeColor7.bgColor(1) }}
               />
             </View>
@@ -158,7 +158,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
                 title="لغو سفارش"
                 onPress={() => setCancelModal(true)}
                 loading={loadingCancel}
-                textStyle={NewStyles.text4}
+                textStyle={{color: themeColor4.bgColor(1)}}
                 style={{ backgroundColor: themeColor6.bgColor(1) }}
               />
             </View>

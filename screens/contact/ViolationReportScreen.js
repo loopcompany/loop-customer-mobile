@@ -1,7 +1,7 @@
 // ViolationReportScreen.js
 
 import React, { useState } from 'react';
-import { View, TextInput, ScrollView, StyleSheet, I18nManager, KeyboardAvoidingView, } from 'react-native';
+import { View, TextInput, ScrollView, StyleSheet, I18nManager, KeyboardAvoidingView, Pressable, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
@@ -9,10 +9,12 @@ import { themeColor4, themeColor10 } from '../../theme/Color';
 import Button from '../../components/Button';
 import violationReportAPI from '../../services/ViolationReportApi';
 import { showToastOrAlert } from '../../helpers/Common';
+import DatePickerModal from '../../components/DatePickerModal';
+import { Text } from 'react-native';
 
 
 
-export default function ViolationReportScreen({navigation}) {
+export default function ViolationReportScreen({ navigation }) {
   const [form, setForm] = useState({
     type: '',
     technician: '',
@@ -21,7 +23,8 @@ export default function ViolationReportScreen({navigation}) {
     desc: '',
   });
   const [loading, setLoading] = useState(false);
-
+  const [datePickerModal, setDatePickerModal] = useState(false);
+  const [birthDate, setBirthDate] = useState('');
   const handleChange = (field, value) => {
     setForm(prevForm => ({ ...prevForm, [field]: value }));
   };
@@ -43,7 +46,7 @@ export default function ViolationReportScreen({navigation}) {
       };
 
       const response = await violationReportAPI.submitReport(reportData);
-      
+
       if (response.status === 'success') {
         showToastOrAlert(response.message || 'گزارش تخلف با موفقیت ثبت شد');
         // Reset form
@@ -57,12 +60,12 @@ export default function ViolationReportScreen({navigation}) {
       }
     } catch (error) {
       console.error('Violation report error:', error);
-      
+
       let errorMessage = 'خطا در ثبت گزارش تخلف';
-      
+
       if (error.response?.data) {
         const errorData = error.response.data;
-        
+
         if (errorData.errors) {
           // Handle Laravel validation errors
           const validationErrors = Object.values(errorData.errors).flat();
@@ -71,7 +74,7 @@ export default function ViolationReportScreen({navigation}) {
           errorMessage = errorData.message;
         }
       }
-      
+
       showToastOrAlert(errorMessage);
     } finally {
       setLoading(false);
@@ -83,56 +86,61 @@ export default function ViolationReportScreen({navigation}) {
       <ScreenHeaders title={"ثبت تخلف/پیگیری ها"} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={styles.container}>
-          <TextInput 
-            style={styles.input} 
-            placeholder="از تکنسین / پشتیبان لوپ / تراکنش / مشخص کنید" 
+          <TextInput
+            style={styles.input}
+            placeholder="از تکنسین / پشتیبان لوپ / تراکنش / مشخص کنید"
             placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.type}
-            onChangeText={(text) => handleChange('type', text)} 
+            onChangeText={(text) => handleChange('type', text)}
           />
-          <TextInput 
-            style={styles.input} 
-            placeholder="نام / کد تکنسین" 
+          <TextInput
+            style={styles.input}
+            placeholder="نام / کد تکنسین"
             placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.technician}
-            onChangeText={(text) => handleChange('technician', text)} 
+            onChangeText={(text) => handleChange('technician', text)}
           />
-          <TextInput 
-            style={styles.input} 
-            placeholder="تاریخ ثبت" 
+          
+          <Pressable style={styles.input} onPress={() => setDatePickerModal(true)}>
+            <Text style={[NewStyles.text10, { color: themeColor10.bgColor(0.6) }]}>{form.date ? form.date : "تاریخ ثبت"}</Text>
+          </Pressable>
+          <TextInput
+            style={styles.input}
+            placeholder="مبلغ تراکنش"
             placeholderTextColor={themeColor10.bgColor(0.6)}
-            value={form.date}
-            onChangeText={(text) => handleChange('date', text)} 
-          />
-          <TextInput 
-            style={styles.input} 
-            placeholder="مبلغ تراکنش" 
-            placeholderTextColor={themeColor10.bgColor(0.6)}
-            keyboardType="numeric" 
+            keyboardType="numeric"
             value={form.amount}
-            onChangeText={(text) => handleChange('amount', text)} 
+            onChangeText={(text) => handleChange('amount', text)}
           />
-          <TextInput 
-            style={[styles.input, styles.textarea]} 
-            placeholder="توضیحات" 
+          <TextInput
+            style={[styles.input, styles.textarea]}
+            placeholder="توضیحات"
             placeholderTextColor={themeColor10.bgColor(0.6)}
-            multiline 
+            multiline
             value={form.desc}
-            onChangeText={(text) => handleChange('desc', text)} 
+            maxLength={191}
+            onChangeText={(text) => handleChange('desc', text)}
           />
           <View style={styles.buttonContainer}>
-            <Button 
-              title={'ثبت'} 
+            <Button
+              title={'ثبت'}
               loading={loading}
               disabled={loading}
               onPress={handleSubmit}
             />
-            <Button 
-              title={'پیگیری‌ها'} 
+            <Button
+              title={'پیگیری‌ها'}
               onPress={() => navigation.navigate('ViolationReportsListScreen')}
             />
           </View>
         </ScrollView>
+        <DatePickerModal
+          datePickerModal={datePickerModal}
+          setDatePickerModal={setDatePickerModal}
+          birthDate={birthDate}
+          onDateChange={(date) => handleChange('date', date)}
+          setBirthDate={setBirthDate}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -166,11 +166,11 @@ function Invoice({ route }) {
                         </View>
 
                         {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
-                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ نهایی تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
+                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
                         {(data?.extra_price > 0) && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                         {(data?.discount_price > 0) && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
                         {(totalPrice > totalDiscountedPrice > 0) && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
+                        {(data?.status > 0 && data?.technician_price) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
                         {renderRow('موجودی کیف پول شما: ', formatPrice(user?.wallet ?? 0) + ' تومان')}
 
                         {/* نمایش هزینه‌های اضافی */}
@@ -220,10 +220,10 @@ function Invoice({ route }) {
                     :
                     <>
                         <View style={{ flex: 1 }}>
-                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
+                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14 }, NewStyles.text4]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
+                            <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
                         </View>
                     </>
                 }

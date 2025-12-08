@@ -432,7 +432,7 @@ function Preview({ navigation }) {
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
                 <View style={{ flex: 1, alignItems:'center' }}>
-                    <Button title={'ثبت نهایی سفارش'} textStyle={NewStyles.text4} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
+                    <Button title={'ثبت نهایی سفارش'} textStyle={{color: themeColor4.bgColor(1)}} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>
             </View>
         </SafeAreaView>

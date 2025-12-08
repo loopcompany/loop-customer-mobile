@@ -191,8 +191,8 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
         <CustomStatusBar />
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-          style={{ flex: 1 }}
+          behavior={'padding'}
+          style={{ flex: 1, width: '100%' }}
         >
           <ScrollView
             contentContainerStyle={styles.container}
@@ -340,8 +340,8 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   codeCell: {
-    width: 45,
-    height: 50,
+    width: 40,
+    height: 45,
     backgroundColor: themeColor3.bgColor(0.7),
     fontSize: 20,
     color: themeColor0.bgColor(1),

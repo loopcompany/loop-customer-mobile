@@ -24,19 +24,18 @@ export default function Address({ step, data, navigation }) {
     const addressId = useSelector(state => state.step?.addressId);
     const addresses = useSelector(state => state.address?.data);
     const [deleteModal, setDeletModal] = useState(false);
-
+    const token = useSelector(state => state.auth?.token);
     const [loading, setLoading] = useState(false);
 
     // Fetch addresses when component mounts
     useEffect(() => {
         const loadAddresses = async () => {
-            const token = await AsyncStorage.getItem('userToken');
             if (token) {
                 dispatch(fetchAddresses(token));
             }
         };
         loadAddresses();
-    }, [dispatch]);
+    }, [dispatch, token]);
 
     const renderRow = (label, value, textStyle = NewStyles.text10) =>
         <View style={NewStyles.rowWrapper}>
@@ -47,7 +46,6 @@ export default function Address({ step, data, navigation }) {
     const deleteAddress = async () => {
         setLoading(true);
         try {
-            const token = await AsyncStorage.getItem('userToken');
             const response = await axios.delete(`${uri}/addresses/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 200) {
                 dispatch(fetchAddresses(token));
@@ -62,7 +60,6 @@ export default function Address({ step, data, navigation }) {
     }
 
     const handleRefresh = async () => {
-        const token = await AsyncStorage.getItem('userToken');
         if (token) {
             dispatch(fetchAddresses(token));
         }

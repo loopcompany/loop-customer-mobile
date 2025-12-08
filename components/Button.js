@@ -27,15 +27,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor:themeColor0.bgColor(1),
     
-    
-    // paddingVertical: 12,
     paddingHorizontal: 40,
     marginVertical: 10,
-    // shadowColor: "#00f",
-    // shadowOffset: { width: 0, height: 0 },
-    // shadowOpacity: 0.9,
-    // shadowRadius: 10,
-    // elevation: 5,
     width: "100%",
     height:50,
     alignItems: "center",

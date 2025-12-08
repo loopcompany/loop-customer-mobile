@@ -78,7 +78,8 @@ export default function LearnMoreScreen() {
 }
 
 const styles = StyleSheet.create({
-  termsContainer: {
-    padding: 15,
-  },
+ 
+  faqsContainer:{
+    paddingHorizontal:15
+  }
 });

@@ -166,6 +166,11 @@ const NewStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor14.bgColor(1),
+    ...(Platform.OS === 'web' && {
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden',
+    }),
   },
 
   center: {

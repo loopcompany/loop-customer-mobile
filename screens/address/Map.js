@@ -26,6 +26,7 @@ export default function Map({ route, navigation }) {
     const [loading, setLoading] = useState(false);
     const user = useSelector(state => state.user?.data);
     const address = useSelector(state => state?.address);
+    const token = useSelector(state => state.auth?.token);
 
     const [region, setRegion] = useState(null);
 
@@ -55,7 +56,6 @@ export default function Map({ route, navigation }) {
         setLoading(true);
         try {
             // دریافت توکن از AsyncStorage
-            const token = await AsyncStorage.getItem('userToken');
             
             console.log('Token:', token);
             console.log('Address data:', address);
@@ -75,14 +75,16 @@ export default function Map({ route, navigation }) {
             if (response.status === 201) {
                 showToastOrAlert(response?.data?.message || 'آدرس با موفقیت ثبت شد')
                 dispatch(fetchAddresses(token));
+                navigation.goBack();
             }
+            
         } catch (error) {
             console.error('Submit address error:', error.response?.data);
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
             showToastOrAlert(message);
         } finally {
             setLoading(false);
-            navigation.goBack();
+            
         }
     }
 

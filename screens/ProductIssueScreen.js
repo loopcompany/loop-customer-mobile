@@ -45,6 +45,10 @@ export default function ProductIssueScreen({ navigation }) {
   const [completeDatePickerVisible, setCompleteDatePickerVisible] = useState(false);
 
   const handleChange = (key, value) => {
+    if(key === 'amount') {
+      // Remove commas before setting the value
+      value = value.replace(/,/g, '');
+    }
     setForm({ ...form, [key]: value });
   };
 
@@ -191,7 +195,7 @@ export default function ProductIssueScreen({ navigation }) {
 
           <TextInput
             placeholder="مبلغ پرداختی"
-            value={form.amount}
+            value={form.amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             onChangeText={(t) => handleChange('amount', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"

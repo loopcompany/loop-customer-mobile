@@ -203,7 +203,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                                 title="لغو سفارش"
                                 onPress={() => setRejectModal(true)}
                                 loading={rejecting}
-                                textStyle={NewStyles.text4}
+                                textStyle={{color: themeColor4.bgColor(1)}}
                                 style={{ backgroundColor: themeColor6.bgColor(1) }}
                             />
                         </View>
@@ -212,7 +212,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                                 title="می پذیرم"
                                 onPress={() => setAcceptModal(true)}
                                 loading={accepting}
-                                textStyle={NewStyles.text4}
+                                textStyle={{color: themeColor4.bgColor(1)}}
                                 style={{ backgroundColor: themeColor7.bgColor(1) }}
                             />
                         </View>

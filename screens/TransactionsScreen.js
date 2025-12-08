@@ -96,11 +96,11 @@ export default function TransactionsScreen() {
   // تبدیل type به متن فارسی
   const getTypeText = (type) => {
     switch (type) {
-      case 1:
+      case '1':
         return 'شارژ کیف پول';
-      case 2:
+      case '2':
         return 'پرداخت آنلاین';
-      case 3:
+      case '3':
         return 'کسر هزینه از کیف پول';
       default:
         return 'نامشخص';
@@ -110,11 +110,11 @@ export default function TransactionsScreen() {
   // رنگ بر اساس وضعیت (status)
   const getStatusColor = (status) => {
     switch (status) {
-      case 100:
+      case '100':
         return themeColor7.bgColor(1); // موفق - سبز
-      case -1:
+      case '-1':
         return themeColor6.bgColor(1); // ناموفق - قرمز
-      case 0:
+      case '0':
         return themeColor0.bgColor(1); // در انتظار - آبی
       default:
         return themeColor1.bgColor(1);
@@ -124,11 +124,11 @@ export default function TransactionsScreen() {
   // متن وضعیت
   const getStatusText = (status) => {
     switch (status) {
-      case 100:
+      case '100':
         return 'موفق';
-      case -1:
+      case '-1':
         return 'ناموفق';
-      case 0:
+      case '0':
         return 'در انتظار';
       default:
         return 'نامشخص';
