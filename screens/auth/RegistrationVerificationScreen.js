@@ -17,6 +17,7 @@ import {
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../../helpers/Common';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor10 } from '../../theme/Color';
@@ -32,6 +33,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground } from 'expo-image';
 
 export default function RegistrationVerificationScreen({ route, navigation }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { phone, userData } = route.params || {};
 
@@ -69,7 +71,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 6) {
-      setError('لطفاً کد 6 رقمی را کامل وارد کنید');
+      setError(t('Please enter the complete 6-digit code'));
       return;
     }
 
@@ -80,6 +82,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
       // Use the correct format that matches the API
       const response = await authAPI.verifyPhone({
         phone: phone,
+        
         code: verificationCode
       });
 
@@ -96,16 +99,16 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
           dispatch(fetchUser(response.data.token));
         }
 
-        showToastOrAlert('شماره موبایل با موفقیت تایید شد');
+        showToastOrAlert(t('Mobile number successfully verified'));
         navigation.navigate('FolderScreen'); // Navigate to main app
       } else {
-        setError(response.message || 'کد وارد شده صحیح نیست');
+        setError(response.message || t('The entered code is not correct!'));
         setVerificationCode('');
       }
     } catch (error) {
       console.error('Verification error:', error);
 
-      let errorMessage = 'خطا در تایید کد. لطفاً مجدداً تلاش کنید';
+      let errorMessage = t('Error verifying code. Please try again');
 
       if (error.response?.data) {
         const errorData = error.response.data;
@@ -120,7 +123,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
         // Show specific error for 422
         if (error.response?.status === 422) {
-          errorMessage = errorMessage || 'اطلاعات وارد شده صحیح نیست';
+          errorMessage = errorMessage || t('The entered information is incorrect');
         }
       }
 
@@ -142,14 +145,14 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         setTimer(120);
         setCanResend(false);
         setError('');
-        showToastOrAlert('کد تایید مجدداً ارسال شد');
+        showToastOrAlert(t('Verification code resent'));
       } else {
-        setError(response.message || 'خطا در ارسال مجدد کد');
+        setError(response.message || t('Error resending code'));
       }
     } catch (error) {
       console.error('Resend code error:', error);
 
-      let errorMessage = 'خطا در ارسال مجدد کد';
+      let errorMessage = t('Error resending code');
 
       if (error.response?.data) {
         const errorData = error.response.data;
@@ -171,12 +174,12 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
   const handleEditMobile = () => {
     showAlert(
-      'ویرایش شماره موبایل',
-      'آیا می‌خواهید شماره موبایل را ویرایش کنید؟',
+      t('Edit mobile number'),
+      t('Do you want to edit the mobile number?'),
       [
-        { text: 'لغو', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'بله', onPress: () => {
+          text: t('Yes'), onPress: () => {
             if (Platform.OS == 'web') {
               window.history.back()
             } else {
@@ -191,7 +194,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
-        title="تایید شماره موبایل"
+        title={t('Verify mobile number')}
         showLeftIcon={true}
       />
       <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
@@ -211,10 +214,10 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
               {/* Instructions */}
               <View style={styles.instructionContainer}>
                 <Text style={NewStyles.title4}>
-                  کد تایید ارسال شده را وارد کنید
+                  {t('Enter the verification code sent')}
                 </Text>
                 <Text style={NewStyles.text4}>
-                  کد 6 رقمی به شماره موبایل
+                  {t('6-digit code to mobile number')}
                 </Text>
                 <TouchableOpacity onPress={handleEditMobile}>
                   <Text style={styles.mobileNumber}>
@@ -222,7 +225,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
                   </Text>
                 </TouchableOpacity>
                 <Text style={NewStyles.text4}>
-                  ارسال شده است
+                  {t('has been sent')}
                 </Text>
               </View>
 
@@ -265,7 +268,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
               <View style={styles.timerContainer}>
                 {!canResend ? (
                   <Text style={NewStyles.text4}>
-                    ارسال مجدد کد در {formatTime(timer)}
+                    {t('Resend code in')} {formatTime(timer)}
                   </Text>
                 ) : (
                   <TouchableOpacity
@@ -274,7 +277,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
                     style={styles.resendButton}
                   >
                     <Text style={styles.resendButtonText}>
-                      ارسال مجدد کد
+                      {t('Resend Code')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -282,7 +285,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
               {/* Verify Button */}
               <Button
-                title="تایید"
+                title={t('Confirm')}
                 loading={loading}
                 onPress={handleVerifyCode}
                 style={styles.verifyButton}

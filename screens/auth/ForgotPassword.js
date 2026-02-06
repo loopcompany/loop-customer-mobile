@@ -9,9 +9,11 @@ import { setAuthLoading, setAuthError, clearAuthError } from "../../slices/authS
 import { validateMelicode, validatePhone, validateEmail, showToastOrAlert } from "../../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         melicode: "",
         phone: "",
@@ -69,7 +71,7 @@ export default function ForgotPassword({ navigation }) {
 
         // Validate form
         if (!validateForm()) {
-            showToastOrAlert("لطفاً اطلاعات را به درستی وارد کنید");
+            showToastOrAlert(t('Please enter the information correctly'));
             return;
         }
 
@@ -94,13 +96,13 @@ export default function ForgotPassword({ navigation }) {
                     });
                 }, 1500);
             } else {
-                showToastOrAlert(response.message || "خطایی رخ داده است");
+                showToastOrAlert(response.message || t('An error occurred'));
                 dispatch(setAuthError(response.message));
             }
         } catch (error) {
             console.error('Forgot password error:', error);
 
-            let errorMessage = "خطا در ارتباط با سرور";
+            let errorMessage = t('Server connection error');
 
             if (error.response?.data) {
                 const errorData = error.response.data;
@@ -108,7 +110,7 @@ export default function ForgotPassword({ navigation }) {
                 if (errorData.errors) {
                     // Handle validation errors
                     setErrors(errorData.errors);
-                    errorMessage = "اطلاعات وارد شده صحیح نیست";
+                    errorMessage = t('The entered information is incorrect');
                 } else if (errorData.message) {
                     errorMessage = errorData.message;
                 }
@@ -143,7 +145,7 @@ export default function ForgotPassword({ navigation }) {
                         <View style={[{ flex: 2, width: '100%', gap: 15, maxWidth: 800 }, NewStyles.center]}>
                             {/* National ID Input */}
                             <View style={styles.inputContainer}>
-                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>کد ملی<Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>{t('National ID')}<Text style={NewStyles.title6}>*</Text></Text>
 
                                 <TextInput
                                     style={[
@@ -152,7 +154,7 @@ export default function ForgotPassword({ navigation }) {
                                         NewStyles.border10,
                                         errors.melicode && styles.inputError
                                     ]}
-                                    placeholder="کد ملی خود را وارد کنید"
+                                    placeholder={t('Enter your national ID')}
                                     placeholderTextColor={themeColor10.bgColor(0.7)}
                                     value={formData.melicode}
                                     onChangeText={(value) => handleInputChange('melicode', value)}
@@ -167,7 +169,7 @@ export default function ForgotPassword({ navigation }) {
 
                             {/* Phone Input */}
                             <View style={styles.inputContainer}>
-                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>شماره موبایل<Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>{t('Phone number')}<Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -175,7 +177,7 @@ export default function ForgotPassword({ navigation }) {
                                         NewStyles.border10,
                                         errors.phone && styles.inputError
                                     ]}
-                                    placeholder="شماره موبایل خود را وارد کنید"
+                                    placeholder={t('Enter your phone number')}
                                     placeholderTextColor={themeColor10.bgColor(0.7)}
                                     value={formData.phone}
                                     onChangeText={(value) => handleInputChange('phone', value)}
@@ -190,7 +192,7 @@ export default function ForgotPassword({ navigation }) {
 
                             {/* Email Input */}
                             <View style={styles.inputContainer}>
-                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}> ایمیل<Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>{t('Email')}<Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -198,7 +200,7 @@ export default function ForgotPassword({ navigation }) {
                                         NewStyles.border10,
                                         errors.email && styles.inputError
                                     ]}
-                                    placeholder="آدرس ایمیل خود را وارد کنید"
+                                    placeholder={t('Enter your email address')}
                                     placeholderTextColor={themeColor10.bgColor(0.7)}
                                     value={formData.email}
                                     onChangeText={(value) => handleInputChange('email', value)}
@@ -215,7 +217,7 @@ export default function ForgotPassword({ navigation }) {
                         {/* Submit Button */}
                         <View style={[{ flex: 1, width: '100%' }, NewStyles.center]}>
                             <Button
-                                title={isLoading ? "در حال ارسال..." : "ارسال کد بازیابی"}
+                                title={isLoading ? t('Sending...') : t('Send recovery code')}
                                 onPress={handleSubmit}
                                 loading={isLoading}
                                 disabled={isLoading}
@@ -234,7 +236,7 @@ export default function ForgotPassword({ navigation }) {
                                 }}
                                 disabled={isLoading}
                             >
-                                <Text style={styles.backToLoginText}>بازگشت به ورود</Text>
+                                <Text style={styles.backToLoginText}>{t('Back to login')}</Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>

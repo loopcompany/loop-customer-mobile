@@ -4,9 +4,7 @@ import { useOrganizationAccess } from '../hooks/useOrganizationAccess';
  * Helper function برای دیباگ کردن وضعیت access control system
  * این تابع می‌تواند در development mode استفاده شود
  */
-export const debugOrganizationAccess = () => {
-  console.log('🔍 Organization Access Debug Report');
-  console.log('=====================================');
+export const debugOrganizationAccess = () => { 
   
   // Debug info از hook
   const hookData = useOrganizationAccess();

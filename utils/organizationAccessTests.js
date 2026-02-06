@@ -6,9 +6,7 @@ import { debugOrganizationAccess, testScreenAccess, performanceMonitor } from '.
 /**
  * تست کامل سیستم کنترل دسترسی سازمانی
  */
-export const runIntegrationTest = async () => {
-  console.log('🚀 Starting Organization Access Control Integration Test');
-  console.log('======================================================');
+export const runIntegrationTest = async () => { 
   
   try {
     // ۱. بررسی وضعیت فعلی سیستم
@@ -96,9 +94,7 @@ export const runIntegrationTest = async () => {
       console.log(`⚠️ Low cache performance: ${perfStats.cacheHitRate.toFixed(1)}% hit rate`);
     }
     
-    // ۶. نتیجه نهایی
-    console.log('\n📋 Step 6: Final Results');
-    console.log('======================================================');
+    // ۶. نتیجه نهایی 
     
     const issues = [];
     

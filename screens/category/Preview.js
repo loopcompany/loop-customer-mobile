@@ -213,7 +213,7 @@ function Preview({ navigation }) {
                     console.log('✅ [Preview] service_schedule به payload اضافه شد');
                 } else {
                     console.error('❌ [Preview] خطا: service_schedule برای کاربر سازمانی اجباری است اما ساخته نشد');
-                    showToastOrAlert('لطفاً فیلدهای زمان نگهداری و سرویس را تکمیل کنید.');
+                    showToastOrAlert(t('Please complete the maintenance and service time fields.'));
                     setLoading(false);
                     return;
                 }
@@ -298,24 +298,24 @@ function Preview({ navigation }) {
                     <View style={NewStyles.rowWrapper}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={26} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>{isFixed ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ'}</Text>
+                            <Text style={NewStyles.title}>{isFixed ? t('Loop Fixed Amount') : t('Loop Base Amount')}</Text>
                         </View>
                         <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} >
                             <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.text}>{totalPrice > 0 ? `${formatPrice(totalPrice)}` + ' تومان' : 'نیاز به بررسی'}</Text>
+                            <Text style={NewStyles.text}>{totalPrice > 0 ? `${formatPrice(totalPrice)}${t(' Toman')}` : t('Needs Review')}</Text>
                         </Pressable>
                     </View>
                     <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
-                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، اطلاعات سفارش شما پس از بررسی توسط تکسنین لوپ، و بررسی های تخصصی قیمت گذاری نهایی خواهد شد.</Text>
+                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Dear user, your order information will be finalized after review by Loop technicians and specialized evaluations.')}</Text>
                     </View>
                 </View>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name="gift-outline" size={26} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>کد تشویق</Text>
+                        <Text style={NewStyles.title}>{t('Discount Code')}</Text>
                     </View>
                     <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
-                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، جهت دریافت کد تشویق، می توانید به بخش طرح های تشویقی مراجعه کرده و هر هفته در گردونه شانس لوپ شرکت کنید!</Text>
+                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t("Dear user, to receive a discount code, you can visit the promotions section and participate in Loop's lucky wheel every week!")}</Text>
                     </View>
                     <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
                         <View
@@ -328,7 +328,7 @@ function Preview({ navigation }) {
                             ]}
                         >
                             <Ionicons name={'ticket-outline'} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder='کد تشویقی خودرا وارد کنید.' placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
+                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
                         </View>
                         <Pressable
                             style={[
@@ -337,7 +337,7 @@ function Preview({ navigation }) {
                                 NewStyles.center
                             ]}
                             onPress={() => checkDiscount()}>
-                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>بررسی کد</Text>}
+                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>{t('Check Code')}</Text>}
                             {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                         </Pressable>
                     </View>
@@ -345,30 +345,30 @@ function Preview({ navigation }) {
                 <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
                     <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Text style={NewStyles.title}>پیش نمایش سفارش</Text>
+                            <Text style={NewStyles.title}>{t('Order Preview')}</Text>
                             <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
                         </View>
                         <Text style={NewStyles.text3}>{category?.title}</Text>
                     </View>
-                    {renderRow('زمان مراجعه تکنسین', isUrgent > 0 ? 'درخواست فوری' : formatDate(date) + ' ساعت ' + time, NewStyles.text, isUrgent > 0 && NewStyles.title6)}
+                    {renderRow(t('Technician Visit Time'), isUrgent > 0 ? t('Urgent Request') : formatDate(date) + t(' at ') + time, NewStyles.text, isUrgent > 0 && NewStyles.title6)}
                     {maleCount + femaleCount + unspecifiedCount > 0 &&
                         renderRow(
-                            'جنسیت تکنسین',
+                            t('Technician Gender'),
                             (() => {
                                 const total = maleCount + femaleCount + unspecifiedCount;
-                                if (total === 0) return 'مشخص نشده';
+                                if (total === 0) return t('Not Specified');
                                 let details = [];
-                                if (maleCount > 0) details.push(`تکنسین آقا`);
-                                if (femaleCount > 0) details.push(`تکنسین خانم`);
+                                if (maleCount > 0) details.push(t('Male Technician'));
+                                if (femaleCount > 0) details.push(t('Female Technician'));
 
                                 return (details.length > 0 ? ` ${details.join(' ')}` : '');
                             })()
                         )
                     }
 
-                    {renderRow('آدرس', '')}
+                    {renderRow(t('Address'), '')}
                     {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + address?.region + ' - ' + address?.address, '', NewStyles.text10)}
-                    {discountPercent && renderRow('درصد تخفیف نهایی شما', discountPercent + ' درصد', NewStyles.text10)}
+                    {discountPercent && renderRow(t('Your Final Discount Percentage'), discountPercent + t(' percent'), NewStyles.text10)}
                 </View>
 
                 {steps?.data?.map((previewItem, index) => (
@@ -421,7 +421,7 @@ function Preview({ navigation }) {
                 {des && <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>توضیحات کاربر</Text>
+                        <Text style={NewStyles.title}>{t('User Description')}</Text>
                     </View>
                     <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                         <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
@@ -432,7 +432,7 @@ function Preview({ navigation }) {
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
                 <View style={{ flex: 1, alignItems:'center' }}>
-                    <Button title={'ثبت نهایی سفارش'} textStyle={{color: themeColor4.bgColor(1)}} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
+                    <Button title={t('Final Order Submission')} textStyle={{color: themeColor4.bgColor(1)}} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>
             </View>
         </SafeAreaView>

@@ -4,11 +4,14 @@ import Menuitem from "../../components/Menuitem";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
 import { withOrganizationAccess, ACCESS_PRESETS } from "../../components/withOrganizationAccess";
+import { useTranslation } from "react-i18next";
+
 const callSupport = () => {
   Linking.openURL("tel:09012955939"); // شماره دلخواهت
 };
 
 function OrderMenuScreen({ navigation }) {
+  const { t } = useTranslation();
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <ScrollView
@@ -25,24 +28,22 @@ function OrderMenuScreen({ navigation }) {
         <View style={[styles.container, NewStyles.center]}>
           <Menuitem
             style={{ width: "75%" }}
-            title={"سفارش سیستماتیک"}
-            subTitle={"(انتخابی)"}
+            title={t("Systematic order")}
+            subTitle={t("(Optional)")}
             onPress={() => {
               navigation.navigate("SignInLanding");
             }}
           />
-
           <Menuitem
             style={{ width: "75%" }}
-            title={"سفارش فوری"}
-            subTitle={"(تماس)"}
+            title={t("Urgent order")}
+            subTitle={t("(Call)")}
             onPress={callSupport}
           />
-
           <Menuitem
             style={{ width: "75%" }}
-            title={"هوش مصنوعی"}
-            subTitle={"(به زودی)"}
+            title={t("Artificial intelligence")}
+            subTitle={t("(Coming soon)")}
             onPress={() => {
               navigation.navigate("SignInLanding");
             }}
@@ -51,7 +52,7 @@ function OrderMenuScreen({ navigation }) {
         <View style={[styles.container, NewStyles.center]}>
           <Menuitem
             style={{ width: "75%" }}
-            title={"سازمانی / شرکتی"}
+            title={t("Organization / Company")}
             onPress={() => {
               navigation.navigate("Grouping");
             }}
@@ -137,8 +138,8 @@ export default withOrganizationAccess(OrderMenuScreen, {
       // اگر کاربر سازمانی است، باید تایید کامل داشته باشد
       return {
         allowed: hasCompleteAccess,
-        title: "نیاز به تایید کامل",
-        message: "برای مشاهده منوی سفارشات، باید هم پروفایل و هم قرارداد شما تایید شده باشد",
+        title: t("Full verification required"),
+        message: t("To view the order menu, both your profile and your contract must be verified"),
         showRetry: true
       };
     },

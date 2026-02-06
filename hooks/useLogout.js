@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Platform } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 import TokenManager from '../services/TokenManager';
 import { setToken, setUserType } from '../slices/authSlice';
@@ -10,6 +11,7 @@ import { showAlert } from '../helpers/Common';
 
 // Custom hook for logout functionality
 export const useLogout = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -44,7 +46,7 @@ export const useLogout = () => {
     if (Platform.OS === 'web') {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
-        const confirmed = window.confirm('آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟');
+        const confirmed = window.confirm(t('Are you sure you want to log out?'));
         
         if (confirmed) {
           logout()
@@ -53,7 +55,7 @@ export const useLogout = () => {
                 try { options.onSuccess(); } catch {}
               }
               if (window.alert) {
-                window.alert(result.message || 'با موفقیت خارج شدید');
+                window.alert(result.message || t('You have successfully logged out!'));
               }
               // Navigate to Welcome screen after alert
               if (navigation.replace) {
@@ -67,7 +69,7 @@ export const useLogout = () => {
             })
             .catch((error) => {
               if (window.alert) {
-                window.alert(error.message || 'خطای غیرمنتظره در خروج');
+                window.alert(error.message || t('Unexpected error during logout'));
               }
             });
         }
@@ -93,15 +95,15 @@ export const useLogout = () => {
     } else {
       // Use Alert.alert for mobile
       showAlert(
-        'خروج از حساب کاربری',
-        'آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟',
+        t('Log Out'),
+        t('Are you sure you want to log out?'),
         [
           {
-            text: 'انصراف',
+            text: t('Cancel'),
             style: 'cancel',
           },
           {
-            text: 'خروج',
+            text: t('Log Out'),
             style: 'destructive',
             onPress: async () => {
               try {
@@ -109,9 +111,9 @@ export const useLogout = () => {
                 if (typeof options.onSuccess === 'function') {
                   try { options.onSuccess(); } catch {}
                 }
-                showAlert('موفق', result.message, [
+                showAlert(t('Successful'), result.message, [
                   {
-                    text: 'باشه',
+                    text: t('Ok'),
                     onPress: () => {
                       // Navigate to Welcome screen after showing alert
                       if (navigation.replace) {
@@ -126,7 +128,7 @@ export const useLogout = () => {
                   }
                 ]);
               } catch (error) {
-                showAlert('خطا', error.message || 'خطای غیرمنتظره در خروج');
+                showAlert(t('Error'), error.message || t('Unexpected error during logout'));
               }
             },
           },
@@ -165,13 +167,13 @@ export const useLogout = () => {
     if (Platform.OS === 'web') {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
-        const confirmed = window.confirm('آیا می‌خواهید از همه دستگاه‌هایی که با این حساب وارد شده‌اند خارج شوید؟');
+        const confirmed = window.confirm(t('Do you want to log out from all devices logged in with this account?'));
         
         if (confirmed) {
           logoutFromAllDevices()
             .then((result) => {
               if (window.alert) {
-                window.alert(result.message || 'با موفقیت از همه دستگاه‌ها خارج شدید');
+                window.alert(result.message || t('Successfully logged out from all devices'));
               }
               // Navigate to Welcome screen after alert
               if (navigation.replace) {
@@ -185,7 +187,7 @@ export const useLogout = () => {
             })
             .catch((error) => {
               if (window.alert) {
-                window.alert(error.message || 'خطای غیرمنتظره در خروج از همه دستگاه‌ها');
+                window.alert(error.message || t('Unexpected error logging out from all devices'));
               }
             });
         }
@@ -208,22 +210,22 @@ export const useLogout = () => {
     } else {
       // Use Alert.alert for mobile
       showAlert(
-        'خروج از همه دستگاه‌ها',
-        'آیا می‌خواهید از همه دستگاه‌هایی که با این حساب وارد شده‌اند خارج شوید؟',
+        t('Log Out From All Devices'),
+        t('Do you want to log out from all devices logged in with this account?'),
         [
           {
-            text: 'انصراف',
+            text: t('Cancel'),
             style: 'cancel',
           },
           {
-            text: 'خروج از همه',
+            text: t('Log Out All'),
             style: 'destructive',
             onPress: async () => {
               try {
                 const result = await logoutFromAllDevices();
-                showAlert('موفق', result.message, [
+                showAlert(t('Successful'), result.message, [
                   {
-                    text: 'باشه',
+                    text: t('Ok'),
                     onPress: () => {
                       // Navigate to Welcome screen after showing alert
                       if (navigation.replace) {
@@ -238,7 +240,7 @@ export const useLogout = () => {
                   }
                 ]);
               } catch (error) {
-                showAlert('خطا', error.message || 'خطای غیرمنتظره در خروج از همه دستگاه‌ها');
+                showAlert(t('Error'), error.message || t('Unexpected error logging out from all devices'));
               }
             },
           },

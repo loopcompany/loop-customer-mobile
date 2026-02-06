@@ -1,7 +1,7 @@
 import { Dimensions, Platform, ToastAndroid, Alert } from "react-native";
 import Constants from "expo-constants";
 import dayjs from "dayjs";
-import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import moment from "moment";
 import { toJalaali } from 'jalaali-js';
 var jalaali = require("jalaali-js");
@@ -290,13 +290,13 @@ export const showToastOrAlert = (message) => {
 // Validation functions for forgot password
 export const validateMelicode = (melicode) => {
   if (!melicode) {
-    return { isValid: false, message: 'کد ملی الزامی است' };
+    return { isValid: false, message: i18next.t('National ID is required') };
   }
 
   const cleanMelicode = melicode.toString().replace(/\D/g, '');
 
   if (cleanMelicode.length !== 10) {
-    return { isValid: false, message: 'کد ملی باید 10 رقم باشد' };
+    return { isValid: false, message: i18next.t('National ID must be 10 digits') };
   }
 
   // Check for invalid patterns
@@ -306,7 +306,7 @@ export const validateMelicode = (melicode) => {
   ];
 
   if (invalidPatterns.includes(cleanMelicode)) {
-    return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
+    return { isValid: false, message: i18next.t('The entered national ID is not valid') };
   }
 
   // Check sum validation
@@ -328,22 +328,22 @@ export const validateMelicode = (melicode) => {
     }
   }
 
-  return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
+  return { isValid: false, message: i18next.t('The entered national ID is not valid') };
 };
 
 export const validatePhone = (phone) => {
   if (!phone) {
-    return { isValid: false, message: 'شماره موبایل الزامی است' };
+    return { isValid: false, message: i18next.t('Phone number is required') };
   }
 
   const cleanPhone = phone.toString().replace(/\D/g, '');
 
   if (cleanPhone.length !== 11) {
-    return { isValid: false, message: 'شماره موبایل باید 11 رقم باشد' };
+    return { isValid: false, message: i18next.t('Phone number must be 11 digits') };
   }
 
   if (!cleanPhone.startsWith('09')) {
-    return { isValid: false, message: 'شماره موبایل باید با 09 شروع شود' };
+    return { isValid: false, message: i18next.t('Phone number must start with 09') };
   }
 
   return { isValid: true, message: '' };
@@ -351,13 +351,13 @@ export const validatePhone = (phone) => {
 
 export const validateEmail = (email) => {
   if (!email) {
-    return { isValid: false, message: 'آدرس ایمیل الزامی است' };
+    return { isValid: false, message: i18next.t('Email address is required') };
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailRegex.test(email)) {
-    return { isValid: false, message: 'فرمت ایمیل صحیح نیست' };
+    return { isValid: false, message: i18next.t('Email format is incorrect') };
   }
 
   return { isValid: true, message: '' };
@@ -402,15 +402,15 @@ export const isDateValid = (date, daysToAdd) => {
 // Order status helpers
 export const getOrderStatusText = (status) => {
   const statusMap = {
-    0: 'در انتظار',
-    1: 'در حال انجام',
-    2: 'انجام شده',
-    3: 'لغو شده توسط کاربر',
-    4: 'لغو شده توسط تکنسین',
-    5: 'لغو شده توسط ادمین',
-    6: 'منقضی شده'
+    0: i18next.t('Pending'),
+    1: i18next.t('In progress'),
+    2: i18next.t('Completed'),
+    3: i18next.t('Canceled by user'),
+    4: i18next.t('Canceled by technician'),
+    5: i18next.t('Canceled by admin'),
+    6: i18next.t('Expired')
   };
-  return statusMap[status] || 'نامشخص';
+  return statusMap[status] || i18next.t('Unknown');
 };
 
 export const getOrderStatusColor = (status) => {
@@ -445,7 +445,7 @@ export const calculateDaysDifference = (targetDate) => {
 };
 
 export const getPaymentStatusText = (status) => {
-  return status === 0 ? 'پرداخت نشده' : 'پرداخت شده';
+  return status === 0 ? i18next.t('Unpaid') : i18next.t('Paid');
 };
 
 export const getPaymentStatusColor = (status) => {

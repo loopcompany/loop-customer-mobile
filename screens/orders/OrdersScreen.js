@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
+import { useTranslation } from 'react-i18next';
 import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
 import NewStyles from '../../styles/NewStyles';
@@ -16,6 +17,7 @@ import OrderItem from '../../components/OrderItem';
 import BlankScreen from '../../components/BlankScreen';
 
 function OrdersScreen({ navigation }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
 
@@ -95,18 +97,18 @@ function OrdersScreen({ navigation }) {
   // متن وضعیت سفارش
   const getStatusText = (statusValue) => {
     switch (statusValue) {
-      case 0: return 'در انتظار';
-      case 1: return 'در حال انجام';
-      case 2: return 'تمام شده';
-      case 3: return 'لغو شده';
-      default: return 'همه';
+      case 0: return t('Awaiting Review');
+      case 1: return t('In Progress');
+      case 2: return t('Completed');
+      case 3: return t('Canceled');
+      default: return t('All');
     }
   };
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
-        title="تراکنش ها/سفارش‌ها"
+        title={t('Transactions/Orders')}
         onBackPress={() => {
           navigation.reset({
             index: 0,
@@ -127,7 +129,7 @@ function OrdersScreen({ navigation }) {
             color={(fromDate || toDate || status !== null) ? '#fff' : themeColor0.bgColor(1)}
           />
           <Text style={[styles.filterButtonText, (fromDate || toDate || status !== null) && { color: '#fff' }]}>
-            فیلتر
+            {t('Filter')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -136,11 +138,11 @@ function OrdersScreen({ navigation }) {
       {(fromDate || toDate || status !== null) && (
         <View style={styles.activeFilterBadge}>
           <Text style={[NewStyles.title3, styles.activeFilterText]}>
-            {fromDate && `از: ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+            {fromDate && `${t('From:')} ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
             {fromDate && toDate && ' | '}
-            {toDate && `تا: ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+            {toDate && `${t('To:')} ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
             {(fromDate || toDate) && status !== null && ' | '}
-            {status !== null && `وضعیت: ${getStatusText(status)}`}
+            {status !== null && `${t('Status:')} ${getStatusText(status)}`}
           </Text>
           <TouchableOpacity onPress={clearFilter} style={styles.clearFilterBtn}>
             <Ionicons name="close-circle" size={20} color="#666" />
@@ -176,7 +178,7 @@ function OrdersScreen({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, NewStyles.title10]}>فیلتر سفارشات</Text>
+              <Text style={[styles.modalTitle, NewStyles.title10]}>{t('Filter Orders')}</Text>
               <TouchableOpacity onPress={() => setShowFilterModal(false)}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
@@ -189,7 +191,7 @@ function OrdersScreen({ navigation }) {
               {/* از تاریخ */}
               <View style={[styles.dateInputContainer, NewStyles.center]}>
                 <View style={{ width: '100%' }}>
-                  <Text style={[NewStyles.text10, { marginBottom: 10 }]}>از تاریخ:</Text>
+                  <Text style={[NewStyles.text10, { marginBottom: 10 }]}>{t('From Date:')}</Text>
                   <TouchableOpacity
                     style={[styles.dateInput, showFromPicker && styles.dateInputActive]}
                     onPress={() => {
@@ -198,7 +200,7 @@ function OrdersScreen({ navigation }) {
                     }}
                   >
                     <Text style={[styles.dateText, tempFromDate && styles.dateTextSelected]}>
-                      {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                      {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : t('Select Date')}
                     </Text>
                     <Ionicons name={showFromPicker ? "chevron-up" : "calendar-outline"} size={20} color={showFromPicker ? themeColor0.bgColor(1) : "#666"} />
                   </TouchableOpacity>
@@ -238,7 +240,7 @@ function OrdersScreen({ navigation }) {
                       >
                         <Ionicons name="arrow-back" size={18} color="#fff" />
                         <Text style={styles.confirmDateBtnText}>
-                          {tempFromDate ? 'تایید و انتخاب تاریخ پایان' : 'بستن'}
+                          {tempFromDate ? t('Confirm and Select End Date') : t('Close')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -249,7 +251,7 @@ function OrdersScreen({ navigation }) {
               {/* تا تاریخ */}
               <View style={styles.dateInputContainer}>
                 <View style={{ width: '100%' }}>
-                  <Text style={[NewStyles.text10, { marginBottom: 10 }]}>تا تاریخ:</Text>
+                  <Text style={[NewStyles.text10, { marginBottom: 10 }]}>{t('To Date:')}</Text>
                   <TouchableOpacity
                     style={[styles.dateInput, showToPicker && styles.dateInputActive]}
                     onPress={() => {
@@ -258,7 +260,7 @@ function OrdersScreen({ navigation }) {
                     }}
                   >
                     <Text style={[styles.dateText, tempToDate && styles.dateTextSelected]}>
-                      {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                      {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : t('Select Date')}
                     </Text>
                     <Ionicons name={showToPicker ? "chevron-up" : "calendar-outline"} size={20} color={showToPicker ? themeColor0.bgColor(1) : "#666"} />
                   </TouchableOpacity>
@@ -293,7 +295,7 @@ function OrdersScreen({ navigation }) {
                         onPress={() => setShowToPicker(false)}
                       >
                         <Ionicons name="checkmark" size={18} color="#fff" />
-                        <Text style={styles.confirmDateBtnText}>تایید تاریخ پایان</Text>
+                        <Text style={styles.confirmDateBtnText}>{t('Confirm End Date')}</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -302,7 +304,7 @@ function OrdersScreen({ navigation }) {
 
               {/* انتخاب وضعیت */}
               <View style={styles.statusContainer}>
-                <Text style={[NewStyles.text10, { marginBottom: 10 }]}>وضعیت سفارش:</Text>
+                <Text style={[NewStyles.text10, { marginBottom: 10 }]}>{t('Order Status:')}</Text>
                 <View style={styles.statusButtons}>
                   {[null, 0, 1, 2, 3].map((statusValue) => (
                     <TouchableOpacity
@@ -329,7 +331,7 @@ function OrdersScreen({ navigation }) {
                   onPress={clearFilter}
                 >
                   <Ionicons name="trash-outline" size={20} color="#fff" />
-                  <Text style={styles.modalBtnText}> پاک کردن </Text>
+                  <Text style={styles.modalBtnText}> {t('Clear')} </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -337,7 +339,7 @@ function OrdersScreen({ navigation }) {
                   onPress={applyFilter}
                 >
                   <Ionicons name="checkmark" size={20} color="#fff" />
-                  <Text style={styles.modalBtnText}> اعمال فیلتر </Text>
+                  <Text style={styles.modalBtnText}> {t('Apply Filter')} </Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

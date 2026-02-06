@@ -2,23 +2,24 @@ import { StyleSheet, Image, Platform } from "react-native";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
-
+import { useTranslation } from "react-i18next";
 
 export default function SignInLanding({ navigation }) {
+  const { t } = useTranslation();
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
 
       <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain" />
       <Button
         style={{ width: "70%" }}
-        title={"ورود"}
+        title={t("Log in")}
         onPress={() => {
           navigation.navigate("LoginScreen");
         }}
       />
       <Button
         style={{ width: "70%" }}
-        title={"ثبت نام"}
+        title={t("Sign up")}
         onPress={() => {
           navigation.navigate("MainSignIn");
         }}

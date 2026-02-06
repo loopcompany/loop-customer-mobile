@@ -10,8 +10,10 @@ import {
 import NewStyles from "../styles/NewStyles";
 import { themeColor0, themeColor10 } from "../theme/Color";
 import { ImageBackground } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 export default function Welcome({ navigation }) {
+  const {t} = useTranslation()
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <TouchableWithoutFeedback
@@ -28,20 +30,16 @@ export default function Welcome({ navigation }) {
             />
           </View>
           <View style={[{ flex: 2, gap: 15 }]}>
-            <Text
-              style={[NewStyles.title4, { textAlign: "center", fontSize: 40 }]}
-            >
-              سلام
-            </Text>
+            <Text style={[NewStyles.title4, { textAlign: "center", fontSize: 40 }]}>{t("Hello")}</Text>
             <Text
               style={[NewStyles.title1, { textAlign: "center", fontSize: 45 }]}
             >
-              به جوهر آینده
+             {t("To the essence of the future")}
             </Text>
             <Text
               style={[NewStyles.title4, { textAlign: "center", fontSize: 40 }]}
             >
-              خوش آمدید
+             {t("Welcome")}
             </Text>
           </View>
         </View>

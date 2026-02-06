@@ -70,7 +70,7 @@ export default function Address({ step, data, navigation }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('AddNewAddress')}>
                 <Ionicons name="add" size={24} color={themeColor4.bgColor(1)} />
-                <Text style={NewStyles.title4}>افزودن آدرس جدید</Text>
+                <Text style={NewStyles.title4}>{t("Add New Address")}</Text>
             </Pressable>
             <FlatList
                 style={{ gap: 15 }}
@@ -96,7 +96,7 @@ export default function Address({ step, data, navigation }) {
                     )
                 }}
             />
-            <ConfirmationModal title={'حذف آدرس'} message={'آیا از حذف این آدرس اطمینان دارید؟'} action={() => deleteAddress()} confirmationModal={deleteModal} setConfirmationModal={setDeletModal} />
+            <ConfirmationModal title={t('Delete Address')} message={t('Are you sure you want to delete this address?')} action={() => deleteAddress()} confirmationModal={deleteModal} setConfirmationModal={setDeletModal} />
         </View>
     )
 }

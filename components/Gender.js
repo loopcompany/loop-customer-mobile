@@ -2,6 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor4, themeColor6 } from '../theme/Color';
@@ -9,6 +10,7 @@ import { setMaleCount, setFemaleCount, setUnspecifiedCount, setGeneralData } fro
 
 export default function Gender({ step, data }) {
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const femaleCount = useSelector(state => state.step?.femaleCount);
     const maleCount = useSelector(state => state.step?.maleCount);
@@ -18,7 +20,7 @@ export default function Gender({ step, data }) {
         <View style={NewStyles.seperator1}>
             <View style={[NewStyles.row, { gap: 5 }]}>
                 <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View>}</Text>
+                <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>{t('Required')}</Text></View>}</Text>
             </View>
             {data?.des && <Text style={NewStyles.text3}>{data?.des}</Text>}
             
@@ -36,7 +38,7 @@ export default function Gender({ step, data }) {
                     marginBottom: 10
                 }]}
             >
-                <Text style={[NewStyles.text3, { color: maleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>تکنسین آقا</Text>
+                <Text style={[NewStyles.text3, { color: maleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Male Technician')}</Text>
             </Pressable>
 
             <Pressable
@@ -52,7 +54,7 @@ export default function Gender({ step, data }) {
                     backgroundColor: femaleCount === 1 ? themeColor0.bgColor(0.1) : themeColor4.bgColor(1) 
                 }]}
             >
-                <Text style={[NewStyles.text3, { color: femaleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>تکنسین خانم</Text>
+                <Text style={[NewStyles.text3, { color: femaleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Female Technician')}</Text>
             </Pressable>
         </View>
     )

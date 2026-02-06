@@ -36,19 +36,19 @@ export default function AddNewAddress({ navigation }) {
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} mode='padding' style={NewStyles.container}>
-            <ScreenHeaders title={'ثبت آدرس'}/>
+            <ScreenHeaders title={t('Register Address')}/>
             <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
 
                 <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
                     
                     <Text style={NewStyles.text}>
-                        نام آدرس منتخب
+                        {t('Address Title')}
                         <Text style={styles.required}>* </Text>
                     </Text>
                     <TextInput 
                         style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
                         keyboardType='default' 
-                        placeholder='مانند: منزل، شرکت، فروشگاه و ...' 
+                        placeholder={t('Such as: home, office, store, etc.')} 
                         placeholderTextColor={themeColor3.bgColor(1)} 
                         maxLength={30} 
                         value={address?.title} 
@@ -56,36 +56,36 @@ export default function AddNewAddress({ navigation }) {
                     />
 
                     <Text style={NewStyles.text}>
-                        نام
+                        {t('First Name')}
                         <Text style={styles.required}>* </Text>
                     </Text>
                     <TextInput 
                         style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
                         keyboardType='default' 
-                        placeholder='نام' 
+                        placeholder={t('First Name')} 
                         placeholderTextColor={themeColor3.bgColor(1)} 
                         value={address?.fname || ''} 
                         onChangeText={(text) => { dispatch(setFname(text)) }} 
                     />
 
                     <Text style={NewStyles.text}>
-                        نام خانوادگی
+                        {t('Last Name')}
                         <Text style={styles.required}>* </Text>
                     </Text>
                     <TextInput 
                         style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]} 
                         keyboardType='default' 
-                        placeholder='نام خانوادگی' 
+                        placeholder={t('Last Name')} 
                         placeholderTextColor={themeColor3.bgColor(1)} 
                         value={address?.lname || ''} 
                         onChangeText={(text) => { dispatch(setLname(text)) }} 
                     />
 
-                    <Text style={NewStyles.text}>تلفن ثابت</Text>
+                    <Text style={NewStyles.text}>{t('Landline')}</Text>
                     <View style={styles.row}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]}
-                            placeholder="شماره تماس ثابت"
+                            placeholder={t('Landline number')}
                             keyboardType="phone-pad"
                             placeholderTextColor={themeColor3.bgColor(1)}
                             value={address?.telephone ? address.telephone.replace(/^021/, '') : ''}
@@ -101,13 +101,13 @@ export default function AddNewAddress({ navigation }) {
                     </View>
 
                     <Text style={NewStyles.text}>
-                        شماره موبایل
+                        {t('Mobile Number')}
                         <Text style={styles.required}>* </Text>
                     </Text>
                     <View style={styles.row}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]}
-                            placeholder="شماره موبایل"
+                            placeholder={t('Mobile Number')}
                             keyboardType="phone-pad"
                             placeholderTextColor={themeColor3.bgColor(1)}
                             value={address?.mobile ? address.mobile.replace(/^0/, '') : ''}
@@ -124,12 +124,12 @@ export default function AddNewAddress({ navigation }) {
                     <View style={styles.row}>
                         <View style={{ flex: 1 }}>
                             <Text style={NewStyles.text}>
-                                منطقه
+                                {t('Region')}
                                 <Text style={styles.required}>* </Text>
                             </Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
-                                placeholder="منطقه"
+                                placeholder={t('Region')}
                                 keyboardType="phone-pad"
                                 placeholderTextColor={themeColor3.bgColor(1)}
                                 value={address?.region}
@@ -138,12 +138,12 @@ export default function AddNewAddress({ navigation }) {
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={NewStyles.text}>
-                                شهر
+                                {t('City')}
                                 <Text style={styles.required}>* </Text>
                             </Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
-                                placeholder="شهر"
+                                placeholder={t('City')}
                                 keyboardType='default'
                                 editable={false}
                                 placeholderTextColor={themeColor3.bgColor(1)}
@@ -154,13 +154,13 @@ export default function AddNewAddress({ navigation }) {
                     </View>
 
                     <Text style={NewStyles.text}>
-                        آدرس با جزئیات کامل
+                        {t('Full detailed address')}
                         <Text style={styles.required}>* </Text>
                     </Text>
                     <TextInput 
                         style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.multiLine]} 
                         keyboardType='default' 
-                        placeholder='آدرس با جزئیات کامل' 
+                        placeholder={t('Full detailed address')} 
                         placeholderTextColor={themeColor3.bgColor(1)} 
                         value={address?.address} 
                         onChangeText={(text) => { dispatch(setAddress(text)) }} 
@@ -168,9 +168,9 @@ export default function AddNewAddress({ navigation }) {
                     />
                 </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, {alignItems:'center', justifyContent:'center',}]}>
-                <Button title={'مرحله بعد'} onPress={() => {
+                <Button title={t('Next Step')} onPress={() => {
                     if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address) {
-                        showToastOrAlert('لطفا فیلدهای الزامی را پر کنید.')
+                        showToastOrAlert(t('Please fill in all the required fields.'))
                         return;
                     };
                     navigation.replace('Map')

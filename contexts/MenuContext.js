@@ -35,9 +35,6 @@ export const MenuProvider = ({ children }) => {
     const userType = useSelector(state => state.auth.userType);
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.user?.data);
-    console.log('====================================');
-    console.log(user);
-    console.log('====================================');
     const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
 
     // صفحاتی که نباید Footer و Menu نمایش داده شود

@@ -16,6 +16,7 @@ import { fetchUser } from "../../slices/userSlice";
 import { fetchAddresses } from "../../slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
+
 const initialState = {
   phone: '',
   password: '',
@@ -71,29 +72,30 @@ export default function LoginScreen({ navigation }) {
   const [state, dispatch] = useReducer(formReducer, initialState);
   const reduxDispatch = useDispatch();
   const { t } = useTranslation();
+
   // Form validation
   const validateForm = () => {
     const errors = {};
 
     // Phone validation (11 digits starting with 09)
     if (!state.phone) {
-      errors.phone = 'شماره موبایل الزامی است';
+      errors.phone = t('Phone number is required');
     } else if (state.phone.length !== 11 || !/^09\d{9}$/.test(state.phone)) {
-      errors.phone = 'شماره موبایل باید 11 رقم و با 09 شروع شود';
+      errors.phone = t('Phone number must be 11 digits and start with 09');
     }
 
     // Password validation
     if (!state.password) {
-      errors.password = 'رمز عبور الزامی است';
+      errors.password = t('Password is required');
     } else if (state.password.length < 6) {
-      errors.password = 'رمز عبور باید حداقل 6 کاراکتر باشد';
+      errors.password = t('Password must be at least 6 characters');
     }
 
     // Captcha validation
     if (!state.captchaInput) {
-      errors.captchaInput = 'کد امنیتی الزامی است';
+      errors.captchaInput = t('Security code is required');
     } else if (state.captchaInput !== state.captcha) {
-      errors.captchaInput = 'کد امنیتی صحیح نیست';
+      errors.captchaInput = t('Security code is incorrect');
     }
 
     return errors;
@@ -108,7 +110,7 @@ export default function LoginScreen({ navigation }) {
 
       if (minutesPassed < 15) {
         const remainingMinutes = Math.ceil(15 - minutesPassed);
-        showToastOrAlert(`بعد از ${remainingMinutes} دقیقه مجدداً تلاش کنید`);
+        showToastOrAlert(t('Try again after {{minutes}} minutes', { minutes: remainingMinutes }));
         return false;
       } else {
         dispatch({ type: 'RESET_ATTEMPTS' });
@@ -146,7 +148,6 @@ export default function LoginScreen({ navigation }) {
         const userData = response.data.user;
         const token = response.data.token;
 
-        // **همیشه** توکن را در AsyncStorage ذخیره کن (برای تمام کاربران)
         await TokenManager.saveAuthData(token, userData);
         console.log('✅ Token and user data saved to AsyncStorage');
 
@@ -166,7 +167,7 @@ export default function LoginScreen({ navigation }) {
 
         // Update Redux store
         reduxDispatch(setToken(token));
-        reduxDispatch(setUserType('individual')); // کاربر فردی
+        reduxDispatch(setUserType('individual'));
 
         // Save account type to AsyncStorage for next app launch
         await AsyncStorage.setItem('accountType', 'individual');
@@ -176,7 +177,7 @@ export default function LoginScreen({ navigation }) {
         reduxDispatch(fetchUser(token));
         reduxDispatch(fetchAddresses(token));
 
-        showToastOrAlert('ورود با موفقیت انجام شد');
+        showToastOrAlert(t('Login successful'));
 
         // Navigate to main app
         navigation.navigate('FolderScreen');
@@ -185,7 +186,7 @@ export default function LoginScreen({ navigation }) {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });
 
         if (response.requires_verification) {
-          showToastOrAlert('لطفاً ابتدا شماره موبایل خود را تایید کنید');
+          showToastOrAlert(t('Please verify your phone number first'));
 
           // Navigate to verification screen
           navigation.navigate('RegistrationVerificationScreen', {
@@ -196,7 +197,7 @@ export default function LoginScreen({ navigation }) {
           dispatch({
             type: 'SET_ERROR',
             field: 'general',
-            error: response.message || 'شماره موبایل یا رمز عبور اشتباه است'
+            error: response.message || t('Phone number or password is incorrect')
           });
         }
       }
@@ -204,14 +205,14 @@ export default function LoginScreen({ navigation }) {
       console.log('Login error:', error);
       dispatch({ type: 'INCREMENT_ATTEMPTS' });
 
-      let errorMessage = 'خطا در ورود. لطفاً مجدداً تلاش کنید';
+      let errorMessage = t('Login error. Please try again');
 
       if (error.response?.status === 401) {
-        errorMessage = 'شماره موبایل یا رمز عبور اشتباه است';
+        errorMessage = t('Phone number or password is incorrect');
       } else if (error.response?.status === 403) {
-        errorMessage = 'دسترسی مسدود شده است';
+        errorMessage = t('Access denied');
       } else if (error.response?.status === 429) {
-        errorMessage = 'درخواست‌های زیاد. لطفاً کمی صبر کنید';
+        errorMessage = t('Too many requests. Please wait a moment');
       }
 
       dispatch({ type: 'SET_ERROR', field: 'general', error: errorMessage });
@@ -274,7 +275,7 @@ export default function LoginScreen({ navigation }) {
 
               // Update Redux store
               reduxDispatch(setToken(savedToken));
-              reduxDispatch(setUserType('individual')); // کاربر فردی
+              reduxDispatch(setUserType('individual'));
 
               // Save account type to AsyncStorage for next app launch
               await AsyncStorage.setItem('accountType', 'individual');
@@ -283,7 +284,7 @@ export default function LoginScreen({ navigation }) {
 
               reduxDispatch(fetchUser(savedToken));
 
-              showToastOrAlert('ورود خودکار انجام شد');
+              showToastOrAlert(t('Automatic login successful'));
 
               // Navigate to main app
               navigation.navigate('FolderScreen');
@@ -306,6 +307,7 @@ export default function LoginScreen({ navigation }) {
 
     checkAutoLogin();
   }, []);
+
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
       <CustomStatusBar />
@@ -331,14 +333,14 @@ export default function LoginScreen({ navigation }) {
           {state.loginAttempts >= 3 && (
             <View style={styles.warningContainer}>
               <Text style={styles.warningText}>
-                {state.loginAttempts}/5 تلاش ناموفق. پس از 5 تلاش، 15 دقیقه منتظر بمانید.
+                {t('{{attempts}}/5 failed attempts. Wait 15 minutes after 5 attempts.', { attempts: state.loginAttempts })}
               </Text>
             </View>
           )}
 
           {/* Phone Input */}
           <View style={styles.inputGroup}>
-            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>نام کاربری<Text style={NewStyles.title6}>*</Text></Text>
+            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>{t('Username')}<Text style={NewStyles.title6}>*</Text></Text>
 
             <TextInput
               style={[
@@ -348,14 +350,14 @@ export default function LoginScreen({ navigation }) {
                 { textAlign: 'right' },
                 state.errors.phone && styles.inputError
               ]}
-              placeholder=" نام کاربری (09XXXXXXXXX)"
+              placeholder={t('Username (09XXXXXXXXX)')}
               placeholderTextColor={themeColor10.bgColor(0.9)}
               value={state.phone}
               onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
               keyboardType="phone-pad"
               maxLength={11}
-              accessibilityLabel="شماره موبایل"
-              accessibilityHint="شماره موبایل 11 رقمی خود را با 09 وارد کنید"
+              accessibilityLabel={t('Phone number')}
+              accessibilityHint={t('Enter your 11-digit phone number starting with 09')}
             />
             {state.errors.phone && (
               <Text style={styles.fieldErrorText}>{state.errors.phone}</Text>
@@ -364,7 +366,7 @@ export default function LoginScreen({ navigation }) {
 
           {/* Password Input */}
           <View style={styles.inputGroup}>
-            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>رمز عبور<Text style={NewStyles.title6}>*</Text></Text>
+            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>{t('Password')}<Text style={NewStyles.title6}>*</Text></Text>
             <View style={{ width: '100%' }}>
               <TextInput
                 style={[
@@ -374,13 +376,13 @@ export default function LoginScreen({ navigation }) {
                   { textAlign: 'right', paddingLeft: 45 },
                   state.errors.password && styles.inputError
                 ]}
-                placeholder="رمز عبور (حداقل 6 کاراکتر)"
+                placeholder={t('Password (at least 6 characters)')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 secureTextEntry={!state.showPassword}
                 value={state.password}
                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'password', value })}
-                accessibilityLabel="رمز عبور"
-                accessibilityHint="رمز عبور حداقل 6 کاراکتری خود را وارد کنید"
+                accessibilityLabel={t('Password')}
+                accessibilityHint={t('Enter your password with at least 6 characters')}
               />
               <TouchableOpacity
                 onPress={() => dispatch({ type: 'SET_FIELD', field: 'showPassword', value: !state.showPassword })}
@@ -419,7 +421,7 @@ export default function LoginScreen({ navigation }) {
                   }
                 />
               </TouchableOpacity>
-              <Text style={NewStyles.title4}>ذخیره اطلاعات ورود</Text>
+              <Text style={NewStyles.title4}>{t('Save login information')}</Text>
             </View>
           </View>
 
@@ -432,16 +434,16 @@ export default function LoginScreen({ navigation }) {
                   NewStyles.textInput,
                   NewStyles.text10,
                   NewStyles.border10,
-                  { width: '40%', textAlign: 'center' },
+                  { width: '40%', textAlign: 'center',fontSize:10 },
                   state.errors.captchaInput && styles.inputError
                 ]}
-                placeholder="کد امنیتی"
+                placeholder={t('Security code')}
                 placeholderTextColor={themeColor10.bgColor(0.9)}
                 value={state.captchaInput}
                 onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'captchaInput', value })}
                 keyboardType="number-pad"
                 maxLength={4}
-                accessibilityLabel="کد امنیتی"
+                accessibilityLabel={t('Security code')}
               />
 
               {/* Refresh Button */}
@@ -462,7 +464,7 @@ export default function LoginScreen({ navigation }) {
           {/* Login Button */}
           <Button
             style={{ width: "100%" }}
-            title={"ورود"}
+            title={t('Login')}
             loading={state.isLoading}
             onPress={handleLogin}
             disabled={state.isLoading}
@@ -473,13 +475,13 @@ export default function LoginScreen({ navigation }) {
             onPress={handleForgotPassword}
             style={styles.forgotPasswordButton}
           >
-            <Text style={[NewStyles.title4, styles.forgotPasswordText]}>رمز عبور خود را فراموش کرده‌اید؟</Text>
+            <Text style={[NewStyles.title4, styles.forgotPasswordText]}>{t('Forgot password?')}</Text>
           </TouchableOpacity>
 
           {/* Register Link */}
           <TransparentButton
             customTextStyle={{ color: themeColor4.bgColor(1), textDecorationLine: 'underline' }}
-            title={"ثبت نام کاربر جدید"}
+            title={t('Register new user')}
             onPress={() => {
               navigation.navigate("MainSignIn");
             }}

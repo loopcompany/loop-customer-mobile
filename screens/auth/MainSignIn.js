@@ -23,7 +23,8 @@ import InviteCodeInput from "../../components/InviteCodeInput";
 import LocationPicker from "../../components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
-// Form state management with useReducer
+import { useTranslation } from "react-i18next";
+
 const initialState = {
     melicode: '',
     phone: '',
@@ -71,6 +72,7 @@ const formReducer = (state, action) => {
 export default function MainSignIn({ navigation }) {
     const [state, dispatch] = useReducer(formReducer, initialState);
     const inviteLetter = 'L'; // Static invite letter
+    const { t } = useTranslation();
 
     // Form validation
     const validateForm = () => {
@@ -78,42 +80,42 @@ export default function MainSignIn({ navigation }) {
 
         // Melicode validation (10 digits)
         if (!state.melicode) {
-            errors.melicode = 'کد ملی الزامی است';
+            errors.melicode = t("National ID is required");
         } else if (state.melicode.length !== 10 || !/^\d{10}$/.test(state.melicode)) {
-            errors.melicode = 'کد ملی باید 10 رقم باشد';
+            errors.melicode = t("National ID must be 10 digits");
         }
 
         // Phone validation (11 digits starting with 09)
         if (!state.phone) {
-            errors.phone = 'شماره موبایل الزامی است';
+            errors.phone = t("Mobile number is required");
         } else if (state.phone.length !== 11 || !/^09\d{9}$/.test(state.phone)) {
-            errors.phone = 'شماره موبایل باید 11 رقم و با 09 شروع شود';
+            errors.phone = t("Mobile number must be 11 digits and start with 09");
         }
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!state.email) {
-            errors.email = 'آدرس ایمیل الزامی است';
+            errors.email = t("Email address is required");
         } else if (!emailRegex.test(state.email)) {
-            errors.email = 'فرمت ایمیل صحیح نیست';
+            errors.email = t("Invalid email format");
         }
 
         // Location validation
         if (!state.province) {
-            errors.province = 'انتخاب استان الزامی است';
+            errors.province = t("Province is required");
         }
         if (!state.city) {
-            errors.city = 'انتخاب شهر الزامی است';
+            errors.city = t("City is required");
         }
         if (!state.region) {
-            errors.region = 'انتخاب منطقه الزامی است';
+            errors.region = t("Region is required");
         }
 
         // Captcha validation
         if (!state.captchaInput) {
-            errors.captchaInput = 'کد امنیتی الزامی است';
+            errors.captchaInput = t("Security code is required");
         } else if (state.captchaInput !== state.captcha) {
-            errors.captchaInput = 'کد امنیتی صحیح نیست';
+            errors.captchaInput = t("Security code is incorrect");
         }
 
         return errors;
@@ -144,7 +146,7 @@ export default function MainSignIn({ navigation }) {
             const response = await authAPI.register(userData);
 
             if (response.success) {
-                showToastOrAlert('کد تایید به شماره موبایل شما ارسال شد');
+                showToastOrAlert(t("Verification code sent to your mobile number"));
 
                 // Navigate to verification screen
                 navigation.navigate('RegistrationVerificationScreen', {
@@ -155,12 +157,12 @@ export default function MainSignIn({ navigation }) {
                 dispatch({
                     type: 'SET_ERROR',
                     field: 'general',
-                    error: response.message || 'خطا در ثبت نام'
+                    error: response.message || t("Registration failed")
                 });
             }
         } catch (error) {
             console.log('Registration error:', error);
-            let errorMessage = 'خطا در ثبت نام. لطفاً مجدداً تلاش کنید';
+            let errorMessage = t("Registration failed. Please try again");
 
             if (error.response?.data?.errors) {
                 // Handle field-specific errors from backend
@@ -201,7 +203,7 @@ export default function MainSignIn({ navigation }) {
                         {/* Melicode (National ID) */}
                         <View style={styles.inputContainer}>
                             <View style={{ alignItems: 'flex-end', width: '100%' }}>
-                                <Text style={NewStyles.title4}>کد ملی <Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={NewStyles.title4}>{t("National ID")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -210,14 +212,14 @@ export default function MainSignIn({ navigation }) {
                                         { width: '100%', textAlign: 'right' },
                                         state.errors.melicode && styles.inputError
                                     ]}
-                                    placeholder="کد ملی"
+                                    placeholder={t("National ID")}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
                                     value={state.melicode}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
                                     keyboardType="number-pad"
                                     maxLength={10}
-                                    accessibilityLabel="کد ملی"
-                                    accessibilityHint="کد ملی 10 رقمی خود را وارد کنید"
+                                    accessibilityLabel={t("National ID")}
+                                    accessibilityHint={t("Enter your 10-digit national ID")}
                                 />
                                 {state.errors.melicode && (
                                     <Text style={styles.fieldErrorText}>{state.errors.melicode}</Text>
@@ -228,7 +230,7 @@ export default function MainSignIn({ navigation }) {
                         {/* Phone Number */}
                         <View style={styles.inputContainer}>
                             <View style={{ alignItems: 'flex-end', width: '100%' }}>
-                                <Text style={NewStyles.title4}>شماره موبایل <Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={NewStyles.title4}>{t("Mobile number")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -237,14 +239,14 @@ export default function MainSignIn({ navigation }) {
                                         { width: '100%', textAlign: 'right' },
                                         state.errors.phone && styles.inputError
                                     ]}
-                                    placeholder="شماره موبایل : 09XXXXXXXXX"
+                                    placeholder={t("Mobile number: 09XXXXXXXXX")}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
                                     value={state.phone}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
                                     keyboardType="phone-pad"
                                     maxLength={11}
-                                    accessibilityLabel="شماره موبایل"
-                                    accessibilityHint="شماره موبایل 11 رقمی خود را با 09 وارد کنید"
+                                    accessibilityLabel={t("Mobile number")}
+                                    accessibilityHint={t("Enter your 11-digit mobile number starting with 09")}
                                 />
                                 {state.errors.phone && (
                                     <Text style={styles.fieldErrorText}>{state.errors.phone}</Text>
@@ -264,7 +266,7 @@ export default function MainSignIn({ navigation }) {
                         {/* Email */}
                         <View style={styles.inputContainer}>
                             <View style={{ alignItems: 'flex-end', width: '100%' }}>
-                                <Text style={NewStyles.title4}>آدرس ایمیل <Text style={NewStyles.title6}>*</Text></Text>
+                                <Text style={NewStyles.title4}>{t("Email address")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -273,14 +275,14 @@ export default function MainSignIn({ navigation }) {
                                         { width: '100%', textAlign: 'right' },
                                         state.errors.email && styles.inputError
                                     ]}
-                                    placeholder="آدرس ایمیل*"
+                                    placeholder={t("Email address*")}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
                                     value={state.email}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
-                                    accessibilityLabel="آدرس ایمیل"
-                                    accessibilityHint="آدرس ایمیل معتبر خود را وارد کنید"
+                                    accessibilityLabel={t("Email address")}
+                                    accessibilityHint={t("Enter a valid email address")}
                                 />
                                 {state.errors.email && (
                                     <Text style={styles.fieldErrorText}>{state.errors.email}</Text>
@@ -318,7 +320,7 @@ export default function MainSignIn({ navigation }) {
                                         state.errors.captchaInput && styles.inputError
                                     ]}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
-                                    placeholder="کد امنیتی"
+                                    placeholder={t("Security code")}
                                     value={state.captchaInput}
                                     onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'captchaInput', value })}
                                     keyboardType="number-pad"
@@ -341,7 +343,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Submit Button */}
                         <Button
-                            title="ثبت نام"
+                            title={t("Sign up")}
                             loading={state.isLoading}
                             onPress={handleRegistration}
                             style={styles.submitButton}
@@ -354,7 +356,7 @@ export default function MainSignIn({ navigation }) {
                             disabled={state.isLoading}
                         >
                             <Text style={styles.loginLinkText}>
-                                قبلاً ثبت نام کرده‌اید؟ ورود به حساب کاربری
+                                {t("Already registered? Sign in to your account")}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -365,7 +367,7 @@ export default function MainSignIn({ navigation }) {
                             disabled={state.isLoading}
                         >
                             <Text style={styles.loginLinkText}>
-                                ساخت ایمیل
+                                {t("Create email")}
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -8,6 +8,7 @@ import {
 } from 'react-native-confirmation-code-field';
 import NewStyles from '../styles/NewStyles';
 import { themeColor10, themeColor3 } from '../theme/Color';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Reusable Invite Code Input Component
@@ -29,6 +30,8 @@ export default function InviteCodeInput({
     errorMessage = '',
     style = {},
 }) {
+    const { t } = useTranslation();
+    
     // CodeField hooks
     const ref = useBlurOnFulfill({ value, cellCount });
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -59,7 +62,7 @@ export default function InviteCodeInput({
                 marginBottom: 6, 
                 textAlign: 'right' 
             }}>
-                کد معرف (اختیاری)
+                {t('Referral code (optional)')}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 {/* Prefix Box */}

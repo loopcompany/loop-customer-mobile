@@ -91,7 +91,7 @@ export default function Map({ route, navigation }) {
     const getLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-            showAlert('خطا', 'شما دسترسی لوپ به لوکیشن خود را بسته‌اید!');
+            showAlert(t('Error'), t('You have denied Loop access to your location!'));
         } else {
             try {
                 const location = await Location.getCurrentPositionAsync();
@@ -104,7 +104,7 @@ export default function Map({ route, navigation }) {
                     })
                 }
             } catch (e) {
-                showAlert('خطا', 'برای دسترسی به موقعیت فعلی، باید لوکیشن خود را روشن کنید.');
+                showAlert(t('Error'), t('To access your current location, you must turn on your location.'));
                 console.log('Error while trying to get location: ', e);
             }
         }
@@ -117,7 +117,7 @@ export default function Map({ route, navigation }) {
             console.log('Address data:', address);
 
             if (!token) {
-                showToastOrAlert('لطفا ابتدا وارد شوید');
+                showToastOrAlert(t('Please log in first.'));
                 setLoading(false);
                 return;
             }
@@ -132,7 +132,7 @@ export default function Map({ route, navigation }) {
                 );
 
                 if (distance > parseFloat(radii.radius)) {
-                    showToastOrAlert('لطفا مکانی داخل منطقه مشخص شده را انتخاب کنید!');
+                    showToastOrAlert(t('Please select a location within the specified area!'));
                     setLoading(false);
                     return;
                 }
@@ -145,7 +145,7 @@ export default function Map({ route, navigation }) {
                 }
             })
             if (response.status === 201) {
-                showToastOrAlert(response?.data?.message || 'آدرس با موفقیت ثبت شد')
+                showToastOrAlert(response?.data?.message || t('Address successfully registered'))
                 dispatch(fetchAddresses(token));
                 if (Platform.OS == 'web') {
                     window.history.back()
@@ -189,7 +189,7 @@ export default function Map({ route, navigation }) {
                         );
 
                         if (distance > parseFloat(radii.radius)) {
-                            showToastOrAlert('لطفا مکانی داخل منطقه مشخص شده را انتخاب کنید!');
+                            showToastOrAlert(t('Please select a location within the specified area!'));
                             return;
                         }
                     }
@@ -241,12 +241,12 @@ export default function Map({ route, navigation }) {
                     <Ionicons name="locate" size={24} color={themeColor0.bgColor(1)} />
                 </Pressable>
                 <Button
-                    title={'تأیید'}
+                    title={t('Confirm')}
                     loading={loading}
                     disabled={!isLocationValid()}
                     onPress={() => {
                         if (!isLocationValid()) {
-                            showToastOrAlert('لطفا مکان مورد نظر خود را به درستی روی نقشه پیدا کنید.')
+                            showToastOrAlert(t('Please find your desired location correctly on the map.'))
                             return;
                         } else {
 

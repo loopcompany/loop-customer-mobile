@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import { useDispatch } from "react-redux";
+import { useTranslation } from 'react-i18next';
 import NewStyles from "../../styles/NewStyles";
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from "react-native-confirmation-code-field";
 import { themeColor0, themeColor1, themeColor3, themeColor10 } from "../../theme/Color";
@@ -15,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 
 export default function ResetPasswordScreen({ navigation, route }) {
+  const { t } = useTranslation();
   const params = route?.params;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
   // Verify the reset code
   const codeVerification = async () => {
     if (value.length !== 6) {
-      setError('لطفاً کد 6 رقمی را کامل وارد کنید');
+      setError(t('Please enter the complete 6-digit code'));
       return;
     }
 
@@ -65,12 +67,12 @@ export default function ResetPasswordScreen({ navigation, route }) {
 
       // Check if phone and code are valid
       if (!phone || !code) {
-        setError("شماره موبایل یا کد وارد نشده است");
+        setError(t("Mobile number or code not entered"));
         return;
       }
 
       if (!phone.match(/^09\d{9}$/)) {
-        setError("فرمت شماره موبایل صحیح نیست");
+        setError(t("Mobile number format is incorrect"));
         return;
       }
 
@@ -88,7 +90,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
           await TokenManager.saveAuthData(token, user);
           dispatch(setToken(token));
 
-          showToastOrAlert("ورود موفقیت‌آمیز! در حال هدایت...");
+          showToastOrAlert(t("Login successful! Redirecting..."));
 
           // Navigate to main app
           setTimeout(() => {
@@ -99,12 +101,12 @@ export default function ResetPasswordScreen({ navigation, route }) {
           }, 1500);
         }
       } else {
-        setError(response.message || "کد وارد شده صحیح نیست");
+        setError(response.message || t("The code entered is incorrect"));
         setValue('');
       }
     } catch (error) {
       console.error('Code verification error:', error);
-      setError('خطا در تایید کد. لطفاً مجدداً تلاش کنید');
+      setError(t('Error verifying code. Please try again'));
       setValue('');
     } finally {
       setLoading(false);
@@ -123,13 +125,13 @@ export default function ResetPasswordScreen({ navigation, route }) {
         setTimer(120);
         setCanResend(false);
         setError('');
-        showToastOrAlert(response.message || "کد مجدداً ارسال شد");
+        showToastOrAlert(response.message || t("Verification code resent"));
       } else {
-        setError(response.message || "خطا در ارسال مجدد کد");
+        setError(response.message || t("Error resending code"));
       }
     } catch (error) {
       console.error('Resend code error:', error);
-      setError("خطا در ارسال مجدد کد");
+      setError(t("Error resending code"));
     } finally {
       setLoading(false);
     }
@@ -137,12 +139,12 @@ export default function ResetPasswordScreen({ navigation, route }) {
 
   const handleEditMobile = () => {
     showAlert(
-      'ویرایش شماره موبایل',
-      'آیا می‌خواهید شماره موبایل را ویرایش کنید؟',
+      t('Edit mobile number'),
+      t('Do you want to edit the mobile number?'),
       [
-        { text: 'لغو', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'بله', onPress: () => {
+          text: t('Yes'), onPress: () => {
             if (Platform.OS == 'web') {
               window.history.back()
             } else {
@@ -156,7 +158,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
-        title="بازیابی رمز عبور"
+        title={t("Reset Password")}
         showLeftIcon={true}
       />
       <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
@@ -173,10 +175,10 @@ export default function ResetPasswordScreen({ navigation, route }) {
               {/* Instructions */}
               <View style={styles.instructionContainer}>
                 <Text style={NewStyles.title4}>
-                  کد بازیابی ارسال شده را وارد کنید
+                  {t("Enter the reset code sent")}
                 </Text>
                 <Text style={NewStyles.text4}>
-                  کد 6 رقمی به شماره موبایل
+                  {t("6-digit code to mobile number")}
                 </Text>
                 <TouchableOpacity onPress={handleEditMobile}>
                   <Text style={styles.mobileNumber}>
@@ -184,7 +186,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
                   </Text>
                 </TouchableOpacity>
                 <Text style={NewStyles.text4}>
-                  ارسال شده است
+                  {t("has been sent")}
                 </Text>
               </View>
 
@@ -230,7 +232,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
               <View style={styles.timerContainer}>
                 {!canResend ? (
                   <Text style={NewStyles.text4}>
-                    ارسال مجدد کد در {formatTime(timer)}
+                    {t("Resend code in")} {formatTime(timer)}
                   </Text>
                 ) : (
                   <TouchableOpacity
@@ -239,7 +241,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
                     style={styles.resendButton}
                   >
                     <Text style={styles.resendButtonText}>
-                      ارسال مجدد کد
+                      {t("Resend Code")}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -247,7 +249,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
 
               {/* Verify Button */}
               <Button
-                title="تایید"
+                title={t("Verify")}
                 loading={loading}
                 onPress={codeVerification}
                 style={styles.verifyButton}

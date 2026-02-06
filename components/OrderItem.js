@@ -97,8 +97,8 @@ export default function OrderItem({ item, navigation }) {
         const status = item?.status;
         if (status == 0) {
             return {
-                text1: `در انتظار بررسی`,
-                text2: 'لغو سفارش',
+                text1: t('Awaiting Review'),
+                text2: t('Cancel Order'),
                 onPress1: () => { },
                 onPress2: () => setCancelModal(true),
                 loading1: loading,
@@ -108,7 +108,7 @@ export default function OrderItem({ item, navigation }) {
 
         if (status == 2) {
             return {
-                text1: 'صورتحساب',
+                text1: t('Invoice'),
                 onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
                 loading1: loading,
                 loading2: loading,
@@ -118,7 +118,7 @@ export default function OrderItem({ item, navigation }) {
         if (status >= 3) {
             return {
                 text1: '',
-                text2: item?.status == 3 ? 'لغو شده توسط شما' : item?.status == 4 ? 'لغو شده توسط تکنسین' : item?.status == 5 ? 'لغو توسط لوپ' : item?.status == 6 ? 'لغو به علت پایان زمان سفارش' : 'لغو شده',
+                text2: item?.status == 3 ? t('Canceled by You') : item?.status == 4 ? t('Canceled by Technician') : item?.status == 5 ? t('Canceled by Loop') : item?.status == 6 ? t('Canceled due to Order Time Expiry') : t('Canceled'),
                 onPress1: () => {
                     // if (!user?.city_id) {
                     //     showToastOrAlert('لطفا شهر خود را انتخاب نمایید.');
@@ -150,39 +150,39 @@ export default function OrderItem({ item, navigation }) {
                     </View>
                     <Text style={[NewStyles.text10]}>{item?.technician?.name}</Text>
                     <Text style={[NewStyles.text3]}>{item?.technician?.technician_type}</Text>
-                    <Text style={NewStyles.text3}>{calculateDaysDifference(item?.technician?.created_at)} روز تجربه - ({item?.technician?.completed_orders_count} سفارش موفق) - ⭐ {Number(item?.technician?.average_rating)?.toFixed(1)} </Text>
+                    <Text style={NewStyles.text3}>{calculateDaysDifference(item?.technician?.created_at)}{t(' days experience')} - ({item?.technician?.completed_orders_count}{t(' successful orders')}) - ⭐ {Number(item?.technician?.average_rating)?.toFixed(1)} </Text>
                 </View>
             }
-            {renderRow(item?.category?.title, `شناسه سفارش: ${item?.id}`, [NewStyles.text, { fontSize: 14 }], NewStyles.text)}
+            {renderRow(item?.category?.title, `${t('Order ID: ')}${item?.id}`, [NewStyles.text, { fontSize: 14 }], NewStyles.text)}
 
             {Number(item?.is_fixed) == 0 ?
-                renderRow(item?.status == 0 ? 'مبلغ پایه لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                renderRow(item?.status == 0 ? t('Loop Base Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
                 :
-                renderRow(item?.status == 0 ? 'مبلغ قطعی لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                renderRow(item?.status == 0 ? t('Loop Fixed Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
             }
 
-            {item?.status != 2 && renderRow(`زمان مراجعه تکنسین`, item?.is_urgent > 0 ? 'درخواست فوری ' : formatDate(item?.date) + ' ساعت ' + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
+            {item?.status != 2 && renderRow(t('Technician Visit Time'), item?.is_urgent > 0 ? t('Urgent Request') : formatDate(item?.date) + t(' at ') + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
 
-            {item?.discount_price && renderRow('تخفیف نهایی شما از سفارش', formatPrice(item?.discount_price) + ' تومان', NewStyles.title, NewStyles.text10)}
-            {totalPrice > totalDiscountedPrice && renderRow('قیمت بدون تخفیف', formatPrice(totalPrice) + ' تومان', NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+            {item?.discount_price && renderRow(t('Your Final Order Discount'), formatPrice(item?.discount_price) + t(' Toman'), NewStyles.title, NewStyles.text10)}
+            {totalPrice > totalDiscountedPrice && renderRow(t('Price Without Discount'), formatPrice(totalPrice) + t(' Toman'), NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
             {/* {item?.status == 2 && renderRow('وضعیت پرداخت', item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده', NewStyles.text, item?.payment_status > 0 ? NewStyles.text7 : NewStyles.text6)} */}
             {item?.status == 2 && <View style={NewStyles.rowWrapper}>
-                <Text style={[NewStyles.title10]}>وضعیت پرداخت</Text>
+                <Text style={[NewStyles.title10]}>{t('Payment Status')}</Text>
                 <View style={[{ backgroundColor: item?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
-                    <Text style={NewStyles.text4}>{item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
+                    <Text style={NewStyles.text4}>{item?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>
                 </View>
             </View>}
 
-            {item?.status == 1 && renderRow('وضعیت سفارش', item?.started_at ? 'در حال انجام' : item?.arrived_at ? 'تکنسین به محل سفارش رسید' : item?.set_off_at ? 'تکنسین در راه است' : 'جاری', NewStyles.text10, (!item?.started_at && !item?.arrived_at && !item?.set_off_at) ? NewStyles.text1 : NewStyles.text7)}
+            {item?.status == 1 && renderRow(t('Order Status'), item?.started_at ? t('In Progress') : item?.arrived_at ? t('Technician arrived at order location') : item?.set_off_at ? t('Technician is on the way') : t('Active'), NewStyles.text10, (!item?.started_at && !item?.arrived_at && !item?.set_off_at) ? NewStyles.text1 : NewStyles.text7)}
             <View style={[NewStyles.row, { gap: 5, justifyContent: 'flex-end' }]}>
-                <Text style={NewStyles.text3}>مشاهده جزئیات</Text>
+                <Text style={NewStyles.text3}>{t('View Details')}</Text>
                 <Ionicons name="chevron-back" size={16} color={themeColor3.bgColor(1)} />
             </View>
             {buttonConfig && <PairButton {...buttonConfig} />}
             <RateModal rateModal={rateModal} setRateModal={setRateModal} orderId={item?.id} data={item?.user_rate} />
-            <ConfirmationModal title={'لغو سفارش'} message={'آیا از لغو سفارش خود اطمینان دارید؟'} action={() => cancel()} confirmationModal={cancelModal} setConfirmationModal={setCancelModal} />
-            <ConfirmationModal title={'شروع سفارش'} message={'آیا تأیید می کنید که تکنسین سفارش خود را شروع کرده است؟'} action={() => start()} confirmationModal={startModal} setConfirmationModal={setStartModal} />
-            <ConfirmationModal title={'پایان سفارش'} message={'آیا تأیید می کنید که کار تکنسین پایان یافته است؟'} action={() => end()} confirmationModal={endModal} setConfirmationModal={setEndModal} />
+            <ConfirmationModal title={t('Cancel Order')} message={t('Are you sure you want to cancel your order?')} action={() => cancel()} confirmationModal={cancelModal} setConfirmationModal={setCancelModal} />
+            <ConfirmationModal title={t('Start Order')} message={t('Do you confirm that the technician has started your order?')} action={() => start()} confirmationModal={startModal} setConfirmationModal={setStartModal} />
+            <ConfirmationModal title={t('End Order')} message={t('Do you confirm that the technician\'s work is finished?')} action={() => end()} confirmationModal={endModal} setConfirmationModal={setEndModal} />
         </Pressable>
 
     )
