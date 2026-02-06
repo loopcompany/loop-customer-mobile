@@ -19,13 +19,12 @@ const Privacy = ({ navigation }) => {
   return (
     <View style={NewStyles.wrapper}>
       <CustomStatusBar />
-      <ScreenHeaders 
-        title="سازمانی / دولتی" 
-        onBackPress={() => navigation.goBack()}
+      <ScreenHeaders
+        title="سازمانی / دولتی"
       />
-      
+
       <ScrollView style={NewStyles.container} showsVerticalScrollIndicator={false}>
-        
+
         {/* Header Section with Profile */}
         <View style={{
           backgroundColor: '#4A90E2',
@@ -44,7 +43,7 @@ const Privacy = ({ navigation }) => {
             borderRadius: 8,
             marginBottom: 15
           }}>حریم خصوصی</Text>
-          
+
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -79,7 +78,7 @@ const Privacy = ({ navigation }) => {
 
         {/* Form Fields */}
         <View style={{ paddingHorizontal: 15 }}>
-          
+
           {/* Organization Name */}
           <View style={{ marginBottom: 15 }}>
             <TextInput
@@ -190,7 +189,7 @@ const Privacy = ({ navigation }) => {
               borderWidth: 1,
               borderColor: '#ddd',
             }}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={{ padding: 12 }}
               >
@@ -214,11 +213,11 @@ const Privacy = ({ navigation }) => {
           </View>
 
           {/* City and Region Selection */}
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between', 
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
             marginBottom: 15,
-            gap: 10 
+            gap: 10
           }}>
             <View style={{ flex: 1 }}>
               <TextInput
@@ -299,7 +298,7 @@ const Privacy = ({ navigation }) => {
           </View>
 
           {/* Change Password Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
@@ -320,11 +319,11 @@ const Privacy = ({ navigation }) => {
           </TouchableOpacity>
 
           {/* Password Change Fields */}
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between', 
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
             marginBottom: 15,
-            gap: 10 
+            gap: 10
           }}>
             {/* Current Password */}
             <View style={{ flex: 1 }}>
@@ -336,7 +335,7 @@ const Privacy = ({ navigation }) => {
                 borderWidth: 1,
                 borderColor: '#ddd',
               }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={{ padding: 8 }}
                 >
@@ -367,7 +366,7 @@ const Privacy = ({ navigation }) => {
                 borderWidth: 1,
                 borderColor: '#ddd',
               }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowNewPassword(!showNewPassword)}
                   style={{ padding: 8 }}
                 >
@@ -392,7 +391,7 @@ const Privacy = ({ navigation }) => {
           {/* Action Buttons */}
           <View style={{ marginBottom: 20 }}>
             {/* Register/Login Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={{
                 backgroundColor: '#4A90E2',
                 borderRadius: 8,
@@ -411,7 +410,7 @@ const Privacy = ({ navigation }) => {
             </TouchableOpacity>
 
             {/* Logout Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={{
                 backgroundColor: '#FF6B35',
                 borderRadius: 8,

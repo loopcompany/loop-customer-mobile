@@ -43,7 +43,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 {renderRow('زمان ثبت سفارش', formatDateTime(data?.created_at))}
                 {Number(data?.category?.has_gender) > 0 && (
                     renderRow(
-                        'جنسیت و تعداد تکنسینین',
+                        'جنسیت تکنسین',
                         (() => {
                             const male = Number(data.male_count) || 0;
                             const female = Number(data.female_count) || 0;
@@ -53,10 +53,10 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                             if (total === 0) return 'مشخص نشده';
 
                             let details = [];
-                            if (male > 0) details.push(`${male} آقا`);
-                            if (female > 0) details.push(`${female} خانم`);
+                            if (male > 0) details.push(`آقا`);
+                            if (female > 0) details.push(`خانم`);
 
-                            return `${total} تکنسین` + (details.length > 0 ? ` (${details.join(' ')} )` : '');
+                            return (details.length > 0 ? `${details.join(' ')}` : '');
                         })()
                     )
                 )}
@@ -64,9 +64,9 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 {data?.status == 1 && renderRow('وضعیت سفارش', data?.started_at ? 'در حال انجام' : data?.arrived_at ? 'تکنسین به محل سفارش رسید' : data?.set_off_at ? 'تکنسین در راه است' : 'جاری', NewStyles.text, NewStyles.text7)}
                 {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
                 {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
-                {data?.extra_price > 0 && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
+                {data?.extra_price > 0 && renderRow('هزینه قطعات اضافه', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                 {data?.discount_price > 0 && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
-                {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+                {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10,])}
 
                 <View style={NewStyles.rowWrapper}>
                     <Text style={[NewStyles.text]}>وضعیت پرداخت</Text>
@@ -103,7 +103,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 renderSectionHeader={({ section }) => (
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name={section?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>{section?.title}</Text>
+                        <Text style={[NewStyles.title, { flex: 1 }]}>{section?.title}</Text>
                     </View>
                 )}
                 SectionSeparatorComponent={() => <View style={{ paddingVertical: 5 }} />}
@@ -143,7 +143,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
             </View>}
 
             {data?.image_path &&
-                <Image style={[{ height: 250, margin: '5%' }, NewStyles.border10]} source={{ uri: `${imageUri}/${data?.image_path}` }} />
+                <Image style={[{ height: 250, margin: '5%', maxWidth: 400, resizeMode: 'contain', width: '90%', alignSelf: 'center' }, NewStyles.border10]} source={{ uri: `${imageUri}/${data?.image_path}` }} />
             }
         </View>
     )
@@ -448,28 +448,31 @@ function Details({ route, navigation }) {
 
                 <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
 
-                        <AccordionHeader
-                            title="جزئیات سفارش"
-                            isActive={true}
-                            isOpen={showDetails}
-                            onPress={() => setShowDetails(!showDetails)}
-                        />
+                    <AccordionHeader
+                        title="جزئیات سفارش"
+                        isActive={true}
+                        isOpen={showDetails}
+                        onPress={() => setShowDetails(!showDetails)}
+                    />
                     {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} />}
 
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
                         title="بررسی / جایگزین / پیش رسید"
-                        isActive={(data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
+                        isActive={(data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
                         isOpen={showReview}
                         onPress={() => {
-                            if ((data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) {
+                            if ((data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) {
                                 setShowReview(!showReview)
-                            } else {
+                            } else if (data?.status == 3) {
+                                showToastOrAlert('شما سفارش را لغو کرده اید')
+                            }
+                            else {
                                 showToastOrAlert('این مرحله هنوز فعال نشده است.')
                             }
                         }}
                     />
-                    {showReview && ((data?.technician && data?.status != 3 && data?.status != 4 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) && (
+                    {showReview && ((data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) && (
                         <OrderReviewSection
                             data={data}
                             navigation={navigation}
@@ -481,22 +484,20 @@ function Details({ route, navigation }) {
                     <AccordionHeader
                         title="اطلاعات تکنسین"
                         isActive={data?.technician}
-                        isOpen={showTechnician || data?.technician_cancel_reason}
+                        isOpen={showTechnician}
                         onPress={() => {
                             if (data?.technician) {
-                                // اگر علت لغو وجود داره، accordion رو نبندیم
-                                if (!data?.technician_cancel_reason) {
-                                    setShowTechnician(!showTechnician)
-                                }
+                                setShowTechnician(!showTechnician)
+
                             } else {
                                 showToastOrAlert('هنوز تکنسینی به سفارش شما اختصاص داده نشده است.')
                             }
                         }}
                     />
-                    {(showTechnician || data?.technician_cancel_reason) && data?.technician && (
+                    {(showTechnician) && data?.technician && (
                         <View>
                             <TechnicianDetailsComponent navigation={navigation} data={data} renderRow={renderRow} />
-                            
+
                             {/* علت لغو توسط متخصص */}
                             {data?.technician_cancel_reason && (
                                 <View style={[{ backgroundColor: themeColor6.bgColor(0.1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10, marginTop: 10 }, NewStyles.border10]}>
@@ -520,13 +521,15 @@ function Details({ route, navigation }) {
 
                     <AccordionHeader
                         title="در حال انجام"
-                        isActive={data?.status >= 1 && data?.technician}
+                        isActive={(data?.status == 1 || data?.status == 2 || isTechnicianVerified != '0') && data?.technician}
                         isOpen={showProcess}
                         onPress={() => {
-                            if (data?.status >= 1 && data?.technician) {
+                            if ((data?.status == 1 || data?.status == 2 || isTechnicianVerified != '0') && data?.technician) {
                                 setShowProcess(!showProcess)
-                            } else {
+                            } else if (data?.status == 0) {
                                 showToastOrAlert('سفارش شما به مرحله ی انجام نرسیده است.')
+                            } else {
+                                showToastOrAlert('سفارش شما لغو شده است.')
                             }
                         }}
                     />
@@ -687,7 +690,7 @@ function Details({ route, navigation }) {
                             {data?.payment_status == 0 ? (
                                 <>
                                     <View style={[NewStyles.row, { gap: 10 }]}>
-                                        <View style={{ flex: 1 }}>
+                                        <View style={[{ flex: 1 }, NewStyles.center]}>
                                             <Button
                                                 title={'کسر هزینه از کیف پول'}
                                                 style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }}
@@ -696,7 +699,7 @@ function Details({ route, navigation }) {
                                                 onPress={walletPayment}
                                             />
                                         </View>
-                                        <View style={{ flex: 1 }}>
+                                        <View style={[{ flex: 1 }, NewStyles.center]}>
                                             <Button
                                                 title={'شارژ کیف پول'}
                                                 textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
@@ -705,7 +708,7 @@ function Details({ route, navigation }) {
                                             />
                                         </View>
                                     </View>
-                                    <View style={{ paddingBottom: 10 }}>
+                                    <View style={[{ paddingBottom: 10 }, NewStyles.center]}>
 
 
                                         <Button
@@ -718,7 +721,7 @@ function Details({ route, navigation }) {
                                     </View>
                                 </>
                             ) : (
-                                <View style={{ paddingTop: 10 }}>
+                                <View style={{ paddingTop: 10, alignItems: 'center', width: '100%' }}>
                                     <Button
                                         title={'پرداخت شده'}
                                         style={{ backgroundColor: themeColor7.bgColor(1) }}
@@ -779,7 +782,7 @@ function Details({ route, navigation }) {
                                         </View>
                                     )}
 
-                                    <View>
+                                    <View style={{width:'100%', alignItems:'center', }}>
                                         <Button
                                             title={'ثبت وضعیت دریافت'}
                                             onPress={handleSubmitReceive}

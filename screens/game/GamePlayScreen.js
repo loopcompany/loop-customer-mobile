@@ -143,7 +143,7 @@ export default function GamePlayScreen({ route, navigation }) {
   if (!currentQuestion) {
     return (
       <View style={styles.container}>
-        <ScreenHeaders title="بازی کامپیوتر" onBackPress={() => navigation.goBack()} />
+        <ScreenHeaders title="بازی کامپیوتر" />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingEmoji}>⏳</Text>
           <Text style={[NewStyles.title10, { fontSize: 18 }]}>
@@ -158,7 +158,7 @@ export default function GamePlayScreen({ route, navigation }) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeaders
         title={`سوال ${currentQuestionIndex + 1} از ${questions.length}`}
-        onBackPress={() => navigation.goBack()}
+
       />
 
       <ScrollView

@@ -24,14 +24,13 @@ export default function ViolationReportScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(false);
   const [datePickerModal, setDatePickerModal] = useState(false);
-  const [birthDate, setBirthDate] = useState('');
   const handleChange = (field, value) => {
     setForm(prevForm => ({ ...prevForm, [field]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!form.date || !form.amount || !form.desc) {
-      showToastOrAlert('لطفاً تاریخ، مبلغ و توضیحات را وارد کنید');
+    if (!form.date || !form.amount || !form.desc || !form.type) {
+      showToastOrAlert('لطفاً نوع تخلف، تاریخ، مبلغ و توضیحات را وارد کنید');
       return;
     }
 
@@ -86,6 +85,8 @@ export default function ViolationReportScreen({ navigation }) {
       <ScreenHeaders title={"ثبت تخلف/پیگیری ها"} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={styles.container}>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>نوع تخلف <Text style={NewStyles.title6}>*</Text></Text>
+
           <TextInput
             style={styles.input}
             placeholder="از تکنسین / پشتیبان لوپ / تراکنش / مشخص کنید"
@@ -93,6 +94,8 @@ export default function ViolationReportScreen({ navigation }) {
             value={form.type}
             onChangeText={(text) => handleChange('type', text)}
           />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>نام / کد تکنسین</Text>
+
           <TextInput
             style={styles.input}
             placeholder="نام / کد تکنسین"
@@ -100,18 +103,23 @@ export default function ViolationReportScreen({ navigation }) {
             value={form.technician}
             onChangeText={(text) => handleChange('technician', text)}
           />
-          
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>تاریخ ثبت<Text style={NewStyles.title6}>*</Text></Text>
+
           <Pressable style={styles.input} onPress={() => setDatePickerModal(true)}>
             <Text style={[NewStyles.text10, { color: themeColor10.bgColor(0.6) }]}>{form.date ? form.date : "تاریخ ثبت"}</Text>
           </Pressable>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>مبلغ تراکنش<Text style={NewStyles.title6}>*</Text></Text>
+
           <TextInput
             style={styles.input}
             placeholder="مبلغ تراکنش"
             placeholderTextColor={themeColor10.bgColor(0.6)}
             keyboardType="numeric"
-            value={form.amount}
-            onChangeText={(text) => handleChange('amount', text)}
+            value={form.amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            onChangeText={(text) => handleChange('amount', text?.replace(/,/g, ""))}
           />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>توضیحات<Text style={NewStyles.title6}>*</Text></Text>
+
           <TextInput
             style={[styles.input, styles.textarea]}
             placeholder="توضیحات"
@@ -137,9 +145,9 @@ export default function ViolationReportScreen({ navigation }) {
         <DatePickerModal
           datePickerModal={datePickerModal}
           setDatePickerModal={setDatePickerModal}
-          birthDate={birthDate}
+          birthDate={form.date}
           onDateChange={(date) => handleChange('date', date)}
-          setBirthDate={setBirthDate}
+          setBirthDate={(date) => handleChange('date', date)}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>

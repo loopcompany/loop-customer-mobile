@@ -6,6 +6,8 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
+import NewStyles from '../../styles/NewStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OTPVerification = ({ route, navigation }) => {
   const { phone, organizationCode, userId, organizationId } = route.params;
@@ -53,7 +55,7 @@ const OTPVerification = ({ route, navigation }) => {
 
   const handleVerify = async () => {
     const verificationCode = code.join('');
-    
+
     if (verificationCode.length !== 6) {
       showAlert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
       return;
@@ -63,7 +65,7 @@ const OTPVerification = ({ route, navigation }) => {
 
     try {
       const response = await axios.post(`${uri}/organization/verify-phone`, {
-        phone: phone,
+        phone: '0'+phone,
         code: verificationCode,
       });
 
@@ -73,17 +75,17 @@ const OTPVerification = ({ route, navigation }) => {
         // Save organization info (token might not be provided in verify step)
         await AsyncStorage.setItem('accountType', 'organization');
         await AsyncStorage.setItem('organizationCode', organizationCode);
-        
+
         // Save token only if provided
         if (response.data.data?.token) {
           await AsyncStorage.setItem('userToken', response.data.data.token);
         }
-        
+
         // Save user data only if provided
         if (response.data.data?.user) {
           await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
         }
-        
+
         // Save userId and organizationId
         if (userId) {
           await AsyncStorage.setItem('userId', userId.toString());
@@ -108,7 +110,7 @@ const OTPVerification = ({ route, navigation }) => {
       }
     } catch (error) {
       console.error('❌ Verification error:', error);
-      
+
       if (error.response) {
         console.error('Response error:', error.response.data);
         showAlert(
@@ -160,189 +162,187 @@ const OTPVerification = ({ route, navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1, backgroundColor: '#d1e9ff' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <CustomStatusBar />
-      <ScreenHeaders
-        title="تایید شماره موبایل"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
-      />
+    <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
 
-      <ScrollView 
-        contentContainerStyle={{ flexGrow: 1, paddingTop: 30, paddingBottom: 20 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: '#d1e9ff' }}
+        behavior={'padding'}
       >
-        <View style={{ width: '90%', alignSelf: 'center' }}>
-          {/* Header */}
-          <View style={{ 
-            backgroundColor: '#1976d2', 
-            borderRadius: 10, 
-            paddingVertical: 15, 
-            marginBottom: 30, 
-            alignItems: 'center',
-            elevation: 3,
-          }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 18, 
-              fontWeight: 'bold', 
-              fontFamily: 'VazirBold',
-              marginBottom: 8
-            }}>
-              کد تایید ارسال شد
-            </Text>
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 14, 
-              fontFamily: 'VazirLight',
-            }}>
-              کد 6 رقمی ارسال شده به {phone} را وارد کنید
-            </Text>
-          </View>
+        <CustomStatusBar />
+        <ScreenHeaders
+          title="تایید شماره موبایل" 
+        />
 
-          {/* Organization Code Display */}
-          <View style={{ 
-            backgroundColor: '#fff', 
-            borderRadius: 10, 
-            padding: 15, 
-            marginBottom: 30,
-            alignItems: 'center',
-            elevation: 2,
-          }}>
-            <Text style={{ 
-              fontSize: 14, 
-              fontFamily: 'VazirLight',
-              color: '#666',
-              marginBottom: 8
-            }}>
-              کد سازمانی شما:
-            </Text>
-            <Text style={{ 
-              fontSize: 32, 
-              fontFamily: 'VazirBold',
-              color: '#1976d2',
-              letterSpacing: 8
-            }}>
-              {organizationCode}
-            </Text>
-            <Text style={{ 
-              fontSize: 12, 
-              fontFamily: 'VazirLight',
-              color: '#999',
-              marginTop: 8,
-              textAlign: 'center'
-            }}>
-              این کد را برای ورود به سیستم نیاز دارید
-            </Text>
-          </View>
-
-          {/* OTP Input */}
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'center', 
-            marginBottom: 30,
-            gap: 10
-          }}>
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => (inputRefs.current[index] = ref)}
-                value={code[index]}
-                onChangeText={(text) => handleCodeChange(text, index)}
-                onKeyPress={(e) => handleKeyPress(e, index)}
-                keyboardType="number-pad"
-                maxLength={1}
-                style={{
-                  width: 45,
-                  height: 55,
-                  backgroundColor: '#fff',
-                  borderRadius: 10,
-                  borderWidth: 2,
-                  borderColor: code[index] ? '#1976d2' : '#ccc',
-                  fontSize: 22,
-                  fontFamily: 'VazirBold',
-                  textAlign: 'center',
-                  elevation: 2,
-                }}
-              />
-            ))}
-          </View>
-
-          {/* Timer */}
-          {timer > 0 && (
-            <Text style={{
-              textAlign: 'center',
-              fontSize: 14,
-              fontFamily: 'VazirLight',
-              color: '#666',
-              marginBottom: 20
-            }}>
-              زمان باقیمانده: {formatTime(timer)}
-            </Text>
-          )}
-
-          {/* Verify Button */}
-          <TouchableOpacity
-            onPress={handleVerify}
-            disabled={loading || code.join('').length !== 6}
-            style={{
-              backgroundColor: loading || code.join('').length !== 6 ? '#90caf9' : '#1976d2',
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingTop: 30, paddingBottom: 20 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ width: '90%', alignSelf: 'center' }}>
+            {/* Header */}
+            <View style={{
+              backgroundColor: '#1976d2',
               borderRadius: 10,
               paddingVertical: 15,
-              marginBottom: 15,
+              marginBottom: 30,
               alignItems: 'center',
               elevation: 3,
-              opacity: loading || code.join('').length !== 6 ? 0.7 : 1
-            }}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
+            }}>
               <Text style={{
                 color: '#fff',
-                fontSize: 16,
-                fontWeight: 'bold',
-                fontFamily: 'VazirBold'
+                fontSize: 18,
+                fontFamily: 'VazirBold',
+                marginBottom: 8
               }}>
-                تایید
+                کد تایید ارسال شد
               </Text>
-            )}
-          </TouchableOpacity>
+              <Text style={{
+                color: '#fff',
+                fontSize: 14,
+                fontFamily: 'VazirLight',
+              }}>
+                کد 6 رقمی ارسال شده به {phone} را وارد کنید
+              </Text>
+            </View>
 
-          {/* Resend Button */}
-          <TouchableOpacity
-            onPress={handleResendCode}
-            disabled={resendLoading || timer > 0}
-            style={{
+            {/* Organization Code Display */}
+            <View style={{
               backgroundColor: '#fff',
               borderRadius: 10,
-              paddingVertical: 15,
+              padding: 15,
+              marginBottom: 30,
               alignItems: 'center',
-              borderWidth: 2,
-              borderColor: timer > 0 ? '#ccc' : '#1976d2',
-              opacity: timer > 0 ? 0.5 : 1
-            }}
-          >
-            {resendLoading ? (
-              <ActivityIndicator size="small" color="#1976d2" />
-            ) : (
+              elevation: 2,
+            }}>
               <Text style={{
-                color: timer > 0 ? '#999' : '#1976d2',
                 fontSize: 14,
-                fontFamily: 'VazirBold'
+                fontFamily: 'VazirLight',
+                color: '#666',
+                marginBottom: 8
               }}>
-                ارسال مجدد کد
+                کد سازمانی شما:
+              </Text>
+              <Text style={{
+                fontSize: 32,
+                fontFamily: 'VazirBold',
+                color: '#1976d2',
+                letterSpacing: 8
+              }} selectable={true}>
+                {organizationCode}
+              </Text>
+              <Text style={{
+                fontSize: 12,
+                fontFamily: 'VazirLight',
+                color: '#999',
+                marginTop: 8,
+                textAlign: 'center'
+              }}>
+                این کد را برای ورود به سیستم نیاز دارید
+              </Text>
+            </View>
+
+            {/* OTP Input */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              marginBottom: 30,
+              gap: 10
+            }}>
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <TextInput
+                  key={index}
+                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  value={code[index]}
+                  onChangeText={(text) => handleCodeChange(text, index)}
+                  onKeyPress={(e) => handleKeyPress(e, index)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  style={{
+                    width: 45,
+                    height: 55,
+                    backgroundColor: '#fff',
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: code[index] ? '#1976d2' : '#ccc',
+                    fontSize: 22,
+                    fontFamily: 'VazirBold',
+                    textAlign: 'center',
+                    elevation: 2,
+                  }}
+                />
+              ))}
+            </View>
+
+            {/* Timer */}
+            {timer > 0 && (
+              <Text style={{
+                textAlign: 'center',
+                fontSize: 14,
+                fontFamily: 'VazirLight',
+                color: '#666',
+                marginBottom: 20
+              }}>
+                زمان باقیمانده: {formatTime(timer)}
               </Text>
             )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+            {/* Verify Button */}
+            <TouchableOpacity
+              onPress={handleVerify}
+              disabled={loading || code.join('').length !== 6}
+              style={{
+                backgroundColor: loading || code.join('').length !== 6 ? '#90caf9' : '#1976d2',
+                borderRadius: 10,
+                paddingVertical: 15,
+                marginBottom: 15,
+                alignItems: 'center',
+                elevation: 3,
+                opacity: loading || code.join('').length !== 6 ? 0.7 : 1
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={{
+                  color: '#fff',
+                  fontSize: 16,
+                  fontFamily: 'VazirBold'
+                }}>
+                  تایید
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Resend Button */}
+            <TouchableOpacity
+              onPress={handleResendCode}
+              disabled={resendLoading || timer > 0}
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 10,
+                paddingVertical: 15,
+                alignItems: 'center',
+                borderWidth: 2,
+                borderColor: timer > 0 ? '#ccc' : '#1976d2',
+                opacity: timer > 0 ? 0.5 : 1
+              }}
+            >
+              {resendLoading ? (
+                <ActivityIndicator size="small" color="#1976d2" />
+              ) : (
+                <Text style={{
+                  color: timer > 0 ? '#999' : '#1976d2',
+                  fontSize: 14,
+                  fontFamily: 'VazirBold'
+                }}>
+                  ارسال مجدد کد
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

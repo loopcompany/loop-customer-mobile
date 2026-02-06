@@ -21,8 +21,6 @@ const DiscountCodeScreen = ({ navigation }) => {
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
       />
       
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>

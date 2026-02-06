@@ -10,6 +10,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Alert,
+    Linking,
 } from "react-native";
 // CodeField imports removed - using InviteCodeInput component instead
 import Button from "../../components/Button";
@@ -182,7 +183,7 @@ export default function MainSignIn({ navigation }) {
     };
 
     return (
-        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
+        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
             <CustomStatusBar />
             <KeyboardAvoidingView
                 behavior={'padding'}
@@ -199,50 +200,56 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Melicode (National ID) */}
                         <View style={styles.inputContainer}>
-                            <TextInput
-                                style={[
-                                    NewStyles.textInput,
-                                    NewStyles.text10,
-                                    NewStyles.border10,
-                                    { width: '100%', textAlign: 'right' },
-                                    state.errors.melicode && styles.inputError
-                                ]}
-                                placeholder="کد ملی"
-                                placeholderTextColor={themeColor10.bgColor(0.6)}
-                                value={state.melicode}
-                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
-                                keyboardType="number-pad"
-                                maxLength={10}
-                                accessibilityLabel="کد ملی"
-                                accessibilityHint="کد ملی 10 رقمی خود را وارد کنید"
-                            />
-                            {state.errors.melicode && (
-                                <Text style={styles.fieldErrorText}>{state.errors.melicode}</Text>
-                            )}
+                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                                <Text style={NewStyles.title4}>کد ملی <Text style={NewStyles.title6}>*</Text></Text>
+                                <TextInput
+                                    style={[
+                                        NewStyles.textInput,
+                                        NewStyles.text10,
+                                        NewStyles.border10,
+                                        { width: '100%', textAlign: 'right' },
+                                        state.errors.melicode && styles.inputError
+                                    ]}
+                                    placeholder="کد ملی"
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
+                                    value={state.melicode}
+                                    onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'melicode', value })}
+                                    keyboardType="number-pad"
+                                    maxLength={10}
+                                    accessibilityLabel="کد ملی"
+                                    accessibilityHint="کد ملی 10 رقمی خود را وارد کنید"
+                                />
+                                {state.errors.melicode && (
+                                    <Text style={styles.fieldErrorText}>{state.errors.melicode}</Text>
+                                )}
+                            </View>
                         </View>
 
                         {/* Phone Number */}
                         <View style={styles.inputContainer}>
-                            <TextInput
-                                style={[
-                                    NewStyles.textInput,
-                                    NewStyles.text10,
-                                    NewStyles.border10,
-                                    { width: '100%', textAlign: 'right' },
-                                    state.errors.phone && styles.inputError
-                                ]}
-                                placeholder="شماره موبایل : 09XXXXXXXXX"
-                                placeholderTextColor={themeColor10.bgColor(0.6)}
-                                value={state.phone}
-                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
-                                keyboardType="phone-pad"
-                                maxLength={11}
-                                accessibilityLabel="شماره موبایل"
-                                accessibilityHint="شماره موبایل 11 رقمی خود را با 09 وارد کنید"
-                            />
-                            {state.errors.phone && (
-                                <Text style={styles.fieldErrorText}>{state.errors.phone}</Text>
-                            )}
+                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                                <Text style={NewStyles.title4}>شماره موبایل <Text style={NewStyles.title6}>*</Text></Text>
+                                <TextInput
+                                    style={[
+                                        NewStyles.textInput,
+                                        NewStyles.text10,
+                                        NewStyles.border10,
+                                        { width: '100%', textAlign: 'right' },
+                                        state.errors.phone && styles.inputError
+                                    ]}
+                                    placeholder="شماره موبایل : 09XXXXXXXXX"
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
+                                    value={state.phone}
+                                    onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'phone', value })}
+                                    keyboardType="phone-pad"
+                                    maxLength={11}
+                                    accessibilityLabel="شماره موبایل"
+                                    accessibilityHint="شماره موبایل 11 رقمی خود را با 09 وارد کنید"
+                                />
+                                {state.errors.phone && (
+                                    <Text style={styles.fieldErrorText}>{state.errors.phone}</Text>
+                                )}
+                            </View>
                         </View>
 
                         {/* Other Referral Code using reusable component */}
@@ -256,26 +263,29 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Email */}
                         <View style={styles.inputContainer}>
-                            <TextInput
-                                style={[
-                                    NewStyles.textInput,
-                                    NewStyles.text10,
-                                    NewStyles.border10,
-                                    { width: '100%', textAlign: 'right' },
-                                    state.errors.email && styles.inputError
-                                ]}
-                                placeholder="آدرس ایمیل*"
-                                placeholderTextColor={themeColor10.bgColor(0.6)}
-                                value={state.email}
-                                onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                accessibilityLabel="آدرس ایمیل"
-                                accessibilityHint="آدرس ایمیل معتبر خود را وارد کنید"
-                            />
-                            {state.errors.email && (
-                                <Text style={styles.fieldErrorText}>{state.errors.email}</Text>
-                            )}
+                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                                <Text style={NewStyles.title4}>آدرس ایمیل <Text style={NewStyles.title6}>*</Text></Text>
+                                <TextInput
+                                    style={[
+                                        NewStyles.textInput,
+                                        NewStyles.text10,
+                                        NewStyles.border10,
+                                        { width: '100%', textAlign: 'right' },
+                                        state.errors.email && styles.inputError
+                                    ]}
+                                    placeholder="آدرس ایمیل*"
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
+                                    value={state.email}
+                                    onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'email', value })}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    accessibilityLabel="آدرس ایمیل"
+                                    accessibilityHint="آدرس ایمیل معتبر خود را وارد کنید"
+                                />
+                                {state.errors.email && (
+                                    <Text style={styles.fieldErrorText}>{state.errors.email}</Text>
+                                )}
+                            </View>
                         </View>
 
                         {/* Location Picker - Province, City, Region */}
@@ -347,6 +357,17 @@ export default function MainSignIn({ navigation }) {
                                 قبلاً ثبت نام کرده‌اید؟ ورود به حساب کاربری
                             </Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ marginTop: 15 }}
+                            onPress={() => {
+                                Linking.openURL('https://accounts.google.com/signup/v2/webcreateaccount?service=mail')
+                            }}
+                            disabled={state.isLoading}
+                        >
+                            <Text style={styles.loginLinkText}>
+                                ساخت ایمیل
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -406,7 +427,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     card: {
-        width: '90%',
+        width: '100%',
         // backgroundColor: 'rgba(0,0,0,0.55)',
         paddingVertical: 24,
         paddingHorizontal: 12,

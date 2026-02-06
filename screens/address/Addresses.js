@@ -46,7 +46,7 @@ export default function Addresses({ navigation }) {
                     )
                 }}
             />
-            <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow]}>
+            <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow, NewStyles.center]}>
                 <Button title={'افزودن آدرس'} loading={loading} onPress={() => {
                     navigation.navigate('AddNewAddress')
                 }} />

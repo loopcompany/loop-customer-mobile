@@ -192,7 +192,7 @@ export default function Club({ navigation }) {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="باشگاه مشتریان" />
+      <ScreenHeaders title={"طرح های تشویقی"} />
       <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
         <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
           <View style={NewStyles.rowWrapper}>
@@ -207,14 +207,13 @@ export default function Club({ navigation }) {
         {/* دکمه گردونه شانس */}
         <Pressable
           style={[NewStyles.border10, NewStyles.spacing, {
-            height: 140,
             alignSelf: 'center',
             width: '90%',
-            backgroundColor: themeColor1.bgColor(0.1),
+            backgroundColor: themeColor0.bgColor(0.1),
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,
-            borderColor: themeColor1.bgColor(0.3),
+            borderColor: themeColor0.bgColor(0.3),
             borderStyle: 'dashed',
           }]}
           onPress={handleOpenWheel}
@@ -223,7 +222,7 @@ export default function Club({ navigation }) {
           <Text style={[NewStyles.title10, { marginTop: 10 }]}>گردونه شانس</Text>
           <Text style={[NewStyles.text10, { opacity: 0.7 }]}>برای دریافت امتیاز بچرخان!</Text>
           {userGems > 0 && (
-            <Text style={[NewStyles.title1, { marginTop: 5, }]}>
+            <Text style={[NewStyles.title, { marginTop: 5, }]}>
               امتیاز شما: {userGems} 💎
             </Text>
           )}

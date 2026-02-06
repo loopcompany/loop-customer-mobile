@@ -127,7 +127,6 @@ export default function ViolationReportsListScreen({ navigation }) {
             <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
                 <ScreenHeaders
                     title="پیگیری گزارش‌ها"
-                    onPressLeft={() => navigation.goBack()}
                     showLeftIcon={true}
                 />
                 <View style={styles.loadingContainer}>
@@ -142,7 +141,6 @@ export default function ViolationReportsListScreen({ navigation }) {
         <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
             <ScreenHeaders
                 title="پیگیری گزارش‌ها"
-                onPressLeft={() => navigation.goBack()}
                 showLeftIcon={true}
             />
 
@@ -210,15 +208,12 @@ const styles = StyleSheet.create({
         borderColor: '#f0f0f0',
     },
     reportHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        ...NewStyles.rowWrapper,
         marginBottom: 10,
     },
     reportSubject: {
         ...NewStyles.title10,
         flex: 1,
-        marginRight: 10,
         color: themeColor1.bgColor(1),
     },
     reportDate: {
@@ -229,7 +224,7 @@ const styles = StyleSheet.create({
     reportRow: {
         ...NewStyles.row,
         marginBottom: 8,
-        gap:10
+        gap: 10
     },
     reportName: {
         ...NewStyles.text10,
@@ -239,7 +234,6 @@ const styles = StyleSheet.create({
     reportAmount: {
         ...NewStyles.text10,
         marginLeft: 8,
-        fontWeight: 'bold',
         color: '#2196f3',
     },
     reportDescription: {

@@ -10,6 +10,7 @@ import { themeColor0, themeColor10 } from '../theme/Color';
 import { fetchAddresses } from '../slices/addressSlice';
 import { ImageBackground } from 'expo-image';
 import NewStyles from '../styles/NewStyles';
+import { fetchRadii } from '../slices/radiusSlice';
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
@@ -18,6 +19,7 @@ export default function Landing({ navigation }) {
   // Check authentication on component mount
   useEffect(() => {
     checkAuthenticationStatus();
+    dispatch(fetchRadii())
   }, []);
 
   const checkAuthenticationStatus = async () => {

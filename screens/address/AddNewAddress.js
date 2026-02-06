@@ -28,7 +28,7 @@ export default function AddNewAddress({ navigation }) {
             dispatch(setLname(''));
             dispatch(setTelephone(''));
             dispatch(setMobile(''));
-            dispatch(setCity(''));
+            dispatch(setCity('تهران'));
             dispatch(setRegion(''));
             dispatch(setAddress(''));
         }, [dispatch])
@@ -145,6 +145,7 @@ export default function AddNewAddress({ navigation }) {
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
                                 placeholder="شهر"
                                 keyboardType='default'
+                                editable={false}
                                 placeholderTextColor={themeColor3.bgColor(1)}
                                 value={address?.city}
                                 onChangeText={(text) => { dispatch(setCity(text)) }}
@@ -166,7 +167,7 @@ export default function AddNewAddress({ navigation }) {
                         multiline
                     />
                 </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, {alignItems:'center', justifyContent:'center'}]}>
+            <View style={[NewStyles.row, NewStyles.nav, {alignItems:'center', justifyContent:'center',}]}>
                 <Button title={'مرحله بعد'} onPress={() => {
                     if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address) {
                         showToastOrAlert('لطفا فیلدهای الزامی را پر کنید.')
@@ -185,7 +186,7 @@ export default function AddNewAddress({ navigation }) {
 
 const styles = StyleSheet.create({
     contentContainerStyle: {
-        paddingHorizontal: '5%',
+        paddingHorizontal: 0,
         paddingVertical: '5%',
         maxWidth:800,
         alignSelf:'center',

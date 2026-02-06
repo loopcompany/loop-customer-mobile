@@ -257,7 +257,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
         />
       </View>
 
-      <View style={{ marginTop: 15 }}>
+      <View style={{ marginTop: 15, width:'100%', alignItems:'center' }}>
         <Button
           title={submitLoading ? 'در حال ارسال...' : 'ثبت نظر'}
           onPress={handleSubmit}

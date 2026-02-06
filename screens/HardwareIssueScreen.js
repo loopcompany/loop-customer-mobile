@@ -35,7 +35,7 @@ export default function HardwareIssueScreen({ navigation }) {
     {
       id: "4",
       title: "کیس ریست می‌شود",
-      value:1
+      value: 1
     },
     {
       id: "5",
@@ -52,7 +52,7 @@ export default function HardwareIssueScreen({ navigation }) {
     {
       id: "8",
       title: "مانیتور تصویر ندارد",
-       value:1
+      value: 1
     },
     {
       id: "9",
@@ -76,20 +76,15 @@ export default function HardwareIssueScreen({ navigation }) {
   return (
     <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} >
       <CustomStatusBar />
-      <ScreenHeaders 
-        title={'لپ تاپ'} 
-        onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
+      <ScreenHeaders
+        title={'لپ تاپ'}
       />
-
-      
-
       <FlatList
         data={issues}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{gap:10, padding:10}}
-        ListHeaderComponent={()=>{
-          return(
+        contentContainerStyle={{ gap: 10, padding: 10 }}
+        ListHeaderComponent={() => {
+          return (
             <ScreenTitle title={'سخت افزار'} />
           )
         }}
@@ -100,14 +95,14 @@ export default function HardwareIssueScreen({ navigation }) {
         }}
       />
 
-      <View style={{width:'100%', padding:10}}>
+      <View style={{ width: '100%', padding: 10 }}>
         <TextInput
-        placeholder="درخواست دیگری دارید بنویسید..."
-        placeholderTextColor="#fff"
-        style={[NewStyles.textInput, NewStyles.text10,NewStyles.border10]}
-      />
+          placeholder="درخواست دیگری دارید بنویسید..."
+          placeholderTextColor="#fff"
+          style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+        />
       </View>
-      
+
     </ImageBackground>
 
   );

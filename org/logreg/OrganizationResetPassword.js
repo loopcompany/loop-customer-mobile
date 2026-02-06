@@ -225,9 +225,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title="تغییر رمز عبور"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
+        title="تغییر رمز عبور" 
       />
 
       <ScrollView

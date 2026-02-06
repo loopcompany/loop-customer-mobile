@@ -41,7 +41,7 @@ export default function GameMenuScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScreenHeaders title="فکر و بکر" onBackPress={() => navigation.goBack()} />
+      <ScreenHeaders title="فکر و بکر" />
 
       <ScrollView
         style={styles.scrollView}
@@ -146,7 +146,7 @@ export default function GameMenuScreen({ navigation }) {
           <Button
             title="شروع بازی! 🚀"
             onPress={handleStartGame}
-           
+
           />
         </View>
 

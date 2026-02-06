@@ -8,6 +8,7 @@ import {
   Image,
   I18nManager,
   FlatList,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../styles/NewStyles';
@@ -15,26 +16,29 @@ import ScreenHeaders from '../components/ScreenHeaders';
 import Footer from './Footer';
 import { formatJalaaliDate } from '../helpers/Common';
 import { themeColor0, themeColor4 } from '../theme/Color';
-import letterRatesAPI from '../services/LetterRatesApi';
 import { RefreshControl } from 'react-native';
+import letterRatesCategoryAPI from '../services/LetterRatesService';
+import { useNavigation } from '@react-navigation/native';
 
 
 
-export default function RateListScreen({ route }) {
-
-  const params = route?.params;
+export default function RateCategory() {
   const [rates, setRates] = useState([]);
-  const [unionRates, setUnionRates] = useState([]);
-  const [loopRates, setLoopRates] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
   useEffect(() => {
     fetchLetterRates();
   }, [refreshing]);
 
   const fetchLetterRates = async () => {
     try {
-      const response = await letterRatesAPI.getLetterRates(params?.id);
-      setRates(response);
+      const response = await letterRatesCategoryAPI.getLetterRatesCategory();
+
+      if (response.status === 'success') {
+        const allRates = response.data;
+        setRates(allRates);
+
+      }
     } catch (error) {
       console.error('Error fetching letter rates:', error);
     } finally {
@@ -43,10 +47,9 @@ export default function RateListScreen({ route }) {
   };
 
   const renderItem = ({ item }) => (
-    <View style={[styles.rateRow, NewStyles.center]}>
+    <Pressable onPress={() => { navigation.navigate('RateListScreen', {id: item?.id, title: item?.title}) }} style={[styles.rateRow, NewStyles.center]}>
       <Text style={[NewStyles.title10, { fontSize: 14 }]}>{item.title}</Text>
-      <Text style={styles.rateText}>{item.amount}</Text>
-    </View>
+    </Pressable>
   );
 
   return (
@@ -54,11 +57,12 @@ export default function RateListScreen({ route }) {
       <ScreenHeaders title={'نرخنامه'} />
       <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
 
-        <View style={[NewStyles.row, { flex: 1 }]}>
-          <View style={{ flex: 1 }}>
-            <View style={styles.titleContainer}>
-              <Text style={NewStyles.title4}>{params?.title}</Text>
+        <View style={[{ flex: 1 }]}>
+          <View style={styles.titleContainer}>
+              <Text style={NewStyles.title4}>نرخنامه لوپ {formatJalaaliDate(new Date())?.slice(0, 4)}</Text>
             </View>
+          <View style={{ flex: 1 }}>
+
             <FlatList
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
@@ -79,6 +83,7 @@ export default function RateListScreen({ route }) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
+    paddingVertical: 10
   },
   title: {
     textAlign: 'center',

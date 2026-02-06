@@ -9,16 +9,19 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import ScreenHeaders from '../components/ScreenHeaders'; 
-import NewStyles from '../styles/NewStyles'; 
+import ScreenHeaders from '../components/ScreenHeaders';
+import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '../theme/Color';
 import CustomStatusBar from '../components/CustomStatusBar';
 import { getTicketsList, sendTicketMessage } from '../services/Api';
 import { formatDate, formatDateTime } from '../helpers/Common';
+import Button from '../components/Button';
+import { useSelector } from 'react-redux';
 
 export default function MessageScreen({ navigation }) {
   const [messageText, setMessageText] = useState('');
@@ -28,6 +31,7 @@ export default function MessageScreen({ navigation }) {
   const [sending, setSending] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const contact = useSelector(state => state.contacts?.data?.data);
 
   // دریافت لیست پیام‌ها
   const fetchMessages = async () => {
@@ -36,7 +40,7 @@ export default function MessageScreen({ navigation }) {
 
       if (response.success && response.data) {
         // ترتیب معکوس برای نمایش جدیدترین پیام‌ها در پایین
-        setMessages(response.data.reverse());
+        setMessages(response.data);
 
         // محاسبه تعداد پیام‌های خوانده نشده از ادمین
         const unreadAdminMessages = response.data.filter(
@@ -106,7 +110,6 @@ export default function MessageScreen({ navigation }) {
       <CustomStatusBar />
       <ScreenHeaders
         title={'پیام'}
-        onPressLeft={() => navigation.goBack()}
       />
 
       {loading ? (
@@ -122,8 +125,15 @@ export default function MessageScreen({ navigation }) {
         >
 
           {/* دکمه پیام های دریافتی از اپ */}
+          <View style={{width:'100%', alignItems:'center'}}>
+            <Button
+              title={'تماس بگیرید'}
+              onPress={() => {
+                Linking.openURL(`${contact?.link}`);
+              }}
+            />
 
-
+          </View>
           {/* باکس متن پیام */}
           <View style={styles.messageBox}>
             <Text style={styles.sectionTitle}>متن پیام جدید</Text>

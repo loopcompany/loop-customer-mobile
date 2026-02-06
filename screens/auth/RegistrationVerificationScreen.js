@@ -175,7 +175,15 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
       'آیا می‌خواهید شماره موبایل را ویرایش کنید؟',
       [
         { text: 'لغو', style: 'cancel' },
-        { text: 'بله', onPress: () => navigation.goBack() }
+        {
+          text: 'بله', onPress: () => {
+            if (Platform.OS == 'web') {
+              window.history.back()
+            } else {
+              navigation.goBack()
+            }
+          }
+        }
       ]
     );
   };
@@ -184,7 +192,6 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
         title="تایید شماره موبایل"
-        onPressLeft={() => navigation.goBack()}
         showLeftIcon={true}
       />
       <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>

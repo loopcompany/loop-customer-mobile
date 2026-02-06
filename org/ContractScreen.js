@@ -27,8 +27,6 @@ const ContractScreen = ({ navigation }) => {
     <SafeAreaView edges={{top:'off', bottom:'off'}} style={[NewStyles.container]}>
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => { }}
       />
       <ScrollView>
         <CustomStatusBar />

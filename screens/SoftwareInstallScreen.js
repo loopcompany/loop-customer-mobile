@@ -38,18 +38,18 @@ export default function SoftwareInstallScreen({ navigation }) {
     {
       id: '4',
       title: "نصب برنامه‌های سخت‌افزار و پرینتر آفلاین",
-      value:1
+      value: 1
     },
     {
       id: '5',
       title: "نصب برنامه‌های سخت‌افزار و پرینتر آنلاین",
-      value:1
+      value: 1
 
     },
     {
       id: '6',
       title: "کیس روشن نمی‌شود",
-      value:1
+      value: 1
     },
     {
       id: '7',
@@ -65,13 +65,11 @@ export default function SoftwareInstallScreen({ navigation }) {
     },
   ]
   return (
-       
+
     <ImageBackground source={require("../assets/moon.jpg")} style={styles.background} >
 
-      <ScreenHeaders 
-        title={'لپ تاپ'} 
-        onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
+      <ScreenHeaders
+        title={'لپ تاپ'}
       />
       {/* عنوان اصلی */}
 
@@ -79,7 +77,7 @@ export default function SoftwareInstallScreen({ navigation }) {
       <FlatList
         ListHeaderComponent={() => {
           return (
-            <ScreenTitle title={'نرم افزار'}   onPress={() => navigation.navigate("WindowsInstallScreen")}/>
+            <ScreenTitle title={'نرم افزار'} onPress={() => navigation.navigate("WindowsInstallScreen")} />
           )
         }}
         data={data}
@@ -98,11 +96,11 @@ export default function SoftwareInstallScreen({ navigation }) {
           style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
         />
       </View>
-   
-      
-    
+
+
+
     </ImageBackground>
-     
+
   );
 }
 

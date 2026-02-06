@@ -1,13 +1,13 @@
 // screens/TrainingRegistrationScreen.js
 import React, { useState } from "react";
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Image, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform
@@ -53,7 +53,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
       return;
     }
 
-    if (!validateTelephone(form.telephone)) {
+    if (!validateTelephone('021' + form.telephone)) {
       showToastOrAlert('فرمت شماره تلفن صحیح نیست. باید 11 رقم و با 0 شروع شود (مثال: 02112345678)');
       return;
     }
@@ -73,13 +73,13 @@ export default function TrainingRegistrationScreen({ navigation }) {
       return;
     }
 
-    if (form.address.length > 500) {
-      showToastOrAlert('آدرس نباید بیشتر از 500 کاراکتر باشد');
+    if (form.address.length > 191) {
+      showToastOrAlert('آدرس نباید بیشتر از 191 کاراکتر باشد');
       return;
     }
 
-    if (form.description.length > 1000) {
-      showToastOrAlert('توضیحات نباید بیشتر از 1000 کاراکتر باشد');
+    if (form.description.length > 191) {
+      showToastOrAlert('توضیحات نباید بیشتر از 191 کاراکتر باشد');
       return;
     }
 
@@ -87,7 +87,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
       setIsSubmitting(true);
 
       const payload = {
-        telephone: form.telephone.trim(),
+        telephone: "021" + form.telephone.trim(),
         phone: form.phone.trim(),
         address: form.address.trim(),
         description: form.description.trim() || undefined, // اختیاری
@@ -143,36 +143,41 @@ export default function TrainingRegistrationScreen({ navigation }) {
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>
-      <ScreenHeaders 
-        title="ثبت نام دوره‌های آموزشی" 
-        onPressLeft={() => navigation.goBack()} 
+      <ScreenHeaders
+        title="ثبت نام دوره‌های آموزشی"
       />
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={[NewStyles.wrapper]}>
-          
-         
+
+
           <View style={styles.infoBox}>
             <Text style={[NewStyles.text10, { lineHeight: 24 }]}>
               📌 مراحل ثبت‌نام:{'\n'}
               • شماره تلفن ثابت (02112345678){'\n'}
               • شماره موبایل (09123456789){'\n'}
               • آدرس کامل محل سکونت یا کار{'\n'}
-              • توضیحات و علایق آموزشی 
+              • توضیحات و علایق آموزشی
             </Text>
           </View>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>شماره تلفن ثابت<Text style={NewStyles.title6}>*</Text></Text>
 
-          <TextInput
-            placeholder="شماره تلفن ثابت (مثال: 02112345678)"
-            value={form.telephone}
-            onChangeText={(t) => handleChange('telephone', t)}
-            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-            placeholderTextColor="#999"
-            keyboardType="phone-pad"
-            maxLength={11}
-          />
+          <View style={[NewStyles.row, { gap: 10 }]}>
+            <TextInput
+              placeholder="شماره تلفن ثابت (مثال: 02112345678)"
+              value={form.telephone}
+              onChangeText={(t) => handleChange('telephone', t)}
+              style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { width: 'auto', flex: 1 }]}
+              placeholderTextColor="#999"
+              keyboardType="phone-pad"
+              maxLength={8}
+            />
+            <TextInput style={[NewStyles.text10, styles.prefixInput,]} value="021" editable={false} />
+
+          </View>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>شماره موبایل<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
             placeholder="شماره موبایل (مثال: 09123456789)"
@@ -183,30 +188,32 @@ export default function TrainingRegistrationScreen({ navigation }) {
             keyboardType="phone-pad"
             maxLength={11}
           />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>آدرس کامل<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
-            placeholder="آدرس کامل (حداکثر 500 کاراکتر)"
+            placeholder="آدرس کامل (حداکثر 191 کاراکتر)"
             value={form.address}
             onChangeText={(t) => handleChange('address', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 100, textAlignVertical: 'top' }]}
             placeholderTextColor="#999"
             multiline
-            maxLength={500}
+            maxLength={191}
           />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>توضیحات و علایق آموزشی (اختیاری)</Text>
 
           <TextInput
-            placeholder="توضیحات و علایق آموزشی (اختیاری - حداکثر 1000 کاراکتر)"
+            placeholder="توضیحات و علایق آموزشی (اختیاری - حداکثر 191 کاراکتر)"
             value={form.description}
             onChangeText={(t) => handleChange('description', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}
             placeholderTextColor="#999"
             multiline
-            maxLength={1000}
+            maxLength={191}
           />
 
           <View style={styles.spacer} />
 
-         
+
 
           <Button title={'ثبت درخواست'} onPress={handleSubmit} loading={isSubmitting} />
 
@@ -222,6 +229,13 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
+  },
+  prefixInput: {
+    width: 70,
+    backgroundColor: '#ddd',
+    textAlign: 'center',
+    borderRadius: 10,
+    paddingVertical: 12,
   },
   spacer: {
     height: 20,

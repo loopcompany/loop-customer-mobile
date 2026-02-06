@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';
 import * as Linking from "expo-linking";
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,6 +29,8 @@ function Invoice({ route }) {
     const [loading2, setLoading2] = useState(false)
     const [extraServices, setExtraServices] = useState([])
     const [data, setData] = useState([]);
+    const [loadingGateway, setLoadingGateway] = useState(false);
+    const paymentSubscriptionRef = useRef(null);
 
     const fetchData = async () => {
         try {
@@ -91,7 +93,7 @@ function Invoice({ route }) {
     const walletPayment = async () => {
         setLoading1(true);
         try {
-            const response = await axios.post(`${uri}/payment/wallet`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/wallet/pay-order`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 201) {
                 showToastOrAlert(response?.data?.message);
                 dispatch(fetchOrders(token));
@@ -109,35 +111,65 @@ function Invoice({ route }) {
     const redirectUrl = Linking.createURL("/?");
 
     const _addLinkingListener = () => {
-        const subscription = Linking.addEventListener("url", ({ url }) => {
+        // Remove existing listener if any
+        if (paymentSubscriptionRef.current) {
+            paymentSubscriptionRef.current.remove();
+        }
+
+        paymentSubscriptionRef.current = Linking.addEventListener("url", ({ url }) => {
             const { queryParams } = Linking.parse(url);
             if (queryParams?.status == 'OK') {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
                 setRefreshing(true);
-                showToastOrAlert('پرداخت با موفقیت انجام شد.')
+                showToastOrAlert('پرداخت با موفقیت انجام شد.');
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
             } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert('پرداخت با خطا مواجه شد.')
+                showToastOrAlert('پرداخت با خطا مواجه شد.');
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
             }
-            setLoading2(false);
+            setLoadingGateway(false);
         });
-        return () => subscription.remove();
     };
 
     const gatewayPayment = async () => {
-        setLoading2(true);
+        setLoadingGateway(true);
         try {
-            _addLinkingListener()
-            let result = await Linking.openURL(`${uri}/payment/gateway?linkingUri=${redirectUrl}&orderId=${orderId}&userId=${user?.id}`);
-            let redirectData;
-            if (result.url) {
-                redirectData = Linking.parse(result.url);
+            const response = await axios.post(
+                `${uri}/orders/gateway-payment`,
+                {
+                    order_id: orderId,
+                    linking_url: redirectUrl
+                },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.status == 200 && response.data?.data?.payment_url) {
+                _addLinkingListener();
+                await Linking.openURL(response.data.data.payment_url);
+            } else {
+                showToastOrAlert('خطا در اتصال به درگاه پرداخت');
+                setLoadingGateway(false);
             }
         } catch (error) {
-            showToastOrAlert('خطا در اتصال به درگاه پرداخت')
-            setLoading2(false);
+            const message = error?.response ? (error?.response?.data?.message || 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه!';
+            showToastOrAlert(message);
+            setLoadingGateway(false);
         } finally {
-            setLoading2(false);
+            setLoadingGateway(false);
         }
     };
 
@@ -152,7 +184,7 @@ function Invoice({ route }) {
                         <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                             <View style={[NewStyles.row, { gap: 5 }]}>
                                 <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
-                                <Text style={NewStyles.title}>جزئیات سفارش - شناسه: {data?.id}</Text>
+                                <Text style={NewStyles.title}>شناسه سفارش: {data?.id}</Text>
                             </View>
                             <Text style={NewStyles.text3}>{data?.category?.title}</Text>
                         </View>
@@ -165,9 +197,9 @@ function Invoice({ route }) {
                             </View>
                         </View>
 
-                        {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
-                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
-                        {(data?.extra_price > 0) && renderRow('مبلغ خدمات مازاد', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
+                        {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ تخمینی لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
+                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('هزینه اولیه ی محاسبه شده', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
+                        {(data?.extra_price > 0) && renderRow('هزینه ی قطعات', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
                         {(data?.discount_price > 0) && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
                         {(totalPrice > totalDiscountedPrice > 0) && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
                         {(data?.status > 0 && data?.technician_price) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
@@ -212,17 +244,17 @@ function Invoice({ route }) {
                 </View>
             </ScrollView>
 
-            {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10 }]}>
+            {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
                 {data?.payment_status > 0 ?
-                    <View style={{ flex: 1 }}>
+                    <View style={[{ flex: 1 }, NewStyles.center]}>
                         <Button title={'پرداخت شده'} backgroundColor={themeColor7.bgColor(1)} />
                     </View>
                     :
                     <>
-                        <View style={{ flex: 1 }}>
+                        <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
-                        <View style={{ flex: 1 }}>
+                        <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
                         </View>
                     </>

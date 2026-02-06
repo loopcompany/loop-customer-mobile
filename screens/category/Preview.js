@@ -328,7 +328,7 @@ function Preview({ navigation }) {
                             ]}
                         >
                             <Ionicons name={'ticket-outline'} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder='کد تخفیف خود را وارد کنید.' placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
+                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder='کد تشویقی خودرا وارد کنید.' placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
                         </View>
                         <Pressable
                             style={[
@@ -383,7 +383,7 @@ function Preview({ navigation }) {
                                     <View>
                                         <View style={[NewStyles.row, { gap: 5, paddingHorizontal: '5%' }]}>
                                             <Ionicons name={item?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                                            <Text style={NewStyles.title}>{item?.title}</Text>
+                                            <Text style={[NewStyles.title,{flex:1}]}>{item?.title}</Text>
                                         </View>
                                         <FlatList
                                             style={{ paddingHorizontal: '5%', padding: 20 }}

@@ -13,6 +13,8 @@ import DatePickerModal from '../../components/DatePickerModal';
 import LocationPicker from '../../components/LocationPicker';
 import { uri } from '../../services/URL';
 import { jalaliToGregorian, showAlert } from '../../helpers/Common';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '../../components/Button';
 
 const Register = ({ navigation }) => {
   // Form states
@@ -66,8 +68,8 @@ const Register = ({ navigation }) => {
     const sum = code.split('').slice(0, 9)
       .reduce((acc, digit, i) => acc + parseInt(digit) * (10 - i), 0);
     const remainder = sum % 11;
-    return (remainder < 2 && check === remainder) || 
-           (remainder >= 2 && check === 11 - remainder);
+    return (remainder < 2 && check === remainder) ||
+      (remainder >= 2 && check === 11 - remainder);
   };
 
   const validateMobile = (mobile) => {
@@ -101,7 +103,7 @@ const Register = ({ navigation }) => {
 
     if (!mobileNumber) {
       newErrors.mobileNumber = 'شماره موبایل الزامی است';
-    } else if (!validateMobile(mobileNumber)) {
+    } else if (!validateMobile('0' + mobileNumber)) {
       newErrors.mobileNumber = 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد';
     }
 
@@ -159,7 +161,7 @@ const Register = ({ navigation }) => {
   const pickImage = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (permissionResult.granted === false) {
         showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
         return;
@@ -227,7 +229,7 @@ const Register = ({ navigation }) => {
       if (profileImage) {
         const uriParts = profileImage.uri.split('.');
         const fileType = uriParts[uriParts.length - 1];
-        
+
         formData.append('profile_image', {
           uri: profileImage.uri,
           name: `profile.${fileType}`,
@@ -238,18 +240,18 @@ const Register = ({ navigation }) => {
       // Add all form fields
       formData.append('organization_name', organizationName);
       formData.append('organization_email', organizationEmail);
-      formData.append('organization_phone', organizationPhoneNumber);
+      formData.append('organization_phone', '021' + organizationPhoneNumber);
       formData.append('organization_address', organizationAddress);
       formData.append('manager_full_name', familyName);
       formData.append('manager_national_code', nationalCode);
-      formData.append('manager_mobile', mobileNumber);
+      formData.append('manager_mobile', '0' + mobileNumber);
       formData.append('manager_birthdate', gregorianDate);  // Send Gregorian date to API
       formData.append('city', city);
       formData.append('region', region);
       formData.append('postal_code', organizationPostalCode);
       formData.append('password', password);
       formData.append('password_confirmation', password);
-      
+
       // Add location IDs
       if (selectedProvince) {
         formData.append('province_id', selectedProvince.id);
@@ -308,12 +310,12 @@ const Register = ({ navigation }) => {
           method: error.config.method,
         } : null
       });
-      
+
       if (error.response) {
         // Server responded with error (4xx, 5xx)
         console.log('Server response:', error.response.data);
         const errorData = error.response.data;
-        
+
         if (errorData.errors) {
           // Validation errors from server
           const serverErrors = {};
@@ -321,7 +323,7 @@ const Register = ({ navigation }) => {
             serverErrors[key] = errorData.errors[key][0];
           });
           setErrors(serverErrors);
-          
+
           showAlert('خطا در اعتبارسنجی', errorData.message || 'لطفا فیلدها را بررسی کنید');
         } else {
           showAlert('خطا', errorData.message || 'خطا در ثبت نام');
@@ -337,9 +339,9 @@ const Register = ({ navigation }) => {
           `3. دستگاه و سرور در یک شبکه باشند`,
           [
             { text: 'بستن' },
-            { 
-              text: 'تلاش مجدد', 
-              onPress: () => handleRegister() 
+            {
+              text: 'تلاش مجدد',
+              onPress: () => handleRegister()
             }
           ]
         );
@@ -354,571 +356,543 @@ const Register = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1, backgroundColor: '#d1e9ff' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <CustomStatusBar />
-      <ScreenHeaders
-        title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => navigation.navigate('TestConnection')}
-        rightIcon="🔧"
-      />
-      
-      <ScrollView 
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>
+      <KeyboardAvoidingView
+        style={NewStyles.container}
+        behavior={'padding'}
       >
-        {/* Main header - اطلاعات تکمیلی */}
-        <View style={{ 
-          width: '90%', 
-          alignSelf: 'center', 
-          backgroundColor: '#1976d2', 
-          borderRadius: 10, 
-          paddingVertical: 12, 
-          marginBottom: 15, 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          elevation: 3,
-          shadowColor: '#1976d2',
-          shadowOpacity: 0.3,
-          shadowRadius: 4
-        }}>
-          <Text style={{ 
-            color: '#fff', 
-            fontSize: 16, 
-            fontWeight: 'bold', 
-            fontFamily: 'VazirBold',
-            textAlign: 'center' 
-          }}>اطلاعات تکمیلی</Text>
-        </View>
+        <CustomStatusBar />
+        <ScreenHeaders
+          title="سازمانی / دولتی"
+          onPressRight={() => navigation.navigate('TestConnection')}
+          rightIcon="🔧"
+        />
 
-        {/* Form Container */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          
-          {/* تصویر پروفایل */}
-          <TouchableOpacity 
-            onPress={pickImage}
-            style={{ 
-              marginBottom: 15,
-              alignItems: 'center',
-              paddingVertical: 15,
-              backgroundColor: '#f5f5f5',
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderStyle: 'dashed'
-            }}
-          >
-            {profileImage ? (
-              <Image 
-                source={{ uri: profileImage.uri }} 
-                style={{ 
-                  width: 100, 
-                  height: 100, 
-                  borderRadius: 50,
-                  marginBottom: 8
-                }} 
-              />
-            ) : (
-              <View style={{ 
-                width: 100, 
-                height: 100, 
-                borderRadius: 50,
-                backgroundColor: '#e0e0e0',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 8
-              }}>
-                <Text style={{ fontSize: 40 }}>👤</Text>
-              </View>
-            )}
-            <Text style={{ 
-              fontSize: 14, 
-              fontFamily: 'VazirLight',
-              color: '#666'
-            }}>
-              {profileImage ? 'تغییر تصویر پروفایل' : 'انتخاب تصویر پروفایل (اختیاری)'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* نام سازمان */}
-          <View style={{ marginBottom: 8 }}>
-            <TextInput
-              value={organizationName}
-              onChangeText={setOrganizationName}
-              placeholder="نام سازمان * :"
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.organizationName ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            {errors.organizationName && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.organizationName}
-              </Text>
-            )}
+        <ScrollView
+          contentContainerStyle={{ paddingTop: 10 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main header - اطلاعات تکمیلی */}
+          <View style={{
+            width: '90%',
+            alignSelf: 'center',
+            backgroundColor: '#1976d2',
+            borderRadius: 10,
+            paddingVertical: 12,
+            marginBottom: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+            elevation: 3,
+            shadowColor: '#1976d2',
+            shadowOpacity: 0.3,
+            shadowRadius: 4
+          }}>
+            <Text style={[NewStyles.title4]}>اطلاعات تکمیلی</Text>
           </View>
 
-          {/* نام و نام خانوادگی مدیر */}
-          <View style={{ marginBottom: 8 }}>
-            <TextInput
-              value={familyName}
-              onChangeText={setFamilyName}
-              placeholder="نام و نام خانوادگی مدیر * :"
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.familyName ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            {errors.familyName && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.familyName}
-              </Text>
-            )}
-          </View>
+          {/* Form Container */}
+          <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
 
-          {/* شماره ملی مدیر */}
-          <View style={{ marginBottom: 8 }}>
-            <TextInput
-              value={nationalCode}
-              onChangeText={setNationalCode}
-              placeholder="شماره ملی مدیر * :"
-              keyboardType="numeric"
-              maxLength={10}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            {errors.nationalCode && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.nationalCode}
-              </Text>
-            )}
-          </View>
-
-          {/* شماره تلفن همراه مدیر */}
-          <View style={{ marginBottom: 8, position: 'relative' }}>
-            <TextInput
-              value={mobileNumber}
-              onChangeText={setMobileNumber}
-              placeholder="شماره تلفن همراه مدیر * (09xxxxxxxxx)"
-              keyboardType="numeric"
-              maxLength={11}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                paddingLeft: 45,
-                borderWidth: 1, 
-                borderColor: errors.mobileNumber ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            <View style={{ 
-              position: 'absolute', 
-              left: 8, 
-              top: 8, 
-              zIndex: 1,
-              backgroundColor: '#ffeb3b',
-              borderRadius: 4,
-              paddingHorizontal: 6,
-              paddingVertical: 2
-            }}>
-              <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>iran 98+</Text>
-            </View>
-            {errors.mobileNumber && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.mobileNumber}
-              </Text>
-            )}
-          </View>
-
-          {/* متولد */}
-          <View style={{ marginBottom: 8 }}>
+            {/* تصویر پروفایل */}
             <TouchableOpacity
-              onPress={() => setDatePickerModal(true)}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.birthDate ? '#ff0000' : '#ccc',
-                height: 40,
-                justifyContent: 'center'
+              onPress={pickImage}
+              style={{
+                marginBottom: 15,
+                alignItems: 'center',
+                paddingVertical: 15,
+                backgroundColor: '#f5f5f5',
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderStyle: 'dashed'
               }}
             >
-              <Text style={{ 
+              {profileImage ? (
+                <Image
+                  source={{ uri: profileImage.uri }}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50,
+                    marginBottom: 8
+                  }}
+                />
+              ) : (
+                <View style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 50,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 8
+                }}>
+                  <Text style={{ fontSize: 40 }}>👤</Text>
+                </View>
+              )}
+              <Text style={{
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
-                color: birthDate ? '#333' : '#999'
+                color: '#666'
               }}>
-                {birthDate ? `تاریخ تولد: ${birthDate}` : 'تاریخ تولد * : (انتخاب تاریخ)'}
+                {profileImage ? 'تغییر تصویر پروفایل' : 'انتخاب تصویر پروفایل (اختیاری)'}
               </Text>
             </TouchableOpacity>
-            {errors.birthDate && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.birthDate}
-              </Text>
-            )}
-          </View>
 
-          {/* آدرس ایمیل سازمان */}
-          <View style={{ marginBottom: 8 }}>
-            <TextInput
-              value={organizationEmail}
-              onChangeText={setOrganizationEmail}
-              placeholder="آدرس ایمیل سازمان * :"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.organizationEmail ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            {errors.organizationEmail && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.organizationEmail}
-              </Text>
-            )}
-          </View>
+            {/* نام سازمان */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>نام سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <TextInput
+                value={organizationName}
+                onChangeText={setOrganizationName}
+                placeholder="نام سازمان *"
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.organizationName ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 40
+                }}
+              />
+              {errors.organizationName && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.organizationName}
+                </Text>
+              )}
+            </View>
 
-          {/* شماره تلفن ثابت سازمان */}
-          <View style={{ marginBottom: 8 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-              <View style={{ flex: 2 }}>
+            {/* نام و نام خانوادگی مدیر */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>نام و نام خانوادگی مدیر <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={familyName}
+                onChangeText={setFamilyName}
+                placeholder="نام و نام خانوادگی مدیر *"
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.familyName ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 40
+                }}
+              />
+              {errors.familyName && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.familyName}
+                </Text>
+              )}
+            </View>
+
+            {/* شماره ملی مدیر */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره ملی مدیر <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={nationalCode}
+                onChangeText={setNationalCode}
+                placeholder="شماره ملی مدیر *"
+                keyboardType="numeric"
+                maxLength={10}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 40
+                }}
+              />
+              {errors.nationalCode && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.nationalCode}
+                </Text>
+              )}
+            </View>
+
+            {/* شماره تلفن همراه مدیر */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره تلفن همراه مدیر <Text style={NewStyles.title6}>*</Text></Text>
+              <View style={[NewStyles.row, { gap: 10 }]}>
                 <TextInput
-                  value={organizationPhoneNumber}
-                  onChangeText={setOrganizationPhoneNumber}
-                  placeholder=":شماره تلفن ثابت سازمان * "
-                  keyboardType="phone-pad"
-                  style={{ 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: 8, 
-                    paddingVertical: 10, 
+                  value={mobileNumber}
+                  onChangeText={setMobileNumber}
+                  placeholder="شماره تلفن همراه مدیر *"
+                  keyboardType="numeric"
+                  maxLength={10}
+                  style={{
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: 8,
+                    paddingVertical: 10,
                     paddingHorizontal: 12,
-                    borderWidth: 1, 
-                    borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
+                    paddingLeft: 45,
+                    borderWidth: 1,
+                    borderColor: errors.mobileNumber ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    height: 40
+                    height: 40,
+                    flex: 1
                   }}
                 />
-              </View>
-              <View style={{ 
-                backgroundColor: '#ffeb3b',
-                borderRadius: 4,
-                paddingHorizontal: 6,
-                paddingVertical: 2,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 40,
-                minWidth: 50
-              }}>
-                <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
-              </View>
-            </View>
-            {errors.organizationPhoneNumber && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.organizationPhoneNumber}
-              </Text>
-            )}
-          </View>
-
-          {/* رمز عبور */}
-          <View style={{ marginBottom: 8, position: 'relative' }}>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder=":رمز عبور * (حداقل 8 کاراکتر)"
-              secureTextEntry={!showPassword}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                paddingLeft: 45,
-                borderWidth: 1, 
-                borderColor: errors.password ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowPassword(!showPassword)}
-              style={{ 
-                position: 'absolute', 
-                left: 12, 
-                top: 10, 
-                zIndex: 1 
-              }}
-            >
-              <Ionicons 
-                name={showPassword ? 'eye-outline' : 'eye-off-outline'} 
-                size={22} 
-                color="#666" 
-              />
-            </TouchableOpacity>
-            {errors.password && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.password}
-              </Text>
-            )}
-          </View>
-
-          {/* استان، شهر و منطقه با LocationPicker */}
-          <View style={{ marginBottom: 8 }}>
-            <LocationPicker
-              selectedProvince={selectedProvince}
-              selectedCity={selectedCity}
-              selectedRegion={selectedRegion}
-              onProvinceChange={setSelectedProvince}
-              onCityChange={setSelectedCity}
-              onRegionChange={setSelectedRegion}
-              errors={{
-                province: errors.province,
-                city: errors.city,
-                region: errors.region
-              }}
-              required={true}
-            />
-          </View>
-
-          {/* آدرس سازمان */}
-          <View style={{ marginBottom: 8 }}>
-            <TextInput
-              value={organizationAddress}
-              onChangeText={setOrganizationAddress}
-              placeholder="آدرس سازمان * :"
-              multiline
-              numberOfLines={2}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 60,
-                textAlignVertical: 'top'
-              }}
-            />
-            {errors.organizationAddress && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.organizationAddress}
-              </Text>
-            )}
-          </View>
-
-          {/* کد پستی سازمان */}
-          <View style={{ marginBottom: 15 }}>
-            <TextInput
-              value={organizationPostalCode}
-              onChangeText={setOrganizationPostalCode}
-              placeholder="کد پستی سازمان * : (10 رقم)"
-              keyboardType="numeric"
-              maxLength={10}
-              style={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 8, 
-                paddingVertical: 10, 
-                paddingHorizontal: 12,
-                borderWidth: 1, 
-                borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'right',
-                height: 40
-              }}
-            />
-            {errors.organizationPostalCode && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.organizationPostalCode}
-              </Text>
-            )}
-          </View>
-
-          {/* Security Code Input and Captcha */}
-          <View style={{ marginBottom: 15 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-              {/* بروچر - دکمه سمت چپ */}
-              <TouchableOpacity 
-                onPress={() => {
-                  setDisplayedCaptcha(generateCaptcha());
-                  setSecurityCode('');
-                }}
-                style={{ 
-                  backgroundColor: '#e3f2fd',
-                  borderRadius: 8,
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  borderWidth: 1.5,
-                  borderColor: '#1976d2',
-                  flex: 1,
+                <View style={{
+                  backgroundColor: '#ffeb3b',
+                  borderRadius: 4,
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: 36,
-                  flexDirection: 'row'
+                  height: 40,
+                  minWidth: 50
+                }}>
+                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>+98-</Text>
+                </View>
+              </View>
+              {errors.mobileNumber && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.mobileNumber}
+                </Text>
+              )}
+            </View>
+
+            {/* متولد */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>تاریخ تولد <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TouchableOpacity
+                onPress={() => setDatePickerModal(true)}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.birthDate ? '#ff0000' : '#ccc',
+                  height: 40,
+                  justifyContent: 'center'
                 }}
               >
-                <Text style={{ 
+                <Text style={{
                   fontSize: 14,
-                  fontFamily: 'VazirBold',
-                  color: '#1976d2',
-                  textAlign: 'center',
-                  letterSpacing: 2,
-                  textDecorationLine: 'line-through',
-                  textDecorationColor: '#1976d2',
-                  marginRight: 4
-                }}>{displayedCaptcha}</Text>
-                <Text style={{ fontSize: 12, color: '#1976d2' }}>↺</Text>
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  color: birthDate ? '#333' : '#999'
+                }}>
+                  {birthDate ? `تاریخ تولد: ${birthDate}` : 'تاریخ تولد * : (انتخاب تاریخ)'}
+                </Text>
               </TouchableOpacity>
+              {errors.birthDate && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.birthDate}
+                </Text>
+              )}
+            </View>
 
-              {/* کد امنیتی - Text Input سمت راست */}
-              <View style={{ flex: 1 }}>
+            {/* آدرس ایمیل سازمان */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>آدرس ایمیل سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <TextInput
+                value={organizationEmail}
+                onChangeText={setOrganizationEmail}
+                placeholder="آدرس ایمیل سازمان *"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.organizationEmail ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 40
+                }}
+              />
+              {errors.organizationEmail && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.organizationEmail}
+                </Text>
+              )}
+            </View>
+
+            {/* شماره تلفن ثابت سازمان */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره تلفن ثابت سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <View style={[NewStyles.row, { gap: 8 }]}>
+                <View style={{ flex: 2 }}>
+                  <TextInput
+                    value={organizationPhoneNumber}
+                    onChangeText={setOrganizationPhoneNumber}
+                    placeholder="شماره تلفن ثابت سازمان * "
+                    keyboardType="phone-pad"
+                    maxLength={8}
+                    style={{
+                      backgroundColor: '#f5f5f5',
+                      borderRadius: 8,
+                      paddingVertical: 10,
+                      paddingHorizontal: 12,
+                      borderWidth: 1,
+                      borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
+                      fontSize: 14,
+                      fontFamily: 'VazirLight',
+                      textAlign: 'right',
+                      height: 40
+                    }}
+                  />
+                </View>
+                <View style={{
+                  backgroundColor: '#ffeb3b',
+                  borderRadius: 4,
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 40,
+                  minWidth: 50
+                }}>
+                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
+                </View>
+              </View>
+              {errors.organizationPhoneNumber && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.organizationPhoneNumber}
+                </Text>
+              )}
+            </View>
+
+            {/* رمز عبور */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>رمز عبور <Text style={NewStyles.title6}>*</Text></Text>
+              <View style={[NewStyles.row, {
+                gap: 10, backgroundColor: '#f5f5f5',
+                borderWidth: 1,
+                borderColor: errors.password ? '#ff0000' : '#ccc', borderRadius: 8, paddingHorizontal: 12,
+              }]}>
                 <TextInput
-                  value={securityCode}
-                  onChangeText={setSecurityCode}
-                  placeholder="کد امنیتی *"
-                  autoCapitalize="characters"
-                  style={{ 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: 8, 
-                    paddingVertical: 8, 
-                    paddingHorizontal: 10,
-                    borderWidth: 1, 
-                    borderColor: errors.securityCode ? '#ff0000' : '#ccc',
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="رمز عبور * (حداقل 8 کاراکتر)"
+                  secureTextEntry={!showPassword}
+                  style={{
+
+                    borderRadius: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 5,
+                    paddingLeft: 45,
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     textAlign: 'right',
-                    height: 36
+                    height: 40,
+                    flex: 1
                   }}
                 />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{
+                  }}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={22}
+                    color="#666"
+                  />
+                </TouchableOpacity>
               </View>
+              {errors.password && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.password}
+                </Text>
+              )}
             </View>
-            {errors.securityCode && (
-              <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
-                {errors.securityCode}
-              </Text>
-            )}
+
+            {/* استان، شهر و منطقه با LocationPicker */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>استان، شهر و منطقه <Text style={NewStyles.title6}>*</Text></Text>
+              <LocationPicker
+                selectedProvince={selectedProvince}
+                selectedCity={selectedCity}
+                selectedRegion={selectedRegion}
+                onProvinceChange={setSelectedProvince}
+                onCityChange={setSelectedCity}
+                onRegionChange={setSelectedRegion}
+                errors={{
+                  province: errors.province,
+                  city: errors.city,
+                  region: errors.region
+                }}
+                required={true}
+              />
+            </View>
+
+            {/* آدرس سازمان */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>آدرس سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <TextInput
+                value={organizationAddress}
+                onChangeText={setOrganizationAddress}
+                placeholder="آدرس سازمان *"
+                multiline
+                numberOfLines={2}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 60,
+                  textAlignVertical: 'top'
+                }}
+              />
+              {errors.organizationAddress && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.organizationAddress}
+                </Text>
+              )}
+            </View>
+
+            {/* کد پستی سازمان */}
+            <View style={{ marginBottom: 15 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>کد پستی سازمان <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={organizationPostalCode}
+                onChangeText={setOrganizationPostalCode}
+                placeholder="کد پستی سازمان * (10 رقم)"
+                keyboardType="numeric"
+                maxLength={10}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  textAlign: 'right',
+                  height: 40
+                }}
+              />
+              {errors.organizationPostalCode && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.organizationPostalCode}
+                </Text>
+              )}
+            </View>
+
+            {/* Security Code Input and Captcha */}
+            <View style={{ marginBottom: 15, }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, alignItems: 'flex-end' }}>
+                {/* بروچر - دکمه سمت چپ */}
+                <TouchableOpacity
+                  onPress={() => {
+                    setDisplayedCaptcha(generateCaptcha());
+                    setSecurityCode('');
+                  }}
+                  style={{
+                    backgroundColor: '#e3f2fd',
+                    borderRadius: 8,
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    borderWidth: 1.5,
+                    borderColor: '#1976d2',
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 36,
+                    flexDirection: 'row'
+                  }}
+                >
+                  <Text style={{
+                    fontSize: 14,
+                    fontFamily: 'VazirBold',
+                    color: '#1976d2',
+                    textAlign: 'center',
+                    letterSpacing: 2,
+                    textDecorationLine: 'line-through',
+                    textDecorationColor: '#1976d2',
+                    marginRight: 4
+                  }}>{displayedCaptcha}</Text>
+                  <Text style={{ fontSize: 12, color: '#1976d2' }}>↺</Text>
+                </TouchableOpacity>
+
+                {/* کد امنیتی - Text Input سمت راست */}
+                <View style={{ flex: 1 }}>
+                  <Text style={[NewStyles.text, { marginBottom: 5 }]}>کد امنیتی <Text style={NewStyles.title6}>*</Text></Text>
+                  <TextInput
+                    value={securityCode}
+                    onChangeText={setSecurityCode}
+                    placeholder="کد امنیتی *"
+                    autoCapitalize="characters"
+                    style={{
+                      backgroundColor: '#f5f5f5',
+                      borderRadius: 8,
+                      paddingVertical: 8,
+                      paddingHorizontal: 10,
+                      borderWidth: 1,
+                      borderColor: errors.securityCode ? '#ff0000' : '#ccc',
+                      fontSize: 14,
+                      fontFamily: 'VazirLight',
+                      textAlign: 'right',
+                      height: 36
+                    }}
+                  />
+                </View>
+              </View>
+              {errors.securityCode && (
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                  {errors.securityCode}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
 
-        {/* ثبت نام section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
-          <TouchableOpacity 
-            onPress={handleRegister}
-            disabled={loading}
-            style={{ 
-              backgroundColor: loading ? '#90caf9' : '#1976d2', 
-              borderRadius: 10, 
-              paddingVertical: 12, 
-              marginBottom: 10, 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              elevation: 3,
-              shadowColor: '#1976d2',
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              opacity: loading ? 0.7 : 1
-            }}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={{ 
-                color: '#fff', 
-                fontSize: 16, 
-                fontWeight: 'bold', 
-                fontFamily: 'VazirBold',
-                textAlign: 'center' 
-              }}>ثبت نام</Text>
-            )}
-          </TouchableOpacity>
+          {/* ثبت نام section */}
+          <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
 
-          {/* دکمه ورود به حساب کاربری */}
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Login')}
-            style={{ 
-              backgroundColor: '#1976d2', 
-              borderRadius: 10, 
-              paddingVertical: 12, 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              elevation: 3,
-              shadowColor: '#1976d2',
-              shadowOpacity: 0.3,
-              shadowRadius: 4
-            }}
-          >
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              fontFamily: 'VazirBold',
-              textAlign: 'center' 
-            }}>ورود به حساب کاربری</Text>
-          </TouchableOpacity>
-        </View>
+            <Button
+              title={'ثبت نام'}
+              onPress={handleRegister}
+              loading={loading}
+            />
+            <Button
+              title={'ورود به حساب کاربری'}
+              onPress={() => { navigation.navigate('Login') }}
+            />
+          </View>
 
-      </ScrollView>
-      
-      {/* DatePicker Modal */}
-      <DatePickerModal 
-        datePickerModal={datePickerModal}
-        setDatePickerModal={setDatePickerModal}
-        birthDate={birthDate}
-        setBirthDate={setBirthDate}
-      />
-    </KeyboardAvoidingView>
+        </ScrollView>
+
+        {/* DatePicker Modal */}
+        <DatePickerModal
+          datePickerModal={datePickerModal}
+          setDatePickerModal={setDatePickerModal}
+          birthDate={birthDate}
+          setBirthDate={setBirthDate}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

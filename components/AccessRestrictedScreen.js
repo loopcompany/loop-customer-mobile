@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Linking,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -110,7 +111,11 @@ const AccessRestrictedScreen = ({
         break;
       case 'go_back':
         console.log('📱 Going back');
-        navigation.goBack();
+        if (Platform.OS == 'web') {
+          window.history.back()
+        } else {
+          navigation.goBack()
+        }
         break;
       case 'go_home':
         console.log('📱 Navigating to Home');
@@ -293,7 +298,7 @@ const AccessRestrictedScreen = ({
           <Text style={styles.helpText}>
             در صورت داشتن سوال یا مشکل، می‌توانید با پشتیبانی تماس بگیرید.
           </Text>
-          <TouchableOpacity style={styles.helpButton} onPress={()=>{Linking.openURL(contacts?.data?.link)}}>
+          <TouchableOpacity style={styles.helpButton} onPress={() => { Linking.openURL(contacts?.data?.link) }}>
             <Icon name="support-agent" size={20} color={themeColor0.color} />
             <Text style={styles.helpButtonText}>تماس با پشتیبانی</Text>
           </TouchableOpacity>

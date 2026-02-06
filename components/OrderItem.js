@@ -156,18 +156,18 @@ export default function OrderItem({ item, navigation }) {
             {renderRow(item?.category?.title, `شناسه سفارش: ${item?.id}`, [NewStyles.text, { fontSize: 14 }], NewStyles.text)}
 
             {Number(item?.is_fixed) == 0 ?
-                renderRow(item?.status == 0 ? 'مبلغ پایه لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.text7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                renderRow(item?.status == 0 ? 'مبلغ پایه لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
                 :
-                renderRow(item?.status == 0 ? 'مبلغ قطعی لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.text7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                renderRow(item?.status == 0 ? 'مبلغ قطعی لوپ' : 'مبلغ نهایی', totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}` + ' تومان' : 'نیاز به بررسی', [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
             }
 
             {item?.status != 2 && renderRow(`زمان مراجعه تکنسین`, item?.is_urgent > 0 ? 'درخواست فوری ' : formatDate(item?.date) + ' ساعت ' + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
 
-            {item?.discount_price && renderRow('تخفیف نهایی شما از سفارش', formatPrice(item?.discount_price) + ' تومان', NewStyles.text, NewStyles.text10)}
-            {totalPrice > totalDiscountedPrice && renderRow('قیمت بدون تخفیف', formatPrice(totalPrice) + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+            {item?.discount_price && renderRow('تخفیف نهایی شما از سفارش', formatPrice(item?.discount_price) + ' تومان', NewStyles.title, NewStyles.text10)}
+            {totalPrice > totalDiscountedPrice && renderRow('قیمت بدون تخفیف', formatPrice(totalPrice) + ' تومان', NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
             {/* {item?.status == 2 && renderRow('وضعیت پرداخت', item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده', NewStyles.text, item?.payment_status > 0 ? NewStyles.text7 : NewStyles.text6)} */}
             {item?.status == 2 && <View style={NewStyles.rowWrapper}>
-                <Text style={[NewStyles.text10]}>وضعیت پرداخت</Text>
+                <Text style={[NewStyles.title10]}>وضعیت پرداخت</Text>
                 <View style={[{ backgroundColor: item?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
                     <Text style={NewStyles.text4}>{item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
                 </View>

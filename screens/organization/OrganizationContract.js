@@ -30,14 +30,14 @@ const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
   const reduxContractStatus = useSelector(state => state.organization.contractStatus);
   const { refetch } = useOrganizationAccess(); // برای رفرش کردن وضعیت کامل (پروفایل + قرارداد)
-  
+
   const [loading, setLoading] = useState(false);
   const [loadingContract, setLoadingContract] = useState(true);
   const [uploadingContract, setUploadingContract] = useState(false);
-  
+
   // Contract data from admin
   const [adminContract, setAdminContract] = useState(null);
-  
+
   // User uploaded contract
   const [uploadedContract, setUploadedContract] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -46,26 +46,26 @@ const OrganizationContract = ({ navigation }) => {
   const toJalaliDate = (dateString) => {
     try {
       if (!dateString) return '';
-      
+
       const date = new Date(dateString);
-      
+
       // بررسی اعتبار تاریخ
       if (isNaN(date.getTime())) {
         console.warn('Invalid date string:', dateString);
         return dateString;
       }
-      
+
       const jalaaliDate = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-      
+
       // فرمت: ۱۴۰۳/۰۸/۲۱ (اعداد فارسی)
       const year = jalaaliDate.jy.toString();
       const month = jalaaliDate.jm.toString().padStart(2, '0');
       const day = jalaaliDate.jd.toString().padStart(2, '0');
-      
+
       // تبدیل اعداد انگلیسی به فارسی
       const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
       const jalaliDateStr = `${year}/${month}/${day}`;
-      
+
       return jalaliDateStr.replace(/[0-9]/g, (digit) => persianNumbers[parseInt(digit)]);
     } catch (error) {
       console.error('Error converting date to Jalaali:', error);
@@ -83,7 +83,7 @@ const OrganizationContract = ({ navigation }) => {
       console.log('🔄 loadContractData called');
       setLoadingContract(true);
       const token = await AsyncStorage.getItem('userToken');
-      
+
       if (!token) {
         showAlert('خطا', 'لطفا ابتدا وارد شوید');
         navigation.navigate('Login');
@@ -126,7 +126,7 @@ const OrganizationContract = ({ navigation }) => {
         // آخرین قرارداد آپلود شده
         const latestUpload = orgContractsResponse.data.data[0];
         console.log('📤 Latest uploaded contract:', latestUpload);
-        
+
         const uploadedData = {
           id: latestUpload.id,
           file_url: latestUpload.contract_url,
@@ -138,7 +138,7 @@ const OrganizationContract = ({ navigation }) => {
           reviewed_at: latestUpload.reviewed_at ? toJalaliDate(latestUpload.reviewed_at) : null,
           can_edit: latestUpload.can_edit,
         };
-        
+
         console.log('✅ Setting uploadedContract:', uploadedData);
         console.log('📅 Date conversion test:', {
           original_uploaded_at: latestUpload.uploaded_at,
@@ -147,7 +147,7 @@ const OrganizationContract = ({ navigation }) => {
           converted_reviewed_at: uploadedData.reviewed_at
         });
         setUploadedContract(uploadedData);
-        
+
         // 🔥 آپدیت Redux state با وضعیت واقعی قرارداد از API
         if (latestUpload.status) {
           dispatch(updateContractStatus(latestUpload.status));
@@ -156,7 +156,7 @@ const OrganizationContract = ({ navigation }) => {
       } else {
         console.log('⚠️ No uploaded contracts found');
         setUploadedContract(null);
-        
+
         // اگه قراردادی نداریم، وضعیت رو 'not_uploaded' بزاریم
         dispatch(updateContractStatus('not_uploaded'));
         console.log('✅ Redux contractStatus updated to: not_uploaded');
@@ -165,10 +165,14 @@ const OrganizationContract = ({ navigation }) => {
     } catch (error) {
       console.error('❌ Error loading contract:', error);
       console.error('Error response:', error.response?.data);
-      
+
       if (error.response?.status === 403) {
         showAlert('خطا', 'فقط کاربران سازمانی می‌توانند قراردادها را مشاهده کنند');
-        navigation.goBack();
+        if (Platform.OS == 'web') {
+          window.history.back()
+        } else {
+          navigation.goBack()
+        }
       } else if (error.response?.status === 404) {
         // هیچ قراردادی یافت نشد - این عادی است
         console.log('⚠️ 404 - No contracts found (normal)');
@@ -191,7 +195,7 @@ const OrganizationContract = ({ navigation }) => {
       }
 
       const supported = await Linking.canOpenURL(adminContract.file_url);
-      
+
       if (supported) {
         await Linking.openURL(adminContract.file_url);
       } else {
@@ -218,7 +222,7 @@ const OrganizationContract = ({ navigation }) => {
         size: selectedFile.size
       } : null
     });
-    
+
     try {
       // بررسی امکان آپلود
       if (uploadedContract && uploadedContract.status === 'approved') {
@@ -237,7 +241,7 @@ const OrganizationContract = ({ navigation }) => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
-        
+
         console.log('📄 File selected:', {
           name: file.name,
           size: file.size,
@@ -245,7 +249,7 @@ const OrganizationContract = ({ navigation }) => {
           uri: file.uri,
           hasFileObject: !!file.file
         });
-        
+
         // Check file size (max 500MB according to API docs)
         if (file.size > 500 * 1024 * 1024) {
           console.log('❌ File too large:', file.size);
@@ -261,7 +265,7 @@ const OrganizationContract = ({ navigation }) => {
         }
 
         console.log('✅ Validation passed, setting selectedFile');
-        
+
         // 🌐 در وب، باید File object واقعی رو هم ذخیره کنیم
         if (Platform.OS === 'web' && file.file) {
           console.log('📁 Web: Storing File object');
@@ -272,7 +276,7 @@ const OrganizationContract = ({ navigation }) => {
         } else {
           setSelectedFile(file);
         }
-        
+
         showAlert('موفق', `فایل ${file.name} انتخاب شد`);
       } else {
         console.log('⚠️ File selection canceled or no file');
@@ -305,7 +309,7 @@ const OrganizationContract = ({ navigation }) => {
       uploadingContract,
       loading
     });
-    
+
     try {
       if (!selectedFile) {
         console.log('❌ No file selected');
@@ -315,7 +319,7 @@ const OrganizationContract = ({ navigation }) => {
 
       setUploadingContract(true);
       const token = await AsyncStorage.getItem('userToken');
-      
+
       if (!token) {
         console.log('❌ No token found');
         showAlert('خطا', 'لطفا ابتدا وارد شوید');
@@ -325,12 +329,12 @@ const OrganizationContract = ({ navigation }) => {
 
       console.log('🔑 Token found, preparing FormData...');
       const formData = new FormData();
-      
+
       // 🌐 Platform-specific file handling
       if (Platform.OS === 'web') {
         // در وب، selectedFile.file یک File object واقعی است
         console.log('📁 Web: Appending File object directly');
-        
+
         // بررسی وجود file object
         if (selectedFile.file) {
           formData.append('contract_file', selectedFile.file, selectedFile.name);
@@ -370,12 +374,12 @@ const OrganizationContract = ({ navigation }) => {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',
       };
-      
+
       // فقط در React Native باید Content-Type تنظیم بشه
       if (Platform.OS !== 'web') {
         headers['Content-Type'] = 'multipart/form-data';
       }
-      
+
       console.log('📤 Request headers:', headers);
 
       const response = await axios.post(uploadUrl, formData, {
@@ -390,33 +394,33 @@ const OrganizationContract = ({ navigation }) => {
       if (response.data.success) {
         console.log('✅ Upload successful!');
         console.log('Response data:', response.data);
-        
+
         // 🔥 آپدیت Redux state - قرارداد الان pending هست
         dispatch(updateContractStatus('pending'));
         console.log('✅ Redux contractStatus updated to: pending');
-        
+
         // بررسی اینکه واقعاً آپدیت شد یا نه
         setTimeout(() => {
           console.log('🔍 Checking Redux after dispatch - reduxContractStatus:', reduxContractStatus);
         }, 100);
-        
+
         showAlert(
-          'موفق', 
-          response.data.message || 'قرارداد با موفقیت بارگذاری شد و در انتظار تایید است.', 
+          'موفق',
+          response.data.message || 'قرارداد با موفقیت بارگذاری شد و در انتظار تایید است.',
           [
-            { 
-              text: 'باشه', 
+            {
+              text: 'باشه',
               onPress: async () => {
                 console.log('🔄 Clearing selectedFile and reloading data...');
                 setSelectedFile(null);
-                
+
                 // صبر می‌کنیم تا سرور قرارداد رو ثبت کنه
                 console.log('⏳ Waiting 1 second before reloading...');
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 console.log('🔄 Now calling loadContractData...');
                 await loadContractData(); // Reload data
-                
+
                 console.log('🔄 Now calling refetch to update profileStatus + contractStatus...');
                 await refetch(); // 🔥 آپدیت کامل وضعیت از API (هم پروفایل هم قرارداد)
                 console.log('✅ Full status refreshed from API');
@@ -438,7 +442,7 @@ const OrganizationContract = ({ navigation }) => {
           headers: error.config?.headers
         }
       });
-      
+
       if (error.response?.status === 400) {
         console.log('❌ 400 Bad Request');
         showAlert('خطا', error.response.data.message || 'شما یک قرارداد تایید شده دارید و امکان بارگذاری مجدد وجود ندارد.');
@@ -494,8 +498,8 @@ const OrganizationContract = ({ navigation }) => {
     <View style={styles.container}>
       <CustomStatusBar />
       <ScreenHeaders title="قراردادنامه سازمانی" />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -526,7 +530,7 @@ const OrganizationContract = ({ navigation }) => {
               </View>
 
               <View style={styles.contractActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.downloadBtn}
                   onPress={handleDownloadAdminContract}
                 >
@@ -570,7 +574,7 @@ const OrganizationContract = ({ navigation }) => {
 
           {/* دکمه‌های عملیات */}
           <View style={styles.uploadActions}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.selectFileBtn}
               onPress={handlePickDocument}
               disabled={uploadingContract}
@@ -582,7 +586,7 @@ const OrganizationContract = ({ navigation }) => {
             </TouchableOpacity>
 
             {selectedFile && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.uploadBtn}
                 onPress={handleUploadContract}
                 disabled={uploadingContract}
@@ -609,18 +613,18 @@ const OrganizationContract = ({ navigation }) => {
                 uploadedContract.status === 'rejected' && styles.uploadedCardRejected,
               ]}>
                 <View style={styles.uploadedInfo}>
-                  <Ionicons 
+                  <Ionicons
                     name={
                       uploadedContract.status === 'approved' ? 'checkmark-circle' :
-                      uploadedContract.status === 'rejected' ? 'close-circle' :
-                      'time-outline'
-                    } 
-                    size={30} 
+                        uploadedContract.status === 'rejected' ? 'close-circle' :
+                          'time-outline'
+                    }
+                    size={30}
                     color={
                       uploadedContract.status === 'approved' ? '#4caf50' :
-                      uploadedContract.status === 'rejected' ? '#f44336' :
-                      '#ff9800'
-                    } 
+                        uploadedContract.status === 'rejected' ? '#f44336' :
+                          '#ff9800'
+                    }
                   />
                   <View style={styles.uploadedDetails}>
                     <Text style={styles.uploadedFileName}>{uploadedContract.file_name}</Text>
@@ -640,7 +644,7 @@ const OrganizationContract = ({ navigation }) => {
                     ]}>
                       وضعیت: {uploadedContract.status_label}
                     </Text>
-                    
+
                     {/* نمایش دلیل رد */}
                     {uploadedContract.status === 'rejected' && uploadedContract.rejection_reason && (
                       <View style={styles.rejectionBox}>
@@ -648,9 +652,9 @@ const OrganizationContract = ({ navigation }) => {
                         <Text style={styles.rejectionText}>{uploadedContract.rejection_reason}</Text>
                       </View>
                     )}
-                    
+
                     {/* دکمه دانلود قرارداد آپلود شده */}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.viewUploadedBtn}
                       onPress={() => Linking.openURL(uploadedContract.file_url)}
                     >
@@ -968,7 +972,7 @@ const styles = StyleSheet.create({
   statusPending: {
     color: '#ff9800',
   },
-  
+
   // Rejection Reason
   rejectionBox: {
     backgroundColor: '#fff',
@@ -995,7 +999,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     writingDirection: 'rtl',
   },
-  
+
   // View Uploaded Button
   viewUploadedBtn: {
     flexDirection: 'row-reverse',

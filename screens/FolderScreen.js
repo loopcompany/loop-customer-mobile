@@ -6,6 +6,7 @@ import {
   FlatList,
   RefreshControl,
   Platform,
+  ScrollView,
 } from "react-native";
 import Folder from "../components/Folder";
 import NewStyles from "../styles/NewStyles";
@@ -27,7 +28,7 @@ function FolderScreen({ navigation }) {
   const dispatch = useDispatch();
   const user = useSelector(state => state?.user);
   console.log(user);
-  
+
   const loadCategories = async () => {
     try {
       const res = await categoriesAPI.getCategories();
@@ -63,25 +64,39 @@ function FolderScreen({ navigation }) {
       style={NewStyles.container}
       edges={{ top: "off", bottom: "off" }}
     >
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom:30 }]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} imageStyle={{ opacity: 0.8, }} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
-        <View style={styles.logoWrapper}>
-          <Image
-            source={require("../assets/logo.png")}
-            style={NewStyles.logo}
-          />
+        <View>
+          <ScrollView style={{ height: 140, width: '100%' }} refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+            />
+          } contentContainerStyle={{ height: 140 }}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={require("../assets/logo.png")}
+                style={NewStyles.logo}
+              />
+            </View>
+
+          </ScrollView>
         </View>
-        <View style={{ flex: 1, alignItems: 'flex-start' }}>
+        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {/* لوگو بالا */}
-          <FlatList
+          {/* <FlatList
+
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
               />
             }
-            style={{ width: '100%' }}
+            style={{ width: '100%', }}
             data={folders}
+            numColumns={2}
+            columnWrapperStyle={{ backgroundColor: 'red', flexWrap: 'wrap', }}
+            contentContainerStyle={{ paddingBottom: 100 }}
             renderItem={({ item }) => {
               return (
                 <Folder
@@ -122,7 +137,50 @@ function FolderScreen({ navigation }) {
               );
             }}
             keyExtractor={(item) => item?.id?.toString()}
-          />
+          /> */}
+          {
+            folders.map((item) => {
+              return (
+                <View key={item?.id}>
+                  <Folder
+                    title={item?.title}
+                    image={item?.image_path}
+                    onPress={async () => {
+                      if (item?.has_subcategory === 1) {
+                        // اگر دارای زیر دسته است، به SubCategories برو
+                        console.log(
+                          "📂 [FolderScreen] باز کردن زیر دسته:",
+                          item.title
+                        );
+                        navigation.push("SubCategories", {
+                          categoryId: item.id,
+                          categoryTitle: item.title,
+                        });
+                      } else {
+                        try {
+                          const result = await dispatch(fetchSteps(item.id));
+                          console.log(
+                            "🎯 [FolderScreen] نتیجه dispatch:",
+                            result
+                          );
+                          dispatch(setCategory(item));
+                          navigation.navigate("Steps", {
+                            categoryId: item.id,
+                            categoryTitle: item.title,
+                          });
+                        } catch (error) {
+                          console.log(
+                            "❌ [FolderScreen] خطا در dispatch fetchSteps:",
+                            error
+                          );
+                        }
+                      }
+                    }}
+                  />
+                </View>
+              )
+            })
+          }
         </View>
       </ImageBackground>
     </SafeAreaView>

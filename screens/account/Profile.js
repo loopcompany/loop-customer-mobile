@@ -12,7 +12,7 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
 import { userAPI } from '../../services/Api';
 import TokenManager from '../../services/TokenManager';
-import { showToastOrAlert } from '../../helpers/Common';
+import { isLocalUri, showToastOrAlert } from '../../helpers/Common';
 import DatePickerModal from '../../components/DatePickerModal';
 import { Ionicons } from '@expo/vector-icons';
 import OrganizationProfile from './OrganizationProfile';
@@ -25,7 +25,7 @@ export default function Profile() {
     const [datePickerModal, setDatePickerModal] = useState(false);
     const [checkingUserType, setCheckingUserType] = useState(true);
     const [userType, setUserType] = useState(null);
-    
+    const [pickedImageUri, setPickedImageUri] = useState(null);
     // Get user type from Redux
     const userTypeFromRedux = useSelector(state => state.auth.userType);
     // Profile data states
@@ -73,19 +73,19 @@ export default function Profile() {
             console.log('🖼️ getImageUrl: No path provided');
             return null;
         }
-        
+
         // اگر URI محلی است (file://, blob:, content://)
         if (path.startsWith('file://') || path.startsWith('blob:') || path.startsWith('content://')) {
             console.log('🖼️ getImageUrl: Local URI:', path);
             return path;
         }
-        
+
         // اگر URL کامل است (http, https)
         if (path.startsWith('http')) {
             console.log('🖼️ getImageUrl: Full URL:', path);
             return path;
         }
-        
+
         // اگر relative path است از سرور
         const fullUrl = `${imageUri}/${path}`;
         console.log('🖼️ getImageUrl: Building URL from path:', path, '→', fullUrl);
@@ -101,7 +101,7 @@ export default function Profile() {
     const checkUserType = async () => {
         try {
             console.log('🔍 [Profile] شروع بررسی نوع کاربر...');
-            
+
             // First check Redux
             console.log('📦 [Profile] بررسی Redux - userType:', userTypeFromRedux);
             if (userTypeFromRedux) {
@@ -110,18 +110,18 @@ export default function Profile() {
                 setCheckingUserType(false);
                 return;
             }
-            
+
             // If not in Redux, check AsyncStorage
             console.log('💾 [Profile] بررسی AsyncStorage...');
             const accountType = await AsyncStorage.getItem('accountType');
             console.log('💾 [Profile] accountType از AsyncStorage:', accountType);
-            
+
             const userToken = await AsyncStorage.getItem('userToken');
             console.log('🔑 [Profile] userToken موجود:', userToken ? 'بله' : 'خیر');
-            
+
             setUserType(accountType);
             setCheckingUserType(false);
-            
+
             console.log('✅ [Profile] نوع کاربر نهایی تنظیم شد:', accountType);
         } catch (error) {
             console.error('❌ [Profile] خطا در بررسی نوع کاربر:', error);
@@ -153,7 +153,7 @@ export default function Profile() {
         try {
             const newStatus = !autoLoginEnabled;
             setAutoLoginEnabled(newStatus);
-            
+
             if (newStatus) {
                 // First check if user has a valid token
                 const currentToken = await TokenManager.getToken();
@@ -162,7 +162,7 @@ export default function Profile() {
                     setAutoLoginEnabled(false);
                     return;
                 }
-                
+
                 await AsyncStorage.setItem('autoLoginEnabled', 'true');
                 await AsyncStorage.setItem('rememberLogin', 'true');
                 showToastOrAlert('ورود خودکار فعال شد');
@@ -188,7 +188,7 @@ export default function Profile() {
 
             // Launch image picker
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
+                mediaTypes: 'images',
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.8,
@@ -199,6 +199,7 @@ export default function Profile() {
                 console.log('📷 Selected image URI:', selectedImage.uri);
                 console.log('📱 Platform:', Platform.OS);
                 setProfileImage(selectedImage.uri);
+                setPickedImageUri(selectedImage.uri);
                 showToastOrAlert('عکس انتخاب شد. برای ذخیره، دکمه "ذخیره اطلاعات پروفایل" را بزنید');
             }
         } catch (error) {
@@ -238,6 +239,7 @@ export default function Profile() {
                 // Set profile image if available
                 if (user.profile_photo_path) {
                     setProfileImage(user.profile_photo_path);
+                    setPickedImageUri(null);
                 }
             }
         } catch (error) {
@@ -251,7 +253,7 @@ export default function Profile() {
             setIsLoading(true);
 
             // بررسی اینکه آیا عکس جدید انتخاب شده
-            const hasNewImage = profileImage && !profileImage.startsWith('http');
+            const hasNewImage = isLocalUri(pickedImageUri);
 
             if (hasNewImage) {
                 // استفاده از FormData برای آپلود عکس
@@ -327,10 +329,10 @@ export default function Profile() {
                     // بروزرسانی state محلی
                     if (response.user) {
                         const user = response.user;
-                        
+
                         console.log('👤 User data from server:', user);
                         console.log('📷 Profile photo path:', user.profile_photo_path);
-                        
+
                         // بروزرسانی عکس پروفایل
                         if (user.profile_photo_path) {
                             setProfileImage(user.profile_photo_path);
@@ -338,7 +340,7 @@ export default function Profile() {
                         } else {
                             console.log('⚠️ No profile_photo_path in response');
                         }
-                        
+
                         setProfileData(prev => ({
                             ...prev,
                             name: user.name || prev.name,
@@ -395,11 +397,11 @@ export default function Profile() {
 
                     if (response.user) {
                         const user = response.user;
-                        
+
                         if (user.profile_photo_path) {
                             setProfileImage(user.profile_photo_path);
                         }
-                        
+
                         setProfileData(prev => ({
                             ...prev,
                             name: user.name || prev.name,
@@ -411,21 +413,21 @@ export default function Profile() {
                             postal_code: user.postal_code || prev.postal_code,
                             city: user.city || prev.city,
                             region: user.region || prev.region,
-                        home_address: user.home_address || prev.home_address,
-                        work_address: user.work_address || prev.work_address,
-                        card_number: user.card_number || prev.card_number,
-                        sheba_number: user.sheba_number || prev.sheba_number
-                    }));
+                            home_address: user.home_address || prev.home_address,
+                            work_address: user.work_address || prev.work_address,
+                            card_number: user.card_number || prev.card_number,
+                            sheba_number: user.sheba_number || prev.sheba_number
+                        }));
 
-                    if (user.birth_date) {
-                        setBirthDate(user.birth_date);
+                        if (user.birth_date) {
+                            setBirthDate(user.birth_date);
+                        }
+                    }
+
+                    if (response.requires_verification) {
+                        showToastOrAlert('کد تایید به شماره جدید ارسال شد');
                     }
                 }
-
-                if (response.requires_verification) {
-                    showToastOrAlert('کد تایید به شماره جدید ارسال شد');
-                }
-            }
             }
         } catch (error) {
             console.error('❌ Error updating profile:', error);
@@ -564,7 +566,7 @@ export default function Profile() {
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={"پروفایل من"} />
-            <KeyboardAvoidingView style={{flex:1}} behavior='padding'>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
                 <ScrollView contentContainerStyle={styles.container}>
 
                     <View style={styles.header}>
@@ -573,13 +575,13 @@ export default function Profile() {
 
                     {/* Profile Image Section */}
                     <View style={styles.profileImageContainer}>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={styles.profileImageWrapper}
                             onPress={pickProfileImage}
                         >
                             {profileImage ? (
-                                <Image 
-                                    source={{ uri: getImageUrl(profileImage) }} 
+                                <Image
+                                    source={{ uri: getImageUrl(profileImage) }}
                                     style={styles.profileImagePreview}
                                     onError={(e) => console.log('❌ Image load error:', e.nativeEvent.error, 'URI was:', getImageUrl(profileImage))}
                                     onLoad={() => console.log('✅ Image loaded successfully:', getImageUrl(profileImage))}
@@ -589,7 +591,7 @@ export default function Profile() {
                                     <Ionicons name="person" size={50} color={themeColor10.bgColor(0.4)} />
                                 </View>
                             )}
-                           
+
                         </TouchableOpacity>
                         <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 10, fontSize: 12, color: themeColor10.bgColor(0.6) }]}>
                             برای تغییر عکس پروفایل کلیک کنید
@@ -597,6 +599,7 @@ export default function Profile() {
                     </View>
 
                     <View style={{ gap: 10 }}>
+                        <Text style={NewStyles.text10}>نام</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="نام *"
@@ -604,6 +607,8 @@ export default function Profile() {
                             value={profileData.name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
                         />
+                        <Text style={NewStyles.text10}>نام خانوادگی</Text>
+
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="نام خانوادگی *"
@@ -611,6 +616,7 @@ export default function Profile() {
                             value={profileData.last_name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
+                        <Text style={NewStyles.text10}>شماره موبایل</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره موبایل"
@@ -622,13 +628,14 @@ export default function Profile() {
                         />
 
                         {/* تاریخ تولد */}
+                        <Text style={NewStyles.text10}>تاریخ تولد</Text>
                         <TouchableOpacity onPress={() => setDatePickerModal(true)} style={[NewStyles.textInput, NewStyles.border10]}>
                             <Text style={[NewStyles.text10, { color: birthDate ? themeColor10.bgColor(0.6) : themeColor10.bgColor(1) }]}>
                                 {birthDate || 'تاریخ تولد'}
                             </Text>
                         </TouchableOpacity>
 
-
+                        <Text style={NewStyles.text10}>آدرس ایمیل</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس ایمیل"
@@ -639,22 +646,24 @@ export default function Profile() {
                         />
 
                         {/* شماره ثابت */}
+                        <Text style={NewStyles.text10}>شماره تماس ثابت</Text>
                         <View style={styles.row}>
                             <TextInput
-                                style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }]}
+                                style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }, NewStyles.text10]}
                                 placeholder="شماره تماس ثابت"
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
                                 value={profileData.phone_number}
                                 onChangeText={(text) => setProfileData(prev => ({ ...prev, phone_number: text }))}
                             />
-                            {/* <TextInput style={styles.prefixInput} value="021" editable={false} /> */}
+                            <TextInput style={[NewStyles.text10, styles.prefixInput,]} value="021" editable={false} />
                         </View>
 
                         {/* موبایل دوم با پیش‌شماره */}
+                        <Text style={NewStyles.text10}>شماره موبایل دوم</Text>
                         <View style={styles.row}>
                             <TextInput
-                                style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }]}
+                                style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }, NewStyles.text10]}
                                 placeholder="شماره موبایل دوم"
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
@@ -663,6 +672,7 @@ export default function Profile() {
                             />
                             {/* <TextInput style={styles.prefixInput} value="09" editable={false} /> */}
                         </View>
+                        <Text style={NewStyles.text10}>کدپستی</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="کدپستی "
@@ -673,25 +683,33 @@ export default function Profile() {
                         />
 
                         {/* شهر و منطقه */}
+
                         <View style={styles.row}>
-                            <TextInput
-                                style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                placeholder="شهر "
-                                placeholderTextColor={themeColor10.bgColor(0.6)}
-                                value={profileData.city}
-                                onChangeText={(text) => setProfileData(prev => ({ ...prev, city: text }))}
-                            />
-                            <TextInput
-                                style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                placeholder="منطقه"
-                                placeholderTextColor={themeColor10.bgColor(0.6)}
-                                value={profileData.region}
-                                keyboardType='number-pad'
-                                onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
-                            />
+                            <View style={{ flex: 1 }}>
+                                <Text style={NewStyles.text10}>شهر</Text>
+                                <TextInput
+                                    style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
+                                    placeholder="شهر "
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
+                                    value={profileData.city}
+                                    onChangeText={(text) => setProfileData(prev => ({ ...prev, city: text }))}
+                                />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={NewStyles.text10}>منطقه</Text>
+                                <TextInput
+                                    style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
+                                    placeholder="منطقه"
+                                    placeholderTextColor={themeColor10.bgColor(0.6)}
+                                    value={profileData.region}
+                                    keyboardType='number-pad'
+                                    onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
+                                />
+                            </View>
                         </View>
 
                         {/* آدرس منزل */}
+                        <Text style={NewStyles.text10}>آدرس منزل</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس منزل"
@@ -702,6 +720,7 @@ export default function Profile() {
                         />
 
                         {/* محل کار */}
+                        <Text style={NewStyles.text10}>آدرس محل کار</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="آدرس محل کار"
@@ -712,6 +731,7 @@ export default function Profile() {
                         />
 
                         {/* معرفی به دوستان */}
+                        <Text style={NewStyles.text10}>شماره کارت کاربر</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره کارت کاربر:(اختیاری)"
@@ -720,6 +740,7 @@ export default function Profile() {
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, card_number: text }))}
                             keyboardType="number-pad"
                         />
+                        <Text style={NewStyles.text10}>شماره شبا کاربر</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
                             placeholder="شماره شبا کاربر:(اختیاری)"
@@ -728,15 +749,18 @@ export default function Profile() {
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, sheba_number: text }))}
                         />
                     </View>
-                    <Button
-                        style={{ backgroundColor: themeColor4.bgColor(1) }}
-                        title={isLoading ? 'در حال ذخیره...' : 'ذخیره اطلاعات پروفایل'}
-                        onPress={updateProfile}
-                        disabled={isLoading}
-                    />
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                        <Button
+                            style={{ backgroundColor: themeColor4.bgColor(1) }}
+                            title={isLoading ? 'در حال ذخیره...' : 'ذخیره اطلاعات پروفایل'}
+                            onPress={updateProfile}
+                            disabled={isLoading}
+                        />
+                    </View>
 
                     <View style={[NewStyles.row, { marginVertical: 10, gap: 10, alignItems: 'flex-start' }]}>
                         <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text10}>رمز عبور فعلی</Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
@@ -754,6 +778,7 @@ export default function Profile() {
                             ) : null}
                         </View>
                         <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text10}>رمز عبور جدید</Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
@@ -771,14 +796,17 @@ export default function Profile() {
                             ) : null}
                         </View>
                     </View>
-                    <View style={[NewStyles.row, { marginTop: 10, gap: 30 }]}>
-                        <TextInput
-                            style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '50%', textAlign: 'right' }]}
-                            placeholderTextColor={themeColor10.bgColor(0.6)}
-                            placeholder="کد امنیتی"
-                            value={captchaInput}
-                            onChangeText={setCaptchaInput}
-                        />
+                    <View style={[NewStyles.row, { marginTop: 10, gap: 30, alignItems: 'flex-end' }]}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text10}>کد امنیتی</Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: 'right' }]}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
+                                placeholder="کد امنیتی"
+                                value={captchaInput}
+                                onChangeText={setCaptchaInput}
+                            />
+                        </View>
                         <View style={{ ...NewStyles.row, gap: 5 }}>
                             <TouchableOpacity onPress={generateCaptcha}>
                                 <Ionicons name="reload" size={24} color={themeColor0.bgColor(1)} />
@@ -789,12 +817,14 @@ export default function Profile() {
                         </View>
                     </View>
 
-                    <Button
-                        style={{ backgroundColor: themeColor4.bgColor(1) }}
-                        title={isLoadingPassword ? 'در حال تغییر...' : 'تغییر رمز عبور'}
-                        onPress={changePassword}
-                        disabled={isLoadingPassword}
-                    />
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                        <Button
+                            style={{ backgroundColor: themeColor4.bgColor(1) }}
+                            title={isLoadingPassword ? 'در حال تغییر...' : 'تغییر رمز عبور'}
+                            onPress={changePassword}
+                            disabled={isLoadingPassword}
+                        />
+                    </View>
 
                     {/* Auto-login setting */}
                     <View style={[NewStyles.row, { marginVertical: 15, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }]}>
@@ -813,22 +843,24 @@ export default function Profile() {
                         </Text>
                     </View>
 
-                    
-                   
-                    <Button
-                        style={{ backgroundColor: themeColor6.bgColor(1) }}
-                        title={isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
-                        onPress={logoutWithConfirmation}
-                        disabled={isLoggingOut}
-                    />
+
+
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                        <Button
+                            style={{ backgroundColor: themeColor6.bgColor(1) }}
+                            title={isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
+                            onPress={logoutWithConfirmation}
+                            disabled={isLoggingOut}
+                        />
+                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-            
+
             <View>
-                <DatePickerModal 
-                    birthDate={birthDate} 
-                    setBirthDate={setBirthDate} 
-                    setDatePickerModal={setDatePickerModal} 
+                <DatePickerModal
+                    birthDate={birthDate}
+                    setBirthDate={setBirthDate}
+                    setDatePickerModal={setDatePickerModal}
                     datePickerModal={datePickerModal}
                     onDateChange={(date) => {
                         console.log('📅 Birth date changed to:', date);
@@ -845,6 +877,9 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#e0f0ff',
         alignItems: 'stretch',
+        width: '100%',
+        maxWidth: 800,
+        alignSelf: 'center'
     },
     header: {
         flexDirection: 'row-reverse',

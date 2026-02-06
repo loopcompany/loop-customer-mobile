@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import * as Linking from "expo-linking";
@@ -12,6 +12,7 @@ import { uri } from '../../services/URL';
 import { formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function Increase({ navigation }) {
 
@@ -52,7 +53,11 @@ export default function Increase({ navigation }) {
                     subscriptionRef.current.remove();
                     subscriptionRef.current = null;
                 }
-                navigation.goBack();
+                if (Platform.OS == 'web') {
+                    window.history.back()
+                } else {
+                    navigation.goBack()
+                }
             } else if (queryParams?.status == 'NOK') {
                 showToastOrAlert('تراکنش ناموفق بود.')
                 setLoading(false);
@@ -113,7 +118,8 @@ export default function Increase({ navigation }) {
     }
 
     return (
-        <SafeAreaView style={[NewStyles.container, { padding: 10 }]}>
+        <SafeAreaView edges={{top:'off', bottom:'additive'}} style={[NewStyles.container]}>
+            <ScreenHeaders title={'شارژ کیف پول'} />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
                 <Text style={NewStyles.text}>مبلغ مورد نظر خود را به تومان وارد کنید. <Text style={[NewStyles.title6]}>*</Text></Text>
                 <Text style={NewStyles.text10}>موجودی فعلی کیف پول شما: <Text style={NewStyles.title}>{formatPrice(user?.wallet ?? 0)}</Text> تومان</Text>

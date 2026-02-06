@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { Platform } from 'react-native';
 import userSlice from './slices/userSlice';
 import contactSlice from './slices/contactSlice';
 import authSlice from './slices/authSlice';
@@ -11,8 +12,43 @@ import stepSlice from './slices/stepSlice';
 import orderSlice from './slices/orderSlice';
 import ordersSlice from './slices/ordersSlice';
 import organizationSlice from './slices/organizationSlice';
+import radiusSlice from './slices/radiusSlice';
 
-export default configureStore({
+// Redux state persistence functions for web platform
+const loadState = () => {
+  if (Platform.OS !== 'web') {
+    return undefined;
+  }
+  
+  try {
+    const serializedState = localStorage.getItem('reduxState');
+    if (serializedState === null) {
+      return undefined;
+    }
+    return JSON.parse(serializedState);
+  } catch (error) {
+    console.error('Error loading state from localStorage:', error);
+    return undefined;
+  }
+};
+
+const saveState = (state) => {
+  if (Platform.OS !== 'web') {
+    return;
+  }
+  
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem('reduxState', serializedState);
+  } catch (error) {
+    console.error('Error saving state to localStorage:', error);
+  }
+};
+
+// Load persisted state before store creation
+const preloadedState = loadState();
+
+const store = configureStore({
   reducer: {
     auth: authSlice,
     lang: languageSlice,
@@ -26,5 +62,16 @@ export default configureStore({
     order: orderSlice,
     orders: ordersSlice,
     organization: organizationSlice,
-  }
-})
+    radius: radiusSlice,
+  },
+  preloadedState
+});
+
+// Subscribe to store changes and save state automatically on web
+if (Platform.OS === 'web') {
+  store.subscribe(() => {
+    saveState(store.getState());
+  });
+}
+
+export default store;

@@ -1,5 +1,5 @@
 import { View, Modal, StyleSheet, TouchableWithoutFeedback, Text, TouchableOpacity } from 'react-native';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 
 import NewStyles from '../styles/NewStyles';
@@ -20,15 +20,14 @@ const DATE_PICKER_OPTIONS = {
     mainColor: MAIN_COLOR
 };
 
-export default function DatePickerModal({
+const DatePickerModal = React.memo(function DatePickerModal({
     datePickerModal,
     setDatePickerModal,
     birthDate,
     setBirthDate,
     isCurrentDate,
     minimumDate = null, // تاریخ حداقل (اختیاری)
-    maximumDate = null,  // تاریخ حداکثر (اختیاری)
-    onDateChange = null  // callback برای اطلاع از تغییر تاریخ
+    maximumDate = null  // تاریخ حداکثر (اختیاری)
 }) {
 
     const date = useMemo(() => new Date(), []);
@@ -48,8 +47,33 @@ export default function DatePickerModal({
         return minimumDate || undefined;
     }, [minimumDate]);
 
+    // Memoized callbacks to prevent infinite re-renders
+    const handleRequestClose = useCallback(() => {
+        setDatePickerModal(prev => !prev);
+    }, [setDatePickerModal]);
+
+    // Empty callbacks required by react-native-modern-datepicker
+    // Using empty dependency array to prevent re-renders
+    const handleDateChange = useCallback(() => {
+        // Intentionally empty - required by library
+    }, []);
+
+    const handleMonthYearChange = useCallback(() => {
+        // Intentionally empty - required by library
+    }, []);
+
+    const handleSelectedChange = useCallback((selectedDate) => {
+        console.log('📅 DatePickerModal - تاریخ انتخاب شده:', selectedDate);
+        console.log('📅 DatePickerModal - بعد از slice:', selectedDate.slice(0, 10));
+        setBirthDate(selectedDate.slice(0, 10));
+    }, [setBirthDate]);
+
+    const handleConfirm = useCallback(() => {
+        setDatePickerModal(false);
+    }, [setDatePickerModal]);
+
     return (
-        <Modal animationType='fade' transparent={true} visible={datePickerModal} onRequestClose={() => { setDatePickerModal(!datePickerModal) }}>
+        <Modal animationType='fade' transparent={true} visible={datePickerModal} onRequestClose={handleRequestClose}>
             {/* <TouchableWithoutFeedback onPress={() => { setDatePickerModal(false) }}> */}
                 <View style={[styles.wrapper, NewStyles.center]}>
                     <TouchableWithoutFeedback onPress={() => { }}>
@@ -57,41 +81,45 @@ export default function DatePickerModal({
                             <View style={styles.calendarContainer}>
                                 <DatePicker
                                     mode='calendar'
-                                    
                                     isGregorian={false}
                                     options={DATE_PICKER_OPTIONS}
                                     style={styles.calendar}
                                     selected={birthDate}
-                                    onDateChange={() => {
-
-                                    }}
-                                    onMonthYearChange={() => {
-
-                                    }}
                                     current={isCurrentDate ? isCurrentDate : currentDate}
                                     minimumDate={minDate}
                                     maximumDate={maxDate}
-                                    onSelectedChange={(p) => {
-                                        setBirthDate(p.slice(0, 10));
-                                        if (onDateChange) {
-                                            onDateChange(p.slice(0, 10));
-                                        }
-                                    }}
+                                    onDateChange={handleDateChange}
+                                    onMonthYearChange={handleMonthYearChange}
+                                    onSelectedChange={handleSelectedChange}
                                 />
                             </View>
 
                             {/* دکمه بستن */}
 
-                            <Button title="تأیید" onPress={() => {
-                                setDatePickerModal(false);
-                            }} />
+                            <Button title="تأیید" onPress={handleConfirm} />
                         </View>
                     </TouchableWithoutFeedback>
                 </View>
             {/* </TouchableWithoutFeedback> */}
         </Modal>
     )
+});
+
+// Custom comparison function for React.memo
+// Only re-render if these specific props change
+function arePropsEqual(prevProps, nextProps) {
+    return (
+        prevProps.datePickerModal === nextProps.datePickerModal &&
+        prevProps.birthDate === nextProps.birthDate &&
+        prevProps.isCurrentDate === nextProps.isCurrentDate &&
+        prevProps.minimumDate === nextProps.minimumDate &&
+        prevProps.maximumDate === nextProps.maximumDate
+        // Intentionally exclude setDatePickerModal and setBirthDate from comparison
+        // as they cause unnecessary re-renders when parent re-renders
+    );
 }
+
+export default React.memo(DatePickerModal, arePropsEqual);
 
 const styles = StyleSheet.create({
     wrapper: {

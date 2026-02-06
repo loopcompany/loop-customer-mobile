@@ -10,12 +10,13 @@ import { showToastOrAlert } from '../../helpers/Common';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6 } from '../../theme/Color';
 import MessagesList from './MessagesList';
+import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function ChatRoom({ route }) {
 
     const { t } = useTranslation();
     const technicianId = route?.params?.technicianId;
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState('');
     const token = useSelector((state) => state?.auth?.token);
     const [refreshing, setRefreshing] = useState(true)
     const [loading, setLoading] = useState(false)
@@ -88,7 +89,7 @@ export default function ChatRoom({ route }) {
             if (response.status === 201 || response.status === 200) {
                 if (response.data?.success) {
                     fetchData();
-                    setMessage(null);
+                    setMessage('');
                 }
             }
         } catch (error) {
@@ -117,6 +118,7 @@ export default function ChatRoom({ route }) {
             // marginBottom: insets.bottom * 3,
         }]}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} keyboardVerticalOffset={Platform.OS == 'ios' ? 90 : undefined} style={{ flex: 1 }} >
+                <ScreenHeaders title={'پیام به تکنسین لوپ'} />
                 {/* <ImageBackground source={require('../../assets/images/card/1.avif')} resizeMode='cover' blurRadius={20} style={{ justifyContent: 'space-between', flex: 1, overflow: 'visible' }}> */}
                     <MessagesList messeges={data} refreshing={refreshing} onRefresh={() => { fetchData() }} />
                     {!isClosed ?

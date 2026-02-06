@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -21,11 +22,11 @@ import { showAlert } from '../../helpers/Common';
 import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor10, themeColor11, themeColor14 } from '../../theme/Color';
 import { NewStyles } from '../../styles/NewStyles';
 import OrganizationService from '../../services/OrganizationService';
-import { 
-  setProfileData, 
-  setProfileLoading, 
+import {
+  setProfileData,
+  setProfileLoading,
   setProfileError,
-  updateProfileStatus 
+  updateProfileStatus
 } from '../../slices/organizationSlice';
 
 /**
@@ -34,14 +35,14 @@ import {
 const OrganizationProfileScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  
+
   const { token } = useSelector(state => state.auth);
-  const { 
-    profileData: reduxProfileData, 
-    profileLoading, 
-    profileError 
+  const {
+    profileData: reduxProfileData,
+    profileLoading,
+    profileError
   } = useSelector(state => state.organization);
-  
+
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
     organization_name: '',
@@ -54,7 +55,7 @@ const OrganizationProfileScreen = () => {
     registration_number: '',
   });
   const [errors, setErrors] = useState({});
-  
+
   // Sync with Redux data when it changes
   useEffect(() => {
     if (reduxProfileData) {
@@ -76,11 +77,11 @@ const OrganizationProfileScreen = () => {
    */
   const fetchProfile = async () => {
     if (!token) return;
-    
+
     dispatch(setProfileLoading(true));
-    
+
     const result = await OrganizationService.getProfile(token);
-    
+
     if (result.success) {
       dispatch(setProfileData(result.data));
     } else {
@@ -97,7 +98,7 @@ const OrganizationProfileScreen = () => {
       ...prev,
       [field]: value
     }));
-    
+
     // پاک کردن خطا برای این فیلد
     if (errors[field]) {
       setErrors(prev => ({
@@ -124,20 +125,26 @@ const OrganizationProfileScreen = () => {
       showAlert('خطا', 'لطفا تمام فیلدهای الزامی را به درستی پر کنید');
       return;
     }
-    
+
     setSaving(true);
-    
+
     const result = await OrganizationService.updateProfile(token, profileData);
-    
+
     if (result.success) {
       // بروزرسانی Redux state
       dispatch(setProfileData(result.data));
       dispatch(updateProfileStatus('pending')); // وضعیت به pending تغییر می‌کند
-      
+
       showAlert('موفقیت', result.message || 'اطلاعات شما با موفقیت ذخیره شد', [
         {
           text: 'باشه',
-          onPress: () => navigation.goBack()
+          onPress: () => {
+            if (Platform.OS == 'web') {
+              window.history.back()
+            } else {
+              navigation.goBack()
+            }
+          }
         }
       ]);
     } else {
@@ -145,10 +152,10 @@ const OrganizationProfileScreen = () => {
       if (result.validationErrors && Object.keys(result.validationErrors).length > 0) {
         setErrors(result.validationErrors);
       }
-      
+
       showAlert('خطا', result.error);
     }
-    
+
     setSaving(false);
   };
 
@@ -189,11 +196,10 @@ const OrganizationProfileScreen = () => {
   return (
     <View style={styles.container}>
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} barStyle="dark-content" />
-      <ScreenHeaders 
+      <ScreenHeaders
         title="اطلاعات پروفایل سازمانی"
-        onBackPress={() => navigation.goBack()}
       />
-      
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* نمایش وضعیت فعلی */}
         {reduxProfileData?.status && (
@@ -216,7 +222,7 @@ const OrganizationProfileScreen = () => {
         {/* فرم اطلاعات شرکت */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>اطلاعات شرکت</Text>
-          
+
           <Input
             label="نام شرکت *"
             value={profileData.company_name}
@@ -224,7 +230,7 @@ const OrganizationProfileScreen = () => {
             placeholder="نام کامل شرکت را وارد کنید"
             error={errors.company_name}
           />
-          
+
           <Input
             label="شماره ثبت شرکت *"
             value={profileData.company_registration_number}
@@ -233,7 +239,7 @@ const OrganizationProfileScreen = () => {
             keyboardType="numeric"
             error={errors.company_registration_number}
           />
-          
+
           <Input
             label="آدرس شرکت *"
             value={profileData.company_address}
@@ -243,7 +249,7 @@ const OrganizationProfileScreen = () => {
             numberOfLines={3}
             error={errors.company_address}
           />
-          
+
           <Input
             label="تلفن شرکت *"
             value={profileData.company_phone}
@@ -252,7 +258,7 @@ const OrganizationProfileScreen = () => {
             keyboardType="phone-pad"
             error={errors.company_phone}
           />
-          
+
           <Input
             label="نوع کسب و کار *"
             value={profileData.business_type}
@@ -260,7 +266,7 @@ const OrganizationProfileScreen = () => {
             placeholder="مثال: خدمات فنی، ساختمان، ..."
             error={errors.business_type}
           />
-          
+
           <Input
             label="وب‌سایت"
             value={profileData.website}
@@ -274,7 +280,7 @@ const OrganizationProfileScreen = () => {
         {/* فرم اطلاعات مدیر */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>اطلاعات مدیر</Text>
-          
+
           <Input
             label="نام و نام خانوادگی مدیر *"
             value={profileData.manager_name}
@@ -282,7 +288,7 @@ const OrganizationProfileScreen = () => {
             placeholder="نام کامل مدیر شرکت"
             error={errors.manager_name}
           />
-          
+
           <Input
             label="شماره موبایل مدیر *"
             value={profileData.manager_phone}
@@ -291,7 +297,7 @@ const OrganizationProfileScreen = () => {
             keyboardType="phone-pad"
             error={errors.manager_phone}
           />
-          
+
           <Input
             label="ایمیل مدیر *"
             value={profileData.manager_email}

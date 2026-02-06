@@ -141,7 +141,15 @@ export default function ResetPasswordScreen({ navigation, route }) {
       'آیا می‌خواهید شماره موبایل را ویرایش کنید؟',
       [
         { text: 'لغو', style: 'cancel' },
-        { text: 'بله', onPress: () => navigation.goBack() }
+        {
+          text: 'بله', onPress: () => {
+            if (Platform.OS == 'web') {
+              window.history.back()
+            } else {
+              navigation.goBack()
+            }
+          }
+        }
       ]
     );
   };
@@ -149,13 +157,12 @@ export default function ResetPasswordScreen({ navigation, route }) {
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders
         title="بازیابی رمز عبور"
-        onPressLeft={() => navigation.goBack()}
         showLeftIcon={true}
       />
-      <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
         <CustomStatusBar />
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          behavior={'padding'}
           style={{ flex: 1 }}
         >
           <ScrollView
@@ -274,7 +281,7 @@ const styles = StyleSheet.create({
     gap: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    maxWidth:500
+    maxWidth: 500
   },
   instructionContainer: {
     alignItems: 'center',

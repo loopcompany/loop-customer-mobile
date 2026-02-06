@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "لوپ",
+    "name": "loop",
     "slug": "loop",
     "scheme": "expo.loop.with-webbrowser-redirect",
     "version": "1.0.0",

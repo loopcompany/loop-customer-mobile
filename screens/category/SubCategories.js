@@ -59,7 +59,7 @@ const SubCategories = ({ navigation, route }) => {
           {/* Header */}
           <ScreenHeaders
             title={categoryTitle || 'زیردسته‌ها'}
-            onPressLeft={() => navigation.goBack()}
+            
             showLeftIcon={true}
           />
 
@@ -84,8 +84,8 @@ const SubCategories = ({ navigation, route }) => {
                   console.log('🎯 [SubCategories] شروع دریافت مراحل برای ID:', item.id);
 
                   try {
-                    const result = await dispatch(fetchSteps(item.id));
                     dispatch(setCategory(item));
+                    const result = await dispatch(fetchSteps(item.id));
 
                     navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
                   } catch (error) {

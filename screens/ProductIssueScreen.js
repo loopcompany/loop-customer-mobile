@@ -45,7 +45,7 @@ export default function ProductIssueScreen({ navigation }) {
   const [completeDatePickerVisible, setCompleteDatePickerVisible] = useState(false);
 
   const handleChange = (key, value) => {
-    if(key === 'amount') {
+    if (key === 'amount') {
       // Remove commas before setting the value
       value = value.replace(/,/g, '');
     }
@@ -164,26 +164,31 @@ export default function ProductIssueScreen({ navigation }) {
       <ScreenHeaders title={'عیب سرویس / محصول'} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={[NewStyles.wrapper]}>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>نام محصول / سرویس<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput placeholder="نام محصول / سرویس" value={form.name} onChangeText={(t) => handleChange('name', t)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>تاریخ ثبت سفارش<Text style={NewStyles.title6}>*</Text></Text>
 
           <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
               {form.orderDate || 'تاریخ ثبت سفارش'}
             </Text>
           </TouchableOpacity>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>تاریخ دریافت / انجام</Text>
 
-          <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]}onPress={() => setCompleteDatePickerVisible(true)}>
+          <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
               {form.completeDate || 'تاریخ دریافت / انجام'}
             </Text>
           </TouchableOpacity>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>شماره سفارش<Text style={NewStyles.title6}>*</Text></Text>
 
           <OrderDropdown
             value={selectedOrder?.value}
             onChange={handleOrderSelect}
             placeholder="انتخاب شماره سفارش"
           />
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>کد تکنسین</Text>
 
           <TextInput
             placeholder="کد تکنسین"
@@ -192,6 +197,7 @@ export default function ProductIssueScreen({ navigation }) {
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
           />
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>مبلغ پرداختی</Text>
 
           <TextInput
             placeholder="مبلغ پرداختی"
@@ -201,6 +207,7 @@ export default function ProductIssueScreen({ navigation }) {
             placeholderTextColor="#999"
             keyboardType="numeric"
           />
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>توضیحات<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
             placeholder="توضیحات"
@@ -213,7 +220,7 @@ export default function ProductIssueScreen({ navigation }) {
 
           <View style={styles.spacer} />
 
-         
+
           <Button title={'ثبت'} onPress={handleSubmit} loading={isSubmitting} />
 
         </ScrollView>

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         flexDirection: "row",
-        paddingHorizontal: 10,
+        paddingHorizontal: 20,
     },
     titleText: {
         ...NewStyles.title10,
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
         ...NewStyles.row
     },
     arrow: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
         resizeMode: "contain",
     },
     titleContainer: {

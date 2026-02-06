@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,9 +11,15 @@ export default function SubcategoryHeader({ title }) {
     const navigation = useNavigation();
 
     return (
-        <SafeAreaView edges={{top:'additive', bottom:'off'}} style={[styles.headerWrapper, NewStyles.shadow, NewStyles.rowWrapper]}>
+        <SafeAreaView edges={{ top: 'additive', bottom: 'off' }} style={[styles.headerWrapper, NewStyles.shadow, NewStyles.rowWrapper]}>
             <Text style={NewStyles.title}>{title}</Text>
-            <Ionicons name="arrow-back-outline" size={24} color={themeColor0.bgColor(1)} onPress={() => { navigation.goBack() }} />
+            <Ionicons name="arrow-back-outline" size={24} color={themeColor0.bgColor(1)} onPress={() => {
+                if (Platform.OS == 'web') {
+                    window.history.back()
+                } else {
+                    navigation.goBack()
+                }
+            }} />
         </SafeAreaView>
     )
 }
@@ -23,6 +29,6 @@ const styles = StyleSheet.create({
         // height: 60,
         backgroundColor: themeColor5.bgColor(1),
         paddingHorizontal: '5%',
-        paddingBottom:10
+        paddingBottom: 10
     },
 })

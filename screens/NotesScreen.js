@@ -37,7 +37,7 @@ export default function NotesScreen({ route, navigation }) {
     try {
       setLoading(true);
       const response = await notesAPI.getAll();
-      
+
       if (response.success && response.data) {
         setNotes(response.data);
       }
@@ -162,7 +162,7 @@ export default function NotesScreen({ route, navigation }) {
 
   return (
     <View style={NewStyles.container}>
-      <ScreenHeaders title="یادداشت‌ها" onBackPress={() => navigation.goBack()} />
+      <ScreenHeaders title="یادداشت‌ها" />
 
       <FlatList
         data={notes}
@@ -189,7 +189,7 @@ export default function NotesScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  
+
   listContent: {
     padding: 16,
     paddingBottom: 100,
@@ -245,6 +245,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: themeColor3.bgColor(0.2),
+    width: '100%',
+    alignItems: 'center'
   },
 });
 

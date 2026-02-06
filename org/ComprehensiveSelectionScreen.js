@@ -25,23 +25,21 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}> 
+    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}>
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
       />
-      
+
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
-        
+
         {/* انتخاب جامع Header */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
-            backgroundColor: '#1976d2', 
-            borderRadius: 12, 
-            paddingVertical: 14, 
-            alignItems: 'center', 
+          <View style={{
+            backgroundColor: '#1976d2',
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
             justifyContent: 'center',
             elevation: 3,
             shadowColor: '#1976d2',
@@ -49,12 +47,12 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             shadowRadius: 4,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 18, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>انتخاب جامع</Text>
             {/* Yellow arrow down */}
             <View style={{
@@ -75,23 +73,23 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* لپ تاپ Section */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: themeColor4.bgColor(1), 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            alignItems: 'center', 
+          <View style={{
+            backgroundColor: themeColor4.bgColor(1),
+            borderRadius: 12,
+            paddingVertical: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: themeColor10.bgColor(1),
             elevation: 2,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: themeColor10, 
-              fontSize: 16, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: themeColor10,
+              fontSize: 16,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>لپ تاپ</Text>
             {/* Yellow arrow down */}
           </View>
@@ -99,42 +97,42 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* نرم افزاری */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -142,17 +140,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -160,9 +158,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -171,43 +169,43 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         </View>
 
         {/* سخت افزاری */}
-      <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -215,17 +213,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -233,9 +231,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -245,43 +243,43 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
 
         {/* شبکه / اتصال چند محصول */}
-      <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -289,17 +287,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -307,9 +305,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -320,65 +318,65 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* هارد دیسک Section */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: themeColor4.bgColor(1), 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            alignItems: 'center', 
+          <View style={{
+            backgroundColor: themeColor4.bgColor(1),
+            borderRadius: 12,
+            paddingVertical: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: themeColor10.bgColor(1),
             elevation: 2,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: themeColor10, 
-              fontSize: 16, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: themeColor10,
+              fontSize: 16,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>لپ تاپ</Text>
             {/* Yellow arrow down */}
           </View>
         </View>
         {/* اکسترنال */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -386,17 +384,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -404,9 +402,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -417,42 +415,42 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* اینترنال */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -460,17 +458,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -478,9 +476,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -490,24 +488,24 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
 
         {/* دوربین مدار بسته Section */}
-      <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: themeColor4.bgColor(1), 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            alignItems: 'center', 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
+          <View style={{
+            backgroundColor: themeColor4.bgColor(1),
+            borderRadius: 12,
+            paddingVertical: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: themeColor10.bgColor(1),
             elevation: 2,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: themeColor10, 
-              fontSize: 16, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: themeColor10,
+              fontSize: 16,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>لپ تاپ</Text>
             {/* Yellow arrow down */}
           </View>
@@ -516,42 +514,42 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* دستگاه / DVR */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -559,17 +557,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -577,9 +575,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -589,43 +587,43 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
 
         {/* دوربین */}
-      <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -633,17 +631,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -651,9 +649,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -663,24 +661,24 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
 
         {/* مانیتور Section */}
-         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: themeColor4.bgColor(1), 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            alignItems: 'center', 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
+          <View style={{
+            backgroundColor: themeColor4.bgColor(1),
+            borderRadius: 12,
+            paddingVertical: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: themeColor10.bgColor(1),
             elevation: 2,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: themeColor10, 
-              fontSize: 16, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: themeColor10,
+              fontSize: 16,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>لپ تاپ</Text>
             {/* Yellow arrow down */}
           </View>
@@ -688,43 +686,43 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
 
         {/* سخت افزاری - مانیتور */}
-       <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -732,17 +730,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -750,9 +748,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -763,23 +761,23 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* چاپگر Section */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: themeColor4.bgColor(1), 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            alignItems: 'center', 
+          <View style={{
+            backgroundColor: themeColor4.bgColor(1),
+            borderRadius: 12,
+            paddingVertical: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: themeColor10.bgColor(1),
             elevation: 2,
             position: 'relative'
           }}>
-            <Text style={{ 
-              color: themeColor10, 
-              fontSize: 16, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: themeColor10,
+              fontSize: 16,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>لپ تاپ</Text>
             {/* Yellow arrow down */}
           </View>
@@ -787,42 +785,42 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* پرینتر لیزری */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -830,17 +828,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -848,9 +846,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -861,42 +859,42 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* کپی صنعتی */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{ 
+          <View style={{
             flexDirection: 'row',
             padding: 8,
             alignItems: 'center',
           }}>
             {/* Count Controls */}
 
-            <Text style={{ 
-              fontSize: 16, 
-              color:themeColor10.bgColor(0.5), 
+            <Text style={{
+              fontSize: 16,
+              color: themeColor10.bgColor(0.5),
               fontFamily: 'VazirBold',
               backgroundColor: themeColor4.bgColor(1),
               borderRadius: 4,
               borderColor: themeColor10.bgColor(1),
-              borderWidth:1,
+              borderWidth: 1,
               paddingHorizontal: 12,
               paddingVertical: 4,
               marginLeft: 8,
               minWidth: 24,
               textAlign: 'center'
             }}>{counts.software}</Text>
-                        <View style={{
+            <View style={{
               borderRadius: 6,
               paddingHorizontal: 8,
               paddingVertical: 4,
               marginLeft: 8
             }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: themeColor10.bgColor(1), 
+              <Text style={{
+                fontSize: 12,
+                color: themeColor10.bgColor(1),
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>تعداد محصول</Text>
             </View>
             <View style={{ flex: 1 }} />
-            
+
             {/* Category Label */}
             <TouchableOpacity style={{
               backgroundColor: '#ffeb3b',
@@ -904,17 +902,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               paddingHorizontal: 12,
               paddingVertical: 6
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                color: '#333', 
+              <Text style={{
+                fontSize: 14,
+                color: '#333',
                 fontFamily: 'VazirBold',
                 textAlign: 'center'
               }}>نرم افزاری</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Description */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#f5f5f5',
             borderRadius: 6,
             padding: 8,
@@ -922,9 +920,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#666', 
+            <Text style={{
+              fontSize: 12,
+              color: '#666',
               fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 18
@@ -933,7 +931,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         </View>
 
       </ScrollView>
-      
+
     </View>
   );
 };

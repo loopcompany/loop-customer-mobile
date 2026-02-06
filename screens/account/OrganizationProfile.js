@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  Image, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  KeyboardAvoidingView,
   Platform,
-  ActivityIndicator 
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +25,7 @@ import { showAlert } from '../../helpers/Common';
 
 import useLogout from '../../hooks/useLogout';
 import { uri } from '../../services/URL';
+import NewStyles from '../../styles/NewStyles';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '../../helpers/Common';
 
@@ -71,7 +72,7 @@ const OrganizationProfile = () => {
       console.log('🔄 [OrganizationProfile] شروع بارگذاری پروفایل...');
       setLoadingProfile(true);
       const token = await AsyncStorage.getItem('userToken');
-      
+
       if (!token) {
         console.log('❌ [OrganizationProfile] توکن یافت نشد');
         showAlert('خطا', 'لطفا ابتدا وارد شوید');
@@ -80,7 +81,7 @@ const OrganizationProfile = () => {
       }
 
       console.log('📡 [OrganizationProfile] ارسال درخواست به:', `${uri}/organization/profile`);
-      
+
       const response = await axios.get(`${uri}/organization/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,18 +95,18 @@ const OrganizationProfile = () => {
       if (response.data.status === 'success') {
         const data = response.data.data;
         console.log('📦 [OrganizationProfile] داده‌های دریافتی کامل:', JSON.stringify(data, null, 2));
-        
+
         setOrganizationName(data.organization_name || '');
         setFamilyName(data.manager_full_name || '');
         setNationalCode(data.manager_national_code || '');
-        
+
         // اگر شماره موبایل null بود، از AsyncStorage بخوان
         if (data.manager_mobile) {
           setMobileNumber(data.manager_mobile);
           console.log('📱 [OrganizationProfile] شماره موبایل از API:', data.manager_mobile);
         } else {
           console.log('⚠️ [OrganizationProfile] manager_mobile null است، خواندن از AsyncStorage...');
-          
+
           // ابتدا از organizationData بخوان
           const orgData = await AsyncStorage.getItem('organizationData');
           if (orgData) {
@@ -116,7 +117,7 @@ const OrganizationProfile = () => {
               console.log('📱 [OrganizationProfile] شماره موبایل از organizationData:', savedData.manager_mobile);
             }
           }
-          
+
           // اگر نبود، از userData بخوان
           if (!mobileNumber) {
             const userData = await AsyncStorage.getItem('userData');
@@ -131,7 +132,7 @@ const OrganizationProfile = () => {
             }
           }
         }
-        
+
         setOrganizationPhoneNumber(data.organization_phone || '');
         setBirthDate(data.manager_birthdate || '');
         setOrganizationEmail(data.organization_email || '');
@@ -139,26 +140,26 @@ const OrganizationProfile = () => {
         setRegion(data.region || '');
         setOrganizationAddress(data.organization_address || '');
         setOrganizationPostalCode(data.postal_code || '');
-        
+
         console.log('🏢 [OrganizationProfile] نام سازمان set شد:', data.organization_name);
         console.log('👤 [OrganizationProfile] نام مدیر set شد:', data.manager_full_name);
         console.log('📱 [OrganizationProfile] شماره موبایل نهایی:', data.manager_mobile || 'از AsyncStorage');
-        
+
         if (data.profile_image) {
           console.log('🖼️ [OrganizationProfile] ===== بررسی تصویر پروفایل =====');
           console.log('🖼️ [OrganizationProfile] مقدار خام از سرور:', data.profile_image);
-          
+
           // بررسی: آیا URL کامل است؟
           const isFullUrl = data.profile_image.startsWith('http');
           console.log('🖼️ [OrganizationProfile] آیا URL کامل است?:', isFullUrl);
-          
+
           const imageUrl = isFullUrl ? data.profile_image : `${uri}/storage/${data.profile_image}`;
           console.log('🖼️ [OrganizationProfile] URL نهایی:', imageUrl);
           setProfileImage({ uri: imageUrl, uploaded: true });
         } else {
           console.log('⚠️ [OrganizationProfile] تصویر پروفایل موجود نیست');
         }
-        
+
         console.log('✅ [OrganizationProfile] تمام داده‌ها با موفقیت set شدند');
       } else {
         console.log('⚠️ [OrganizationProfile] وضعیت پاسخ success نیست:', response.data);
@@ -170,7 +171,7 @@ const OrganizationProfile = () => {
         response: error.response?.data,
         status: error.response?.status,
       });
-      
+
       // Fallback: تلاش برای بارگذاری از AsyncStorage
       console.log('🔄 [OrganizationProfile] تلاش برای بارگذاری از AsyncStorage...');
       try {
@@ -178,7 +179,7 @@ const OrganizationProfile = () => {
         if (organizationData) {
           const data = JSON.parse(organizationData);
           console.log('📦 [OrganizationProfile] داده‌های AsyncStorage:', data);
-          
+
           setOrganizationName(data.organization_name || '');
           setFamilyName(data.manager_full_name || '');
           setNationalCode(data.manager_national_code || '');
@@ -190,13 +191,13 @@ const OrganizationProfile = () => {
           setRegion(data.region || '');
           setOrganizationAddress(data.organization_address || '');
           setOrganizationPostalCode(data.postal_code || '');
-          
+
           if (data.profile_image) {
             const isFullUrl = data.profile_image.startsWith('http');
             const imageUrl = isFullUrl ? data.profile_image : `${uri}/storage/${data.profile_image}`;
             setProfileImage({ uri: imageUrl, uploaded: true });
           }
-          
+
           console.log('✅ [OrganizationProfile] داده‌ها از AsyncStorage بارگذاری شد');
         } else {
           console.log('⚠️ [OrganizationProfile] داده‌ای در AsyncStorage یافت نشد');
@@ -216,9 +217,9 @@ const OrganizationProfile = () => {
   const pickImage = async () => {
     try {
       console.log('📸 [OrganizationProfile] ===== شروع انتخاب تصویر =====');
-      
+
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (permissionResult.granted === false) {
         console.log('❌ [OrganizationProfile] دسترسی رد شد');
         showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
@@ -242,13 +243,13 @@ const OrganizationProfile = () => {
         console.log('  - URI:', selectedImage.uri);
         console.log('  - Width:', selectedImage.width);
         console.log('  - Height:', selectedImage.height);
-        
+
         setProfileImage(selectedImage);
         console.log('✅ [OrganizationProfile] تصویر set شد');
       } else {
         console.log('❌ [OrganizationProfile] انتخاب لغو شد');
       }
-      
+
       console.log('📸 [OrganizationProfile] ===== پایان انتخاب =====');
     } catch (error) {
       console.error('❌ [OrganizationProfile] خطا:', error);
@@ -271,7 +272,7 @@ const OrganizationProfile = () => {
 
       // بررسی آیا عکس جدید داریم
       const hasNewImage = profileImage && profileImage.uri && !profileImage.uri.startsWith('http');
-      
+
       console.log('📝 [OrganizationProfile] آماده‌سازی داده‌ها...');
       console.log('🖼️ [OrganizationProfile] عکس جدید:', hasNewImage ? 'بله' : 'خیر');
 
@@ -285,16 +286,16 @@ const OrganizationProfile = () => {
         // اگر عکس جدید داریم، از FormData استفاده کن
         console.log('📦 [OrganizationProfile] استفاده از FormData (با عکس)');
         const formData = new FormData();
-        
+
         const uriParts = profileImage.uri.split('.');
         const fileType = uriParts[uriParts.length - 1];
-        
+
         formData.append('profile_image', {
           uri: profileImage.uri,
           name: `profile.${fileType}`,
           type: `image/${fileType}`,
         });
-        
+
         formData.append('organization_name', organizationName);
         formData.append('organization_email', organizationEmail);
         formData.append('organization_phone', organizationPhoneNumber);
@@ -348,12 +349,12 @@ const OrganizationProfile = () => {
         region: region,
         postal_code: organizationPostalCode,
       });
-      
+
       // همیشه از POST استفاده کن
       const response = await axios.post(
         `${uri}/organization/update-profile`,
         requestData,
-        { 
+        {
           headers: requestHeaders,
           timeout: 30000,
         }
@@ -364,26 +365,26 @@ const OrganizationProfile = () => {
 
       if (response.data.status === 'success') {
         const responseData = response.data.data;
-        
+
         console.log('🔍 [OrganizationProfile] ===== بررسی پاسخ =====');
         console.log('  - نام سازمان ارسالی:', organizationName);
         console.log('  - نام سازمان برگشتی:', responseData?.organization_name);
-        
+
         // بررسی تصویر در پاسخ
         if (responseData?.profile_image) {
           console.log('🖼️ [OrganizationProfile] ===== تصویر جدید در پاسخ =====');
           console.log('🖼️ [OrganizationProfile] profile_image:', responseData.profile_image);
-          
+
           const isFullUrl = responseData.profile_image.startsWith('http');
           const newImageUrl = isFullUrl ? responseData.profile_image : `${uri}/storage/${responseData.profile_image}`;
-          
+
           console.log('🖼️ [OrganizationProfile] URL نهایی:', newImageUrl);
           setProfileImage({ uri: newImageUrl, uploaded: true });
         }
-        
+
         showAlert('موفق', 'پروفایل با موفقیت به‌روزرسانی شد');
         setIsEditing(false);
-        
+
         console.log('🔄 [OrganizationProfile] بارگذاری مجدد اطلاعات...');
         // بارگذاری مجدد اطلاعات
         await loadOrganizationProfile();
@@ -396,12 +397,12 @@ const OrganizationProfile = () => {
         response: error.response?.data,
         status: error.response?.status,
       });
-      
+
       // چک کردن خطاهای مختلف
       if (error.response?.status === 405) {
         const errorMessage = error.response?.data?.message || '';
         const method = errorMessage.includes('POST') ? 'POST' : 'PUT';
-        
+
         showAlert(
           '⚠️ قابلیت به‌روزرسانی هنوز فعال نشده',
           `متأسفانه Backend هنوز امکان ویرایش پروفایل سازمانی را فعال نکرده است.\n\n` +
@@ -412,7 +413,7 @@ const OrganizationProfile = () => {
           `• POST /api/organization/profile (با _method=PUT)\n` +
           `• یا PUT /api/organization/profile\n\n` +
           `📞 لطفاً با تیم Backend هماهنگ کنید تا این endpoint را فعال کنند.`,
-          [{ 
+          [{
             text: 'متوجه شدم',
             onPress: () => {
               setIsEditing(false);
@@ -443,17 +444,17 @@ const OrganizationProfile = () => {
     try {
       // اعتبارسنجی
       const newErrors = {};
-      
+
       if (!currentPassword) {
         newErrors.currentPassword = 'رمز عبور فعلی الزامی است';
       }
-      
+
       if (!newPassword) {
         newErrors.newPassword = 'رمز عبور جدید الزامی است';
       } else if (newPassword.length < 8) {
         newErrors.newPassword = 'رمز عبور جدید باید حداقل 8 کاراکتر باشد';
       }
-      
+
       if (newPassword !== confirmPassword) {
         newErrors.confirmPassword = 'تکرار رمز عبور مطابقت ندارد';
       }
@@ -465,9 +466,9 @@ const OrganizationProfile = () => {
 
       setLoading(true);
       const token = await AsyncStorage.getItem('userToken');
-      
+
       console.log('🔑 [OrganizationProfile] توکن برای تغییر رمز:', token ? `${token.substring(0, 20)}...` : 'null');
-      
+
       if (!token) {
         showAlert('خطا', 'لطفا ابتدا وارد شوید');
         setLoading(false);
@@ -523,17 +524,16 @@ const OrganizationProfile = () => {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#d1e9ff' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <CustomStatusBar />
       <ScreenHeaders
         title="پروفایل سازمانی"
-        onPressLeft={() => navigation.goBack()}
       />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -541,14 +541,14 @@ const OrganizationProfile = () => {
         {/* Header با دکمه ویرایش */}
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>اطلاعات سازمان</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setIsEditing(!isEditing)}
             style={styles.editButton}
           >
-            <Ionicons 
-              name={isEditing ? "checkmark-circle" : "create-outline"} 
-              size={24} 
-              color={themeColor1.bgColor(1)} 
+            <Ionicons
+              name={isEditing ? "checkmark-circle" : "create-outline"}
+              size={24}
+              color={themeColor1.bgColor(1)}
             />
             <Text style={styles.editButtonText}>
               {isEditing ? 'انصراف' : 'ویرایش'}
@@ -557,17 +557,17 @@ const OrganizationProfile = () => {
         </View>
 
         <View style={styles.formContainer}>
-          
+
           {/* تصویر پروفایل */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={isEditing ? pickImage : null}
             disabled={!isEditing}
             style={styles.imageContainer}
           >
             {profileImage ? (
-              <Image 
-                source={{ uri: profileImage.uri }} 
-                style={styles.profileImage} 
+              <Image
+                source={{ uri: profileImage.uri }}
+                style={styles.profileImage}
               />
             ) : (
               <View style={styles.placeholderImage}>
@@ -653,13 +653,16 @@ const OrganizationProfile = () => {
           {/* تلفن ثابت سازمان */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>تلفن ثابت سازمان *</Text>
-            <TextInput
-              value={organizationPhoneNumber}
-              onChangeText={setOrganizationPhoneNumber}
-              editable={isEditing}
-              keyboardType="phone-pad"
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-            />
+            <View style={[NewStyles.row, { gap: 10 }]}>
+              <TextInput
+                value={organizationPhoneNumber}
+                onChangeText={setOrganizationPhoneNumber}
+                editable={isEditing}
+                keyboardType="phone-pad"
+                style={[styles.input, { flex: 1 }, !isEditing && styles.inputDisabled]}
+              />
+              <TextInput style={[NewStyles.text10, styles.prefixInput,]} value="021" editable={false} />
+            </View>
           </View>
 
           {/* شهر و منطقه */}
@@ -712,7 +715,7 @@ const OrganizationProfile = () => {
 
           {/* دکمه ذخیره تغییرات */}
           {isEditing && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleUpdateProfile}
               disabled={loading}
               style={styles.saveButton}
@@ -739,14 +742,14 @@ const OrganizationProfile = () => {
                   secureTextEntry={!showCurrentPassword}
                   style={styles.passwordInput}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowCurrentPassword(!showCurrentPassword)}
                   style={styles.eyeIcon}
                 >
-                  <Ionicons 
-                    name={showCurrentPassword ? 'eye-outline' : 'eye-off-outline'} 
-                    size={22} 
-                    color="#666" 
+                  <Ionicons
+                    name={showCurrentPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={22}
+                    color="#666"
                   />
                 </TouchableOpacity>
               </View>
@@ -765,14 +768,14 @@ const OrganizationProfile = () => {
                   secureTextEntry={!showNewPassword}
                   style={styles.passwordInput}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowNewPassword(!showNewPassword)}
                   style={styles.eyeIcon}
                 >
-                  <Ionicons 
-                    name={showNewPassword ? 'eye-outline' : 'eye-off-outline'} 
-                    size={22} 
-                    color="#666" 
+                  <Ionicons
+                    name={showNewPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={22}
+                    color="#666"
                   />
                 </TouchableOpacity>
               </View>
@@ -791,14 +794,14 @@ const OrganizationProfile = () => {
                   secureTextEntry={!showConfirmPassword}
                   style={styles.passwordInput}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={styles.eyeIcon}
                 >
-                  <Ionicons 
-                    name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} 
-                    size={22} 
-                    color="#666" 
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={22}
+                    color="#666"
                   />
                 </TouchableOpacity>
               </View>
@@ -808,7 +811,7 @@ const OrganizationProfile = () => {
             </View>
 
             {/* دکمه تغییر رمز */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleChangePassword}
               disabled={loading}
               style={styles.changePasswordButton}
@@ -822,7 +825,7 @@ const OrganizationProfile = () => {
           </View>
 
           {/* دکمه خروج */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={logoutWithConfirmation}
             disabled={isLoggingOut}
             style={styles.logoutButton}
@@ -835,7 +838,7 @@ const OrganizationProfile = () => {
       </ScrollView>
 
       {/* DatePicker Modal */}
-      <DatePickerModal 
+      <DatePickerModal
         datePickerModal={datePickerModal}
         setDatePickerModal={setDatePickerModal}
         birthDate={birthDate}
@@ -1038,6 +1041,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'VazirBold',
     marginRight: 8,
+  },
+  prefixInput: {
+    width: 70,
+    backgroundColor: '#ddd',
+    textAlign: 'center',
+    borderRadius: 10,
+    paddingVertical: 10,
   },
 });
 

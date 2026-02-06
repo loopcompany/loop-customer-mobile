@@ -167,12 +167,12 @@ export default function LoginScreen({ navigation }) {
         // Update Redux store
         reduxDispatch(setToken(token));
         reduxDispatch(setUserType('individual')); // کاربر فردی
-        
+
         // Save account type to AsyncStorage for next app launch
         await AsyncStorage.setItem('accountType', 'individual');
         await AsyncStorage.setItem('userType', 'individual');
         console.log('💾 [LoginScreen] accountType و userType ذخیره شد: individual');
-        
+
         reduxDispatch(fetchUser(token));
         reduxDispatch(fetchAddresses(token));
 
@@ -275,12 +275,12 @@ export default function LoginScreen({ navigation }) {
               // Update Redux store
               reduxDispatch(setToken(savedToken));
               reduxDispatch(setUserType('individual')); // کاربر فردی
-              
+
               // Save account type to AsyncStorage for next app launch
               await AsyncStorage.setItem('accountType', 'individual');
               await AsyncStorage.setItem('userType', 'individual');
               console.log('💾 [LoginScreen Auto-Login] accountType و userType ذخیره شد: individual');
-              
+
               reduxDispatch(fetchUser(savedToken));
 
               showToastOrAlert('ورود خودکار انجام شد');
@@ -307,9 +307,9 @@ export default function LoginScreen({ navigation }) {
     checkAutoLogin();
   }, []);
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
       <CustomStatusBar />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
+      <KeyboardAvoidingView behavior={'padding'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -338,6 +338,8 @@ export default function LoginScreen({ navigation }) {
 
           {/* Phone Input */}
           <View style={styles.inputGroup}>
+            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>نام کاربری<Text style={NewStyles.title6}>*</Text></Text>
+
             <TextInput
               style={[
                 NewStyles.textInput,
@@ -362,7 +364,8 @@ export default function LoginScreen({ navigation }) {
 
           {/* Password Input */}
           <View style={styles.inputGroup}>
-            <View style={{ position: 'relative', width: '100%' }}>
+            <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>رمز عبور<Text style={NewStyles.title6}>*</Text></Text>
+            <View style={{ width: '100%' }}>
               <TextInput
                 style={[
                   NewStyles.textInput,
@@ -466,7 +469,7 @@ export default function LoginScreen({ navigation }) {
           />
 
           {/* Forgot Password Link */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleForgotPassword}
             style={styles.forgotPasswordButton}
           >

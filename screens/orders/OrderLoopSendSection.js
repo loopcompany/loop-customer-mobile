@@ -174,7 +174,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     </Text>
                     {data?.user_cancellation_reason && (
                         <>
-                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>دلیل شما:</Text>
+                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>{isAccepted ? 'توضیحات شما:' : 'دلیل شما:'}</Text>
                             <Text style={[NewStyles.text10]}>{data?.user_cancellation_reason}</Text>
                         </>
                     )}
@@ -197,22 +197,22 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     </View>
 
                     {/* دکمه‌های تایید و رد */}
-                    <View style={[NewStyles.row, { gap: 10 }]}>
-                        <View style={{ flex: 1 }}>
+                    <View style={[NewStyles.row, { gap: 10, maxWidth: 900, width: '100%', alignSelf:'center' }]}>
+                        <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
                                 title="لغو سفارش"
                                 onPress={() => setRejectModal(true)}
                                 loading={rejecting}
-                                textStyle={{color: themeColor4.bgColor(1)}}
+                                textStyle={{ color: themeColor4.bgColor(1) }}
                                 style={{ backgroundColor: themeColor6.bgColor(1) }}
                             />
                         </View>
-                        <View style={{ flex: 1 }}>
+                        <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
                                 title="می پذیرم"
                                 onPress={() => setAcceptModal(true)}
                                 loading={accepting}
-                                textStyle={{color: themeColor4.bgColor(1)}}
+                                textStyle={{ color: themeColor4.bgColor(1) }}
                                 style={{ backgroundColor: themeColor7.bgColor(1) }}
                             />
                         </View>

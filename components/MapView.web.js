@@ -31,7 +31,7 @@ if (Platform.OS === 'web') {
     useMapEvents = leafletComponents.useMapEvents;
     useMap = leafletComponents.useMap;
     
-    console.log('Leaflet components extracted - MapContainer:', !!MapContainer, 'TileLayer:', !!TileLayer);
+    console.log('Leaflet components extracted - MapContainer:', !!MapContainer, 'TileLayer:', !!TileLayer, 'LeafletCircle:', !!LeafletCircle);
     
     // Fix for default markers in Leaflet
     if (L && L.Icon && L.Icon.Default) {
@@ -363,26 +363,57 @@ const WebPolyline = ({ coordinates, strokeColor = '#007AFF', strokeWidth = 3, ..
 };
 
 // Web Circle component
-const WebCircle = ({ center, radius, strokeColor = '#007AFF', fillColor, ...props }) => {
-  if (!LeafletCircle || !center) {
+const WebCircle = ({ center, radius, strokeColor = '#007AFF', fillColor = 'rgba(52, 152, 219, 0.2)', strokeWidth = 2, ...props }) => {
+  console.log('WebCircle called with:', { center, radius, strokeColor, fillColor, strokeWidth, LeafletCircleAvailable: !!LeafletCircle });
+  
+  if (!center) {
+    console.warn('WebCircle: No center provided');
+    return null;
+  }
+  
+  if (!LeafletCircle) {
+    console.warn('WebCircle: LeafletCircle not available - using CSS fallback');
+    // Fallback with CSS circle
+    const radiusInPixels = Math.min(radius / 100, 200); // Rough conversion, max 200px
     return (
-      <View style={styles.fallbackCircle}>
-        <Text style={styles.circleText}>⭕ Area</Text>
-      </View>
+      <div style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        width: `${radiusInPixels * 2}px`,
+        height: `${radiusInPixels * 2}px`,
+        marginLeft: `-${radiusInPixels}px`,
+        marginTop: `-${radiusInPixels}px`,
+        border: `${strokeWidth}px solid ${strokeColor}`,
+        backgroundColor: fillColor,
+        borderRadius: '50%',
+        pointerEvents: 'none',
+        zIndex: 1000,
+      }} />
     );
   }
 
   const position = [center.latitude, center.longitude];
+  
+  console.log('Rendering LeafletCircle with position:', position, 'radius:', radius);
 
-  return (
-    <LeafletCircle
-      center={position}
-      radius={radius}
-      color={strokeColor}
-      fillColor={fillColor}
-      {...props}
-    />
-  );
+  try {
+    return (
+      <LeafletCircle
+        center={position}
+        radius={radius}
+        color={strokeColor}
+        fillColor={fillColor}
+        weight={strokeWidth}
+        fillOpacity={0.3}
+        opacity={0.8}
+        {...props}
+      />
+    );
+  } catch (error) {
+    console.error('Error rendering LeafletCircle:', error);
+    return null;
+  }
 };
 
 const PROVIDER_GOOGLE = 'google';

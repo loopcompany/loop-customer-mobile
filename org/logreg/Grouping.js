@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform } from "react-native";
 import Footer from "../../screens/Footer";
 import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
@@ -23,20 +23,19 @@ const Grouping = ({ navigation }) => {
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / شرکتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
       />
 
       {/* Background with image */}
       <ImageBackground
         cachePolicy={"memory-disk"}
-        source={require("../../assets/moon.jpg")}
+        source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} 
         style={[NewStyles.container, { backgroundColor: "#020305" }]}
         contentPosition={"center"}
-        contentFit="contain"
+        contentFit="cover"
       >
         {/* Top section with header text */}
-        <View
+        <Pressable
+        onPress={()=>{navigation.navigate('OrganizationTermsScreen')}}
           style={{
             alignItems: "center",
             paddingTop: 30,
@@ -66,7 +65,7 @@ const Grouping = ({ navigation }) => {
               قوانین و مقررات سامانه در پنل سازمانی / شرکتی
             </Text>
           </View>
-        </View>
+        </Pressable>
 
         {/* Central tower-like structure */}
         <View
@@ -107,7 +106,6 @@ const Grouping = ({ navigation }) => {
                 style={{
                   color: "#ffeb3b",
                   fontSize: 20,
-                  fontWeight: "bold",
                   fontFamily: "VazirBold",
                   textAlign: "center",
                 }}
@@ -154,7 +152,6 @@ const Grouping = ({ navigation }) => {
                 style={{
                   color: "#fff",
                   fontSize: 13,
-                  fontWeight: "bold",
                   fontFamily: "VazirBold",
                   textAlign: "center",
                 }}
@@ -221,7 +218,7 @@ const Grouping = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                راهنمای پنل سازمانی / دولتی ۱
+                راهنمای پنل سازمانی / دولتی 
               </Text>
               {/* Red arrow pointing down or up based on state */}
               <View

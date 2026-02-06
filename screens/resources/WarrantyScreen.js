@@ -81,7 +81,7 @@ export default function WarrantyScreen() {
 }
 
 const styles = StyleSheet.create({
-  termsContainer: {
+  warrantiesContainer: {
     padding: 15,
   },
 });

@@ -1,9 +1,9 @@
-import { View, Text, FlatList, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Pressable, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 
-import { uri } from '../services/URL';
+import { imageUri, uri } from '../services/URL';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../theme/Color';
 import { addStep, decrement, increment, updateRadioButton } from '../slices/stepSlice';
@@ -18,11 +18,11 @@ export default function RadioButton({ step, data, setLoading }) {
     const category = useSelector(state => state.category?.data);
     const [show, setShow] = useState(false)
     const token = useSelector(state => state.auth?.token);
-    
+
     const fetchConditionalSteps = async (id) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id }, {headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }})
+            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id }, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
 
             dispatch(addStep({ fieldId: data?.id, fieldDetailId: id, step, steps: response.data }))
         } catch (error) {
@@ -63,8 +63,8 @@ export default function RadioButton({ step, data, setLoading }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    {data?.icon_name && <View style={{ flex: 1 }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
+                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? 'right' :'center' }]}>{data?.title}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -79,22 +79,31 @@ export default function RadioButton({ step, data, setLoading }) {
                 keyExtractor={(item) => item?.id?.toString()}
                 data={data?.field_details}
                 initialNumToRender={30}
-                renderItem={({ item }) =>
-                    <View style={{ gap: 10 }}>
-                        
+                renderItem={({ item }) => {
+                    return (<View style={{ gap: 10 }}>
+
                         <TouchableOpacity onPress={() => {
                             dispatch(updateRadioButton({ fieldId: data?.id, fieldDetailId: item.id, step }))
                             if (data?.is_conditional == 1) {
                                 fetchConditionalSteps(item.id);
                             }
-                        }} style={[{ backgroundColor: themeColor4.bgColor(1), padding: 10, ...NewStyles.border5 }, item?.value > 0 && { backgroundColor: themeColor0.bgColor(0.2) }]}>
+                        }} style={[{ backgroundColor: themeColor4.bgColor(1), padding: 10, ...NewStyles.border5, ...NewStyles.row, gap: 10 }, item?.value > 0 && { backgroundColor: themeColor0.bgColor(0.2) }]}>
+                            {
+                                item?.image_path &&
+
+                                <Image
+                                    source={{ uri: `${imageUri}/${item?.image_path}` }}
+                                    style={{ height: 50, width: 50 }}
+                                />
+                            }
                             <Text style={NewStyles.text10}>{item.title}</Text>
                         </TouchableOpacity>
 
 
                         {item.has_counter == 1 && item.value ? renderCounter(item) : renderPrice(item)}
                         {item?.des ? <Text style={NewStyles.text}>{item?.des}</Text> : null}
-                    </View>
+                    </View>)
+                }
                 }
             />}
         </View>

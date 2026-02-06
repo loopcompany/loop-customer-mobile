@@ -45,14 +45,14 @@ export default function CheckBox({ step, data }) {
 
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    {data?.icon_name && <View style={{ flex: 1 }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
+                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? 'right' :'center' }]}>{data?.title}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
             {show && data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}>
-                    <Text style={NewStyles.text10}>{data?.des}</Text>
-                </View>}
+                <Text style={NewStyles.text10}>{data?.des}</Text>
+            </View>}
             {show && <FlatList
                 style={{ gap: 20 }}
                 showsVerticalScrollIndicator={false}
@@ -60,7 +60,7 @@ export default function CheckBox({ step, data }) {
                 data={data?.field_details}
                 renderItem={({ item }) =>
                     <View style={{ gap: 10 }}>
-                       
+
                         <TouchableOpacity onPress={() => {
                             dispatch(updateCheckbox({ fieldId: data?.id, fieldDetailId: item.id, step }))
                         }} style={[{ backgroundColor: themeColor4.bgColor(1), padding: 10, ...NewStyles.border5 }, item?.value > 0 && { backgroundColor: themeColor0.bgColor(0.2) }]}>

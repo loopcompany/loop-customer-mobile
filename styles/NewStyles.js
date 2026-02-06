@@ -283,6 +283,12 @@ const NewStyles = StyleSheet.create({
     color: themeColor1.bgColor(1),
     textAlign: "right",
   },
+  title3: {
+    fontSize: 16,
+    fontFamily: "VazirBold",
+    color: themeColor3.bgColor(1),
+    textAlign: "right",
+  },
 
   title4: {
     fontSize: 15,

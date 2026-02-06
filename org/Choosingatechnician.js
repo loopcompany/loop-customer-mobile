@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import Footer from '../screens/Footer';
 import ScreenHeaders from '../components/ScreenHeaders';
 import NewStyles from '../styles/NewStyles';
@@ -8,68 +8,74 @@ import CustomStatusBar from '../components/CustomStatusBar';
 
 export default function Choosingatechnician({ navigation }) {
   return (
-      <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}> 
+    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}>
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
+        onPressLeft={() => {
+          if (Platform.OS == 'web') {
+            window.history.back()
+          } else {
+            navigation.goBack()
+          }
+        }}
+        onPressRight={() => { }}
       />
 
-      
+
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
-  <View style={{ width: '95%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{ 
-            backgroundColor: '#1976d2', 
-            borderRadius: 12, 
-            paddingVertical: 14, 
-            marginBottom: 12, 
-            alignItems: 'center', 
+        <View style={{ width: '95%', alignSelf: 'center', marginBottom: 12 }}>
+          <View style={{
+            backgroundColor: '#1976d2',
+            borderRadius: 12,
+            paddingVertical: 14,
+            marginBottom: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             elevation: 3,
             shadowColor: '#1976d2',
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 18, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>ادامه رزرو / مراجعه تکنسین</Text>
           </View>
 
           {/* زمان نگهداری و سرویس (بلند مدت) */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#c8e6c9',
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            marginBottom: 12, 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            borderWidth: 1, 
+            borderRadius: 12,
+            paddingVertical: 12,
+            marginBottom: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
             borderColor: '#81c784',
             elevation: 2,
             shadowColor: '#4caf50',
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
-            <Text style={{ 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              color: '#2e7d32', 
-              fontFamily: 'VazirBold', 
-              textAlign: 'center' 
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#2e7d32',
+              fontFamily: 'VazirBold',
+              textAlign: 'center'
             }}>زمان نگهداری و سرویس (بلند مدت)</Text>
           </View>
 
           {/* Price options grid */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 12 }}>
-            <TouchableOpacity style={{ 
-              backgroundColor: '#f5f5f5', 
-              borderRadius: 8, 
-              paddingVertical: 10, 
+            <TouchableOpacity style={{
+              backgroundColor: '#f5f5f5',
+              borderRadius: 8,
+              paddingVertical: 10,
               paddingHorizontal: 12,
               width: '48%',
               marginBottom: 8,
@@ -77,19 +83,19 @@ export default function Choosingatechnician({ navigation }) {
               borderWidth: 1,
               borderColor: '#ddd'
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                fontWeight: 'bold', 
-                color: '#333', 
-                fontFamily: 'VazirBold', 
-                textAlign: 'center' 
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: 'VazirBold',
+                textAlign: 'center'
               }}>۲۰ روزه ( ۱۵ ریز کرک)</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
-              backgroundColor: '#f5f5f5', 
-              borderRadius: 8, 
-              paddingVertical: 10, 
+            <TouchableOpacity style={{
+              backgroundColor: '#f5f5f5',
+              borderRadius: 8,
+              paddingVertical: 10,
               paddingHorizontal: 12,
               width: '48%',
               marginBottom: 8,
@@ -97,19 +103,19 @@ export default function Choosingatechnician({ navigation }) {
               borderWidth: 1,
               borderColor: '#ddd'
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                fontWeight: 'bold', 
-                color: '#333', 
-                fontFamily: 'VazirBold', 
-                textAlign: 'center' 
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: 'VazirBold',
+                textAlign: 'center'
               }}>۱۲۰ روزه ( ۳۰ ریز کرک)</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
-              backgroundColor: '#f5f5f5', 
-              borderRadius: 8, 
-              paddingVertical: 10, 
+            <TouchableOpacity style={{
+              backgroundColor: '#f5f5f5',
+              borderRadius: 8,
+              paddingVertical: 10,
               paddingHorizontal: 12,
               width: '48%',
               marginBottom: 8,
@@ -117,19 +123,19 @@ export default function Choosingatechnician({ navigation }) {
               borderWidth: 1,
               borderColor: '#ddd'
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                fontWeight: 'bold', 
-                color: '#333', 
-                fontFamily: 'VazirBold', 
-                textAlign: 'center' 
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: 'VazirBold',
+                textAlign: 'center'
               }}>یکسال ( هر یک ماه)</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
-              backgroundColor: '#f5f5f5', 
-              borderRadius: 8, 
-              paddingVertical: 10, 
+            <TouchableOpacity style={{
+              backgroundColor: '#f5f5f5',
+              borderRadius: 8,
+              paddingVertical: 10,
               paddingHorizontal: 12,
               width: '48%',
               marginBottom: 8,
@@ -137,39 +143,39 @@ export default function Choosingatechnician({ navigation }) {
               borderWidth: 1,
               borderColor: '#ddd'
             }}>
-              <Text style={{ 
-                fontSize: 14, 
-                fontWeight: 'bold', 
-                color: '#333', 
-                fontFamily: 'VazirBold', 
-                textAlign: 'center' 
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: 'VazirBold',
+                textAlign: 'center'
               }}>۱۱۰ روزه ( ۳۰ ریز کرک)</Text>
             </TouchableOpacity>
           </View>
 
           {/* تاریخ شروع */}
-          <View style={{ 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            marginBottom: 8, 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            borderWidth: 1, 
+          <View style={{
+            backgroundColor: '#f5f5f5',
+            borderRadius: 12,
+            paddingVertical: 12,
+            marginBottom: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
             borderColor: '#ddd'
           }}>
-            <Text style={{ 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              color: '#333', 
-              fontFamily: 'VazirBold', 
-              textAlign: 'center' 
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#333',
+              fontFamily: 'VazirBold',
+              textAlign: 'center'
             }}>تاریخ شروع :</Text>
           </View>
 
           {/* Time slots for second section */}
           <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 }}>
-            <TouchableOpacity style={{ 
+            <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 8,
@@ -180,7 +186,7 @@ export default function Choosingatechnician({ navigation }) {
               marginHorizontal: 2,
               alignItems: 'center'
             }}>
-              <Text style={{ 
+              <Text style={{
                 fontSize: 13,
                 fontFamily: 'VazirBold',
                 color: '#333',
@@ -188,7 +194,7 @@ export default function Choosingatechnician({ navigation }) {
               }}>۱۰ صبح به بعد</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
+            <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 8,
@@ -199,7 +205,7 @@ export default function Choosingatechnician({ navigation }) {
               marginHorizontal: 2,
               alignItems: 'center'
             }}>
-              <Text style={{ 
+              <Text style={{
                 fontSize: 13,
                 fontFamily: 'VazirBold',
                 color: '#333',
@@ -207,7 +213,7 @@ export default function Choosingatechnician({ navigation }) {
               }}>۱۲ ظهر به بعد</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
+            <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 8,
@@ -218,7 +224,7 @@ export default function Choosingatechnician({ navigation }) {
               marginHorizontal: 2,
               alignItems: 'center'
             }}>
-              <Text style={{ 
+              <Text style={{
                 fontSize: 13,
                 fontFamily: 'VazirBold',
                 color: '#333',
@@ -228,47 +234,47 @@ export default function Choosingatechnician({ navigation }) {
           </View>
 
           {/* Separator line */}
-          <View style={{ 
-            height: 1, 
-            backgroundColor: '#666', 
-            marginVertical: 8, 
-            width: '100%' 
+          <View style={{
+            height: 1,
+            backgroundColor: '#666',
+            marginVertical: 8,
+            width: '100%'
           }} />
 
           {/* برگزاری نامه (اختیاری) - second section */}
-          <View style={{ 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            marginBottom: 8, 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            borderWidth: 1, 
+          <View style={{
+            backgroundColor: '#f5f5f5',
+            borderRadius: 12,
+            paddingVertical: 12,
+            marginBottom: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
             borderColor: '#ddd'
           }}>
-            <Text style={{ 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              color: '#333', 
-              fontFamily: 'VazirBold', 
-              textAlign: 'center' 
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#333',
+              fontFamily: 'VazirBold',
+              textAlign: 'center'
             }}>برگزاری نامه (اختیاری)</Text>
           </View>
 
           {/* Description text - second section */}
-          <View style={{ 
-            backgroundColor: '#f9f9f9', 
-            borderRadius: 8, 
-            paddingVertical: 10, 
-            paddingHorizontal: 12, 
+          <View style={{
+            backgroundColor: '#f9f9f9',
+            borderRadius: 8,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
             marginBottom: 12,
             borderWidth: 1,
             borderColor: '#e0e0e0'
           }}>
-            <Text style={{ 
-              fontSize: 11, 
-              color: '#666', 
-              fontFamily: 'VazirLight', 
+            <Text style={{
+              fontSize: 11,
+              color: '#666',
+              fontFamily: 'VazirLight',
               textAlign: 'right',
               lineHeight: 16
             }}>
@@ -278,30 +284,30 @@ export default function Choosingatechnician({ navigation }) {
           </View>
 
           {/* انتخاب تکنسین */}
-          <View style={{ 
-            backgroundColor: '#1976d2', 
-            borderRadius: 12, 
-            paddingVertical: 14, 
-            marginBottom: 12, 
-            alignItems: 'center', 
+          <View style={{
+            backgroundColor: '#1976d2',
+            borderRadius: 12,
+            paddingVertical: 14,
+            marginBottom: 12,
+            alignItems: 'center',
             justifyContent: 'center',
             elevation: 3,
             shadowColor: '#1976d2',
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontSize: 18, 
-              fontWeight: 'bold', 
+            <Text style={{
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 'bold',
               fontFamily: 'VazirBold',
-              textAlign: 'center' 
+              textAlign: 'center'
             }}>انتخاب تکنسین</Text>
           </View>
 
           {/* Gender selection buttons */}
           <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 }}>
-            <TouchableOpacity style={{ 
+            <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 12,
@@ -312,7 +318,7 @@ export default function Choosingatechnician({ navigation }) {
               marginHorizontal: 4,
               alignItems: 'center'
             }}>
-              <Text style={{ 
+              <Text style={{
                 fontSize: 16,
                 fontFamily: 'VazirBold',
                 color: '#333',
@@ -320,7 +326,7 @@ export default function Choosingatechnician({ navigation }) {
               }}>آقا</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ 
+            <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 12,
@@ -331,7 +337,7 @@ export default function Choosingatechnician({ navigation }) {
               marginHorizontal: 4,
               alignItems: 'center'
             }}>
-              <Text style={{ 
+              <Text style={{
                 fontSize: 16,
                 fontFamily: 'VazirBold',
                 color: '#333',
@@ -340,9 +346,9 @@ export default function Choosingatechnician({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-        
+
       </ScrollView>
-      
+
     </View>
   );
 }

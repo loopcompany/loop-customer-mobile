@@ -187,8 +187,6 @@ const Login = ({ navigation }) => {
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => { }}
       />
 
       <KeyboardAvoidingView
@@ -220,7 +218,6 @@ const Login = ({ navigation }) => {
             <Text style={{
               color: '#fff',
               fontSize: 16,
-              fontWeight: 'bold',
               fontFamily: 'VazirBold',
               textAlign: 'center'
             }}>ورود به حساب کاربری</Text>
@@ -230,6 +227,7 @@ const Login = ({ navigation }) => {
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
             {/* کد سازمانی */}
             <View style={{ marginBottom: 8 }}>
+              <Text style={NewStyles.title}>کد سازمانی <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationCode}
                 onChangeText={setOrganizationCode}
@@ -258,7 +256,15 @@ const Login = ({ navigation }) => {
             </View>
 
             {/* رمز عبور */}
-            <View style={{ marginBottom: 8, position: 'relative' }}>
+            <Text style={NewStyles.title}>رمز عبور <Text style={NewStyles.title6}>*</Text></Text>
+            <View style={[{
+              marginBottom: 8, gap: 8, backgroundColor: '#f5f5f5',
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              borderWidth: 1,
+              borderColor: errors.password ? '#ff0000' : '#ccc',
+            }, NewStyles.row]}>
+
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -266,27 +272,18 @@ const Login = ({ navigation }) => {
                 placeholderTextColor="#999"
                 secureTextEntry={!showPassword}
                 style={{
-                  backgroundColor: '#f5f5f5',
                   borderRadius: 8,
-                  paddingVertical: 10,
-                  paddingHorizontal: 12,
-                  paddingLeft: 45,
-                  borderWidth: 1,
-                  borderColor: errors.password ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
                   textAlign: 'right',
-                  height: 40
+                  height: 40,
+                  flex: 1
                 }}
               />
               {/* Eye icon for password visibility */}
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: 10,
-                  zIndex: 1
                 }}
               >
                 <Ionicons
@@ -435,7 +432,6 @@ const Login = ({ navigation }) => {
                 <Text style={{
                   color: '#fff',
                   fontSize: 16,
-                  fontWeight: 'bold',
                   fontFamily: 'VazirBold',
                   textAlign: 'center'
                 }}>ورود</Text>

@@ -30,7 +30,7 @@ export default function WindowsInstallScreen({ navigation }) {
     , {
       id: 3,
       title: "ویندوز 8.1",
-      value:1
+      value: 1
     }
     ,
     {
@@ -56,14 +56,12 @@ export default function WindowsInstallScreen({ navigation }) {
 
   return (
     <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} >
-      <ScreenHeaders 
-        title={'لپ تاپ'} 
-        onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
+      <ScreenHeaders
+        title={'لپ تاپ'}
       />
 
       <FlatList
-      contentContainerStyle={{gap:10, padding:10}}
+        contentContainerStyle={{ gap: 10, padding: 10 }}
         ListHeaderComponent={() => {
           return (
 
@@ -77,11 +75,11 @@ export default function WindowsInstallScreen({ navigation }) {
           )
         }}
       />
-      
+
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  
+
 });

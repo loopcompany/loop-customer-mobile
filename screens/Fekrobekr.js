@@ -11,9 +11,7 @@ export default function Fekrobekr({ navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={{ top: 'off', bottom: 'additive' }}>
       <ScreenHeaders 
-        title={"فکروبکر"} 
-        onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
+        title={"فکروبکر"}   
       />
       {/* <Text style={styles.title}>فکر و بکر</Text> */}
       <Text

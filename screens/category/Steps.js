@@ -47,13 +47,13 @@ function Steps({ navigation, route }) {
         console.log('📋 [Steps] تعداد کل مراحل:', length);
         console.log('📋 [Steps] مرحله فعلی:', step);
         console.log('📦 [Steps] categoryId از route:', categoryId);
-        
+
         // اگر در وب هستیم و داده‌ها خالی است (بعد از ریلود)، دوباره fetchSteps را صدا بزنیم
         if (Platform.OS === 'web' && (!steps?.data || steps.data.length === 0) && categoryId) {
             console.log('🔄 [Steps] داده‌ها خالی است، دوباره fetchSteps صدا زده می‌شود...');
             dispatch(fetchSteps(categoryId));
         }
-        
+
         if (steps?.data && steps.data.length > 0) {
             // console.log('📝 [Steps] مرحله اول:', JSON.stringify(steps.data[0], null, 2));
         }
@@ -65,7 +65,11 @@ function Steps({ navigation, route }) {
                 dispatch(emptySteps());
                 dispatch(emptyCategory());
                 dispatch(emptyAddress());
-                navigation.goBack();
+                if (Platform.OS == 'web') {
+                    window.history.back()
+                } else {
+                    navigation.goBack()
+                }
                 return true;
             };
 
@@ -78,9 +82,9 @@ function Steps({ navigation, route }) {
 
 
     function required(step) {
-        
+
         const result = steps.data?.[step].every(item => {
-            
+
             if (["date", "time", "address", "gender"].includes(item.type) && item.is_required == 1) {
                 const isValid = !!item.value;
                 console.log(`   ✓ type: ${item.type}, value: "${item.value}", valid: ${isValid ? '✅' : '❌'}`);
@@ -102,25 +106,25 @@ function Steps({ navigation, route }) {
             // Validation برای service_schedule (فقط برای کاربران سازمانی)
             if (item.type == "service_schedule" && item.is_required == 1) {
                 console.log('🔍 [Steps.validation] بررسی service_schedule...');
-                
+
                 // پیدا کردن فیلد اصلی
                 const mainField = item.field_details?.find(f => f.id === 'main_selection');
                 const selectedOption = mainField?.options?.find(opt => opt.value > 0);
-                
+
                 if (!selectedOption) {
                     console.log('❌ [Steps.validation] service_schedule: انتخاب اصلی (long_term/short_term) نشده');
                     return false; // اگر انتخابی نشده
                 }
-                
+
                 console.log('✅ [Steps.validation] service_schedule: نوع انتخاب شده:', selectedOption.id);
-                
+
                 // بررسی فیلدهای شرطی
                 const conditionalFields = item.field_details?.filter(
                     f => f.conditional_on === selectedOption.id
                 );
-                
+
                 console.log('📋 [Steps.validation] تعداد فیلدهای شرطی:', conditionalFields?.length);
-                
+
                 // بررسی که همه فیلدهای شرطی اجباری پر شده باشند
                 const isValid = conditionalFields?.every(field => {
                     if (field.type === 'radioButton') {
@@ -157,20 +161,20 @@ function Steps({ navigation, route }) {
                     }
                     return true;
                 });
-                
+
                 if (!isValid) {
                     console.log('❌ [Steps.validation] service_schedule ناقص است');
                 } else {
                     console.log('✅ [Steps.validation] service_schedule کامل است');
                 }
-                
+
                 return isValid;
             }
-            
+
             console.log(`   ✓ type: ${item.type}, no validation needed or not required`);
             return true;
         });
-        
+
         return result;
     }
 
@@ -180,7 +184,7 @@ function Steps({ navigation, route }) {
             showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
             return;
         }
-        
+
         if (!required(step)) {
             const message = 'لطفا فیلدهای الزامی را تکمیل نمایید.';
             showToastOrAlert(message);
@@ -196,7 +200,7 @@ function Steps({ navigation, route }) {
     const selectedDate = useSelector(state => state?.step?.date)
     const selectedTime = useSelector(state => state?.step?.time)
     const [timeValidationError, setTimeValidationError] = useState(false);
-    
+
     useEffect(() => {
         if (selectedDate && selectedTime) {
             const result = isMoreThan4HoursFromNow(selectedDate, selectedTime);
@@ -216,7 +220,18 @@ function Steps({ navigation, route }) {
     return (
         <View style={NewStyles.container}>
             <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" >
-                <StepsHeader handleNextStep={() => { handleNextStep() }} handlePreStep={() => { setStep((currStep) => currStep - 1); }} showPre={step != 0} />
+                <StepsHeader handleNextStep={() => { handleNextStep() }} handlePreStep={() => {
+                    if (step != 0) {
+
+                        setStep((currStep) => currStep - 1);
+                    } else {
+                        if (Platform.OS == 'web') {
+                            window.history.back()
+                        } else {
+                            navigation.goBack()
+                        }
+                    }
+                }} showPre={true} />
                 {/* <ProgressBar step={step} /> */}
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
                     <FlatList
@@ -226,16 +241,16 @@ function Steps({ navigation, route }) {
                         keyExtractor={(item) => item?.id?.toString()}
                         renderItem={({ item }) => {
                             console.log('🎯 [Steps.renderItem] رندر item:', item?.id, 'type:', item?.type);
-                            
+
                             const isUrgentActive = steps?.isUrgent === 1;
                             if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
                                 return null;
                             }
-                            
+
                             if (item?.type === 'service_schedule') {
                                 console.log('✅ [Steps.renderItem] service_schedule یافت شد! رندر ServiceSchedule...');
                             }
-                            
+
                             return (
                                 <View >
                                     {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
@@ -265,7 +280,7 @@ function Steps({ navigation, route }) {
 const styles = StyleSheet.create({
     flatListContainer: {
         gap: 20,
-        paddingHorizontal:Platform.OS==='web' ? '20%' : 0
+        paddingHorizontal: Platform.OS === 'web' ? '20%' : 0
     },
 
     separator: {

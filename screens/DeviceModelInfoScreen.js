@@ -31,8 +31,7 @@ export default function DeviceModelInfoScreen({ navigation }) {
     <ImageBackground source={require('../assets/moon.jpg')} style={styles.background} >
   
         <ScreenHeaders 
-          title={'لپ تاپ'} 
-          onPressLeft={() => navigation.goBack()} 
+          title={'لپ تاپ'}  
           onPressRight={() => navigation.navigate('NextScreen')} 
         />
         <ScrollView contentContainerStyle={styles.container} edges={['left', 'right']}>

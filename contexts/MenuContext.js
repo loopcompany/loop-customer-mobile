@@ -9,15 +9,17 @@ import {
     Modal,
     Linking,
     TouchableWithoutFeedback,
+    Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1 } from '../theme/Color';
-import NewStyles from '../styles/NewStyles';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import NewStyles, { deviceHeight } from '../styles/NewStyles';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import useLogout from '../hooks/useLogout';
 import { fetchContacts } from '../slices/contactSlice';
+import { fetchUser } from '../slices/userSlice';
 
 // Create Context
 const MenuContext = createContext();
@@ -28,10 +30,14 @@ export const MenuProvider = ({ children }) => {
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
     const [currentRouteName, setCurrentRouteName] = useState('');
-
+    const insets = useSafeAreaInsets();
     // Get user type and auth token from Redux
     const userType = useSelector(state => state.auth.userType);
     const token = useSelector(state => state.auth.token);
+    const user = useSelector(state => state.user?.data);
+    console.log('====================================');
+    console.log(user);
+    console.log('====================================');
     const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
 
     // صفحاتی که نباید Footer و Menu نمایش داده شود
@@ -77,12 +83,12 @@ export const MenuProvider = ({ children }) => {
         if (screensWithoutMenu.includes(currentRouteName)) {
             return false;
         }
-        
+
         // اگر در صفحه قوانین سازمانی هستیم و کاربر لاگین نکرده، منو نشان نده
         if (currentRouteName === 'OrganizationTermsScreen' && !isLoggedIn) {
             return false;
         }
-        
+
         // در غیر این صورت منو را نشان بده
         return true;
     }, [currentRouteName, isLoggedIn]);
@@ -92,20 +98,24 @@ export const MenuProvider = ({ children }) => {
     useEffect(() => {
         dispatch(fetchContacts());
     }, [])
-    const contact = useSelector(state => state.contacts);
+    useEffect(()=>{
+        if(!user && token){
+            dispatch(fetchUser(token))
+        }
+    },[token])
 
     // Generate menu items dynamically based on user type
     const menuItems = useMemo(() => {
         console.log('🔍 [MenuContext] Current userType:', userType);
-        
+
         const baseMenuItems = [
             { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
             { id: 22, title: "کیف پول لوپ", screen: "Increase" },
             { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
             // برای سازمانی: قوانین سازمانی | برای عادی: قوانین عمومی
-            { 
-                id: 20, 
-                title: userType === 'organization' ? "قوانین و مقررات سازمانی" : "قوانین / درباره لوپ", 
+            {
+                id: 20,
+                title: userType === 'organization' ? "قوانین و مقررات سازمانی" : "قوانین / درباره لوپ",
                 screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen"
             },
             { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
@@ -113,7 +123,7 @@ export const MenuProvider = ({ children }) => {
             { id: 17, title: " ضمانت نامه / گارانتی", screen: "WarrantyScreen" },
             { id: 16, title: "نظرات و پیشنهادات", screen: "FeedbackSurveyScreen" },
             { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
-            { id: 14, title: "نرخنامه", screen: "RateListScreen" },
+            { id: 14, title: "نرخنامه", screen: "RateCategory" },
             { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
             { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
             { id: 11, title: "فکروبکر", screen: "GameMenu" },
@@ -160,7 +170,7 @@ export const MenuProvider = ({ children }) => {
             style={styles.item}
             onPress={() => navigateToScreen(item.screen)}
         >
-            <Text style={NewStyles.text10}>{item.title}</Text>
+            <Text style={[NewStyles.title10, { paddingVertical: 5 }]}>{item.title}</Text>
         </TouchableOpacity>
     );
 
@@ -181,15 +191,15 @@ export const MenuProvider = ({ children }) => {
                 {/* Global Footer - فقط در صفحات مجاز نمایش داده می‌شود */}
                 {shouldShowMenu && (
                     <View style={[styles.footer, NewStyles.rowWrapper]}>
-                        <TouchableOpacity onPress={callSupport}>
+                        <View >
                             <Text style={NewStyles.text4}>
-                                {contact?.data?.data?.name || '021-21164552'}
+                                {user?.code}
                             </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.supportButton} onPress={()=>{navigation.navigate('MessageScreen')}}>
+                        </View>
+                        <TouchableOpacity style={styles.supportButton} onPress={() => { navigation.navigate('MessageScreen') }}>
                             <Text style={NewStyles.text4}>پشتیبانی</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={openMenu}>
+                        <TouchableOpacity onPress={openMenu} style={{ backgroundColor: themeColor4.bgColor(1), borderRadius: 100, marginVertical: 5 }}>
                             <Image
                                 source={require("../assets/logo.png")}
                                 style={styles.footerLogo}
@@ -197,46 +207,46 @@ export const MenuProvider = ({ children }) => {
                         </TouchableOpacity>
                     </View>
                 )}
-            </SafeAreaView>
+                {/* Menu Modal */}
+                <Modal
+                    transparent={true}
+                    visible={menuVisible}
+                    onRequestClose={closeMenu}
+                    animationType="fade"
+                >
+                    <TouchableWithoutFeedback onPress={closeMenu}>
+                        <View style={styles.coverlist2}>
+                            <View style={[styles.coverlist, {height: deviceHeight - insets.top - insets.bottom - 50}]}>
+                                <View style={{ backgroundColor: themeColor0.bgColor(1), }}>
+                                    <FlatList
+                                        inverted
+                                        data={menuItems}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        renderItem={renderMenuItem}
+                                        contentContainerStyle={styles.list}
+                                        showsVerticalScrollIndicator={false}
+                                    />
 
-            {/* Menu Modal */}
-            <Modal
-                transparent={true}
-                visible={menuVisible}
-                onRequestClose={closeMenu}
-                animationType="fade"
-            >
-                <TouchableWithoutFeedback onPress={closeMenu}>
-                    <View style={styles.coverlist2}>
-                        <View style={styles.coverlist}>
-                            <View style={{ backgroundColor: themeColor0.bgColor(1) }}>
-                                <FlatList
-                                    inverted
-                                    data={menuItems}
-                                    keyExtractor={(item) => item.id.toString()}
-                                    renderItem={renderMenuItem}
-                                    contentContainerStyle={styles.list}
-                                    showsVerticalScrollIndicator={false}
-                                />
-
-                                {/* دکمه خروج */}
-                                <View style={styles.logoutContainer}>
-                                    <TouchableOpacity
-                                        style={[styles.logoutBtn, isLoggingOut && styles.logoutBtnDisabled]}
-                                        onPress={() => logoutWithConfirmation({ onSuccess: closeMenu })}
-                                        disabled={isLoggingOut}
-                                    >
-                                        <Ionicons name="power" size={20} color="#fff" />
-                                        <Text style={styles.logoutText}>
-                                            {isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    {/* دکمه خروج */}
+                                    <View style={styles.logoutContainer}>
+                                        <TouchableOpacity
+                                            style={[styles.logoutBtn, isLoggingOut && styles.logoutBtnDisabled]}
+                                            onPress={() => logoutWithConfirmation({ onSuccess: closeMenu })}
+                                            disabled={isLoggingOut}
+                                        >
+                                            <Ionicons name="power" size={20} color="#fff" />
+                                            <Text style={styles.logoutText}>
+                                                {isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </SafeAreaView>
+
         </MenuContext.Provider>
     );
 };
@@ -255,11 +265,11 @@ const styles = StyleSheet.create({
     coverlist: {
         width: '80%',
         backgroundColor: themeColor0.bgColor(0),
-        height: '92%',
-        justifyContent: 'flex-end'
+        justifyContent: 'flex-end',
     },
     coverlist2: {
-        flex: 1
+        flex: 1,
+        
     },
     footer: {
         backgroundColor: themeColor13.bgColor(1),
@@ -267,8 +277,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     footerLogo: {
-        width: 60,
-        height: 60,
+        width: 70,
+        height: 40,
         resizeMode: "contain",
     },
     supportButton: {
@@ -278,8 +288,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     list: {
-        paddingVertical: "20",
-        paddingHorizontal: "16",
+        paddingTop: 20,
+        paddingHorizontal: 16,
+        paddingBottom: 100,
     },
     item: {
         backgroundColor: themeColor4.bgColor(1),

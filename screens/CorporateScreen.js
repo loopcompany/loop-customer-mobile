@@ -1,13 +1,18 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import BlankScreen from '../components/BlankScreen';
+import { Platform } from 'react-native';
 
 // نمونه صفحه خالی برای تست
 export default function CorporateScreen() {
   const navigation = useNavigation();
 
   const handleGoBack = () => {
-    navigation.goBack();
+    if (Platform.OS == 'web') {
+      window.history.back()
+    } else {
+      navigation.goBack()
+    }
   };
 
   return (

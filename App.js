@@ -93,6 +93,8 @@ import WebViewScreen from './screens/WebViewScreen';
 import ScreenHeaders from "./components/ScreenHeaders";
 import AccessRestrictedScreen from "./components/AccessRestrictedScreen";
 import AuthInitializer from "./components/AuthInitializer";
+import OrganizationTermsScreen from "./screens/resources/OrganizationTermsScreen";
+import RateCategory from "./screens/RateCategory";
 const Stack = createNativeStackNavigator();
 I18nManager.forceRTL(false);
 SplashScreen.preventAutoHideAsync();
@@ -230,6 +232,7 @@ const App = () => {
         PrivacyScreen: 'privacy',
         LearnMoreScreen: 'learn-more',
         AboutScreen: 'about',
+        OrganizationTermsScreen: 'organization-terms',
         TransactionsScreen: 'transactions',
         MessageScreen: 'messages',
         OrdersScreen: 'orders',
@@ -239,6 +242,7 @@ const App = () => {
         FeedbackSurveyScreen: 'feedback',
         Fekrobekr: 'fekrobekr',
         RateListScreen: 'rates',
+        RateCategory: 'category-rates',
         ProductIssueScreen: 'product-issue',
         TrainingRegistrationScreen: 'training-registration',
         IncentivePlansScreen: 'incentive-plans',
@@ -448,6 +452,7 @@ const App = () => {
             <Stack.Screen component={ViolationReportsListScreen} name="ViolationReportsListScreen" />
             <Stack.Screen component={FeedbackSurveyScreen} name="FeedbackSurveyScreen" />
             <Stack.Screen component={RateListScreen} name="RateListScreen" />
+            <Stack.Screen component={RateCategory} name="RateCategory" />
             <Stack.Screen component={ProductIssueScreen} name="ProductIssueScreen" />
             <Stack.Screen component={IncentivePlansScreen} name="IncentivePlansScreen" />
             <Stack.Screen component={TrainingRegistrationScreen} name="TrainingRegistrationScreen" />
@@ -455,6 +460,7 @@ const App = () => {
             <Stack.Screen component={AddEditNoteScreen} name="AddEditNoteScreen" />
             <Stack.Screen component={LearnMoreScreen} name="LearnMoreScreen" />
             <Stack.Screen component={AboutScreen} name="AboutScreen" />
+            <Stack.Screen component={OrganizationTermsScreen} name="OrganizationTermsScreen" />
             <Stack.Screen component={PrivacyScreen} name="PrivacyScreen" />
             <Stack.Screen component={WarrantyScreen} name="WarrantyScreen" />
             <Stack.Screen component={GameMenuScreen} name="GameMenu" />

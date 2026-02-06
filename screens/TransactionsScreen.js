@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import moment from 'moment-jalaali';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '../helpers/Common';
-import { themeColor0, themeColor1, themeColor4, themeColor6, themeColor7 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '../theme/Color';
 import { getTransactions } from '../services/WalletApi';
 
 export default function TransactionsScreen() {
@@ -18,7 +18,7 @@ export default function TransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [pagination, setPagination] = useState(null);
-  
+
   // فیلتر تاریخ
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [fromDate, setFromDate] = useState(null);
@@ -38,7 +38,7 @@ export default function TransactionsScreen() {
       const params = {};
       if (fromDate) params.from_date = fromDate;
       if (toDate) params.to_date = toDate;
-      
+
       // استفاده از service
       const data = await getTransactions(token, params);
 
@@ -115,9 +115,9 @@ export default function TransactionsScreen() {
       case '-1':
         return themeColor6.bgColor(1); // ناموفق - قرمز
       case '0':
-        return themeColor0.bgColor(1); // در انتظار - آبی
+        return themeColor11.bgColor(1); // در انتظار - آبی
       default:
-        return themeColor1.bgColor(1);
+        return themeColor11.bgColor(1);
     }
   };
 
@@ -150,20 +150,20 @@ export default function TransactionsScreen() {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title="تراکنش ها" />
-      
+
       {/* دکمه فیلتر */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity 
-          onPress={openFilterModal} 
+        <TouchableOpacity
+          onPress={openFilterModal}
           style={[
             styles.filterButton,
             (fromDate || toDate) && styles.filterButtonActive
           ]}
         >
-          <Ionicons 
-            name="filter" 
-            size={20} 
-            color={(fromDate || toDate) ? '#fff' : themeColor0.bgColor(1)} 
+          <Ionicons
+            name="filter"
+            size={20}
+            color={(fromDate || toDate) ? '#fff' : themeColor0.bgColor(1)}
           />
           <Text style={[
             styles.filterButtonText,
@@ -189,7 +189,7 @@ export default function TransactionsScreen() {
           <View style={styles.activeFilterBadge}>
             <Ionicons name="funnel" size={16} color="#fff" />
             <Text style={styles.activeFilterText}>
-              فیلتر فعال: 
+              فیلتر فعال:
               {fromDate && ` از ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
               {toDate && ` تا ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
             </Text>
@@ -208,59 +208,62 @@ export default function TransactionsScreen() {
         ) : (
           <>
             <Text style={styles.header}>تراکنش‌ها</Text>
-            {transactions.map((item, index) => (
-              <View
-                key={item.id || index}
-                style={[
-                  styles.transactionBox,
-                  { backgroundColor: getStatusColor(item.status) }
-                ]}
-              >
-                <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text10, { flex: 1 }]}>
-                    {formatDateTime(item.created_at)}
-                  </Text>
-                  <Text style={[NewStyles.text10, styles.statusBadge]}>
-                    {getStatusText(item.status)}
-                  </Text>
-                </View>
-
-                <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text10]}>
-                    مبلغ:
-                  </Text>
-                  <Text style={[NewStyles.title10]}>
-                    {formatPrice(item.price * 10)} ریال
-                  </Text>
-                </View>
-
-                <View style={styles.transactionRow}>
-                  <Text style={[NewStyles.text10]}>
-                    نوع:
-                  </Text>
-                  <Text style={[NewStyles.text10]}>
-                    {getTypeText(item.type)}
-                  </Text>
-                </View>
-
-                {item.referenceId && (
+            <FlatList
+              data={transactions}
+              renderItem={({ item, index }) => (
+                <View
+                  key={item.id || index}
+                  style={[
+                    styles.transactionBox,
+                    { backgroundColor: getStatusColor(item.status) }
+                  ]}
+                >
                   <View style={styles.transactionRow}>
-                    <Text style={[NewStyles.text10]}>
-                      شماره پیگیری:
+                    <Text style={[NewStyles.text4, { flex: 1 }]}>
+                      {formatDateTime(item.created_at)}
                     </Text>
-                    <Text style={[NewStyles.text10]}>
-                      {item.referenceId}
+                    <Text style={[NewStyles.text4, styles.statusBadge]}>
+                      {getStatusText(item.status)}
                     </Text>
                   </View>
-                )}
 
-                {item.description && (
-                  <Text style={[NewStyles.text10]}>
-                    {item.description}
-                  </Text>
-                )}
-              </View>
-            ))}
+                  <View style={styles.transactionRow}>
+                    <Text style={[NewStyles.text4]}>
+                      مبلغ:
+                    </Text>
+                    <Text style={[NewStyles.title4]}>
+                      {formatPrice(item.price * 10)} ریال
+                    </Text>
+                  </View>
+
+                  <View style={styles.transactionRow}>
+                    <Text style={[NewStyles.text4]}>
+                      نوع:
+                    </Text>
+                    <Text style={[NewStyles.text4]}>
+                      {getTypeText(item.type)}
+                    </Text>
+                  </View>
+
+                  {item.referenceId && (
+                    <View style={styles.transactionRow}>
+                      <Text style={[NewStyles.text4]}>
+                        شماره پیگیری:
+                      </Text>
+                      <Text style={[NewStyles.text4]}>
+                        {item.referenceId}
+                      </Text>
+                    </View>
+                  )}
+
+                  {item.description && (
+                    <Text style={[NewStyles.text4]}>
+                      {item.description}
+                    </Text>
+                  )}
+                </View>
+              )}
+            /> 
 
             {pagination && (
               <View style={styles.paginationInfo}>
@@ -292,112 +295,136 @@ export default function TransactionsScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* از تاریخ */}
-            <View style={styles.dateInputContainer}>
-              <Text style={styles.dateLabel}>از تاریخ:</Text>
-              <TouchableOpacity 
-                style={styles.dateInput}
-                onPress={() => {
-                  setShowFromPicker(!showFromPicker);
-                  if (!showFromPicker) {
-                    // Clear temp when opening to allow re-selection
-                    setTempFromDate(null);
-                  }
-                }}
-              >
-                <Text style={styles.dateText}>
-                  {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
-                </Text>
-                <Ionicons name="calendar-outline" size={20} color="#666" />
-              </TouchableOpacity>
-              {showFromPicker && (
-                <DatePicker
-                  mode="calendar"
-                  options={{
-                    backgroundColor: '#fff',
-                    textHeaderColor: themeColor0.bgColor(1),
-                    textDefaultColor: '#333',
-                    selectedTextColor: '#fff',
-                    mainColor: themeColor0.bgColor(1),
-                    textSecondaryColor: '#999',
-                  }}
-                  selected={fromDate ? moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                  onSelectedChange={(date) => {
-                    const gregorian = convertJalaliToGregorian(date);
-                    setTempFromDate(gregorian);
-                    setShowFromPicker(false);
-                  }}
-                  onDateChange={(date) => {
-                    const gregorian = convertJalaliToGregorian(date);
-                    setTempFromDate(gregorian);
-                  }}
-                  style={{ borderRadius: 10 }}
-                />
-              )}
-            </View>
-
-            {/* تا تاریخ */}
-            <View style={styles.dateInputContainer}>
-              <Text style={styles.dateLabel}>تا تاریخ:</Text>
-              <TouchableOpacity 
-                style={styles.dateInput}
-                onPress={() => {
-                  setShowToPicker(!showToPicker);
-                  if (!showToPicker) {
-                    // Clear temp when opening to allow re-selection
-                    setTempToDate(null);
-                  }
-                }}
-              >
-                <Text style={styles.dateText}>
-                  {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
-                </Text>
-                <Ionicons name="calendar-outline" size={20} color="#666" />
-              </TouchableOpacity>
-              {showToPicker && (
-                <DatePicker
-                  mode="calendar"
-                  options={{
-                    backgroundColor: '#fff',
-                    textHeaderColor: themeColor0.bgColor(1),
-                    textDefaultColor: '#333',
-                    selectedTextColor: '#fff',
-                    mainColor: themeColor0.bgColor(1),
-                    textSecondaryColor: '#999',
-                  }}
-                  selected={toDate ? moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                  onSelectedChange={(date) => {
-                    const gregorian = convertJalaliToGregorian(date);
-                    setTempToDate(gregorian);
+            <ScrollView
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              {/* از تاریخ */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.dateLabel}>از تاریخ:</Text>
+                <TouchableOpacity
+                  style={[styles.dateInput, showFromPicker && styles.dateInputActive]}
+                  onPress={() => {
                     setShowToPicker(false);
+                    setShowFromPicker(!showFromPicker);
                   }}
-                  onDateChange={(date) => {
-                    const gregorian = convertJalaliToGregorian(date);
-                    setTempToDate(gregorian);
-                  }}
-                  style={{ borderRadius: 10 }}
-                />
-              )}
-            </View>
+                >
+                  <Text style={[styles.dateText, tempFromDate && styles.dateTextSelected]}>
+                    {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                  </Text>
+                  <Ionicons name={showFromPicker ? "chevron-up" : "calendar-outline"} size={20} color={showFromPicker ? themeColor0.bgColor(1) : "#666"} />
+                </TouchableOpacity>
+                {showFromPicker && (
+                  <View style={styles.pickerContainer}>
+                    <DatePicker
+                      mode="calendar"
+                      isGregorian={false}
+                      options={{
+                        backgroundColor: '#fff',
+                        textHeaderColor: themeColor0.bgColor(1),
+                        textDefaultColor: '#333',
+                        selectedTextColor: '#fff',
+                        mainColor: themeColor0.bgColor(1),
+                        textSecondaryColor: '#999',
+                        defaultFont: 'VazirLight',
+                        headerFont: 'VazirLight',
+                      }}
+                      selected={tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
+                      onDateChange={() => { }}
+                      onMonthYearChange={() => { }}
+                      onSelectedChange={(date) => {
+                        const gregorian = convertJalaliToGregorian(date);
+                        setTempFromDate(gregorian);
+                      }}
+                      style={{ borderRadius: 10 }}
+                    />
+                    <TouchableOpacity
+                      style={styles.confirmDateBtn}
+                      onPress={() => {
+                        setShowFromPicker(false);
+                        // Auto-open end date picker
+                        setShowToPicker(true);
+                      }}
+                    >
+                      <Ionicons name="arrow-back" size={18} color="#fff" />
+                      <Text style={styles.confirmDateBtnText}>
+                        {tempFromDate ? 'تایید و انتخاب تاریخ پایان' : 'بستن'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
 
-            {/* دکمه‌ها */}
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalBtn, styles.clearBtn]}
-                onPress={clearFilter}
-              >
-                <Ionicons name="trash-outline" size={20} color="#fff" />
-                <Text style={styles.modalBtnText}>پاک کردن</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalBtn, styles.applyBtn]}
-                onPress={applyFilter}
-              >
-                <Ionicons name="checkmark" size={20} color="#fff" />
-                <Text style={styles.modalBtnText}>اعمال فیلتر</Text>
-              </TouchableOpacity>
-            </View>
+              {/* تا تاریخ */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.dateLabel}>تا تاریخ:</Text>
+                <TouchableOpacity
+                  style={[styles.dateInput, showToPicker && styles.dateInputActive]}
+                  onPress={() => {
+                    setShowFromPicker(false);
+                    setShowToPicker(!showToPicker);
+                  }}
+                >
+                  <Text style={[styles.dateText, tempToDate && styles.dateTextSelected]}>
+                    {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                  </Text>
+                  <Ionicons name={showToPicker ? "chevron-up" : "calendar-outline"} size={20} color={showToPicker ? themeColor0.bgColor(1) : "#666"} />
+                </TouchableOpacity>
+                {showToPicker && (
+                  <View style={styles.pickerContainer}>
+                    <DatePicker
+                      mode="calendar"
+                      isGregorian={false}
+                      options={{
+                        backgroundColor: '#fff',
+                        textHeaderColor: themeColor0.bgColor(1),
+                        textDefaultColor: '#333',
+                        selectedTextColor: '#fff',
+                        mainColor: themeColor0.bgColor(1),
+                        textSecondaryColor: '#999',
+                        defaultFont: 'VazirLight',
+                        headerFont: 'VazirLight',
+                      }}
+                      selected={tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
+                      onDateChange={() => { }}
+                      onMonthYearChange={() => { }}
+                      onSelectedChange={(date) => {
+                        const gregorian = convertJalaliToGregorian(date);
+                        setTempToDate(gregorian);
+                      }}
+                      style={{ borderRadius: 10 }}
+                    />
+                    <TouchableOpacity
+                      style={styles.confirmDateBtn}
+                      onPress={() => setShowToPicker(false)}
+                    >
+                      <Ionicons name="checkmark" size={18} color="#fff" />
+                      <Text style={styles.confirmDateBtnText}>تایید تاریخ پایان</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+
+              {/* دکمه‌ها */}
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalBtn, styles.clearBtn]}
+                  onPress={clearFilter}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#fff" />
+                  <Text style={styles.modalBtnText}>پاک کردن</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalBtn, styles.applyBtn]}
+                  onPress={applyFilter}
+                >
+                  <Ionicons name="checkmark" size={20} color="#fff" />
+                  <Text style={styles.modalBtnText}>اعمال فیلتر</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -506,7 +533,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    maxHeight: '80%',
+    maxHeight: '90%',
+  },
+  modalScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -543,11 +574,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
   },
+  dateInputActive: {
+    borderColor: themeColor0.bgColor(1),
+    borderWidth: 2,
+    backgroundColor: '#fff',
+  },
   dateText: {
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#333',
     textAlign: 'right',
+  },
+  dateTextSelected: {
+    fontFamily: 'VazirBold',
+    color: themeColor0.bgColor(1),
+  },
+  pickerContainer: {
+    marginTop: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    maxWidth: 400,
+    width: '100%',
+    alignSelf: 'center'
+  },
+  confirmDateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: themeColor0.bgColor(1),
+    padding: 12,
+    gap: 8,
+  },
+  confirmDateBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'VazirBold',
   },
   modalButtons: {
     flexDirection: 'row',

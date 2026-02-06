@@ -27,8 +27,6 @@ const Method = ({ navigation }) => {
       <CustomStatusBar />
       <ScreenHeaders
         title="سازمانی / دولتی"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
       />
 
       {/* Background with image */}

@@ -16,7 +16,7 @@ import { themeColor0, themeColor1, themeColor6, themeColor7 } from '../theme/Col
 import NewStyles from '../styles/NewStyles';
 
 const { width } = Dimensions.get('window');
-const WHEEL_SIZE = width * 0.75;
+const WHEEL_SIZE = width > 800 ? 800 * 0.75 : width * 0.75;
 const CENTER = WHEEL_SIZE / 2;
 
 const LuckyWheel = ({ prizes, onSpinStart, spinning, disabled }) => {
@@ -56,7 +56,8 @@ const LuckyWheel = ({ prizes, onSpinStart, spinning, disabled }) => {
         }).start(() => {
             setCurrentRotation(totalRotation % 360);
         });
-    };    const renderSegments = () => {
+    };
+    const renderSegments = () => {
         return prizes.map((prize, index) => {
             const startAngle = (anglePerSegment * index - 90) * (Math.PI / 180);
             const endAngle = (anglePerSegment * (index + 1) - 90) * (Math.PI / 180);
@@ -199,18 +200,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -20,
         zIndex: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 5,
+        
     },
     wheel: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 10,
+        
     },
     spinButton: {
         position: 'absolute',

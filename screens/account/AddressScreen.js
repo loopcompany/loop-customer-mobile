@@ -39,7 +39,7 @@ export default function AddressScreen({ route, navigation }) {
     try {
       setLoading(true);
       const response = await addressAPI.getAll();
-      
+
       if (response.success && response.data) {
         setAddresses(response.data);
       }
@@ -167,11 +167,10 @@ export default function AddressScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'additive' }}>
-      <ScreenHeaders 
-        title="آدرس‌های من" 
-        onPressLeft={() => navigation.goBack()} 
+      <ScreenHeaders
+        title="آدرس‌های من"
       />
-      
+
       <View style={{ flex: 1 }}>
         {loading && addresses.length === 0 ? (
           <View style={styles.loadingContainer}>
@@ -196,7 +195,7 @@ export default function AddressScreen({ route, navigation }) {
       </View>
 
       <View style={styles.footer}>
-        
+
         <Button title="افزودن آدرس جدید" onPress={() => navigation.navigate('AddNewAddress')} />
       </View>
     </SafeAreaView>
@@ -246,7 +245,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 15,
-    
+    ...NewStyles.center
+
   },
   addBtn: {
     backgroundColor: themeColor1.bgColor(1),

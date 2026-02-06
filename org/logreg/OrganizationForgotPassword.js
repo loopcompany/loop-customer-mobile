@@ -123,8 +123,6 @@ const OrganizationForgotPassword = ({ navigation }) => {
       <CustomStatusBar />
       <ScreenHeaders
         title="فراموشی رمز عبور"
-        onPressLeft={() => navigation.goBack()}
-        onPressRight={() => {}}
       />
 
       <ScrollView
@@ -328,7 +326,13 @@ const OrganizationForgotPassword = ({ navigation }) => {
 
           {/* Back to Login */}
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              if (Platform.OS == 'web') {
+                window.history.back()
+              } else {
+                navigation.goBack()
+              }
+            }}
             style={{
               alignItems: 'center',
               paddingVertical: 10,

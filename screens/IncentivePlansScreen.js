@@ -10,9 +10,7 @@ export default function IncentivePlansScreen({ navigation }) {
   return (
     <SafeAreaView style={[NewStyles.container, styles.mainContainer]} edges={{ top: 'off', bottom: 'additive' }}>
       <ScreenHeaders 
-        title="طرح‌های تشویقی" 
-        onPressLeft={() => navigation.goBack()} 
-        onPressRight={() => navigation.navigate('NextScreen')} 
+        title="طرح‌های تشویقی"  
       />
       
       <View style={styles.contentContainer}>

@@ -31,7 +31,7 @@ import { uri } from '../../services/URL';
 const OrganizationContractScreen = () => {
   const navigation = useNavigation();
   const { token } = useSelector(state => state.auth);
-  
+
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [downloadingTemplate, setDownloadingTemplate] = useState(false);
@@ -45,14 +45,14 @@ const OrganizationContractScreen = () => {
   const fetchContract = async () => {
     try {
       setLoading(true);
-      
+
       const response = await axios.get(`${uri}/organization/contract`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
-      
+
       if (response.data.success) {
         const data = response.data.data;
         setContractData(data);
@@ -62,7 +62,7 @@ const OrganizationContractScreen = () => {
       }
     } catch (error) {
       console.error('Error fetching contract:', error);
-      
+
       if (error.response?.status === 401) {
         showAlert('خطا', 'لطفا مجدداً وارد شوید');
       } else if (error.response?.status === 404) {
@@ -82,17 +82,17 @@ const OrganizationContractScreen = () => {
   const downloadTemplate = async () => {
     try {
       setDownloadingTemplate(true);
-      
+
       const response = await axios.get(`${uri}/organization/contract/template`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
-      
+
       if (response.data.success && response.data.data.template_url) {
         const templateUrl = response.data.data.template_url;
-        
+
         // باز کردن لینک در مرورگر
         const supported = await Linking.canOpenURL(templateUrl);
         if (supported) {
@@ -116,10 +116,10 @@ const OrganizationContractScreen = () => {
    */
   const selectFile = async () => {
     console.log('🔵 selectFile function called!'); // چک می‌کنیم تابع اصلاً صدا زده میشه یا نه
-    
+
     try {
       console.log('🟢 Opening document picker...');
-      
+
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'image/*'],
         copyToCacheDirectory: true,
@@ -130,31 +130,31 @@ const OrganizationContractScreen = () => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
-        
+
         console.log('📄 Selected file:', {
           name: file.name,
           size: file.size,
           mimeType: file.mimeType,
           uri: file.uri
         });
-        
+
         // بررسی حجم فایل (حداکثر 10 مگابایت)
         if (file.size > 10 * 1024 * 1024) {
           console.log('❌ File too large:', file.size);
           showAlert('خطا', 'حجم فایل نباید از 10 مگابایت بیشتر باشد');
           return;
         }
-        
+
         // بررسی نوع فایل
         const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
         console.log('🔍 Checking mimeType:', file.mimeType, 'against allowed types:', allowedTypes);
-        
+
         if (!allowedTypes.includes(file.mimeType)) {
           console.log('❌ Invalid mimeType:', file.mimeType);
           showAlert('خطا', `فقط فایل‌های PDF و تصاویر مجاز هستند\n\nنوع فایل شما: ${file.mimeType}`);
           return;
         }
-        
+
         console.log('✅ File validation passed, setting selectedFile');
         setSelectedFile(file);
         showAlert('موفقیت', `فایل "${file.name}" انتخاب شد`);
@@ -184,10 +184,10 @@ const OrganizationContractScreen = () => {
       showAlert('خطا', 'لطفا ابتدا فایل قرارداد را انتخاب کنید');
       return;
     }
-    
+
     try {
       setUploading(true);
-      
+
       // ایجاد FormData
       const formData = new FormData();
       formData.append('contract', {
@@ -195,7 +195,7 @@ const OrganizationContractScreen = () => {
         type: selectedFile.mimeType,
         name: selectedFile.name,
       });
-      
+
       const response = await axios.post(`${uri}/organization/contract`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -204,11 +204,11 @@ const OrganizationContractScreen = () => {
         },
         timeout: 60000, // 60 ثانیه timeout
       });
-      
+
       if (response.data.success) {
         setContractStatus('pending');
         setSelectedFile(null);
-        
+
         showAlert('موفقیت', 'قرارداد شما با موفقیت آپلود شد و در انتظار تایید است', [
           {
             text: 'باشه',
@@ -220,7 +220,7 @@ const OrganizationContractScreen = () => {
       }
     } catch (error) {
       console.error('Error uploading contract:', error);
-      
+
       if (error.response?.status === 422) {
         showAlert('خطا', 'فایل انتخابی معتبر نیست');
       } else if (error.response?.status === 413) {
@@ -243,7 +243,7 @@ const OrganizationContractScreen = () => {
       showAlert('خطا', 'فایل قرارداد موجود نیست');
       return;
     }
-    
+
     try {
       const supported = await Linking.canOpenURL(contractData.file_url);
       if (supported) {
@@ -307,13 +307,12 @@ const OrganizationContractScreen = () => {
   return (
     <View style={styles.container}>
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} barStyle="dark-content" />
-      <ScreenHeaders 
+      <ScreenHeaders
         title="مدیریت قرارداد"
-        onBackPress={() => navigation.goBack()}
       />
-      
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        
+
         {/* نمایش وضعیت فعلی */}
         <View style={[styles.statusContainer, { borderLeftColor: getStatusColor() }]}>
           <View style={styles.statusHeader}>
@@ -325,14 +324,14 @@ const OrganizationContractScreen = () => {
               </Text>
             </View>
           </View>
-          
+
           {/* نمایش تاریخ آپلود */}
           {contractData?.uploaded_at && (
             <Text style={styles.uploadDate}>
               آپلود شده در: {new Date(contractData.uploaded_at).toLocaleDateString('fa-IR')}
             </Text>
           )}
-          
+
           {/* نمایش دلیل رد */}
           {contractStatus === 'rejected' && contractData?.rejection_reason && (
             <View style={styles.rejectionContainer}>
@@ -390,7 +389,7 @@ const OrganizationContractScreen = () => {
           <>
             <View style={styles.uploadContainer}>
               <Text style={styles.uploadTitle}>آپلود قرارداد</Text>
-              
+
               {selectedFile ? (
                 <View style={styles.selectedFileContainer}>
                   <Icon name="description" size={40} color={themeColor0.color} />
@@ -418,9 +417,9 @@ const OrganizationContractScreen = () => {
             {/* دکمه آپلود - همیشه نمایش داده میشه */}
             <Button
               title={
-                uploading ? 'در حال آپلود...' : 
-                selectedFile ? 'آپلود قرارداد' : 
-                'ابتدا فایل را انتخاب کنید'
+                uploading ? 'در حال آپلود...' :
+                  selectedFile ? 'آپلود قرارداد' :
+                    'ابتدا فایل را انتخاب کنید'
               }
               onPress={uploadContract}
               loading={uploading}

@@ -33,6 +33,17 @@ const persianMonths = [
   'بهمن',
   'اسفند',
 ];
+
+export const isLocalUri = (uri) => {
+  if (!uri || typeof uri !== 'string') return false;
+  return (
+    uri.startsWith('file://') ||
+    uri.startsWith('content://') ||
+    uri.startsWith('blob:') ||
+    uri.startsWith('data:') // برای بعضی حالت‌های وب
+  );
+};
+
 const padZero = (num) => (num < 10 ? `0${num}` : `${num}`);
 export function generateTimeSlots(startTime, endTime, intervalMinutes) {
   const slots = [];
@@ -120,16 +131,28 @@ export function isMoreThan4HoursFromNow(dateString, timeString) {
     }
   }
 
-  // Ensure time format is HH:MM
-  if (startTime && !startTime.includes(':')) {
-    startTime = startTime + ':00';
+  // Parse hour and minute from startTime
+  let hour, minute;
+  if (startTime && startTime.includes(':')) {
+    const timeParts = startTime.split(':');
+    hour = parseInt(timeParts[0]);
+    minute = parseInt(timeParts[1]);
+  } else {
+    hour = parseInt(startTime);
+    minute = 0;
   }
 
+  // Pad hour and minute to ensure HH:MM format
+  const paddedHour = hour.toString().padStart(2, '0');
+  const paddedMinute = minute.toString().padStart(2, '0');
+  const formattedTime = `${paddedHour}:${paddedMinute}:00`;
+
   // Create target datetime
-  const targetDateTime = new Date(`${dateString}T${startTime}:00`);
+  const targetDateTime = new Date(`${dateString}T${formattedTime}`);
   const now = new Date();
   const diffMs = targetDateTime - now;
   const diffHours = diffMs / (1000 * 60 * 60);
+
   return diffHours >= 4;
 }
 
@@ -403,16 +426,16 @@ export const getOrderStatusColor = (status) => {
   return colorMap[status] || '#9E9E9E';
 };
 export const formatDateTime = (isoDate) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    if (isNaN(date.getTime())) return '';
-    const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-    
-    // گرفتن ساعت و دقیقه
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+  if (!isoDate) return '';
+  const date = new Date(isoDate);
+  if (isNaN(date.getTime())) return '';
+  const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
 
-    return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
+  // گرفتن ساعت و دقیقه
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
 };
 export const calculateDaysDifference = (targetDate) => {
   const now = dayjs();
@@ -468,28 +491,28 @@ export const getPaymentStatusColor = (status) => {
  */
 export function jalaliToGregorian(jDate) {
   if (!jDate) return '';
-  
+
   try {
     // فرمت ورودی: 1402/08/17
     const parts = jDate.split('/');
     if (parts.length !== 3) return '';
-    
+
     const jy = parseInt(parts[0]);
     const jm = parseInt(parts[1]);
     const jd = parseInt(parts[2]);
-    
+
     // بررسی اعتبار مقادیر
     if (isNaN(jy) || isNaN(jm) || isNaN(jd)) return '';
     if (jm < 1 || jm > 12 || jd < 1 || jd > 31) return '';
-    
+
     // استفاده از کتابخانه jalaali-js برای تبدیل دقیق
     const gregorian = jalaali.toGregorian(jy, jm, jd);
-    
+
     // فرمت خروجی: YYYY-MM-DD
     const year = gregorian.gy;
     const month = gregorian.gm < 10 ? `0${gregorian.gm}` : `${gregorian.gm}`;
     const day = gregorian.gd < 10 ? `0${gregorian.gd}` : `${gregorian.gd}`;
-    
+
     return `${year}-${month}-${day}`;
   } catch (error) {
     console.error('Error converting Jalali to Gregorian:', error);
@@ -526,33 +549,33 @@ export const showAlert = (title, message, buttons = []) => {
       // For confirmation dialogs with buttons
       const confirmMessage = title ? `${title}\n\n${message}` : message;
       const confirmed = window.confirm(confirmMessage);
-      
+
       if (confirmed) {
         // Find and execute the positive/destructive button
-        const positiveButton = buttons.find(btn => 
-          btn.style === 'destructive' || 
+        const positiveButton = buttons.find(btn =>
+          btn.style === 'destructive' ||
           btn.style === 'default' ||
-          btn.text?.includes('بله') || 
-          btn.text?.includes('تایید') || 
+          btn.text?.includes('بله') ||
+          btn.text?.includes('تایید') ||
           btn.text?.includes('خروج') ||
           btn.text?.includes('حذف') ||
           btn.text?.includes('ارسال') ||
           btn.text?.includes('ذخیره') ||
           btn.text?.includes('OK')
         ) || buttons[buttons.length - 1]; // Default to last button
-        
+
         if (positiveButton && positiveButton.onPress) {
           positiveButton.onPress();
         }
       } else {
         // Find and execute the cancel button
-        const cancelButton = buttons.find(btn => 
-          btn.style === 'cancel' || 
-          btn.text?.includes('انصراف') || 
+        const cancelButton = buttons.find(btn =>
+          btn.style === 'cancel' ||
+          btn.text?.includes('انصراف') ||
           btn.text?.includes('خیر') ||
           btn.text?.includes('Cancel')
         );
-        
+
         if (cancelButton && cancelButton.onPress) {
           cancelButton.onPress();
         }

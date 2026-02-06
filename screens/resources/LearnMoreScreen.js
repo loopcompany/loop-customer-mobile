@@ -80,6 +80,7 @@ export default function LearnMoreScreen() {
 const styles = StyleSheet.create({
  
   faqsContainer:{
-    paddingHorizontal:15
+    paddingHorizontal:15,
+    paddingVertical:10
   }
 });

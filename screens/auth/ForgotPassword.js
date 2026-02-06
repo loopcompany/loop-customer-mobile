@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useDispatch } from "react-redux";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
@@ -124,7 +124,7 @@ export default function ForgotPassword({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-            <ImageBackground cachePolicy={'memory-disk'} source={require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="contain" >
+            <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} imageStyle={{ opacity: 0.8, }} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
                 <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior='padding'>
                     <ScrollView
                         contentContainerStyle={styles.container}
@@ -140,9 +140,11 @@ export default function ForgotPassword({ navigation }) {
 
 
                         {/* Form Section */}
-                        <View style={[{ flex: 2, width: '100%', gap: 15 }, NewStyles.center]}>
+                        <View style={[{ flex: 2, width: '100%', gap: 15, maxWidth: 800 }, NewStyles.center]}>
                             {/* National ID Input */}
                             <View style={styles.inputContainer}>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>کد ملی<Text style={NewStyles.title6}>*</Text></Text>
+
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -165,6 +167,7 @@ export default function ForgotPassword({ navigation }) {
 
                             {/* Phone Input */}
                             <View style={styles.inputContainer}>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}>شماره موبایل<Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -187,6 +190,7 @@ export default function ForgotPassword({ navigation }) {
 
                             {/* Email Input */}
                             <View style={styles.inputContainer}>
+                                <Text style={[NewStyles.text4, { fontFamily: 'VazirBold' }]}> ایمیل<Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
                                         NewStyles.textInput,
@@ -220,7 +224,14 @@ export default function ForgotPassword({ navigation }) {
                             {/* Back to Login */}
                             <TouchableOpacity
                                 style={[styles.backToLoginContainer]}
-                                onPress={() => navigation.goBack()}
+                                onPress={() => {
+                                    if(Platform.OS == 'web'){
+                                        window.history.back()
+                                    }else{
+
+                                        navigation.goBack()
+                                    }
+                                }}
                                 disabled={isLoading}
                             >
                                 <Text style={styles.backToLoginText}>بازگشت به ورود</Text>

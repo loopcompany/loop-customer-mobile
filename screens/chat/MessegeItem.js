@@ -29,9 +29,8 @@ export default function MessegeItem({ messege }) {
                             {/* نمایش تیک‌ها */}
                             {isRead ? (
                                 // دو تیک برای خوانده شده
-                                <View style={{ flexDirection: 'row', marginLeft: 2 }}>
-                                    <Ionicons name="checkmark" size={14} color={themeColor0.bgColor(1)} style={{ marginLeft: -6 }} />
-                                    <Ionicons name="checkmark" size={14} color={themeColor0.bgColor(1)} />
+                                <View style={{ flexDirection: 'row', marginLeft: 2 }}> 
+                                    <Ionicons name="checkmark-done" size={14} color={themeColor0.bgColor(1)} />
                                 </View>
                             ) : (
                                 // یک تیک برای نخوانده شده

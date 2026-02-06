@@ -121,13 +121,12 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
-      <View style={[{ width: '100%', gap:10 }, NewStyles.row]}>
-        <View style={{flex:1}}>
+      <View style={[{ width: '100%', gap: 10, maxWidth: 900 }, NewStyles.row]}>
+        <View style={[{ flex: 1 }, NewStyles.center]}>
           <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
         </View>
-        <View style={{flex:1}}>
-          <Button title={'ذخیره فاکتور'} style={{backgroundColor:themeColor7.bgColor(1)}} textStyle={{color: themeColor4.bgColor(1)}} onPress={() => {  Linking.openURL(`${uri}/orders/${orderId}/invoice`)}} />
-
+        <View style={[{ flex: 1 }, NewStyles.center]}>
+          <Button title={'ذخیره فاکتور'} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
         </View>
       </View>
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
@@ -143,22 +142,22 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
             </Text>
           </View>
         ) : (
-          <View style={[NewStyles.row, { width: '100%', gap: 10, marginTop: 15 }]}>
-            <View style={{ flex: 1 }}>
+          <View style={[NewStyles.row, { width: '100%', gap: 10, marginTop: 15, maxWidth: 900, }]}>
+            <View style={[{ flex: 1 }, NewStyles.center]}>
               <Button
                 title="تایید سفارش"
                 onPress={() => setAcceptModal(true)}
                 loading={loadingAccept}
-                textStyle={[{color: themeColor4.bgColor(1)}]}
+                textStyle={[{ color: themeColor4.bgColor(1) }]}
                 style={{ backgroundColor: themeColor7.bgColor(1) }}
               />
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={[{ flex: 1 }, NewStyles.center]}>
               <Button
                 title="لغو سفارش"
                 onPress={() => setCancelModal(true)}
                 loading={loadingCancel}
-                textStyle={{color: themeColor4.bgColor(1)}}
+                textStyle={{ color: themeColor4.bgColor(1) }}
                 style={{ backgroundColor: themeColor6.bgColor(1) }}
               />
             </View>
