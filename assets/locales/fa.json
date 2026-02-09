@@ -1114,7 +1114,33 @@
   "Warning": "هشدار",
   "Your message was sent successfully": "پیام شما با موفقیت ارسال شد",
   "Your messages will be sent to Loop support team and will be answered as soon as possible.": "پیام‌های شما به تیم پشتیبانی لوپ ارسال می‌شود و در اسرع وقت پاسخ داده خواهد شد.",
-  "📌 Registration Steps:\n• Landline phone number (02112345678)\n• Mobile number (09123456789)\n• Complete residential or work address\n• Description and educational interests": "📌 مراحل ثبت‌نام:\n• شماره تلفن ثابت (02112345678)\n• شماره موبایل (09123456789)\n• آدرس کامل محل سکونت یا کار\n• توضیحات و علایق آموزشی"
+  "📌 Registration Steps:\n• Landline phone number (02112345678)\n• Mobile number (09123456789)\n• Complete residential or work address\n• Description and educational interests": "📌 مراحل ثبت‌نام:\n• شماره تلفن ثابت (02112345678)\n• شماره موبایل (09123456789)\n• آدرس کامل محل سکونت یا کار\n• توضیحات و علایق آموزشی",
+ "Error retrieving transactions": "خطا در دریافت تراکنش‌ها",
+ "Online Payment": "پرداخت آنلاین",
+ "Wallet Deduction": "کسر از کیف پول",
+ "Failed": "ناموفق",
+ "Filter by Date": "فیلتر بر اساس تاریخ",
+ "Active filter:": "فیلتر فعال:",
+ "from": "از",
+ "to": "تا",
+ "No transactions found": "تراکنشی یافت نشد",
+ "Amount:": "مبلغ:",
+ "Rial": "ریال",
+ "Type:": "نوع:",
+ "Tracking Number:": "شماره پیگیری:",
+ "Page": "صفحه",
+ "of": "از",
+ "Total:": "مجموع:",
+ "transaction": "تراکنش",
+ "Date Filter": "فیلتر تاریخ",
+ "Error fetching reports": "خطا در دریافت گزارش‌ها",
+ "No subject": "بدون عنوان",
+ "ID:": "شناسه:",
+ "Registered:": "ثبت شده:",
+ "No violation reports found": "گزارش تخلفی یافت نشد",
+ "You haven't submitted any violation reports yet": "هنوز هیچ گزارش تخلفی ثبت نکرده‌اید",
+ "Track Reports": "پیگیری گزارش‌ها"
+
 }
 
 

@@ -99,7 +99,7 @@ export default function TransactionsScreen() {
   const getTypeText = (type) => {
     switch (type) {
       case '1':
-        return t('Wallet Recharge');
+        return t('Wallet recharge');
       case '2':
         return t('Online Payment');
       case '3':
