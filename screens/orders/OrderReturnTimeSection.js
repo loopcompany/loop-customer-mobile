@@ -5,6 +5,7 @@ import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import jalaali from 'jalaali-js'
 import moment from 'moment-jalaali'
+import { useTranslation } from 'react-i18next'
 
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
@@ -14,6 +15,7 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
+    const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
     const [selectedOption, setSelectedOption] = useState(null)
     const [showCustomInput, setShowCustomInput] = useState(false)
@@ -26,17 +28,17 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
         {
             id: 1,
             icon: 'call-outline',
-            text: 'در زمان عودت با من تماس گرفته شود'
+            text: t("Contact me at the return time")
         },
         {
             id: 2,
             icon: 'calendar-outline',
-            text: 'در چه تاریخی محصول عودت داده می شود؟'
+            text: t("What date will the product be returned?")
         },
         {
             id: 3,
             icon: 'speedometer-outline',
-            text: 'عجله دارم، سریع تر انجام شود'
+            text: t("I'm in a hurry, please do it faster")
         }
     ]
 
@@ -63,11 +65,11 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
             )
 
             if (response.status == 200 && response.data?.success) {
-                showToastOrAlert(response.data?.message || 'درخواست پیگیری با موفقیت ثبت شد')
+                showToastOrAlert(response.data?.message || t("Follow-up request submitted successfully"))
                 if (onUpdate) onUpdate()
             }
         } catch (error) {
-            const message = error?.response?.data?.message || 'خطا در ثبت درخواست پیگیری'
+            const message = error?.response?.data?.message || t("Error submitting follow-up request")
             showToastOrAlert(message)
         } finally {
             setSubmitting(false)
@@ -102,8 +104,8 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
             <View style={[styles.noticeBox]}>
                 <Text style={[NewStyles.text10]}>
                     {isLocked
-                        ? 'درخواست شما برای زمان عودت ثبت شده است'
-                        : 'کاربر گرامی، محصول شما در لوپ تعمیر می‌شود. لطفاً نحوه دریافت محصول خود را مشخص کنید'}
+                        ? t("Your return time request has been submitted")
+                        : t("Dear user, your product is being repaired at Loop. Please specify how you want to receive your product.")}
                 </Text>
             </View>
 
@@ -113,15 +115,15 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                     <View style={[{ backgroundColor: themeColor3.bgColor(0.2), padding: 10 }, NewStyles.border10, NewStyles.center]}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="time-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>تاریخ و زمان عودت محصول</Text>
+                            <Text style={NewStyles.title}>{t("Product return date and time")}</Text>
                         </View>
                     </View>
                     <View style={NewStyles.rowWrapper}>
-                        <Text style={[NewStyles.text]}>تاریخ عودت</Text>
+                        <Text style={[NewStyles.text]}>{t("Return date")}</Text>
                         <Text style={[NewStyles.text10]}>{formattedReturnDate}</Text>
                     </View>
                     <View style={NewStyles.rowWrapper}>
-                        <Text style={[NewStyles.text]}>ساعت عودت</Text>
+                        <Text style={[NewStyles.text]}>{t("Return time")}</Text>
                         <Text style={[NewStyles.text10]}>{formattedReturnTime}</Text>
                     </View>
                 </View>
@@ -136,11 +138,11 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                         color={themeColor7.bgColor(1)}
                     />
                     <Text style={[NewStyles.title, { color: themeColor7.bgColor(1) }]}>
-                        درخواست ثبت شده
+                        {t("Request submitted")}
                     </Text>
                     {data?.user_return_followup_description && (
                         <>
-                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>درخواست شما:</Text>
+                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>{t("Your request:")}</Text>
                             <View style={[styles.requestBox, NewStyles.border10]}>
                                 <Text style={[NewStyles.text10]}>{data?.user_return_followup_description}</Text>
                             </View>
@@ -151,7 +153,7 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                 <View style={{ width: '100%', marginTop: 15, gap: 15 }}>
                     {/* گزینه‌های از پیش تعریف شده */}
                     <View style={{ gap: 10 }}>
-                        <Text style={NewStyles.text}>انتخاب درخواست:</Text>
+                        <Text style={NewStyles.text}>{t("Select request:")}</Text>
                         {options.map((option) => (
                             <TouchableOpacity
                                 key={option.id}
@@ -197,7 +199,7 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                                 { flex: 1 },
                                 showCustomInput && { color: themeColor0.bgColor(1), fontFamily: 'VazirBold' }
                             ]}>
-                                ثبت توضیح سفارشی
+                                {t("Submit custom description")}
                             </Text>
 
                         </TouchableOpacity>
@@ -206,10 +208,10 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                     {/* فیلد توضیحات سفارشی */}
                     {showCustomInput && (
                         <View style={{ gap: 5 }}>
-                            <Text style={NewStyles.text}>توضیحات خود را وارد کنید:</Text>
+                            <Text style={NewStyles.text}>{t("Enter your description:")}</Text>
                             <TextInput
                                 style={[styles.textInput, NewStyles.border10]}
-                                placeholder="توضیحات مربوط به زمان عودت را بنویسید..."
+                                placeholder={t("Enter your return time details...")}
                                 placeholderTextColor={themeColor0.bgColor(0.4)}
                                 multiline
                                 numberOfLines={4}
@@ -222,7 +224,7 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
 
                     {/* دکمه ثبت */}
                     {canSubmit && <Button
-                        title="ثبت درخواست"
+                        title={t("Submit Request")}
                         onPress={() => setConfirmModal(true)}
                         loading={submitting}
                         textStyle={NewStyles.text4}
@@ -230,15 +232,15 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                     />}
 
                     <Text style={[NewStyles.text10, { textAlign: 'center', color: themeColor0.bgColor(0.6) }]}>
-                        درخواست شما به پشتیبانی لوپ ارسال خواهد شد
+                        {t("Your request will be sent to Loop support")}
                     </Text>
                 </View>
             )}
 
             {/* Modal */}
             <ConfirmationModal
-                title="ثبت درخواست زمان عودت"
-                message="آیا از ثبت این درخواست اطمینان دارید؟"
+                title={t("Submit return time request")}
+                message={t("Are you sure you want to submit this request?")}
                 action={handleSubmit}
                 confirmationModal={confirmModal}
                 setConfirmationModal={setConfirmModal}

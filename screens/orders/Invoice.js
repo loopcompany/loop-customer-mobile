@@ -122,7 +122,7 @@ function Invoice({ route }) {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
                 setRefreshing(true);
-                showToastOrAlert(t('Payment completed successfully.'));
+                showToastOrAlert(t('Payment completed successfully'));
                 // Cleanup listener after handling
                 if (paymentSubscriptionRef.current) {
                     paymentSubscriptionRef.current.remove();
@@ -184,26 +184,26 @@ function Invoice({ route }) {
                         <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                             <View style={[NewStyles.row, { gap: 5 }]}>
                                 <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
-                                <Text style={NewStyles.title}>{t('Order ID:')} {data?.id}</Text>
+                                <Text style={NewStyles.title}>{t('Order ID')}: {data?.id}</Text>
                             </View>
                             <Text style={NewStyles.text3}>{data?.category?.title}</Text>
                         </View>
 
-                        {renderRow(t('Order Registration Time'), formatDateTime(data?.created_at))}
+                        {renderRow(t('Order registration time'), formatDateTime(data?.created_at))}
                         <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text]}>{t('Payment Status')}</Text>
+                            <Text style={[NewStyles.text]}>{t('Payment status')}</Text>
                             <View style={[{ backgroundColor: data?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
                                 <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>
                             </View>
                         </View>
 
-                        {renderRow((Number(data?.is_fixed) == 1) ? t('Loop Fixed Amount') : t('Loop Estimated Amount'), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t('Toman') : t('Needs Review'))}
+                        {renderRow((Number(data?.is_fixed) == 1) ? t('Loop Fixed Amount') : t('Estimated cost by Loop'), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t('Toman') : t('Needs review'))}
                         {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t('Initial Calculated Cost'), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
-                        {(data?.extra_price > 0) && renderRow(t('Parts Cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
-                        {(data?.discount_price > 0) && renderRow(t('Your Discount Amount'), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
-                        {(totalPrice > totalDiscountedPrice > 0) && renderRow(t('Final Amount Without Discount'), `${formatPrice(totalPrice)}` + ' ' + t('Toman'), NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable Amount'), formatPrice(totalDiscountedPrice) + ' ' + t('Toman'))}
-                        {renderRow(t('Your Wallet Balance:'), formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
+                        {(data?.extra_price > 0) && renderRow(t('Extra parts cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
+                        {(data?.discount_price > 0) && renderRow(t('Your discount amount'), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
+                        {(totalPrice > totalDiscountedPrice > 0) && renderRow(t('Final amount without discount'), `${formatPrice(totalPrice)}` + ' ' + t('Toman'), NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable amount'), formatPrice(totalDiscountedPrice) + ' ' + t('Toman'))}
+                        {renderRow(`${t('Your wallet balance')}:`, formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
 
                         {/* Extra Services Display */}
                         {extraServices.length > 0 && (
@@ -232,7 +232,7 @@ function Invoice({ route }) {
                                         </View>
                                     ))}
                                     <View style={{ borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1), marginTop: 10, paddingTop: 10 }}>
-                                        {renderRow(t('Total Extra Costs'), `${formatPrice(extraServices.reduce((sum, item) => sum + Number(item?.price || 0), 0))} ${t('Toman')}`, NewStyles.title, NewStyles.title)}
+                                        {renderRow(t('Total Extra Costs:'), `${formatPrice(extraServices.reduce((sum, item) => sum + Number(item?.price || 0), 0))} ${t('Toman')}`, NewStyles.title, NewStyles.title)}
                                     </View>
                                 </View>
                             </>
@@ -252,10 +252,10 @@ function Invoice({ route }) {
                     :
                     <>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
-                            <Button title={t('Pay from Wallet')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
+                            <Button title={t('Wallet payment')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
-                            <Button title={t('Pay via Gateway')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
+                            <Button title={t('Gateway payment')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
                         </View>
                     </>
                 }
