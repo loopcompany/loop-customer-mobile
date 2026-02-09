@@ -113,8 +113,8 @@ i18n
       en: { translation: en },
       fa: { translation: fa },
     },
-    lng: "en",
-    fallbackLng: "en",
+    lng: "fa",
+    fallbackLng: "fa",
     interpolation: {
       escapeValue: false
     }

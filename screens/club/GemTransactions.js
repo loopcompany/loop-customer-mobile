@@ -26,7 +26,7 @@ export default function GemTransactions() {
             const response = await axios.get(`${uri}/user/gem-transactions`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             setData(response?.data);
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
             showToastOrAlert(message);
         } finally {
             setRefreshing(false);
