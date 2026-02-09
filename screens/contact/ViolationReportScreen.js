@@ -1,8 +1,9 @@
 // ViolationReportScreen.js
 
-import React, { useState } from 'react';
+import React, { useState,useMemo } from 'react';
 import { View, TextInput, ScrollView, StyleSheet, I18nManager, KeyboardAvoidingView, Pressable, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor4, themeColor10 } from '../../theme/Color';
@@ -11,10 +12,15 @@ import violationReportAPI from '../../services/ViolationReportApi';
 import { showToastOrAlert } from '../../helpers/Common';
 import DatePickerModal from '../../components/DatePickerModal';
 import { Text } from 'react-native';
-
+import { createStyles } from '../../styles/NewStyles';
 
 
 export default function ViolationReportScreen({ navigation }) {
+const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
   const [form, setForm] = useState({
     type: '',
     technician: '',
@@ -30,7 +36,7 @@ export default function ViolationReportScreen({ navigation }) {
 
   const handleSubmit = async () => {
     if (!form.date || !form.amount || !form.desc || !form.type) {
-      showToastOrAlert('لطفاً نوع تخلف، تاریخ، مبلغ و توضیحات را وارد کنید');
+      showToastOrAlert(t('Please enter violation type, date, amount and description'));
       return;
     }
 
@@ -47,7 +53,7 @@ export default function ViolationReportScreen({ navigation }) {
       const response = await violationReportAPI.submitReport(reportData);
 
       if (response.status === 'success') {
-        showToastOrAlert(response.message || 'گزارش تخلف با موفقیت ثبت شد');
+        showToastOrAlert(response.message || t('Violation report registered successfully'));
         // Reset form
         setForm({
           type: '',
@@ -60,7 +66,7 @@ export default function ViolationReportScreen({ navigation }) {
     } catch (error) {
       console.error('Violation report error:', error);
 
-      let errorMessage = 'خطا در ثبت گزارش تخلف';
+      let errorMessage = t('Error registering violation report');
 
       if (error.response?.data) {
         const errorData = error.response.data;
@@ -79,50 +85,50 @@ export default function ViolationReportScreen({ navigation }) {
       setLoading(false);
     }
   };
-
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={"ثبت تخلف/پیگیری ها"} />
+      <ScreenHeaders title={t("Violation Report/Tracking")} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>نوع تخلف <Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Violation Type')} <Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
-            style={styles.input}
-            placeholder="از تکنسین / پشتیبان لوپ / تراکنش / مشخص کنید"
+            style={[styles.input,{fontSize:10}]}
+            placeholder={t('From technician / Loop support / Transaction / Specify')}
             placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.type}
             onChangeText={(text) => handleChange('type', text)}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>نام / کد تکنسین</Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Technician Name / Code')}</Text>
 
           <TextInput
             style={styles.input}
-            placeholder="نام / کد تکنسین"
+            placeholder={t('Technician Name / Code')}
             placeholderTextColor={themeColor10.bgColor(0.6)}
             value={form.technician}
             onChangeText={(text) => handleChange('technician', text)}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>تاریخ ثبت<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <Pressable style={styles.input} onPress={() => setDatePickerModal(true)}>
-            <Text style={[NewStyles.text10, { color: themeColor10.bgColor(0.6) }]}>{form.date ? form.date : "تاریخ ثبت"}</Text>
+            <Text style={[NewStyles.text10, { color: themeColor10.bgColor(0.6) }]}>{form.date ? form.date : t('Registration Date')}</Text>
           </Pressable>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>مبلغ تراکنش<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Transaction Amount')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
             style={styles.input}
-            placeholder="مبلغ تراکنش"
+            placeholder={t('Transaction Amount')}
             placeholderTextColor={themeColor10.bgColor(0.6)}
             keyboardType="numeric"
             value={form.amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             onChangeText={(text) => handleChange('amount', text?.replace(/,/g, ""))}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>توضیحات<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder="توضیحات"
+            placeholder={t('Description')}
             placeholderTextColor={themeColor10.bgColor(0.6)}
             multiline
             value={form.desc}
@@ -131,13 +137,13 @@ export default function ViolationReportScreen({ navigation }) {
           />
           <View style={styles.buttonContainer}>
             <Button
-              title={'ثبت'}
+              title={t('Submit')}
               loading={loading}
               disabled={loading}
               onPress={handleSubmit}
             />
             <Button
-              title={'پیگیری‌ها'}
+              title={t('Tracking')}
               onPress={() => navigation.navigate('ViolationReportsListScreen')}
             />
           </View>
@@ -154,7 +160,7 @@ export default function ViolationReportScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#f5f5f5',

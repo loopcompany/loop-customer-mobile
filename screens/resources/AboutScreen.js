@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
@@ -14,6 +15,7 @@ import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
 
 export default function AboutScreen() {
+  const { t } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -34,11 +36,11 @@ export default function AboutScreen() {
           setExpandedItems({ [response.data[0].id]: true });
         }
       } else {
-        showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+        showToastOrAlert(t('Error loading terms'));
       }
     } catch (error) {
       console.error('Error loading terms:', error);
-      showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+      showToastOrAlert(t('Error loading terms'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -58,7 +60,7 @@ export default function AboutScreen() {
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="قوانین / درباره لوپ" />
+      <ScreenHeaders title={t("Terms / About Loop")} />
       <FlatList
         data={terms}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}

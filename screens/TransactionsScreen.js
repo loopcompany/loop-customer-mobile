@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
@@ -13,6 +14,7 @@ import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, theme
 import { getTransactions } from '../services/WalletApi';
 
 export default function TransactionsScreen() {
+  const { t } = useTranslation();
   const token = useSelector((state) => state?.auth?.token);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export default function TransactionsScreen() {
         setPagination(data.data.pagination);
       }
     } catch (error) {
-      const message = error?.response?.data?.message || 'خطا در دریافت تراکنش‌ها';
+      const message = error?.response?.data?.message || t('Error retrieving transactions');
       showToastOrAlert(message);
     } finally {
       setLoading(false);
@@ -97,13 +99,13 @@ export default function TransactionsScreen() {
   const getTypeText = (type) => {
     switch (type) {
       case '1':
-        return 'شارژ کیف پول';
+        return t('Wallet Recharge');
       case '2':
-        return 'پرداخت آنلاین';
+        return t('Online Payment');
       case '3':
-        return 'کسر هزینه از کیف پول';
+        return t('Wallet Deduction');
       default:
-        return 'نامشخص';
+        return t('Unknown');
     }
   };
 
@@ -125,23 +127,23 @@ export default function TransactionsScreen() {
   const getStatusText = (status) => {
     switch (status) {
       case '100':
-        return 'موفق';
+        return t('Successful');
       case '-1':
-        return 'ناموفق';
+        return t('Failed');
       case '0':
-        return 'در انتظار';
+        return t('Pending');
       default:
-        return 'نامشخص';
+        return t('Unknown');
     }
   };
 
   if (loading) {
     return (
       <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-        <ScreenHeaders title={"تراکنش ها"} />
+        <ScreenHeaders title={t("Transactions")} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-          <Text style={[NewStyles.text10, { marginTop: 10 }]}>در حال بارگذاری...</Text>
+          <Text style={[NewStyles.text10, { marginTop: 10 }]}>{t("Loading...")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -149,7 +151,7 @@ export default function TransactionsScreen() {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="تراکنش ها" />
+      <ScreenHeaders title={t("Transactions")} />
 
       {/* دکمه فیلتر */}
       <View style={styles.filterContainer}>
@@ -169,7 +171,7 @@ export default function TransactionsScreen() {
             styles.filterButtonText,
             { color: (fromDate || toDate) ? '#fff' : themeColor0.bgColor(1) }
           ]}>
-            فیلتر تاریخ
+            {t("Filter by Date")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -189,9 +191,9 @@ export default function TransactionsScreen() {
           <View style={styles.activeFilterBadge}>
             <Ionicons name="funnel" size={16} color="#fff" />
             <Text style={styles.activeFilterText}>
-              فیلتر فعال:
-              {fromDate && ` از ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
-              {toDate && ` تا ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+              {t("Active filter:")}
+              {fromDate && ` ${t("from")} ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+              {toDate && ` ${t("to")} ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
             </Text>
             <TouchableOpacity onPress={clearFilter} style={styles.clearFilterBtn}>
               <Ionicons name="close-circle" size={20} color="#fff" />
@@ -202,12 +204,12 @@ export default function TransactionsScreen() {
         {transactions.length == 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-              تراکنشی یافت نشد
+              {t("No transactions found")}
             </Text>
           </View>
         ) : (
           <>
-            <Text style={styles.header}>تراکنش‌ها</Text>
+            <Text style={styles.header}>{t("Transactions")}</Text>
             <FlatList
               data={transactions}
               renderItem={({ item, index }) => (
@@ -229,16 +231,16 @@ export default function TransactionsScreen() {
 
                   <View style={styles.transactionRow}>
                     <Text style={[NewStyles.text4]}>
-                      مبلغ:
+                      {t("Amount:")}
                     </Text>
                     <Text style={[NewStyles.title4]}>
-                      {formatPrice(item.price * 10)} ریال
+                      {formatPrice(item.price * 10)} {t("Rial")}
                     </Text>
                   </View>
 
                   <View style={styles.transactionRow}>
                     <Text style={[NewStyles.text4]}>
-                      نوع:
+                      {t("Type:")}
                     </Text>
                     <Text style={[NewStyles.text4]}>
                       {getTypeText(item.type)}
@@ -248,7 +250,7 @@ export default function TransactionsScreen() {
                   {item.referenceId && (
                     <View style={styles.transactionRow}>
                       <Text style={[NewStyles.text4]}>
-                        شماره پیگیری:
+                        {t("Tracking Number:")}
                       </Text>
                       <Text style={[NewStyles.text4]}>
                         {item.referenceId}
@@ -268,10 +270,10 @@ export default function TransactionsScreen() {
             {pagination && (
               <View style={styles.paginationInfo}>
                 <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                  صفحه {pagination.current_page} از {pagination.last_page}
+                  {t("Page")} {pagination.current_page} {t("of")} {pagination.last_page}
                 </Text>
                 <Text style={[NewStyles.text3, { textAlign: 'center', marginTop: 5 }]}>
-                  مجموع: {pagination.total} تراکنش
+                  {t("Total:")} {pagination.total} {t("transaction")}
                 </Text>
               </View>
             )}
@@ -289,7 +291,7 @@ export default function TransactionsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>فیلتر تاریخ</Text>
+              <Text style={styles.modalTitle}>{t("Date Filter")}</Text>
               <TouchableOpacity onPress={() => setShowFilterModal(false)}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
@@ -302,7 +304,7 @@ export default function TransactionsScreen() {
             >
               {/* از تاریخ */}
               <View style={styles.dateInputContainer}>
-                <Text style={styles.dateLabel}>از تاریخ:</Text>
+                <Text style={styles.dateLabel}>{t("From Date:")}</Text>
                 <TouchableOpacity
                   style={[styles.dateInput, showFromPicker && styles.dateInputActive]}
                   onPress={() => {
@@ -311,7 +313,7 @@ export default function TransactionsScreen() {
                   }}
                 >
                   <Text style={[styles.dateText, tempFromDate && styles.dateTextSelected]}>
-                    {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                    {tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : t("Select Date")}
                   </Text>
                   <Ionicons name={showFromPicker ? "chevron-up" : "calendar-outline"} size={20} color={showFromPicker ? themeColor0.bgColor(1) : "#666"} />
                 </TouchableOpacity>
@@ -349,7 +351,7 @@ export default function TransactionsScreen() {
                     >
                       <Ionicons name="arrow-back" size={18} color="#fff" />
                       <Text style={styles.confirmDateBtnText}>
-                        {tempFromDate ? 'تایید و انتخاب تاریخ پایان' : 'بستن'}
+                        {tempFromDate ? t("Confirm and Select End Date") : t("Close")}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -358,7 +360,7 @@ export default function TransactionsScreen() {
 
               {/* تا تاریخ */}
               <View style={styles.dateInputContainer}>
-                <Text style={styles.dateLabel}>تا تاریخ:</Text>
+                <Text style={styles.dateLabel}>{t("To Date:")}</Text>
                 <TouchableOpacity
                   style={[styles.dateInput, showToPicker && styles.dateInputActive]}
                   onPress={() => {
@@ -367,7 +369,7 @@ export default function TransactionsScreen() {
                   }}
                 >
                   <Text style={[styles.dateText, tempToDate && styles.dateTextSelected]}>
-                    {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : 'انتخاب تاریخ'}
+                    {tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : t("Select Date")}
                   </Text>
                   <Ionicons name={showToPicker ? "chevron-up" : "calendar-outline"} size={20} color={showToPicker ? themeColor0.bgColor(1) : "#666"} />
                 </TouchableOpacity>
@@ -400,7 +402,7 @@ export default function TransactionsScreen() {
                       onPress={() => setShowToPicker(false)}
                     >
                       <Ionicons name="checkmark" size={18} color="#fff" />
-                      <Text style={styles.confirmDateBtnText}>تایید تاریخ پایان</Text>
+                      <Text style={styles.confirmDateBtnText}>{t("Confirm End Date")}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -413,7 +415,7 @@ export default function TransactionsScreen() {
                   onPress={clearFilter}
                 >
                   <Ionicons name="trash-outline" size={20} color="#fff" />
-                  <Text style={styles.modalBtnText}>پاک کردن</Text>
+                  <Text style={styles.modalBtnText}>{t("Clear")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -421,7 +423,7 @@ export default function TransactionsScreen() {
                   onPress={applyFilter}
                 >
                   <Ionicons name="checkmark" size={20} color="#fff" />
-                  <Text style={styles.modalBtnText}>اعمال فیلتر</Text>
+                  <Text style={styles.modalBtnText}>{t("Apply Filter")}</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

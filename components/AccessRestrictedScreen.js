@@ -21,16 +21,14 @@ import {
 import NewStyles from '../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get('window');
 
-/**
- * کامپوننت نمایش صفحه محدودیت دسترسی برای کاربران سازمانی
- */
 const AccessRestrictedScreen = ({
   type = 'access_denied',
-  title = 'دسترسی محدود',
-  message = 'شما مجوز دسترسی به این بخش را ندارید',
+  title = null,
+  message = null,
   nextSteps = [],
   profileStatus = null,
   contractStatus = null,
@@ -40,12 +38,13 @@ const AccessRestrictedScreen = ({
   contractRejectionReason = null,
 }) => {
   const navigation = useNavigation();
+  const { t } = useTranslation();
+  const resolvedTitle = title || t('Restricted access');
+  const resolvedMessage = message || t('You do not have permission to access this section.');
 
   const contacts = useSelector(state => state.contacts?.data)
 
-  /**
-   * آیکون بر اساس نوع صفحه
-   */
+
   const getIconConfig = () => {
     switch (type) {
       case 'error':
@@ -64,7 +63,7 @@ const AccessRestrictedScreen = ({
   };
 
   /**
-   * رنگ وضعیت بر اساس حالت
+   * ?????? ?????????? ???? ???????? ????????
    */
   const getStatusColor = (status) => {
     switch (status) {
@@ -78,39 +77,39 @@ const AccessRestrictedScreen = ({
   };
 
   /**
-   * متن وضعیت به فارسی
+   * ?????? ?????????? ???? ??????????
    */
   const getStatusText = (status) => {
     switch (status) {
-      case 'approved': return 'تایید شده';
-      case 'pending': return 'در انتظار بررسی';
-      case 'rejected': return 'رد شده';
-      case 'not_uploaded': return 'آپلود نشده';
-      default: return 'نامشخص';
+      case 'approved': return t('Approved');
+      case 'pending': return t('Pending');
+      case 'rejected': return t('Rejected');
+      case 'not_uploaded': return t('Not uploaded');
+      default: return t('Unknown');
     }
   };
 
   /**
-   * ناوبری به صفحه مربوطه
+   * ?????????????? ???? ???????? ????????????
    */
   const handleNavigation = (action) => {
-    console.log('🚀 AccessRestrictedScreen navigation:', action);
+    console.log(' AccessRestrictedScreen navigation:', action);
 
     switch (action) {
       case 'edit_profile':
-        console.log('📱 Navigating to OrganizationProfile');
+        console.log(' Navigating to OrganizationProfile');
         navigation.navigate('OrganizationProfile');
         break;
       case 'upload_contract':
-        console.log('📱 Navigating to OrganizationContract');
+        console.log(' Navigating to OrganizationContract');
         navigation.navigate('OrganizationContract');
         break;
       case 'edit_account':
-        console.log('📱 Navigating to Profile');
+        console.log(' Navigating to Profile');
         navigation.navigate('Profile');
         break;
       case 'go_back':
-        console.log('📱 Going back');
+        console.log(' Going back');
         if (Platform.OS == 'web') {
           window.history.back()
         } else {
@@ -118,34 +117,34 @@ const AccessRestrictedScreen = ({
         }
         break;
       case 'go_home':
-        console.log('📱 Navigating to Home');
+        console.log(' Navigating to Home');
         navigation.navigate('Home');
         break;
       case 'login':
-        console.log('📱 Navigating to Login');
+        console.log(' Navigating to Login');
         navigation.navigate('MainSignIn');
         break;
       default:
-        console.log('❌ Unknown navigation action:', action);
+        console.log(' Unknown navigation action:', action);
         break;
     }
   };
 
   const iconConfig = getIconConfig();
 
-  console.log('🎨 AccessRestrictedScreen rendered with:', {
+  console.log(' AccessRestrictedScreen rendered with:', {
     profileStatus,
     contractStatus,
     showRetryButton,
     hasRetryFunction: !!onRetry
   });
 
-  // Debug: بررسی نمایش دکمه‌ها
+
   const shouldShowEditProfile = (profileStatus === 'rejected' || profileStatus === 'not_uploaded' || profileStatus === null);
   const shouldShowUploadContract = (contractStatus === 'rejected' || contractStatus === 'not_uploaded' || contractStatus === null);
   const shouldShowViewContract = (contractStatus === 'pending' || contractStatus === 'approved');
 
-  console.log('🎯 Button visibility:', {
+  console.log(' Button visibility:', {
     shouldShowEditProfile,
     shouldShowUploadContract,
     shouldShowViewContract,
@@ -161,7 +160,7 @@ const AccessRestrictedScreen = ({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* آیکون اصلی */}
+
         <View style={styles.iconContainer}>
           <Icon
             name={iconConfig.name}
@@ -170,29 +169,29 @@ const AccessRestrictedScreen = ({
           />
         </View>
 
-        {/* عنوان */}
-        <Text style={styles.title}>{title}</Text>
+      
+        <Text style={styles.title}>{resolvedTitle}</Text>
 
-        {/* پیام اصلی */}
-        <Text style={styles.message}>{message}</Text>
+       
+        <Text style={styles.message}>{resolvedMessage}</Text>
 
-        {/* وضعیت پروفایل و قرارداد */}
+        
         <View style={styles.statusContainer}>
-          <Text style={styles.statusTitle}>وضعیت فعلی:</Text>
+          <Text style={styles.statusTitle}>{t('Current status:')}</Text>
 
           <View style={styles.statusItem}>
             <View style={styles.statusRow}>
               <Icon name="person-outline" size={24} color={themeColor3.color} />
-              <Text style={styles.statusLabel}>اطلاعات پروفایل:</Text>
+              <Text style={styles.statusLabel}>{t('Profile information:')}</Text>
               <View style={[styles.statusBadge, { backgroundColor: getStatusColor(profileStatus || 'unknown') }]}>
                 <Text style={styles.statusBadgeText}>
-                  {profileStatus ? getStatusText(profileStatus) : 'در حال بررسی...'}
+                  {profileStatus ? getStatusText(profileStatus) : t('Under review...')}
                 </Text>
               </View>
             </View>
             {profileRejectionReason && profileStatus === 'rejected' && (
               <Text style={styles.rejectionReason} numberOfLines={3}>
-                دلیل رد: {profileRejectionReason}
+                {t('Rejection reason:')} {profileRejectionReason}
               </Text>
             )}
           </View>
@@ -200,25 +199,25 @@ const AccessRestrictedScreen = ({
           <View style={styles.statusItem}>
             <View style={styles.statusRow}>
               <Icon name="description" size={24} color={themeColor3.color} />
-              <Text style={styles.statusLabel}>قرارداد:</Text>
+              <Text style={styles.statusLabel}>{t('Contract')}</Text>
               <View style={[styles.statusBadge, { backgroundColor: getStatusColor(contractStatus || 'unknown') }]}>
                 <Text style={styles.statusBadgeText}>
-                  {contractStatus ? getStatusText(contractStatus) : 'در حال بررسی...'}
+                  {contractStatus ? getStatusText(contractStatus) : t('Under review...')}
                 </Text>
               </View>
             </View>
             {contractRejectionReason && contractStatus === 'rejected' && (
               <Text style={styles.rejectionReason} numberOfLines={3}>
-                دلیل رد: {contractRejectionReason}
+                {t('Rejection reason:')} {contractRejectionReason}
               </Text>
             )}
           </View>
         </View>
 
-        {/* مراحل بعدی */}
+
         {nextSteps && nextSteps.length > 0 && (
           <View style={styles.nextStepsContainer}>
-            <Text style={styles.nextStepsTitle}>مراحل بعدی:</Text>
+            <Text style={styles.nextStepsTitle}>{t('Next steps:')}</Text>
             {nextSteps.map((step, index) => (
               <TouchableOpacity
                 key={index}
@@ -234,21 +233,19 @@ const AccessRestrictedScreen = ({
           </View>
         )}
 
-        {/* دکمه‌های عملیاتی */}
+        
         <View style={styles.actionsContainer}>
-          {/* دکمه ویرایش اطلاعات حساب - همیشه در بالا نمایش داده شود */}
+         
           <TouchableOpacity
             style={[styles.actionButtonCustom, { backgroundColor: themeColor0.bgColor(1) }]}
             onPress={() => handleNavigation('edit_account')}
           >
             <Icon name="account-circle" size={24} color={themeColor4.color} />
-            <Text style={[styles.actionButtonText, { color: themeColor4.color }]}>ویرایش اطلاعات حساب</Text>
+            <Text style={[styles.actionButtonText, { color: themeColor4.color }]}>{t('Edit account information')}</Text>
           </TouchableOpacity>
-
-          {/* دکمه ویرایش پروفایل - فقط اگه رد شده یا آپلود نشده */}
           {(profileStatus === 'rejected' || profileStatus === 'not_uploaded' || profileStatus === null) && (
             <Button
-              title="ویرایش اطلاعات پروفایل"
+              title={t('Edit profile information')}
               onPress={() => handleNavigation('edit_profile')}
               backgroundColor={themeColor0.bgColor(1)}
               textColor={themeColor4.bgColor(1)}
@@ -256,10 +253,10 @@ const AccessRestrictedScreen = ({
             />
           )}
 
-          {/* دکمه آپلود قرارداد - فقط اگه رد شده یا آپلود نشده */}
+
           {(contractStatus === 'rejected' || contractStatus === 'not_uploaded' || contractStatus === null) && (
             <Button
-              title={contractStatus === 'rejected' ? 'آپلود مجدد قرارداد' : 'آپلود قرارداد'}
+              title={contractStatus === 'rejected' ? t('Re-upload contract') : t('Upload contract')}
               onPress={() => handleNavigation('upload_contract')}
               backgroundColor={themeColor1.bgColor(1)}
               textColor={themeColor4.bgColor(1)}
@@ -267,10 +264,10 @@ const AccessRestrictedScreen = ({
             />
           )}
 
-          {/* دکمه مشاهده قرارداد - اگه pending یا approved باشه */}
+
           {(contractStatus === 'pending' || contractStatus === 'approved') && (
             <Button
-              title="مشاهده قرارداد"
+              title={t('View contract')}
               onPress={() => handleNavigation('upload_contract')}
               backgroundColor={themeColor11.bgColor(1)}
               textColor={themeColor4.bgColor(1)}
@@ -278,10 +275,10 @@ const AccessRestrictedScreen = ({
             />
           )}
 
-          {/* دکمه بررسی وضعیت */}
+
           {showRetryButton && onRetry && (
             <Button
-              title="بررسی وضعیت"
+              title={t('Check status')}
               onPress={onRetry}
               backgroundColor={themeColor2.bgColor(1)}
               textColor={themeColor4.bgColor(1)}
@@ -292,15 +289,15 @@ const AccessRestrictedScreen = ({
 
         </View>
 
-        {/* راهنمای کمک */}
+        
         <View style={styles.helpContainer}>
-          <Text style={styles.helpTitle}>نیاز به کمک دارید؟</Text>
+          <Text style={styles.helpTitle}>{t('Need help?')}</Text>
           <Text style={styles.helpText}>
-            در صورت داشتن سوال یا مشکل، می‌توانید با پشتیبانی تماس بگیرید.
+            {t('If you have questions or issues, you can contact support.')}
           </Text>
           <TouchableOpacity style={styles.helpButton} onPress={() => { Linking.openURL(contacts?.data?.link) }}>
             <Icon name="support-agent" size={20} color={themeColor0.color} />
-            <Text style={styles.helpButtonText}>تماس با پشتیبانی</Text>
+            <Text style={styles.helpButtonText}>{t('Contact support')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

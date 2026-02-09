@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
@@ -20,6 +21,7 @@ import {
 } from './GameData';
 
 export default function GamePlayScreen({ route, navigation }) {
+  const { t } = useTranslation();
   const { level = 'easy' } = route.params || {};
   const levelConfig = GAME_LEVELS[level.toUpperCase()];
 
@@ -143,11 +145,11 @@ export default function GamePlayScreen({ route, navigation }) {
   if (!currentQuestion) {
     return (
       <View style={styles.container}>
-        <ScreenHeaders title="بازی کامپیوتر" />
+        <ScreenHeaders title={t("Computer Game")} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingEmoji}>⏳</Text>
           <Text style={[NewStyles.title10, { fontSize: 18 }]}>
-            در حال آماده‌سازی بازی...
+            {t("Preparing the game...")}
           </Text>
         </View>
       </View>
@@ -157,8 +159,7 @@ export default function GamePlayScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeaders
-        title={`سوال ${currentQuestionIndex + 1} از ${questions.length}`}
-
+        title={t("Question {{current}} of {{total}}", { current: currentQuestionIndex + 1, total: questions.length })}
       />
 
       <ScrollView
@@ -189,7 +190,7 @@ export default function GamePlayScreen({ route, navigation }) {
         {/* سوال */}
         <View style={styles.questionContainer}>
           <Text style={[NewStyles.title10, styles.questionText]}>
-            {currentQuestion.question}
+            {t(currentQuestion.questionKey, { name: t(currentQuestion.correctAnswer.name) })}
           </Text>
           <Text style={styles.questionEmoji}>
             {currentQuestion.correctAnswer.emoji}
@@ -216,10 +217,10 @@ export default function GamePlayScreen({ route, navigation }) {
               >
                 <Text style={styles.optionEmoji}>{device.emoji}</Text>
                 <Text style={[NewStyles.title10, styles.optionName]}>
-                  {device.name}
+                  {t(device.name)}
                 </Text>
                 <Text style={[NewStyles.text10, styles.optionSound]}>
-                  {device.sound}
+                  {t(device.sound)}
                 </Text>
               </TouchableOpacity>
             </Animated.View>
@@ -236,7 +237,7 @@ export default function GamePlayScreen({ route, navigation }) {
                 { color: '#FF9800' },
               ]}
             >
-              دوباره تلاش کن!
+              {t("Try again!")}
             </Text>
           </View>
         )}
@@ -260,7 +261,7 @@ export default function GamePlayScreen({ route, navigation }) {
                 { color: encouragement.color },
               ]}
             >
-              {encouragement.text}
+              {t(encouragement.text)}
             </Text>
           </Animated.View>
         )}

@@ -17,10 +17,10 @@ export default function ConfirmationModal({ title, message, action, confirmation
                     <Text style={NewStyles.text10}>{message}</Text>
                     <View style={[NewStyles.row, { justifyContent: 'flex-end', gap: 20 }]}>
                         <Pressable style={[NewStyles.border10, NewStyles.shadow, { backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, paddingHorizontal: 20 }]} onPress={() => { action(); setConfirmationModal(false) }}>
-                            <Text style={NewStyles.text4}>بله</Text>
+                            <Text style={NewStyles.text4}>{t('Yes')}</Text>
                         </Pressable>
                         <Pressable style={[NewStyles.border10, NewStyles.shadow, { backgroundColor: themeColor1.bgColor(1), paddingVertical: 10, paddingHorizontal: 20 }]} onPress={() => { setConfirmationModal(false) }}>
-                            <Text style={NewStyles.text4}>خیر</Text>
+                            <Text style={NewStyles.text4}>{t('No')}</Text>
                         </Pressable>
                     </View>
                 </View>

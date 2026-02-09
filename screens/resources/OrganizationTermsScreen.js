@@ -11,8 +11,10 @@ import BlankScreen from '../../components/BlankScreen';
 import { RefreshControl } from 'react-native';
 import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
+import { useTranslation } from 'react-i18next';
 
 export default function OrganizationTermsScreen() {
+  const { t } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -33,11 +35,11 @@ export default function OrganizationTermsScreen() {
           setExpandedItems({ [response.data[0].id]: true });
         }
       } else {
-        showToastOrAlert('خطا در بارگذاری قوانین و مقررات سازمانی');
+        showToastOrAlert(t('Error loading organization terms and conditions'));
       }
     } catch (error) {
       console.error('Error loading organization terms:', error);
-      showToastOrAlert('خطا در بارگذاری قوانین و مقررات سازمانی');
+      showToastOrAlert(t('Error loading organization terms and conditions'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -57,7 +59,7 @@ export default function OrganizationTermsScreen() {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="قوانین و مقررات سازمانی" />
+      <ScreenHeaders title={t('Organization Terms and Conditions')} />
       <FlatList
         data={terms}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}

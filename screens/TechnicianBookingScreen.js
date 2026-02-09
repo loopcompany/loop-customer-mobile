@@ -11,13 +11,15 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function TechnicianBookingScreen({navigation}) {
+  const { t } = useTranslation();
   const [timeSlot, setTimeSlot] = useState('10-12');
-  const [gender, setGender] = useState('آقا');
+  const [gender, setGender] = useState('Male');
 
   const timeOptions = ['10-12', '12-14', '14-16', '16-18'];
-  const genders = ['آقا', 'خانم'];
+  const genders = ['Male', 'Female'];
 
   return (
     <ImageBackground
@@ -25,7 +27,7 @@ export default function TechnicianBookingScreen({navigation}) {
       style={styles.background}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>رزرو مراجعه تکنسین</Text>
+        <Text style={styles.title}>{t("Technician Visit Booking")}</Text>
 
         {/* انتخاب زمان */}
         <View style={styles.timeRow}>
@@ -46,17 +48,17 @@ export default function TechnicianBookingScreen({navigation}) {
         {/* تاریخ و آدرس */}
         <TextInput
           style={styles.input}
-          placeholder="تاریخ مراجعه (مثلاً ۱۴۰۳/۰۴/۱۵)"
+          placeholder={t("Visit Date (e.g. 1403/04/15)")}
           placeholderTextColor="#aaa"
         />
         <TextInput
           style={styles.input}
-          placeholder="آدرس مراجعه"
+          placeholder={t("Visit Address")}
           placeholderTextColor="#aaa"
         />
         <TextInput
           style={styles.input}
-          placeholder="شماره تماس"
+          placeholder={t("Phone Number")}
           placeholderTextColor="#aaa"
         />
 
@@ -71,7 +73,7 @@ export default function TechnicianBookingScreen({navigation}) {
                 gender === g && styles.genderSelected,
               ]}
             >
-              <Text style={styles.genderText}>{g}</Text>
+              <Text style={styles.genderText}>{t(g)}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -79,36 +81,36 @@ export default function TechnicianBookingScreen({navigation}) {
         {/* کد تخفیف */}
         <TextInput
           style={styles.input}
-          placeholder="کد تخفیف (اختیاری)"
+          placeholder={t("Discount Code (Optional)")}
           placeholderTextColor="#aaa"
         />
 
         {/* دکمه انتخاب تکنسین */}
         <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionText}>انتخاب تکنسین</Text>
+          <Text style={styles.actionText}>{t("Select Technician")}</Text>
         </TouchableOpacity>
 
         {/* دکمه نرم‌افزار چاپگر */}
         <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionText}>نرم افزار چاپگر</Text>
+          <Text style={styles.actionText}>{t("Printer Software")}</Text>
         </TouchableOpacity>
 
         {/* متن هشدار زرد */}
         <Text style={styles.notice}>
-          (اتصال به قسمت نرم افزار چاپگر)
+          {t("(Connect to Printer Software section)")}
         </Text>
 
         {/* دکمه ثبت نهایی */}
         <TouchableOpacity style={styles.submitButton}>
-          <Text style={styles.submitText}>ثبت / ادامه</Text>
+          <Text style={styles.submitText}>{t("Submit / Continue")}</Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* فوتر */}
       <View style={styles.footer}>
         <Image source={require('../assets/logo.png')} style={styles.footerLogo} />
-        <Text style={styles.support}>پشتیبانی</Text>
-        <Text style={styles.language}>فا</Text>
+        <Text style={styles.support}>{t("Support")}</Text>
+        <Text style={styles.language}>{t("FA")}</Text>
         <Text style={styles.phone}>21164552</Text>
       </View>
     </ImageBackground>

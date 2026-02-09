@@ -72,7 +72,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
       }
 
       if (!phone.match(/^09\d{9}$/)) {
-        setError(t("Mobile number format is incorrect"));
+        setError(t("6"));
         return;
       }
 

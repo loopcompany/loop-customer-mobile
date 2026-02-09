@@ -39,7 +39,7 @@ export default function Address({ step, data, navigation }) {
 
     const renderRow = (label, value, textStyle = NewStyles.text10) =>
         <View style={NewStyles.rowWrapper}>
-            <Text style={NewStyles.text3}>{t(label)}</Text>
+            <Text style={NewStyles.text3}>{label}</Text>
             <Text style={textStyle}>{value}</Text>
         </View>;
 

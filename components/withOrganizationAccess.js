@@ -6,6 +6,7 @@ import Loader from '../components/Loader';
 import LoadingScreen from '../components/LoadingScreen';
 import ErrorScreen from '../components/ErrorScreen';
 import { useIntersectionObserver } from '../utils/performanceOptimization';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Higher-Order Component برای محافظت از صفحات در برابر دسترسی غیرمجاز کاربران سازمانی
@@ -25,6 +26,7 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
   } = options;
 
   const EnhancedComponent = (props) => {
+    const { t } = useTranslation();
     const {
       accessStatus,
       loading,
@@ -63,10 +65,10 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
         return (
           <AccessRestrictedScreen
             type="login_required"
-            title="نیاز به ورود"
-            message="برای دسترسی به این بخش، ابتدا باید وارد حساب کاربری خود شوید"
+            title={t('Login required')}
+            message={t('To access this section, please log in to your account first.')}
             nextSteps={[
-              { text: "ورود به حساب کاربری", action: "login" }
+              { text: t('Login to account'), action: "login" }
             ]}
           />
         );
@@ -85,8 +87,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       }
       return (
         <LoadingScreen 
-          title="بررسی نوع حساب کاربری"
-          message="در حال تشخیص نوع حساب کاربری شما..."
+          title={t('Checking account type')}
+          message={t('Determining your account type...')}
         />
       );
     }
@@ -98,8 +100,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       }
       return (
         <LoadingScreen 
-          title="بررسی وضعیت دسترسی"
-          message="در حال بررسی وضعیت تایید حساب سازمانی شما..."
+          title={t('Checking access status')}
+          message={t('Checking your organization account approval status...')}
         />
       );
     }
@@ -120,7 +122,7 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
 
       return (
         <ErrorScreen
-          title="خطا در بررسی دسترسی"
+          title={t('Access check error')}
           message={error}
           errorType={errorType}
           onRetry={refetch}
@@ -139,8 +141,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       return (
         <AccessRestrictedScreen
           type="not_allowed"
-          title="دسترسی غیرمجاز"
-          message="این بخش فقط برای کاربران فردی در دسترس است"
+          title={t('Access not allowed')}
+          message={t('This section is only available to individual users.')}
         />
       );
     }
@@ -150,8 +152,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       return (
         <AccessRestrictedScreen
           type="access_denied"
-          title="دسترسی محدود"
-          message="برای دسترسی به این بخش، باید هم پروفایل و هم قرارداد شما تایید شده باشد"
+          title={t('Restricted access')}
+          message={t('To access this section, both your profile and contract must be approved.')}
           nextSteps={getNextSteps()}
           profileStatus={profileStatus}
           contractStatus={contractStatus}
@@ -175,8 +177,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
         return (
           <AccessRestrictedScreen
             type="custom"
-            title={customResult.title || "دسترسی محدود"}
-            message={customResult.message || "شما مجوز دسترسی به این بخش را ندارید"}
+            title={customResult.title ? t(customResult.title) : t('Restricted access')}
+            message={customResult.message ? t(customResult.message) : t('You do not have permission to access this section.')}
             nextSteps={customResult.nextSteps}
             onRetry={customResult.showRetry ? refetch : null}
           />
@@ -189,19 +191,19 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       const nextSteps = getNextSteps();
       const blockedMessage = getBlockedMessage();
       
-      let title = "دسترسی محدود";
-      let message = blockedMessage || "شما هنوز مجوز دسترسی به این بخش را ندارید";
+      let title = t('Restricted access');
+      let message = blockedMessage || t('You do not yet have permission to access this section.');
       
       // پیام‌های مخصوص بر اساس وضعیت
       if (profileStatus === 'rejected' || contractStatus === 'rejected') {
-        title = "نیاز به بازنگری";
-        message = "اطلاعات شما رد شده است. لطفا موارد زیر را اصلاح کنید:";
+        title = t('Needs review');
+        message = t('Your information was rejected. Please correct the items below:');
       } else if (profileStatus === 'pending' || contractStatus === 'pending') {
-        title = "در انتظار تایید";
-        message = "اطلاعات شما در حال بررسی است. لطفا صبور باشید.";
+        title = t('Waiting for approval');
+        message = t('Your information is under review. Please be patient.');
       } else if (!accessStatus?.profile_complete) {
-        title = "تکمیل اطلاعات";
-        message = "لطفا ابتدا اطلاعات پروفایل خود را تکمیل کنید.";
+        title = t('Complete your information');
+        message = t('Please complete your profile information first.');
       }
       
       return (
@@ -225,8 +227,8 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
       return (
         <AccessRestrictedScreen
           type="incomplete_access"
-          title="نیاز به تایید کامل"
-          message="برای دسترسی به این بخش، باید هم پروفایل و هم قرارداد شما تایید شده باشد"
+          title={t('Full approval required')}
+          message={t('To access this section, both your profile and contract must be approved.')}
           nextSteps={getNextSteps()}
           profileStatus={profileStatus}
           contractStatus={contractStatus}
@@ -245,7 +247,7 @@ export const withOrganizationAccess = (WrappedComponent, options = {}) => {
 
       return (
         <div ref={ref}>
-          {isVisible ? children : <LoadingScreen title="در حال بارگذاری..." />}
+          {isVisible ? children : <LoadingScreen title={t('Loading...')} />}
         </div>
       );
     };
@@ -287,8 +289,8 @@ export const ACCESS_PRESETS = {
       
       return {
         allowed: hasCompleteAccess,
-        title: "نیاز به تایید کامل",
-        message: "برای ثبت سفارش، باید هم پروفایل و هم قرارداد شما تایید شده باشد",
+        title: "Full approval required",
+        message: "To place an order, both your profile and contract must be approved.",
         showRetry: true
       };
     }

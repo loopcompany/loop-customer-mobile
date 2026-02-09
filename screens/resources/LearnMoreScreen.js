@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
@@ -14,6 +15,7 @@ import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
 
 export default function LearnMoreScreen() {
+  const { t } = useTranslation();
   const [faqs, setFaqs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -34,11 +36,11 @@ export default function LearnMoreScreen() {
           setExpandedItems({ [response.data[0].id]: true });
         }
       } else {
-        showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+        showToastOrAlert(t('Error loading FAQs'));
       }
     } catch (error) {
       console.error('Error loading faqs:', error);
-      showToastOrAlert('خطا در بارگذاری حریم خصوصی');
+      showToastOrAlert(t('Error loading FAQs'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -59,7 +61,7 @@ export default function LearnMoreScreen() {
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="سوالات متداول" />
+      <ScreenHeaders title={t("FAQ")} />
       <FlatList
         data={faqs}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}

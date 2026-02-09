@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable, ActivityIndicator, Modal, TouchableW
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor10, themeColor3, themeColor4, } from '../../theme/Color';
@@ -10,12 +11,13 @@ import { Image } from 'expo-image';
 
 export default function DiscountModal({ discountModal, setDiscountModal, code }) {
 
+    const { t } = useTranslation();
     const [pending, setPending] = useState(false);
 
     const copyToClipboard = async () => {
         setPending(true);
         await Clipboard.setStringAsync(code);
-        showToastOrAlert('کد با موفقیت کپی شد.');
+        showToastOrAlert(t('The code was successfully copied.'));
         setPending(false);
     }
 
@@ -27,13 +29,13 @@ export default function DiscountModal({ discountModal, setDiscountModal, code })
                 <View style={styles.container}>
                     <View style={[styles.modalView, NewStyles.shadow]}>
                         <View style={NewStyles.center}>
-                            <Text style={NewStyles.title}>جایزه با موفقیت دریافت شد.</Text>
+                            <Text style={NewStyles.title}>{t('The award was successfully received.')}</Text>
                         </View>
                         <View style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor3.bgColor(1) }} />
                         <View style={NewStyles.center}>
                             <Image style={{ aspectRatio: 1, width: '50%' }} contentFit="contain" source={require('../../assets/images/emojies/Party.png')} />
                         </View>
-                        <Text style={NewStyles.text10}>برای مشاهده این کد تشویقی به قسمت جایزه‌های دریافتی بروید.</Text>
+                        <Text style={NewStyles.text10}>{t('View your promotional codes in the received codes section.')}</Text>
 
                         <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
                             <View
@@ -55,7 +57,7 @@ export default function DiscountModal({ discountModal, setDiscountModal, code })
                                     NewStyles.center
                                 ]}
                                 onPress={() => { copyToClipboard() }}>
-                                {!pending && <Text style={[NewStyles.text4, {textAlign: 'center'}]}>کپی کردن</Text>}
+                                {!pending && <Text style={[NewStyles.text4, {textAlign: 'center'}]}>{t('Copy')}</Text>}
                                 {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                             </Pressable>
                         </View>

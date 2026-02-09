@@ -1,5 +1,6 @@
 import { Image, Linking, StyleSheet, Text, View, Modal, TouchableOpacity, Share } from 'react-native'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6 } from '../theme/Color'
 import NewStyles from '../styles/NewStyles'
 import { imageUri, mainUri } from '../services/URL'
@@ -9,9 +10,10 @@ import { Pressable } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 
 const TechnicianDetailsComponent = ({ data, navigation }) => {
+    const { t } = useTranslation();
     const [showQRModal, setShowQRModal] = useState(false);
     const handleShare = async () => {
-        const message = ` من از عملکرد ${data?.technician?.name}، تکنسین لوپ راضی هستم و به شما هم توصیه می‌کنم از خدمات او استفاده کنید! ${mainUri}/technician/${data?.technician?.id} `;
+        const message = t('I am satisfied with the performance of {{name}}, Loop technician and I recommend you to use his services too! {{url}}', { name: data?.technician?.name, url: `${mainUri}/technician/${data?.technician?.id}` });
         try {
             const result = await Share.share({ message });
             if (result.action == Share.sharedAction) {
@@ -33,11 +35,11 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
             </View>
             <View style={[{ paddingHorizontal: '5%', paddingBottom: 10, gap: 10 }, NewStyles.rowWrapper]}>
                 <View style={[{ flex: 1 }, NewStyles.center]}>
-                    <Text style={NewStyles.title10}>کد تکنسین</Text>
+                    <Text style={NewStyles.title10}>{t('Technician Code')}</Text>
                     <Text style={NewStyles.text10}>{data?.technician?.referral_code}</Text>
                 </View>
                 <View style={[{ flex: 1 }, NewStyles.center]}>
-                    <Text style={NewStyles.title10}> شروع فعالیت</Text>
+                    <Text style={NewStyles.title10}>{t('Start of activity')}</Text>
                     <Text style={NewStyles.text10}>{formatDate(data?.technician?.created_at)}</Text>
                 </View>
 
@@ -47,24 +49,24 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                     if(data?.status==0 || data?.status==1){
                          Linking.openURL(`tel:${data?.technician?.phone}`)
                     }else{
-                        showToastOrAlert('به علت لغو یا اتمام سفارش امکان تماس با تکنسین وجود ندارد.')
+                        showToastOrAlert(t('Due to order cancellation or completion, contacting the technician is not possible.'))
                     }
                  }}>
                     <Ionicons name="call-outline" size={18} color={themeColor0.bgColor(1)} />
-                    <Text style={[NewStyles.text, { fontSize: 12 }]}>تماس با تکنسین</Text>
+                    <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Call technician')}</Text>
                 </Pressable>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { navigation.navigate('ChatRoom', { technicianId: data?.technician?.id }) }}>
                     <Ionicons name="chatbubble-ellipses-outline" size={18} color={themeColor0.bgColor(1)} />
-                    <Text style={[NewStyles.text, { fontSize: 12 }]}>پیام به تکنسین</Text>
+                    <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Message to technician')}</Text>
                     {(data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
                 </Pressable>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
-                    <Text style={[NewStyles.text, { fontSize: 12 }]}>ارسال به دوستان</Text>
+                    <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Send to friends')}</Text>
                 </Pressable>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
-                    <Text style={[NewStyles.text, { fontSize: 12 }]}>اسکن QR کد</Text>
+                    <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Scan QR code')}</Text>
                 </Pressable>
             </View>
 
@@ -88,7 +90,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                             <Ionicons name="close-circle" size={30} color={themeColor0.bgColor(1)} />
                         </TouchableOpacity>
 
-                        <Text style={[NewStyles.title, { marginBottom: 20 }]}>کد QR معرفی تکنسین</Text>
+                        <Text style={[NewStyles.title, { marginBottom: 20 }]}>{t('QR code for technician referral')}</Text>
 
                         <View style={styles.qrWrapper}>
                             <QRCode
@@ -100,7 +102,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                         </View>
 
                         <Text style={[NewStyles.text10, { marginTop: 20, textAlign: 'center' }]}>
-                            برای مشاهده اطلاعات بیشتر تکنسین
+                            {t('To view more technician information')}
                         </Text>
                     </View>
                 </TouchableOpacity>

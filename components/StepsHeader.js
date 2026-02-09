@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useDispatch, useSelector } from "react-redux";
 import { emptySteps } from '../slices/stepSlice';
@@ -12,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) {
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const user = useSelector(state => state.user);
     const category = useSelector(state => state?.category);
@@ -25,7 +27,7 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
         }]}>
             <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
                 <Image source={require("../assets/next.png")} style={styles.arrow} />
-                <Text style={styles.titleText}>بعدی</Text>
+                <Text style={styles.titleText}>{t("Next")}</Text>
             </TouchableOpacity>
             <View style={styles.titleContainer}>
                 <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
@@ -33,7 +35,7 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
             {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
 
                 <Image source={require("../assets/back.png")} style={styles.arrow} />
-                <Text style={styles.titleText}>قبلی</Text>
+                <Text style={styles.titleText}>{t("Back")}</Text>
             </TouchableOpacity>
                 :
                 <View style={styles.iconContainer} />

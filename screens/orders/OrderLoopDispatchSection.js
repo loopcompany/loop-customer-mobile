@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useTranslation } from 'react-i18next'
 
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
@@ -12,6 +13,7 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) => {
+    const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
     const [loading, setLoading] = useState(true)
     const [confirming, setConfirming] = useState(false)
@@ -69,7 +71,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
             )
 
             if (response.status == 200 && response.data?.success) {
-                showToastOrAlert(response.data?.message || 'گزارش با موفقیت تایید شد')
+                showToastOrAlert(response.data?.message || t('Report confirmed successfully'))
                 // بروزرسانی گزارش با داده‌های جدید
                 if (response.data?.data?.report) {
                     setReport(response.data?.data?.report)
@@ -79,7 +81,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                 if (onUpdate) onUpdate()
             }
         } catch (error) {
-            const message = error?.response?.data?.message || 'خطا در تایید گزارش'
+            const message = error?.response?.data?.message || t('Error confirming report')
             showToastOrAlert(message)
         } finally {
             setConfirming(false)
@@ -106,7 +108,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
             <View style={[styles.container, NewStyles.center]}>
                 <View style={styles.noticeBox}>
                     <Text style={[NewStyles.text10]}>
-                        هنوز گزارش تحویل توسط تکنسین ثبت نشده است
+                        {t('The delivery report has not been submitted by technician yet')}
                     </Text>
                 </View>
             </View>
@@ -122,8 +124,8 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
             <View style={[styles.noticeBox, !isConfirmed && { backgroundColor: themeColor1.bgColor(1) }]}>
                 <Text style={[NewStyles.text10]}>
                     {isConfirmed
-                        ? 'گزارش تحویل توسط شما تایید شده است'
-                        : 'لطفاً اطلاعات گزارش تحویل را بررسی کرده و در صورت صحت، آن را تایید کنید'}
+                        ? t('The delivery report has been confirmed by you')
+                        : t('Please review the delivery report information and confirm it if correct')}
                 </Text>
             </View>
 
@@ -132,7 +134,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* نام و نام خانوادگی تحویل دهنده */}
                 {report?.name && renderRow(
-                    'نام و نام خانوادگی تحویل دهنده',
+                    t('Submitter full name'),
                     report?.name,
                     NewStyles.text,
                     NewStyles.text10
@@ -140,7 +142,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* کد ملی تحویل دهنده */}
                 {report?.melicode && renderRow(
-                    'کد ملی تحویل دهنده',
+                    t('Submitter national ID'),
                     report?.melicode,
                     NewStyles.text,
                     NewStyles.text10
@@ -148,7 +150,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* نام محصول */}
                 {report?.product_name && renderRow(
-                    'نام محصول',
+                    t('Product name'),
                     report?.product_name,
                     NewStyles.text,
                     NewStyles.text10
@@ -156,7 +158,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* برند محصول */}
                 {report?.product_brand && renderRow(
-                    'برند محصول',
+                    t('Product brand'),
                     report?.product_brand,
                     NewStyles.text,
                     NewStyles.text10
@@ -164,7 +166,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* مدل محصول */}
                 {report?.product_model && renderRow(
-                    'مدل محصول',
+                    t('Product model'),
                     report?.product_model,
                     NewStyles.text,
                     NewStyles.text10
@@ -172,7 +174,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* رنگ محصول */}
                 {report?.product_color && renderRow(
-                    'رنگ محصول',
+                    t('Product color'),
                     report?.product_color,
                     NewStyles.text,
                     NewStyles.text10
@@ -180,7 +182,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* شماره سریال */}
                 {report?.product_serial_number && renderRow(
-                    'شماره سریال',
+                    t('Serial number'),
                     report?.product_serial_number,
                     NewStyles.text,
                     NewStyles.text10
@@ -188,7 +190,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* کد برچسب دارایی */}
                 {report?.asset_label_code && renderRow(
-                    'کد برچسب دارایی',
+                    t('Asset label code'),
                     report?.asset_label_code,
                     NewStyles.text,
                     NewStyles.text10
@@ -199,7 +201,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cube-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>لوازم جانبی</Text>
+                            <Text style={NewStyles.title}>{t('Accessories')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -213,7 +215,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="alert-circle-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات گزارش شده توسط کاربر</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>{t('Issues reported by user')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -227,7 +229,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="construct-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات گزارش شده توسط تکنسین</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>{t('Issues reported by technician')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -241,7 +243,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="eye-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={[NewStyles.title, { flex: 1 }]}>مشکلات مشاهده شده توسط تکنسین</Text>
+                            <Text style={[NewStyles.title, { flex: 1 }]}>{t('Issues observed by technician')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -255,7 +257,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="list-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>خدمات درخواستی کاربر</Text>
+                            <Text style={NewStyles.title}>{t('User requested services')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -266,7 +268,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* مدت زمان تقریبی */}
                 {report?.duration && renderRow(
-                    'مدت زمان تقریبی انجام سفارش',
+                    t('Approximate order completion time'),
                     report?.duration,
                     NewStyles.text,
                     NewStyles.text10
@@ -274,8 +276,8 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
                 {/* هزینه تقریبی */}
                 {report?.loop_cost_estimate && renderRow(
-                    'هزینه تقریبی توسط لوپ',
-                    formatPrice(report?.loop_cost_estimate) + ' تومان',
+                    t('Estimated cost by Loop'),
+                    formatPrice(report?.loop_cost_estimate) + ' ' + t('Toman'),
                     NewStyles.text,
                     [NewStyles.text10, { fontWeight: 'bold' }]
                 )}
@@ -285,7 +287,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     <View style={{ gap: 5, marginTop: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="document-text-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>توضیحات لوپ</Text>
+                            <Text style={NewStyles.title}>{t('Loop description')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -300,31 +302,31 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                 <View style={[styles.confirmedBox, NewStyles.center, NewStyles.border10]}>
                     <Ionicons name="checkmark-circle" size={40} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.title, { color: themeColor0.bgColor(1) }]}>
-                        گزارش تایید شده
+                        {t('Report confirmed')}
                     </Text>
                     <Text style={[NewStyles.text10]}>
-                        شما این گزارش را تایید کرده‌اید
+                        {t('You have confirmed this report')}
                     </Text>
                 </View>
             ) : (
                 <View style={{ width: '100%', marginTop: 15, alignItems:'center' }}>
                     <Button
-                        title="تایید گزارش تحویل"
+                        title={t('Confirm delivery report')}
                         onPress={() => setConfirmModal(true)}
                         loading={confirming}
                         textStyle={{color: themeColor4.bgColor(1)}}
                         style={{ backgroundColor: themeColor0.bgColor(1) }}
                     />
                     <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 8, color: themeColor0.bgColor(0.6) }]}>
-                        با تایید گزارش، اطلاعات بالا را صحیح می‌دانید
+                        {t('By confirming the report, you acknowledge the above information is correct')}
                     </Text>
                 </View>
             )}
 
             {/* Modal */}
             <ConfirmationModal
-                title="تایید گزارش تحویل"
-                message="آیا از صحت اطلاعات گزارش تحویل اطمینان دارید و آن را تایید می‌کنید؟"
+                title={t('Confirm delivery report')}
+                message={t('Are you sure the delivery report information is correct and you want to confirm it?')}
                 action={handleConfirmReport}
                 confirmationModal={confirmModal}
                 setConfirmationModal={setConfirmModal}

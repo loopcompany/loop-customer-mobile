@@ -18,6 +18,7 @@ import jalaali from 'jalaali-js';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateContractStatus } from '../../slices/organizationSlice';
 import { useOrganizationAccess } from '../../hooks/useOrganizationAccess';
+import { useTranslation } from 'react-i18next';
 
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
@@ -30,6 +31,7 @@ const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
   const reduxContractStatus = useSelector(state => state.organization.contractStatus);
   const { refetch } = useOrganizationAccess(); // برای رفرش کردن وضعیت کامل (پروفایل + قرارداد)
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
   const [loadingContract, setLoadingContract] = useState(true);
@@ -85,7 +87,7 @@ const OrganizationContract = ({ navigation }) => {
       const token = await AsyncStorage.getItem('userToken');
 
       if (!token) {
-        showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        showAlert(t('Error'), t('Please log in first.'));
         navigation.navigate('Login');
         return;
       }
@@ -130,7 +132,7 @@ const OrganizationContract = ({ navigation }) => {
         const uploadedData = {
           id: latestUpload.id,
           file_url: latestUpload.contract_url,
-          file_name: 'قرارداد امضا شده',
+          file_name: t('Signed contract'),
           uploaded_at: toJalaliDate(latestUpload.uploaded_at),
           status: latestUpload.status,
           status_label: latestUpload.status_label,
@@ -167,7 +169,7 @@ const OrganizationContract = ({ navigation }) => {
       console.error('Error response:', error.response?.data);
 
       if (error.response?.status === 403) {
-        showAlert('خطا', 'فقط کاربران سازمانی می‌توانند قراردادها را مشاهده کنند');
+        showAlert(t('Error'), t('Only organization users can view contracts.'));
         if (Platform.OS == 'web') {
           window.history.back()
         } else {
@@ -178,7 +180,7 @@ const OrganizationContract = ({ navigation }) => {
         console.log('⚠️ 404 - No contracts found (normal)');
         setAdminContract(null);
       } else {
-        showAlert('خطا', error.response?.data?.message || 'خطا در بارگذاری اطلاعات قرارداد');
+        showAlert(t('Error'), error.response?.data?.message || t('Error loading contract information.'));
       }
     } finally {
       setLoadingContract(false);
@@ -190,7 +192,7 @@ const OrganizationContract = ({ navigation }) => {
   const handleDownloadAdminContract = async () => {
     try {
       if (!adminContract || !adminContract.file_url) {
-        showAlert('خطا', 'فایل قرارداد موجود نیست');
+        showAlert(t('Error'), t('Contract file is not available.'));
         return;
       }
 
@@ -199,11 +201,11 @@ const OrganizationContract = ({ navigation }) => {
       if (supported) {
         await Linking.openURL(adminContract.file_url);
       } else {
-        showAlert('خطا', 'امکان باز کردن لینک وجود ندارد');
+        showAlert(t('Error'), t('Unable to open the link.'));
       }
     } catch (error) {
       console.error('Error downloading contract:', error);
-      showAlert('خطا', 'خطا در دانلود قرارداد');
+      showAlert(t('Error'), t('Error downloading contract.'));
     }
   };
 
@@ -227,7 +229,7 @@ const OrganizationContract = ({ navigation }) => {
       // بررسی امکان آپلود
       if (uploadedContract && uploadedContract.status === 'approved') {
         console.log('⚠️ Upload blocked - contract already approved');
-        showAlert('توجه', 'شما یک قرارداد تایید شده دارید و امکان بارگذاری مجدد وجود ندارد.');
+        showAlert(t('Attention'), t('You already have an approved contract and re-upload is not allowed.'));
         return;
       }
 
@@ -253,14 +255,14 @@ const OrganizationContract = ({ navigation }) => {
         // Check file size (max 500MB according to API docs)
         if (file.size > 500 * 1024 * 1024) {
           console.log('❌ File too large:', file.size);
-          showAlert('خطا', 'حجم فایل نباید بیشتر از 500 مگابایت باشد');
+          showAlert(t('Error'), t('File size must not exceed 500 MB.'));
           return;
         }
 
         // Check file type
         if (file.mimeType !== 'application/pdf') {
           console.log('❌ Invalid mimeType:', file.mimeType);
-          showAlert('خطا', 'فقط فایل‌های PDF مجاز هستند');
+          showAlert(t('Error'), t('Only PDF files are allowed.'));
           return;
         }
 
@@ -277,7 +279,7 @@ const OrganizationContract = ({ navigation }) => {
           setSelectedFile(file);
         }
 
-        showAlert('موفق', `فایل ${file.name} انتخاب شد`);
+        showAlert(t('Success'), t('File {{name}} selected', { name: file.name }));
       } else {
         console.log('⚠️ File selection canceled or no file');
         console.log('Result details:', {
@@ -292,7 +294,7 @@ const OrganizationContract = ({ navigation }) => {
         message: error.message,
         stack: error.stack
       });
-      showAlert('خطا', 'خطا در انتخاب فایل: ' + error.message);
+      showAlert(t('Error'), `${t('Error selecting file')}: ${error.message}`);
     }
   };
 
@@ -313,7 +315,7 @@ const OrganizationContract = ({ navigation }) => {
     try {
       if (!selectedFile) {
         console.log('❌ No file selected');
-        showAlert('خطا', 'لطفا ابتدا فایل قرارداد امضا شده را انتخاب کنید');
+        showAlert(t('Error'), t('Please select a signed contract file first.'));
         return;
       }
 
@@ -322,7 +324,7 @@ const OrganizationContract = ({ navigation }) => {
 
       if (!token) {
         console.log('❌ No token found');
-        showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        showAlert(t('Error'), t('Please log in first.'));
         setUploadingContract(false);
         return;
       }
@@ -351,7 +353,7 @@ const OrganizationContract = ({ navigation }) => {
           formData.append('contract_file', blob, selectedFile.name || 'contract.pdf');
           console.log('✅ Blob appended from URI');
         } else {
-          throw new Error('فایل معتبر نیست');
+          throw new Error(t('Invalid file.'));
         }
       } else {
         // در React Native، از uri استفاده می‌کنیم
@@ -405,11 +407,11 @@ const OrganizationContract = ({ navigation }) => {
         }, 100);
 
         showAlert(
-          'موفق',
-          response.data.message || 'قرارداد با موفقیت بارگذاری شد و در انتظار تایید است.',
+          t('Success'),
+          response.data.message || t('Contract uploaded successfully and is pending approval.'),
           [
             {
-              text: 'باشه',
+              text: t('Ok'),
               onPress: async () => {
                 console.log('🔄 Clearing selectedFile and reloading data...');
                 setSelectedFile(null);
@@ -445,31 +447,31 @@ const OrganizationContract = ({ navigation }) => {
 
       if (error.response?.status === 400) {
         console.log('❌ 400 Bad Request');
-        showAlert('خطا', error.response.data.message || 'شما یک قرارداد تایید شده دارید و امکان بارگذاری مجدد وجود ندارد.');
+        showAlert(t('Error'), error.response.data.message || t('You already have an approved contract and re-upload is not allowed.'));
       } else if (error.response?.status === 422) {
         console.log('❌ 422 Validation Error');
         // Validation errors
         const errors = error.response.data.errors;
         const errorMessages = Object.values(errors).flat().join('\n');
-        showAlert('خطای اعتبارسنجی', errorMessages);
+        showAlert(t('Validation error'), errorMessages);
       } else if (error.response?.status === 404) {
         console.log('❌ 404 Not Found');
-        showAlert('خطا', 'اطلاعات سازمان یافت نشد.');
+        showAlert(t('Error'), t('Organization information not found.'));
       } else if (error.response?.status === 401) {
         console.log('❌ 401 Unauthorized');
-        showAlert('خطا', 'احراز هویت ناموفق. لطفا مجدداً وارد شوید.');
+        showAlert(t('Error'), t('Authentication failed. Please log in again.'));
       } else if (error.response?.status === 413) {
         console.log('❌ 413 File Too Large');
-        showAlert('خطا', 'حجم فایل بیش از حد مجاز است.');
+        showAlert(t('Error'), t('File size exceeds the allowed limit.'));
       } else if (error.code === 'ECONNABORTED') {
         console.log('❌ Request Timeout');
-        showAlert('خطا', 'زمان درخواست به پایان رسید. لطفا دوباره تلاش کنید.');
+        showAlert(t('Error'), t('Request timed out. Please try again.'));
       } else if (error.message.includes('Network Error')) {
         console.log('❌ Network Error');
-        showAlert('خطا', 'مشکل در ارتباط با سرور. اتصال اینترنت خود را بررسی کنید.');
+        showAlert(t('Error'), t('Error connecting to server. Please check your internet connection'));
       } else {
         console.log('❌ Other Error');
-        showAlert('خطا', error.response?.data?.message || error.message || 'خطا در آپلود قرارداد');
+        showAlert(t('Error'), error.response?.data?.message || error.message || t('Error uploading contract'));
       }
     } finally {
       setUploadingContract(false);
@@ -486,7 +488,7 @@ const OrganizationContract = ({ navigation }) => {
       <View style={[styles.container, styles.centerContent]}>
         <CustomStatusBar />
         <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-        <Text style={styles.loadingText}>در حال بارگذاری...</Text>
+        <Text style={styles.loadingText}>{t('Loading...')}</Text>
       </View>
     );
   }
@@ -497,7 +499,7 @@ const OrganizationContract = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <CustomStatusBar />
-      <ScreenHeaders title="قراردادنامه سازمانی" />
+      <ScreenHeaders title={t('Organization contract')} />
 
       <ScrollView
         style={styles.scrollView}
@@ -508,7 +510,7 @@ const OrganizationContract = ({ navigation }) => {
         <View style={styles.infoBox}>
           <Ionicons name="information-circle-outline" size={24} color={themeColor1.bgColor(1)} />
           <Text style={styles.infoText}>
-            در این بخش می‌توانید قرارداد همکاری سازمانی را مشاهده و دانلود کنید و سپس قرارداد امضا شده را بارگذاری نمایید.
+            {t('In this section, you can view and download the organizational cooperation contract and then upload the signed contract.')}
           </Text>
         </View>
 
@@ -516,18 +518,18 @@ const OrganizationContract = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="document-text-outline" size={24} color={themeColor1.bgColor(1)} />
-            <Text style={styles.sectionTitle}>قرارداد همکاری</Text>
+            <Text style={styles.sectionTitle}>{t('Cooperation contract')}</Text>
           </View>
 
           {adminContract ? (
             <View style={styles.contractCard}>
               <View style={styles.contractInfo}>
-                <Ionicons name="document" size={40} color={themeColor1.bgColor(1)} />
-                <View style={styles.contractDetails}>
-                  <Text style={styles.contractFileName}>{adminContract.file_name}</Text>
-                  <Text style={styles.contractDate}>تاریخ بارگذاری: {adminContract.uploaded_at}</Text>
+                  <Ionicons name="document" size={40} color={themeColor1.bgColor(1)} />
+                  <View style={styles.contractDetails}>
+                    <Text style={styles.contractFileName}>{adminContract.file_name}</Text>
+                    <Text style={styles.contractDate}>{t('Upload date:')} {adminContract.uploaded_at}</Text>
+                  </View>
                 </View>
-              </View>
 
               <View style={styles.contractActions}>
                 <TouchableOpacity
@@ -535,14 +537,14 @@ const OrganizationContract = ({ navigation }) => {
                   onPress={handleDownloadAdminContract}
                 >
                   <Ionicons name="download-outline" size={20} color="#fff" />
-                  <Text style={styles.downloadBtnText}>دانلود و مشاهده</Text>
+                  <Text style={styles.downloadBtnText}>{t('Download and view')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
             <View style={styles.emptyCard}>
               <Ionicons name="document-outline" size={60} color="#ccc" />
-              <Text style={styles.emptyText}>قرارداد هنوز بارگذاری نشده است</Text>
+              <Text style={styles.emptyText}>{t('The contract has not been uploaded yet.')}</Text>
             </View>
           )}
         </View>
@@ -551,7 +553,7 @@ const OrganizationContract = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="cloud-upload-outline" size={24} color={themeColor4.bgColor(1)} />
-            <Text style={styles.sectionTitle}>بارگذاری قرارداد امضا شده</Text>
+            <Text style={styles.sectionTitle}>{t('Upload signed contract')}</Text>
           </View>
 
           {/* فایل انتخاب شده */}
@@ -581,7 +583,7 @@ const OrganizationContract = ({ navigation }) => {
             >
               <Ionicons name="folder-open-outline" size={20} color={themeColor1.bgColor(1)} />
               <Text style={styles.selectFileBtnText}>
-                {selectedFile ? 'تغییر فایل' : 'انتخاب فایل'}
+                {selectedFile ? t('Change file') : t('Select file')}
               </Text>
             </TouchableOpacity>
 
@@ -597,7 +599,7 @@ const OrganizationContract = ({ navigation }) => {
                   <Ionicons name="cloud-upload" size={20} color="#000000ff" />
                 )}
                 <Text style={styles.uploadBtnText}>
-                  {uploadingContract ? 'در حال آپلود...' : 'آپلود قرارداد'}
+                  {uploadingContract ? t('Uploading...') : t('Upload contract')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -606,7 +608,7 @@ const OrganizationContract = ({ navigation }) => {
           {/* قرارداد آپلود شده قبلی */}
           {uploadedContract && (
             <View style={styles.uploadedSection}>
-              <Text style={styles.uploadedLabel}>قرارداد آپلود شده:</Text>
+              <Text style={styles.uploadedLabel}>{t('Uploaded contract:')}</Text>
               <View style={[
                 styles.uploadedCard,
                 uploadedContract.status === 'approved' && styles.uploadedCardApproved,
@@ -629,11 +631,11 @@ const OrganizationContract = ({ navigation }) => {
                   <View style={styles.uploadedDetails}>
                     <Text style={styles.uploadedFileName}>{uploadedContract.file_name}</Text>
                     <Text style={styles.uploadedDate}>
-                      تاریخ آپلود: {uploadedContract.uploaded_at}
+                      {t('Upload date:')} {uploadedContract.uploaded_at}
                     </Text>
                     {uploadedContract.reviewed_at && (
                       <Text style={styles.uploadedDate}>
-                        تاریخ بررسی: {uploadedContract.reviewed_at}
+                        {t('Review date:')} {uploadedContract.reviewed_at}
                       </Text>
                     )}
                     <Text style={[
@@ -642,13 +644,13 @@ const OrganizationContract = ({ navigation }) => {
                       uploadedContract.status === 'rejected' && styles.statusRejected,
                       uploadedContract.status === 'pending' && styles.statusPending,
                     ]}>
-                      وضعیت: {uploadedContract.status_label}
+                      {t('Status:')} {uploadedContract.status_label}
                     </Text>
 
                     {/* نمایش دلیل رد */}
                     {uploadedContract.status === 'rejected' && uploadedContract.rejection_reason && (
                       <View style={styles.rejectionBox}>
-                        <Text style={styles.rejectionTitle}>دلیل رد:</Text>
+                        <Text style={styles.rejectionTitle}>{t('Rejection reason')}</Text>
                         <Text style={styles.rejectionText}>{uploadedContract.rejection_reason}</Text>
                       </View>
                     )}
@@ -659,7 +661,7 @@ const OrganizationContract = ({ navigation }) => {
                       onPress={() => Linking.openURL(uploadedContract.file_url)}
                     >
                       <Ionicons name="eye-outline" size={18} color={themeColor1.bgColor(1)} />
-                      <Text style={styles.viewUploadedBtnText}>مشاهده فایل آپلود شده</Text>
+                      <Text style={styles.viewUploadedBtnText}>{t('View uploaded file')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -669,13 +671,13 @@ const OrganizationContract = ({ navigation }) => {
 
           {/* راهنمایی */}
           <View style={styles.helpBox}>
-            <Text style={styles.helpTitle}>راهنما:</Text>
-            <Text style={styles.helpText}>• ابتدا قرارداد همکاری را دانلود و مطالعه کنید</Text>
-            <Text style={styles.helpText}>• قرارداد را امضا کنید (به صورت دیجیتال یا اسکن)</Text>
-            <Text style={styles.helpText}>• فایل امضا شده را بارگذاری کنید</Text>
-            <Text style={styles.helpText}>• فرمت مجاز: فقط PDF</Text>
-            <Text style={styles.helpText}>• حداکثر حجم فایل: 500 مگابایت</Text>
-            <Text style={styles.helpText}>• در صورت رد شدن، می‌توانید مجدداً آپلود کنید</Text>
+            <Text style={styles.helpTitle}>{t('Guide:')}</Text>
+            <Text style={styles.helpText}>{t('- First, download and read the cooperation contract')}</Text>
+            <Text style={styles.helpText}>{t('- Sign the contract (digitally or by scan)')}</Text>
+            <Text style={styles.helpText}>{t('- Upload the signed file')}</Text>
+            <Text style={styles.helpText}>{t('- Allowed format: PDF only')}</Text>
+            <Text style={styles.helpText}>{t('- Maximum file size: 500 MB')}</Text>
+            <Text style={styles.helpText}>{t('- If rejected, you can upload again')}</Text>
           </View>
         </View>
       </ScrollView>

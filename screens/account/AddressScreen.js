@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../../theme/Color";
@@ -19,6 +20,7 @@ import { showToastOrAlert, showAlert } from "../../helpers/Common";
 import Button from "../../components/Button";
 
 export default function AddressScreen({ route, navigation }) {
+  const { t } = useTranslation();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,7 +49,7 @@ export default function AddressScreen({ route, navigation }) {
       console.error('Error fetching addresses:', error);
       // Don't show alert on first load if no addresses
       if (addresses.length > 0) {
-        showToastOrAlert('خطا در دریافت آدرس‌ها');
+        showToastOrAlert(t('Error fetching addresses'));
       }
     } finally {
       setLoading(false);
@@ -62,23 +64,23 @@ export default function AddressScreen({ route, navigation }) {
 
   const handleDelete = (id) => {
     showAlert(
-      'حذف آدرس',
-      'آیا مطمئن هستید که می‌خواهید این آدرس را حذف کنید؟',
+      t('Delete Address'),
+      t('Are you sure you want to delete this address?'),
       [
-        { text: 'لغو', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'حذف',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               const response = await addressAPI.delete(id);
               if (response.success) {
-                showToastOrAlert('آدرس با موفقیت حذف شد');
+                showToastOrAlert(t('Address deleted successfully'));
                 fetchAddresses();
               }
             } catch (error) {
               console.error('Error deleting address:', error);
-              showToastOrAlert('خطا در حذف آدرس');
+              showToastOrAlert(t('Error deleting address'));
             }
           },
         },
@@ -91,7 +93,7 @@ export default function AddressScreen({ route, navigation }) {
       <View style={[styles.addressCard, NewStyles.border10]}>
         <View style={styles.cardHeader}>
           <Text style={[NewStyles.title10, { fontSize: 16 }]}>
-            {item.title || 'بدون عنوان'}
+            {item.title || t('Untitled')}
           </Text>
           <TouchableOpacity
             onPress={() => handleDelete(item.id)}
@@ -156,10 +158,10 @@ export default function AddressScreen({ route, navigation }) {
       <View style={styles.emptyState}>
         <Ionicons name="location-outline" size={80} color={themeColor3.bgColor(1)} />
         <Text style={[NewStyles.text10, { marginTop: 20, fontSize: 16 }]}>
-          هنوز آدرسی ثبت نشده است
+          {t('No addresses registered yet')}
         </Text>
         <Text style={[NewStyles.text10, { marginTop: 10, opacity: 0.7 }]}>
-          با دکمه زیر اولین آدرس خود را اضافه کنید
+          {t('Add your first address with the button below')}
         </Text>
       </View>
     );
@@ -168,14 +170,14 @@ export default function AddressScreen({ route, navigation }) {
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'additive' }}>
       <ScreenHeaders
-        title="آدرس‌های من"
+        title={t('My Addresses')}
       />
 
       <View style={{ flex: 1 }}>
         {loading && addresses.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-            <Text style={[NewStyles.text10, { marginTop: 10 }]}>در حال بارگذاری...</Text>
+            <Text style={[NewStyles.text10, { marginTop: 10 }]}>{t('Loading...')}</Text>
           </View>
         ) : (
           <FlatList
@@ -196,7 +198,7 @@ export default function AddressScreen({ route, navigation }) {
 
       <View style={styles.footer}>
 
-        <Button title="افزودن آدرس جدید" onPress={() => navigation.navigate('AddNewAddress')} />
+        <Button title={t('Add New Address')} onPress={() => navigation.navigate('AddNewAddress')} />
       </View>
     </SafeAreaView>
   );

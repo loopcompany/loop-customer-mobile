@@ -37,7 +37,7 @@ export default function UserDiscounts({ navigation }) {
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
-            <ScreenHeaders title="جوایز دریافت شده" />
+            <ScreenHeaders title={t("Received Prizes")} />
             <FlatList
                 contentContainerStyle={[NewStyles.center, { gap: 10 }]}
                 showsVerticalScrollIndicator={false}

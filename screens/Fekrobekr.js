@@ -2,16 +2,18 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from 'react-i18next';
 import NewStyles from "../styles/NewStyles";
 import Button from "../components/Button";
 import ScreenHeaders from "../components/ScreenHeaders";
 import Footer from "./Footer";
 
 export default function Fekrobekr({ navigation }) {
+  const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container} edges={{ top: 'off', bottom: 'additive' }}>
       <ScreenHeaders 
-        title={"فکروبکر"}   
+        title={t("Think and Play")}   
       />
       {/* <Text style={styles.title}>فکر و بکر</Text> */}
       <Text
@@ -22,18 +24,17 @@ export default function Fekrobekr({ navigation }) {
           { textAlign: "center" },
         ]}
       >
-        دوست لوپ سلام {"\n"} فکر و بکر برای آشنایی و یادگیری با شاخه های
-        کامپیوتر به صورت سرگرمی و بازی می باشد.{"\n"} گروه سنی: 5 سال تا 1 سال
+        {t("Hello Loop Friend")} {"\n"} {t("Think and Play is for learning about computer fields in a fun and game-like way.")} {"\n"} {t("Age group: 1 to 5 years")}
       </Text>
 
       <View style={styles.buttonsContainer}>
 
         <View style={{ flex: 1 }}>
-          <Button title="کلمات" />
+          <Button title={t("Words")} />
         </View>
 
         <View style={{ flex: 1 }}>
-          <Button title="تصاویر" />
+          <Button title={t("Images")} />
         </View>
       </View>
 

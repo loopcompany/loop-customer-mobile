@@ -1,6 +1,7 @@
 import { Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef,useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import * as Linking from "expo-linking";
 import axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -13,9 +14,13 @@ import { formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function Increase({ navigation }) {
-
+      const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
     const dispatch = useDispatch();
     const token = useSelector((state) => state?.auth?.token);
     const user = useSelector((state) => state.user?.data);
@@ -46,7 +51,7 @@ export default function Increase({ navigation }) {
             const { queryParams } = Linking.parse(url);
             if (queryParams?.status == 'OK') {
                 dispatch(fetchUser(token))
-                showToastOrAlert('کیف پول شما با موفقیت شارژ شد.')
+                showToastOrAlert(t('Your wallet has been successfully topped up.'))
                 setLoading(false);
                 // Cleanup listener after handling
                 if (subscriptionRef.current) {
@@ -59,7 +64,7 @@ export default function Increase({ navigation }) {
                     navigation.goBack()
                 }
             } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert('تراکنش ناموفق بود.')
+                showToastOrAlert(t('Transaction failed'))
                 setLoading(false);
                 // Cleanup listener after handling
                 if (subscriptionRef.current) {
@@ -72,12 +77,12 @@ export default function Increase({ navigation }) {
 
     const increaseWallet = async () => {
         if (!amount || amount < 10000) {
-            showToastOrAlert('حداقل مبلغ برای شارژ کیف پول ۱۰.۰۰۰ تومان می باشد.');
+            showToastOrAlert(t('The minimum amount for wallet recharge is 10,000 Tomans'));
             return;
         }
 
         if (amount > 50000000) {
-            showToastOrAlert('حداکثر مبلغ برای شارژ کیف پول ۵۰.۰۰۰.۰۰۰ تومان می باشد.');
+            showToastOrAlert(t('The maximum amount for wallet recharge is 50,000,000 Tomans'));
             return;
         }
 
@@ -102,13 +107,13 @@ export default function Increase({ navigation }) {
                 await Linking.openURL(response.data.data.payment_url);
             } else {
 
-                showToastOrAlert('خطا در اتصال به درگاه پرداخت');
+                showToastOrAlert(t('Error connecting to payment gateway'));
                 setLoading(false);
             }
         } catch (error) {
             console.log(error?.response?.data);
 
-            const message = error?.response ? (error?.response?.data?.message || 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.data?.message || t('Error connecting to payment gateway')) : t('Network error!');
             showToastOrAlert(message);
             setLoading(false);
         } finally {
@@ -116,13 +121,13 @@ export default function Increase({ navigation }) {
 
         }
     }
-
+const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     return (
         <SafeAreaView edges={{top:'off', bottom:'additive'}} style={[NewStyles.container]}>
-            <ScreenHeaders title={'شارژ کیف پول'} />
+            <ScreenHeaders title={t('Wallet recharge')} />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
-                <Text style={NewStyles.text}>مبلغ مورد نظر خود را به تومان وارد کنید. <Text style={[NewStyles.title6]}>*</Text></Text>
-                <Text style={NewStyles.text10}>موجودی فعلی کیف پول شما: <Text style={NewStyles.title}>{formatPrice(user?.wallet ?? 0)}</Text> تومان</Text>
+                <Text style={NewStyles.text}>{t('Enter your desired amount in Tomans.')} <Text style={[NewStyles.title6]}>*</Text></Text>
+                <Text style={NewStyles.text10}>{t('Your current wallet balance:')} <Text style={NewStyles.title}>{formatPrice(user?.wallet ?? 0)}</Text> {t('Tomans')}</Text>
                 <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
                     <View
                         style={[
@@ -134,7 +139,7 @@ export default function Increase({ navigation }) {
                         ]}
                     >
                         <Ionicons name={'cash-outline'} size={20} color={themeColor0.bgColor(1)} />
-                        <TextInput style={[styles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]} keyboardType='number-pad' placeholder='مبلغ به تومان' placeholderTextColor={themeColor3.bgColor(1)} maxLength={10} value={amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} onChangeText={(text) => { setAmount(text?.replace(/,/g, "")) }} />
+                        <TextInput style={[styles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]} keyboardType='number-pad' placeholder={t('Amount in Tomans')} placeholderTextColor={themeColor3.bgColor(1)} maxLength={10} value={amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} onChangeText={(text) => { setAmount(text?.replace(/,/g, "")) }} />
                     </View>
                     <View
                         style={[
@@ -142,10 +147,10 @@ export default function Increase({ navigation }) {
                             NewStyles.border10,
                             NewStyles.center
                         ]} >
-                        <Text style={NewStyles.title}>تومان</Text>
+                        <Text style={NewStyles.title}>{t('Tomans')}</Text>
                     </View>
                 </View>
-                <Button title={'پرداخت'}
+                <Button title={t('Payment')}
                     loading={loading}
                     onPress={increaseWallet}
                 />
@@ -155,7 +160,7 @@ export default function Increase({ navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     contentContainerStyle: {
         paddingHorizontal: '5%',
         paddingVertical: '5%',

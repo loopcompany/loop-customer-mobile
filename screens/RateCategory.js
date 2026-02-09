@@ -1,5 +1,5 @@
 // RateListScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
@@ -19,10 +20,16 @@ import { themeColor0, themeColor4 } from '../theme/Color';
 import { RefreshControl } from 'react-native';
 import letterRatesCategoryAPI from '../services/LetterRatesService';
 import { useNavigation } from '@react-navigation/native';
-
+import { createStyles } from '../styles/NewStyles';
 
 
 export default function RateCategory() {
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [rates, setRates] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
@@ -54,12 +61,12 @@ export default function RateCategory() {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={'نرخنامه'} />
+      <ScreenHeaders title={t('Rate List')} />
       <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
 
         <View style={[{ flex: 1 }]}>
           <View style={styles.titleContainer}>
-              <Text style={NewStyles.title4}>نرخنامه لوپ {formatJalaaliDate(new Date())?.slice(0, 4)}</Text>
+              <Text style={NewStyles.title4}>{t('Loop Rate List')} {formatJalaaliDate(new Date())?.slice(0, 4)}</Text>
             </View>
           <View style={{ flex: 1 }}>
 
@@ -80,7 +87,7 @@ export default function RateCategory() {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingVertical: 10

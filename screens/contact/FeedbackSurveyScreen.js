@@ -1,5 +1,5 @@
 // FeedbackSurveyScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
+import { createStyles } from '../../styles/NewStyles';
 import { themeColor1, themeColor0, themeColor10, themeColor7, themeColor3, themeColor4 } from '../../theme/Color';
 import Button from '../../components/Button';
 import pollAPI from '../../services/PollApi';
@@ -24,11 +25,17 @@ import { Ionicons } from '@expo/vector-icons';
  // راست‌چین
 
 export default function FeedbackSurveyScreen() {
+const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
   const [scores, setScores] = useState({
     app: '',
     technician: '',
     support: '',
   });
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [desc, setDesc] = useState('');
   const [loading, setLoading] = useState(true);
   const [canParticipate, setCanParticipate] = useState(false);
@@ -38,6 +45,17 @@ export default function FeedbackSurveyScreen() {
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const token = useSelector(state => state.auth.token);
 
+  // Helper function to translate rating values from backend
+  const translateRating = (rating) => {
+    const ratingMap = {
+      'خوب': t('Good'),
+      'متوسط': t('Average'),
+      'ضعیف': t('Poor')
+    };
+
+    return ratingMap[rating] || rating;
+  };
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -46,7 +64,7 @@ export default function FeedbackSurveyScreen() {
     // Check if user is authenticated
     if (!token) {
       if (mounted) {
-        setError('لطفاً ابتدا وارد حساب کاربری خود شوید');
+        setError(t('Please log in to your account first'));
         setLoading(false);
       }
       return;
@@ -66,7 +84,7 @@ export default function FeedbackSurveyScreen() {
         }
       })
       .catch((e) => {
-        if (mounted) setError(e.message || 'خطا در ارتباط با سرور');
+        if (mounted) setError(e.message || t('Error communicating with server'));
       })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
@@ -79,7 +97,7 @@ export default function FeedbackSurveyScreen() {
   const handleSubmit = async () => {
     // Check authentication before submitting
     if (!token) {
-      setError('لطفاً ابتدا وارد حساب کاربری خود شوید');
+      setError(t('Please log in to your account first'));
       return;
     }
 
@@ -98,13 +116,13 @@ export default function FeedbackSurveyScreen() {
       console.log('User token exists:', !!token);
       
       const res = await pollAPI.submitPoll(pollData);
-      setSubmitSuccess(res.message || 'نظرسنجی با موفقیت ثبت شد.');
+      setSubmitSuccess(res.message || t('Survey submitted successfully.'));
       setCanParticipate(false);
       // Optionally fetch poll result
       pollAPI.getMyPoll().then((poll) => setAlreadyPoll(poll.data)).catch(() => { });
     } catch (e) {
       console.error('Poll submission error:', e);
-      setError(e.message || 'خطا در ثبت نظرسنجی');
+      setError(e.message || t('Error submitting survey'));
     } finally {
       setSubmitLoading(false);
     }
@@ -113,11 +131,11 @@ export default function FeedbackSurveyScreen() {
   if (loading) {
     return (
       <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
-        <ScreenHeaders title={"نظر سنجی / عملکرد"} />
+        <ScreenHeaders title={t("Survey / Performance")} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-          <Text style={styles.loadingText}>در حال بارگذاری...</Text>
-          <Text style={styles.loadingSubText}>لطفاً صبر کنید</Text>
+          <Text style={styles.loadingText}>{t("Loading...")}</Text>
+          <Text style={styles.loadingSubText}>{t("Please wait")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -126,12 +144,12 @@ export default function FeedbackSurveyScreen() {
   if (error) {
     return (
       <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
-        <ScreenHeaders title={"نظر سنجی / عملکرد"} />
+        <ScreenHeaders title={t("Survey / Performance")} />
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={80} color="#ff4444" />
-          <Text style={styles.errorTitle}>خطا</Text>
+          <Text style={styles.errorTitle}>{t("Error")}</Text>
           <Text style={styles.errorMessage}>{error}</Text>
-          {error.includes('وارد حساب') ? (
+          {error.includes('وارد حساب') || error.includes('log in') ? (
             <TouchableOpacity 
               style={styles.loginButton} 
               onPress={() => {
@@ -139,7 +157,7 @@ export default function FeedbackSurveyScreen() {
                 // navigation.navigate('LoginScreen');
               }}
             >
-              <Text style={styles.loginButtonText}>ورود به حساب کاربری</Text>
+              <Text style={styles.loginButtonText}>{t("Login to account")}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity 
@@ -156,11 +174,11 @@ export default function FeedbackSurveyScreen() {
                       pollAPI.getMyPoll().then((poll) => setAlreadyPoll(poll.data)).catch(() => {});
                     }
                   })
-                  .catch((e) => setError(e.message || 'خطا در ارتباط با سرور'))
+                  .catch((e) => setError(e.message || t('Error communicating with server')))
                   .finally(() => setLoading(false));
               }}
             >
-              <Text style={styles.retryButtonText}>تلاش مجدد</Text>
+              <Text style={styles.retryButtonText}>{t("Try again")}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -171,32 +189,32 @@ export default function FeedbackSurveyScreen() {
   if (!canParticipate && alreadyPoll) {
     return (
       <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
-        <ScreenHeaders title={"نظر سنجی / عملکرد"} />
+        <ScreenHeaders title={t("Survey / Performance")} />
         <ScrollView contentContainerStyle={styles.resultContainer}>
           <Ionicons name="checkmark-done-circle-outline" size={80} color={themeColor7.bgColor(1)} />
-          <Text style={styles.resultTitle}>شما قبلاً در نظرسنجی شرکت کرده‌اید</Text>
+          <Text style={styles.resultTitle}>{t("You have already participated in the survey")}</Text>
           
           <View style={styles.resultCard}>
-            <Text style={styles.resultLabel}>نتایج نظرسنجی شما:</Text>
+            <Text style={styles.resultLabel}>{t("Your survey results:")}</Text>
             
             <View style={styles.resultRow}>
-              <Text style={styles.resultItemLabel}>امتیاز اپلیکیشن:</Text>
-              <Text style={styles.resultItemValue}>{alreadyPoll.app_rate}</Text>
+              <Text style={styles.resultItemLabel}>{t("Application score:")}</Text>
+              <Text style={styles.resultItemValue}>{translateRating(alreadyPoll.app_rate)}</Text>
             </View>
             
             <View style={styles.resultRow}>
-              <Text style={styles.resultItemLabel}>امتیاز تکنسین:</Text>
-              <Text style={styles.resultItemValue}>{alreadyPoll.tech_rate}</Text>
+              <Text style={styles.resultItemLabel}>{t("Technician score:")}</Text>
+              <Text style={styles.resultItemValue}>{translateRating(alreadyPoll.tech_rate)}</Text>
             </View>
             
             <View style={styles.resultRow}>
-              <Text style={styles.resultItemLabel}>امتیاز پشتیبانی:</Text>
-              <Text style={styles.resultItemValue}>{alreadyPoll.support_rate}</Text>
+              <Text style={styles.resultItemLabel}>{t("Support score:")}</Text>
+              <Text style={styles.resultItemValue}>{translateRating(alreadyPoll.support_rate)}</Text>
             </View>
             
             {alreadyPoll.description && (
               <View style={styles.descriptionContainer}>
-                <Text style={styles.resultItemLabel}>نظر شما:</Text>
+                <Text style={styles.resultItemLabel}>{t("Your opinion:")}</Text>
                 <Text style={styles.descriptionText}>{alreadyPoll.description}</Text>
               </View>
             )}
@@ -206,44 +224,45 @@ export default function FeedbackSurveyScreen() {
     );
   }
   
+
   if (!canParticipate) {
     return (
       <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
-        <ScreenHeaders title={"نظر سنجی / عملکرد"} />
+        <ScreenHeaders title={t("Survey / Performance")} />
         <View style={styles.notAllowedContainer}>
           <Ionicons name="ban-outline" size={80} color="#ff9800" />
-          <Text style={styles.notAllowedTitle}>مجاز به شرکت نیستید</Text>
+          <Text style={styles.notAllowedTitle}>{t("You are not allowed to participate")}</Text>
           <Text style={styles.notAllowedMessage}>
-            شما قبلاً در نظرسنجی شرکت کرده‌اید یا دسترسی ندارید.
+            {t("You have already participated in the survey or do not have access.")}
           </Text>
         </View>
       </SafeAreaView>
     );
   }
-
+     
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
-      <ScreenHeaders title={"نظر سنجی / عملکرد"} />
+      <ScreenHeaders title={t("Survey / Performance")} />
       <KeyboardAvoidingView behavior="padding">
           <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.section}>
               <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                کاربر گرامی، ضمن تشکر از اعتماد شما، لطفاً میزان رضایت خود از عملکرد لوپ را انتخاب نمایید.
+                {t("Dear user, thank you for your trust, please select your satisfaction level with Loop's performance.")}
               </Text>
 
             {/* اپلیکیشن لوپ */}
             <View style={styles.categoryContainer}>
-              <Text style={styles.category}>اپلیکیشن لوپ</Text>
+              <Text style={styles.category}>{t("Loop Application")}</Text>
             </View>
             <View style={styles.rateRow}>
-              {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+              {[{ value: 'خوب', label: t('Good') }, { value: 'متوسط', label: t('Average') }, { value: 'ضعیف', label: t('Poor') }].map(({ value, label }) => (
                 <TouchableOpacity
-                  key={label}
+                  key={value}
                   style={[
                     styles.rateButton,
-                    scores.app === label && styles.activeButton,
+                    scores.app === value && styles.activeButton,
                   ]}
-                  onPress={() => setRating('app', label)}
+                  onPress={() => setRating('app', value)}
                 >
                   <Text style={styles.rateText}>{label}</Text>
                 </TouchableOpacity>
@@ -252,17 +271,17 @@ export default function FeedbackSurveyScreen() {
 
             {/* تکنسین لوپ */}
             <View style={styles.categoryContainer}>
-              <Text style={styles.category}>تکنسین لوپ</Text>
+              <Text style={styles.category}>{t("Loop Technician")}</Text>
             </View>
             <View style={styles.rateRow}>
-              {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+              {[{ value: 'خوب', label: t('Good') }, { value: 'متوسط', label: t('Average') }, { value: 'ضعیف', label: t('Poor') }].map(({ value, label }) => (
                 <TouchableOpacity
-                  key={label}
+                  key={value}
                   style={[
                     styles.rateButton,
-                    scores.technician === label && styles.activeButton,
+                    scores.technician === value && styles.activeButton,
                   ]}
-                  onPress={() => setRating('technician', label)}
+                  onPress={() => setRating('technician', value)}
                 >
                   <Text style={styles.rateText}>{label}</Text>
                 </TouchableOpacity>
@@ -271,18 +290,18 @@ export default function FeedbackSurveyScreen() {
 
             {/* پشتیبانی لوپ */}
             <View style={styles.categoryContainer}>
-              <Text style={styles.category}>پشتیبانی لوپ</Text>
+              <Text style={styles.category}>{t("Loop Support")}</Text>
             </View>
 
             <View style={styles.rateRow}>
-              {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+              {[{ value: 'خوب', label: t('Good') }, { value: 'متوسط', label: t('Average') }, { value: 'ضعیف', label: t('Poor') }].map(({ value, label }) => (
                 <TouchableOpacity
-                  key={label}
+                  key={value}
                   style={[
                     styles.rateButton,
-                    scores.support === label && styles.activeButton,
+                    scores.support === value && styles.activeButton,
                   ]}
-                  onPress={() => setRating('support', label)}
+                  onPress={() => setRating('support', value)}
                 >
                   <Text style={styles.rateText}>{label}</Text>
                 </TouchableOpacity>
@@ -290,9 +309,9 @@ export default function FeedbackSurveyScreen() {
             </View>
 
             {/* توضیح بیشتر */}
-            <Text style={styles.commentLabel}>توضیح بیشتری دارید؟ بنویسید:</Text>
+            <Text style={styles.commentLabel}>{t("Do you have more details? Write:")}</Text>
             <TextInput
-              placeholder="توضیحات..."
+              placeholder={t("Details...")}
               style={styles.commentInput}
               multiline
               value={desc}
@@ -304,7 +323,7 @@ export default function FeedbackSurveyScreen() {
 
           <View style={styles.buttonContainer}>
             <Button
-              title={submitLoading ? 'در حال ارسال...' : 'ثبت نظرسنجی'}
+              title={submitLoading ? t('Submitting...') : t('Submit Survey')}
               onPress={handleSubmit}
               disabled={submitLoading || !scores.app || !scores.technician || !scores.support}
               loading={submitLoading}
@@ -322,7 +341,7 @@ export default function FeedbackSurveyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#e0f0ff',

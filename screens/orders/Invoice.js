@@ -122,14 +122,14 @@ function Invoice({ route }) {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
                 setRefreshing(true);
-                showToastOrAlert('پرداخت با موفقیت انجام شد.');
+                showToastOrAlert(t('Payment completed successfully.'));
                 // Cleanup listener after handling
                 if (paymentSubscriptionRef.current) {
                     paymentSubscriptionRef.current.remove();
                     paymentSubscriptionRef.current = null;
                 }
             } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert('پرداخت با خطا مواجه شد.');
+                showToastOrAlert(t('Payment failed.'));
                 // Cleanup listener after handling
                 if (paymentSubscriptionRef.current) {
                     paymentSubscriptionRef.current.remove();
@@ -161,11 +161,11 @@ function Invoice({ route }) {
                 _addLinkingListener();
                 await Linking.openURL(response.data.data.payment_url);
             } else {
-                showToastOrAlert('خطا در اتصال به درگاه پرداخت');
+                showToastOrAlert(t('Error connecting to payment gateway'));
                 setLoadingGateway(false);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.data?.message || 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.data?.message || t('Error connecting to payment gateway')) : t('Network error!');
             showToastOrAlert(message);
             setLoadingGateway(false);
         } finally {
@@ -177,41 +177,41 @@ function Invoice({ route }) {
 
     return (
         <View style={NewStyles.container}>
-            <ScreenHeaders title={'پیش رسید سفارش'} />
+            <ScreenHeaders title={t('Order Invoice')} />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 10 }} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
                 <View style={{ backgroundColor: themeColor4.bgColor(1), ...NewStyles.border10, paddingBottom: 10 }}>
                     <View style={[NewStyles.seperator, { gap: 10, padding: '5%', borderBottomWidth: 0 }]}>
                         <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                             <View style={[NewStyles.row, { gap: 5 }]}>
                                 <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
-                                <Text style={NewStyles.title}>شناسه سفارش: {data?.id}</Text>
+                                <Text style={NewStyles.title}>{t('Order ID:')} {data?.id}</Text>
                             </View>
                             <Text style={NewStyles.text3}>{data?.category?.title}</Text>
                         </View>
 
-                        {renderRow('زمان ثبت سفارش', formatDateTime(data?.created_at))}
+                        {renderRow(t('Order Registration Time'), formatDateTime(data?.created_at))}
                         <View style={NewStyles.rowWrapper}>
-                            <Text style={[NewStyles.text]}>وضعیت پرداخت</Text>
+                            <Text style={[NewStyles.text]}>{t('Payment Status')}</Text>
                             <View style={[{ backgroundColor: data?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
-                                <Text style={NewStyles.text4}>{data?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
+                                <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>
                             </View>
                         </View>
 
-                        {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ تخمینی لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
-                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('هزینه اولیه ی محاسبه شده', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
-                        {(data?.extra_price > 0) && renderRow('هزینه ی قطعات', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-                        {(data?.discount_price > 0) && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
-                        {(totalPrice > totalDiscountedPrice > 0) && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0 && data?.technician_price) && renderRow('مبلغ قابل پرداخت', formatPrice(totalDiscountedPrice) + ' تومان')}
-                        {renderRow('موجودی کیف پول شما: ', formatPrice(user?.wallet ?? 0) + ' تومان')}
+                        {renderRow((Number(data?.is_fixed) == 1) ? t('Loop Fixed Amount') : t('Loop Estimated Amount'), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t('Toman') : t('Needs Review'))}
+                        {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t('Initial Calculated Cost'), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
+                        {(data?.extra_price > 0) && renderRow(t('Parts Cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
+                        {(data?.discount_price > 0) && renderRow(t('Your Discount Amount'), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
+                        {(totalPrice > totalDiscountedPrice > 0) && renderRow(t('Final Amount Without Discount'), `${formatPrice(totalPrice)}` + ' ' + t('Toman'), NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable Amount'), formatPrice(totalDiscountedPrice) + ' ' + t('Toman'))}
+                        {renderRow(t('Your Wallet Balance:'), formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
 
-                        {/* نمایش هزینه‌های اضافی */}
+                        {/* Extra Services Display */}
                         {extraServices.length > 0 && (
                             <>
                                 <View style={{ borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1), marginVertical: 15, paddingTop: 15 }}>
                                     <View style={[NewStyles.row, { gap: 5, marginBottom: 10 }]}>
                                         <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
-                                        <Text style={NewStyles.title}>هزینه‌های اضافی</Text>
+                                        <Text style={NewStyles.title}>{t('Extra Costs')}</Text>
                                     </View>
                                     {extraServices.map((item, index) => (
                                         <View key={index} style={{ marginBottom: 8 }}>
@@ -221,7 +221,7 @@ function Invoice({ route }) {
                                                     <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.title ?? item?.extra_service?.title}</Text>
                                                 </View>
                                                 <Text style={[NewStyles.text10]}>
-                                                    {formatPrice(item?.price)} تومان
+                                                    {formatPrice(item?.price)} {t('Toman')}
                                                 </Text>
                                             </View>
                                             {item?.extra_service?.des && (
@@ -232,30 +232,30 @@ function Invoice({ route }) {
                                         </View>
                                     ))}
                                     <View style={{ borderTopWidth: 1, borderTopColor: themeColor5.bgColor(1), marginTop: 10, paddingTop: 10 }}>
-                                        {renderRow('جمع هزینه‌های اضافی', `${formatPrice(extraServices.reduce((sum, item) => sum + Number(item?.price || 0), 0))} تومان`, NewStyles.title, NewStyles.title)}
+                                        {renderRow(t('Total Extra Costs'), `${formatPrice(extraServices.reduce((sum, item) => sum + Number(item?.price || 0), 0))} ${t('Toman')}`, NewStyles.title, NewStyles.title)}
                                     </View>
                                 </View>
                             </>
                         )}
 
                     </View>
-                    <Text style={NewStyles.title7}>ضمن تشکر از اعتماد شما:</Text>
-                    <Text style={NewStyles.title7}>با لوپ تا بی نهایت در کنار شما هستیم.</Text>
+                    <Text style={NewStyles.title7}>{t('Thank you for your trust:')}</Text>
+                    <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
                 </View>
             </ScrollView>
 
             {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
                 {data?.payment_status > 0 ?
                     <View style={[{ flex: 1 }, NewStyles.center]}>
-                        <Button title={'پرداخت شده'} backgroundColor={themeColor7.bgColor(1)} />
+                        <Button title={t('Paid')} backgroundColor={themeColor7.bgColor(1)} />
                     </View>
                     :
                     <>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
-                            <Button title={'پرداخت از کیف پول'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
+                            <Button title={t('Pay from Wallet')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
-                            <Button title={'پرداخت از درگاه'} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
+                            <Button title={t('Pay via Gateway')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
                         </View>
                     </>
                 }

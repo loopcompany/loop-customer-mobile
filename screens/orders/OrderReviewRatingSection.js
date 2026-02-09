@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from '../../theme/Color';
@@ -20,6 +21,7 @@ import { showToastOrAlert } from '../../helpers/Common';
 import { submitReview, checkReviewForOrder } from '../../services/ReviewApi';
 
 export default function OrderReviewRatingSection({ orderId, technicianId, orderStatus, finishedAt }) {
+  const { t } = useTranslation();
   const [scores, setScores] = useState({
     application: '',
     technician: '',
@@ -64,9 +66,9 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
 
   const convertRatingToNumber = (rating) => {
     const ratingMap = {
-      'خوب': 5,
-      'متوسط': 3,
-      'ضعیف': 1
+      'Good': 5,
+      'Average': 3,
+      'Poor': 1
     };
     return ratingMap[rating] || 3;
   };
@@ -74,7 +76,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
   const handleSubmit = async () => {
     // بررسی انتخاب همه امتیازات
     if (!scores.application || !scores.technician || !scores.support) {
-      showToastOrAlert('لطفاً همه امتیازات را انتخاب کنید');
+      showToastOrAlert(t('Please select all ratings'));
       return;
     }
 
@@ -99,13 +101,13 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
       const response = await submitReview(reviewPayload, token);
 
       if (response?.success) {
-        showToastOrAlert(response?.message || 'نظر شما با موفقیت ثبت شد');
+        showToastOrAlert(response?.message || t('Your review has been submitted successfully!'));
         setHasReview(true);
         setReviewData(response?.data?.review);
       }
     } catch (error) {
       console.error('Review submission error:', error);
-      const message = error?.response?.data?.message || 'خطا در ثبت نظر';
+      const message = error?.response?.data?.message || t('Error submitting review');
       showToastOrAlert(message);
     } finally {
       setSubmitLoading(false);
@@ -113,9 +115,9 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
   };
 
   const convertNumberToRating = (number) => {
-    if (number >= 4) return 'خوب';
-    if (number >= 2) return 'متوسط';
-    return 'ضعیف';
+    if (number >= 4) return t('Good');
+    if (number >= 2) return t('Average');
+    return t('Poor');
   };
 
   // اگر شرایط فعال شدن وجود نداشت
@@ -127,7 +129,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="small" color={themeColor1.bgColor(1)} />
-        <Text style={[NewStyles.text10, { marginTop: 10 }]}>در حال بارگذاری...</Text>
+        <Text style={[NewStyles.text10, { marginTop: 10 }]}>{t('Loading...')}</Text>
       </View>
     );
   }
@@ -139,26 +141,26 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
         <View style={styles.reviewedContainer}>
           <Ionicons name="checkmark-done-circle-outline" size={50} color={themeColor7.bgColor(1)} />
           <Text style={[NewStyles.title10, { marginTop: 10, textAlign: 'center' }]}>
-            شما قبلاً نظر خود را ثبت کرده‌اید
+            {t('You have already submitted your review')}
           </Text>
 
           <View style={styles.resultCard}>
             <View style={styles.resultRow}>
-              <Text style={NewStyles.text10}>امتیاز اپلیکیشن:</Text>
+              <Text style={NewStyles.text10}>{t('Application rating:')}</Text>
               <Text style={[NewStyles.text10, { color: themeColor0.bgColor(1) }]}>
                 {convertNumberToRating(reviewData.application_rate)}
               </Text>
             </View>
 
             <View style={styles.resultRow}>
-              <Text style={NewStyles.text10}>امتیاز تکنسین:</Text>
+              <Text style={NewStyles.text10}>{t('Technician rating:')}</Text>
               <Text style={[NewStyles.text10, { color: themeColor0.bgColor(1) }]}>
                 {convertNumberToRating(reviewData.technician_rate)}
               </Text>
             </View>
 
             <View style={styles.resultRow}>
-              <Text style={NewStyles.text10}>امتیاز پشتیبانی:</Text>
+              <Text style={NewStyles.text10}>{t('Support rating:')}</Text>
               <Text style={[NewStyles.text10, { color: themeColor0.bgColor(1) }]}>
                 {convertNumberToRating(reviewData.support_rate)}
               </Text>
@@ -166,7 +168,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
 
             {reviewData.description && (
               <View style={styles.descriptionContainer}>
-                <Text style={NewStyles.text10}>نظر شما:</Text>
+                <Text style={NewStyles.text10}>{t('Your review:')}</Text>
                 <Text style={[NewStyles.text10, { marginTop: 5, opacity: 0.8 }]}>
                   {reviewData.description}
                 </Text>
@@ -183,15 +185,15 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
     <View style={styles.container}>
       <View style={styles.section}>
         <Text style={[NewStyles.text10, { textAlign: 'center', marginBottom: 15 }]}>
-          کاربر گرامی، لطفاً نظر خود را درباره این سفارش ثبت کنید.
+          {t('Dear user, please submit your review about this order.')}
         </Text>
 
         {/* اپلیکیشن لوپ */}
         <View style={styles.categoryContainer}>
-          <Text style={NewStyles.title10}>اپلیکیشن لوپ</Text>
+          <Text style={NewStyles.title10}>{t('Loop Application')}</Text>
         </View>
         <View style={styles.rateRow}>
-          {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+          {['Good', 'Average', 'Poor'].map((label) => (
             <TouchableOpacity
               key={label}
               style={[
@@ -200,17 +202,17 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
               ]}
               onPress={() => setRating('application', label)}
             >
-              <Text style={NewStyles.text10}>{label}</Text>
+              <Text style={NewStyles.text10}>{t(label)}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* تکنسین لوپ */}
         <View style={styles.categoryContainer}>
-          <Text style={NewStyles.title10}>تکنسین لوپ</Text>
+          <Text style={NewStyles.title10}>{t('Loop Technician')}</Text>
         </View>
         <View style={styles.rateRow}>
-          {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+          {['Good', 'Average', 'Poor'].map((label) => (
             <TouchableOpacity
               key={label}
               style={[
@@ -219,17 +221,17 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
               ]}
               onPress={() => setRating('technician', label)}
             >
-              <Text style={NewStyles.text10}>{label}</Text>
+              <Text style={NewStyles.text10}>{t(label)}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* پشتیبانی لوپ */}
         <View style={styles.categoryContainer}>
-          <Text style={NewStyles.title10}>پشتیبانی لوپ</Text>
+          <Text style={NewStyles.title10}>{t('Loop Support')}</Text>
         </View>
         <View style={styles.rateRow}>
-          {['خوب', 'متوسط', 'ضعیف'].map((label) => (
+          {['Good', 'Average', 'Poor'].map((label) => (
             <TouchableOpacity
               key={label}
               style={[
@@ -238,17 +240,17 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
               ]}
               onPress={() => setRating('support', label)}
             >
-              <Text style={NewStyles.text10}>{label}</Text>
+              <Text style={NewStyles.text10}>{t(label)}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* توضیح بیشتر */}
         <Text style={[NewStyles.text10, { marginTop: 10, marginBottom: 6 }]}>
-          توضیح بیشتری دارید؟ بنویسید:
+          {t('Have more details? Write them:')}
         </Text>
         <TextInput
-          placeholder="توضیحات (اختیاری)..."
+          placeholder={t('Description (optional)...')}
           style={styles.commentInput}
           multiline
           value={description}
@@ -259,7 +261,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
 
       <View style={{ marginTop: 15, width:'100%', alignItems:'center' }}>
         <Button
-          title={submitLoading ? 'در حال ارسال...' : 'ثبت نظر'}
+          title={submitLoading ? t('Submitting...') : t('Submit Review')}
           onPress={handleSubmit}
           disabled={submitLoading || !scores.application || !scores.technician || !scores.support}
           loading={submitLoading}

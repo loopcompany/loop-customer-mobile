@@ -79,7 +79,7 @@ export default function Club({ navigation }) {
       console.log('Error fetching prizes:', error);
       // فقط اگر خطای واقعی باشه پیام بده
       if (error.response && error.response.status !== 401) {
-        showToastOrAlert('خطا در دریافت اطلاعات گردونه');
+        showToastOrAlert(t('Error fetching wheel information'));
       }
     }
   };
@@ -87,7 +87,7 @@ export default function Club({ navigation }) {
   // مدیریت چرخش گردونه
   const handleSpinWheel = async () => {
     if (!canSpin) {
-      showToastOrAlert('شما این هفته قبلاً شرکت کرده‌اید. لطفاً هفته آینده مجدداً تلاش کنید.');
+      showToastOrAlert(t('You have already participated this week. Please try again next week.'));
       return;
     }
 
@@ -124,12 +124,12 @@ export default function Club({ navigation }) {
             setNextPlayDate(error.response.data.data.can_play_again_after);
           }
         } else if (errorCode === 'NO_ACTIVE_ACTIONS') {
-          showToastOrAlert('در حال حاضر هیچ پاداشی موجود نیست.');
+          showToastOrAlert(t('No rewards available at the moment.'));
         } else {
-          showToastOrAlert(error.response.data.message || 'خطا در شرکت در گردونه');
+          showToastOrAlert(error.response.data.message || t('Error participating in the wheel'));
         }
       } else {
-        showToastOrAlert('خطای شبکه! لطفاً اتصال اینترنت خود را بررسی کنید.');
+        showToastOrAlert(t('Network error! Please check your internet connection.'));
       }
     }
   };
@@ -137,7 +137,7 @@ export default function Club({ navigation }) {
   // باز کردن مودال گردونه
   const handleOpenWheel = async () => {
     if (!token) {
-      showToastOrAlert('لطفاً ابتدا وارد شوید');
+      showToastOrAlert(t('Please log in first'));
       return;
     }
 
@@ -172,7 +172,7 @@ export default function Club({ navigation }) {
         axios.get(`${uri}/discounts/list`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
       ]);
       setOffers(response.data);
-      const allCategory = { id: '0', title: 'همه' };
+      const allCategory = { id: '0', title: t('All') };
       const updatedCategories = [allCategory, ...response1.data];
       setCategories(updatedCategories);
       setData(response2.data);
@@ -192,15 +192,15 @@ export default function Club({ navigation }) {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={"طرح های تشویقی"} />
+      <ScreenHeaders title={t("Promotional Plans")} />
       <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
         <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
           <View style={NewStyles.rowWrapper}>
             <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('GemTransactions')}>
-              <Text style={NewStyles.text}>تاریخچه گردونه شما</Text>
+              <Text style={NewStyles.text}>{t('Your Wheel History')}</Text>
             </Pressable>
             <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('UserDiscounts')}>
-              <Text style={NewStyles.text}>جوایز دریافت شده</Text>
+              <Text style={NewStyles.text}>{t('Received Prizes')}</Text>
             </Pressable >
           </View>
         </View>
@@ -219,17 +219,17 @@ export default function Club({ navigation }) {
           onPress={handleOpenWheel}
         >
           <Ionicons name="gift" size={50} color={themeColor1.bgColor(1)} />
-          <Text style={[NewStyles.title10, { marginTop: 10 }]}>گردونه شانس</Text>
-          <Text style={[NewStyles.text10, { opacity: 0.7 }]}>برای دریافت امتیاز بچرخان!</Text>
+          <Text style={[NewStyles.title10, { marginTop: 10 }]}>{t('Lucky Wheel')}</Text>
+          <Text style={[NewStyles.text10, { opacity: 0.7 }]}>{t('Spin to earn points!')}</Text>
           {userGems > 0 && (
             <Text style={[NewStyles.title, { marginTop: 5, }]}>
-              امتیاز شما: {userGems} 💎
+              {t('Your Points:')} {userGems} 💎
             </Text>
           )}
         </Pressable>
 
         <View style={{ paddingHorizontal: '5%', alignItems: 'flex-end' }}>
-          <Text style={NewStyles.title10}>پیشنهادهای این هفته</Text>
+          <Text style={NewStyles.title10}>{t("This Week's Offers")}</Text>
         </View>
         <View>
           <FlatList
@@ -241,7 +241,7 @@ export default function Club({ navigation }) {
           />
         </View>
         <View style={[NewStyles.strip, NewStyles.center, { backgroundColor: themeColor1.bgColor(1) }]}>
-          <Text style={NewStyles.title}>طرح های تشویقی</Text>
+          <Text style={NewStyles.title}>{t('Promotional Plans')}</Text>
         </View>
         <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
         <FlatList
@@ -276,7 +276,7 @@ export default function Club({ navigation }) {
               <Pressable onPress={() => setShowWheelModal(false)}>
                 <Ionicons name="close" size={30} color="#333" />
               </Pressable>
-              <Text style={NewStyles.title10}>گردونه شانس هفتگی 🎰</Text>
+              <Text style={NewStyles.title10}>{t('Weekly Lucky Wheel 🎰')}</Text>
               <View style={{ width: 30 }} />
             </View>
 
@@ -284,7 +284,7 @@ export default function Club({ navigation }) {
               {loadingWheel ? (
                 <View style={{ paddingVertical: 100, alignItems: 'center' }}>
                   <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-                  <Text style={[NewStyles.text10, { marginTop: 15 }]}>در حال بارگذاری...</Text>
+                  <Text style={[NewStyles.text10, { marginTop: 15 }]}>{t('Loading...')}</Text>
                 </View>
               ) : prizes.length > 0 ? (
                 <>
@@ -304,10 +304,10 @@ export default function Club({ navigation }) {
                       alignItems: 'center'
                     }}>
                       <Text style={[NewStyles.text10, { textAlign: 'center', color: '#856404' }]}>
-                        شما این هفته شرکت کرده‌اید! 🎉
+                        {t('You have participated this week! 🎉')}
                       </Text>
                       <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: '#856404' }]}>
-                        شرکت بعدی: {moment(nextPlayDate).format('jYYYY/jMM/jDD')}
+                        {t('Next participation:')} {moment(nextPlayDate).format('jYYYY/jMM/jDD')}
                       </Text>
                     </View>
                   )}
@@ -321,7 +321,7 @@ export default function Club({ navigation }) {
                       alignItems: 'center'
                     }}>
                       <Text style={[NewStyles.title10, { color: themeColor1.bgColor(1) }]}>
-                        مجموع امتیازات شما: {userGems} 💎
+                        {t('Your Total Points:')} {userGems} 💎
                       </Text>
                     </View>
                   )}
@@ -329,7 +329,7 @@ export default function Club({ navigation }) {
               ) : (
                 <View style={{ paddingVertical: 50, alignItems: 'center' }}>
                   <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                    در حال حاضر هیچ جایزه‌ای موجود نیست
+                    {t('No prizes available at the moment')}
                   </Text>
                 </View>
               )}

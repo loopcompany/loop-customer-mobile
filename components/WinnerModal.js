@@ -9,12 +9,14 @@ import {
     Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { themeColor1, themeColor7 } from '../theme/Color';
 import NewStyles from '../styles/NewStyles';
 
 const { width } = Dimensions.get('window');
 
 const WinnerModal = ({ visible, onClose, prize, totalGems }) => {
+    const { t } = useTranslation();
     const scaleAnim = useRef(new Animated.Value(0)).current;
     const rotateAnim = useRef(new Animated.Value(0)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -109,19 +111,19 @@ const WinnerModal = ({ visible, onClose, prize, totalGems }) => {
 
                     {/* محتوای مدال */}
                     <View style={styles.content}>
-                        <Text style={styles.title}>🎉 تبریک! 🎉</Text>
+                        <Text style={styles.title}>{t('🎉 Congratulations! 🎉')}</Text>
 
-                        <Text style={styles.subtitle}>شما برنده شدید</Text>
+                        <Text style={styles.subtitle}>{t('You won!')}</Text>
 
                         <View style={styles.gemContainer}>
                             <Text style={styles.gemAmount}>{prize.gems}</Text>
-                            <Text style={styles.gemLabel}>امتیاز 💎</Text>
+                            <Text style={styles.gemLabel}>{t('Points')} 💎</Text>
                         </View>
 
                         <View style={styles.divider} />
 
                         <View style={styles.totalContainer}>
-                            <Text style={styles.totalLabel}>مجموع امتیازات شما:</Text>
+                            <Text style={styles.totalLabel}>{t('Your Total Points:')}</Text>
                             <Text style={styles.totalAmount}>{totalGems} 💎</Text>
                         </View>
 
@@ -130,7 +132,7 @@ const WinnerModal = ({ visible, onClose, prize, totalGems }) => {
                             style={styles.button}
                             onPress={handleClose}
                         >
-                            <Text style={styles.buttonText}>عالی!</Text>
+                            <Text style={styles.buttonText}>{t('Great!')}</Text>
                         </Pressable>
                     </View>
 

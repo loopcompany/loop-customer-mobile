@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../components/ScreenHeaders';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '../theme/Color';
@@ -24,6 +25,7 @@ import Button from '../components/Button';
 import { useSelector } from 'react-redux';
 
 export default function MessageScreen({ navigation }) {
+  const { t } = useTranslation();
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,8 +51,8 @@ export default function MessageScreen({ navigation }) {
         setUnreadCount(unreadAdminMessages);
       }
     } catch (error) {
-      console.error('خطا در دریافت پیام‌ها:', error);
-      Alert.alert('خطا', 'خطا در دریافت پیام‌ها');
+      console.error(t('Error retrieving messages'), error);
+      Alert.alert(t('Error'), t('Error retrieving messages'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -71,12 +73,12 @@ export default function MessageScreen({ navigation }) {
   // ارسال پیام جدید
   const handleSendMessage = async () => {
     if (!messageText.trim()) {
-      Alert.alert('هشدار', 'لطفاً متن پیام را وارد کنید');
+      Alert.alert(t('Warning'), t('Please enter the message text'));
       return;
     }
 
     if (messageText.length > 5000) {
-      Alert.alert('هشدار', 'متن پیام نباید بیشتر از 5000 کاراکتر باشد');
+      Alert.alert(t('Warning'), t('Message text should not exceed 5000 characters'));
       return;
     }
 
@@ -85,13 +87,13 @@ export default function MessageScreen({ navigation }) {
       const response = await sendTicketMessage(messageText);
 
       if (response.success) {
-        Alert.alert('موفق', 'پیام شما با موفقیت ارسال شد');
+        Alert.alert(t('Successful'), t('Your message was sent successfully'));
         setMessageText('');
         // به‌روزرسانی لیست پیام‌ها
         await fetchMessages();
       }
     } catch (error) {
-      Alert.alert('خطا', error.message || 'خطا در ارسال پیام');
+      Alert.alert(t('Error'), error.message || t('Error sending message'));
     } finally {
       setSending(false);
     }
@@ -109,7 +111,7 @@ export default function MessageScreen({ navigation }) {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title={'پیام'}
+        title={t('Message')}
       />
 
       {loading ? (
@@ -127,7 +129,7 @@ export default function MessageScreen({ navigation }) {
           {/* دکمه پیام های دریافتی از اپ */}
           <View style={{width:'100%', alignItems:'center'}}>
             <Button
-              title={'تماس بگیرید'}
+              title={t('Call')}
               onPress={() => {
                 Linking.openURL(`${contact?.link}`);
               }}
@@ -136,12 +138,12 @@ export default function MessageScreen({ navigation }) {
           </View>
           {/* باکس متن پیام */}
           <View style={styles.messageBox}>
-            <Text style={styles.sectionTitle}>متن پیام جدید</Text>
+            <Text style={styles.sectionTitle}>{t('New message text')}</Text>
             <TextInput
               style={styles.messageInput}
               multiline={true}
               numberOfLines={4}
-              placeholder="پیام خود را اینجا وارد کنید..."
+              placeholder={t('Enter your message here...')}
               placeholderTextColor="#999"
               value={messageText}
               onChangeText={setMessageText}
@@ -168,7 +170,7 @@ export default function MessageScreen({ navigation }) {
             ) : (
               <View style={styles.buttonContent}>
                 <Ionicons name="send" size={20} color="#fff" />
-                <Text style={styles.buttonText}>ارسال پیام به لوپ</Text>
+                <Text style={styles.buttonText}>{t('Send message to Loop')}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -177,7 +179,7 @@ export default function MessageScreen({ navigation }) {
           <View style={styles.infoBox}>
             <Ionicons name="information-circle" size={20} color={themeColor7.bgColor(0.7)} />
             <Text style={styles.infoText}>
-              پیام های شما به تیم پشتیبانی لوپ ارسال می‌شود و در اسرع وقت پاسخ داده خواهد شد.
+              {t('Your messages will be sent to Loop support team and will be answered as soon as possible.')}
             </Text>
           </View>
 
@@ -192,7 +194,7 @@ export default function MessageScreen({ navigation }) {
             }}
           >
             <View style={styles.buttonContent}>
-              <Text style={styles.buttonText}>پیام ها</Text>
+              <Text style={styles.buttonText}>{t('Messages')}</Text>
               {unreadCount > 0 && (
                 <View style={styles.unreadBadgeButton}>
                   <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
@@ -212,7 +214,7 @@ export default function MessageScreen({ navigation }) {
               {messages.length === 0 ? (
                 <View style={styles.emptyMessages}>
                   <Ionicons name="chatbubbles-outline" size={50} color={themeColor10.bgColor(0.3)} />
-                  <Text style={styles.emptyText}>هنوز پیامی دریافت نشده است</Text>
+                  <Text style={styles.emptyText}>{t('No messages received yet')}</Text>
                 </View>
               ) : (
                 messages.map((msg) => (
@@ -252,7 +254,7 @@ export default function MessageScreen({ navigation }) {
                     <Text style={styles.messageContent}>{msg.message}</Text>
                     {!msg.is_read && !msg.is_mine && (
                       <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadText}>جدید</Text>
+                        <Text style={styles.unreadText}>{t('New')}</Text>
                       </View>
                     )}
                   </View>

@@ -1,19 +1,21 @@
 import { View, Text, Pressable, Image, StyleSheet, Platform } from 'react-native';
 import React from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles, { deviceWidth } from '../../styles/NewStyles';
 import { imageUri } from '../../services/URL';
 import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
 
 export default function DiscountItem({ item, navigation }) {
+    const { t } = useTranslation();
     return (
         <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item.id })}>
             <View style={[styles.discountWrapper, NewStyles.rowWrapper]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}> 
                     <Text style={NewStyles.text10}>{item?.title}</Text>
-                    <Text style={NewStyles.text}>{item?.gems} امتیاز مورد نیاز</Text>
+                    <Text style={NewStyles.text}>{item?.gems} {t('points required')}</Text>
                 </View>
             </View> 
             <View style={NewStyles.rowWrapper}>
@@ -22,9 +24,9 @@ export default function DiscountItem({ item, navigation }) {
                 {/* <View style={[styles.punch, NewStyles.border100]} /> */}
             </View>
             <View style={[NewStyles.rowWrapper, { width: '100%', paddingHorizontal: '5%' }]}>
-                <Text style={NewStyles.text3}>{item?.discount_percent} درصد تخفیف</Text>
+                <Text style={NewStyles.text3}>{item?.discount_percent} {t('percent discount')}</Text>
                 <View style={NewStyles.row}>
-                    <Text style={NewStyles.text}>اطلاعات بیشتر</Text>
+                    <Text style={NewStyles.text}>{t('More info')}</Text>
                     <Ionicons name="chevron-back" size={15} color={themeColor0.bgColor(1)} />
                 </View>
             </View>

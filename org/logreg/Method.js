@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -13,6 +14,7 @@ import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
 import CustomStatusBar from "../../components/CustomStatusBar";
 
 const Method = ({ navigation }) => {
+  const { t } = useTranslation();
   const handleOrganizationalLogin = () => {
     navigation.navigate("Login");
   };
@@ -26,7 +28,7 @@ const Method = ({ navigation }) => {
     <View style={[NewStyles.container, { flex: 1 }]}>
       <CustomStatusBar />
       <ScreenHeaders
-        title="سازمانی / دولتی"
+        title={t("Organization / Government")}
       />
 
       {/* Background with image */}
@@ -65,7 +67,7 @@ const Method = ({ navigation }) => {
                 lineHeight: 18,
               }}
             >
-              قوانین و مقررات سامانه در پنل سازمانی / شرکتی
+              {t("System terms and conditions in the organization / company panel")}
             </Text>
           </View>
         </View>
@@ -117,8 +119,7 @@ const Method = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                {" "}
-                انتخاب جامع
+                {t("Comprehensive selection")}
               </Text>
               {/* Arrow down */}
               <View
@@ -174,7 +175,7 @@ const Method = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                انتخاب سیستماتیک
+                {t("Systematic selection")}
               </Text>
               {/* Arrow down */}
               <View
@@ -220,7 +221,7 @@ const Method = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                تامین قطعات/ کالا
+                {t("Supply parts / goods")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -265,7 +266,7 @@ const Method = ({ navigation }) => {
                 textAlign: "center",
               }}
             >
-              راهنمای انتخاب جامع
+              {t("Comprehensive selection guide")}
             </Text>
             {/* Red arrow pointing down */}
             <View
@@ -312,7 +313,7 @@ const Method = ({ navigation }) => {
                 textAlign: "center",
               }}
             >
-              راهنمای انتخاب سیستماتیک
+              {t("Systematic selection guide")}
             </Text>
             {/* Red arrow pointing down */}
             <View

@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useTranslation } from 'react-i18next'
 
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
@@ -12,6 +13,7 @@ import ConfirmationModal from '../../components/ConfirmationModal'
 import Button from '../../components/Button'
 
 const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
+  const { t } = useTranslation()
   const token = useSelector((state) => state?.auth?.token)
   const [loadingAccept, setLoadingAccept] = useState(false)
   const [loadingCancel, setLoadingCancel] = useState(false)
@@ -34,12 +36,12 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
       )
 
       if (response.status == 200) {
-        showToastOrAlert(response?.data?.message || 'تایید سفارش با موفقیت انجام شد')
+        showToastOrAlert(response?.data?.message || t('Order confirmed successfully'))
         // بروزرسانی داده‌ها
         if (onUpdate) onUpdate()
       }
     } catch (error) {
-      const message = error?.response?.data?.message || 'خطا در تایید سفارش'
+      const message = error?.response?.data?.message || t('Error confirming order')
       showToastOrAlert(message)
     } finally {
       setLoadingAccept(false)
@@ -62,12 +64,12 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
       )
 
       if (response.status == 200) {
-        showToastOrAlert(response?.data?.message || 'سفارش با موفقیت لغو شد')
+        showToastOrAlert(response?.data?.message || t('Order canceled successfully'))
         // بروزرسانی داده‌ها
         if (onUpdate) onUpdate()
       }
     } catch (error) {
-      const message = error?.response?.data?.message || 'خطا در لغو سفارش'
+      const message = error?.response?.data?.message || t('Error canceling order')
       showToastOrAlert(message)
     } finally {
       setLoadingCancel(false)
@@ -89,7 +91,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
       {/* توضیحات */}
       <View style={styles.noticeBox}>
         <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-          کاربر گرامی، توضیحات شما در حال بررسی توسط کارشناس مربوطه می باشد. از صبر و شکیبایی شما سپاس گزاریم
+          {t('Dear user, your request is being reviewed by our expert. Thank you for your patience.')}
         </Text>
       </View>
 
@@ -102,7 +104,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           <View style={{ gap: 5 }}>
             <View style={[NewStyles.row, { gap: 5 }]}>
               <Ionicons name="create-outline" size={20} color={themeColor0.bgColor(1)} />
-              <Text style={NewStyles.title}>توضیحات کارشناس لوپ</Text>
+              <Text style={NewStyles.title}>{t('Loop expert comments')}</Text>
             </View>
             <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
               <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -113,20 +115,20 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
 
         {/* تاریخ و ساعت مراجعه */}
         {renderRow(
-          'زمان مراجعه تکنسین',
+          t('Technician Visit Time'),
           data?.is_urgent > 0
-            ? 'درخواست فوری'
-            : formatDate(data?.date) + ' ساعت ' + data?.time?.split(':')?.slice(0, 2)?.join(':'),
+            ? t('Urgent Request')
+            : formatDate(data?.date) + t(' at ') + data?.time?.split(':')?.slice(0, 2)?.join(':'),
           NewStyles.text,
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
       <View style={[{ width: '100%', gap: 10, maxWidth: 900 }, NewStyles.row]}>
-        <View style={[{ flex: 1 }, NewStyles.center]}>
-          <Button title={'پیش رسید'} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+        <View style={[{ flex: 1, }, NewStyles.center]}>
+          <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
         </View>
         <View style={[{ flex: 1 }, NewStyles.center]}>
-          <Button title={'ذخیره فاکتور'} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+          <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
         </View>
       </View>
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
@@ -135,17 +137,17 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           <View style={[styles.lockedBox, NewStyles.center, NewStyles.border10]}>
             <Ionicons name="checkmark-circle" size={40} color={themeColor0.bgColor(1)} />
             <Text style={[NewStyles.title, { color: themeColor0.bgColor(1) }]}>
-              سفارش تایید شده
+              {t('Order confirmed')}
             </Text>
             <Text style={[NewStyles.text10]}>
-              شما این سفارش را در تاریخ {formatDate(data?.user_initial_accept)} تایید کرده‌اید
+              {t('You confirmed this order on {{date}}', { date: formatDate(data?.user_initial_accept) })}
             </Text>
           </View>
         ) : (
           <View style={[NewStyles.row, { width: '100%', gap: 10, marginTop: 15, maxWidth: 900, }]}>
             <View style={[{ flex: 1 }, NewStyles.center]}>
               <Button
-                title="تایید سفارش"
+                title={t('Confirm Order')}
                 onPress={() => setAcceptModal(true)}
                 loading={loadingAccept}
                 textStyle={[{ color: themeColor4.bgColor(1) }]}
@@ -154,7 +156,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
             </View>
             <View style={[{ flex: 1 }, NewStyles.center]}>
               <Button
-                title="لغو سفارش"
+                title={t('Cancel Order')}
                 onPress={() => setCancelModal(true)}
                 loading={loadingCancel}
                 textStyle={{ color: themeColor4.bgColor(1) }}
@@ -167,16 +169,16 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
 
       {/* Modals */}
       <ConfirmationModal
-        title="تایید سفارش"
-        message="آیا از تایید این سفارش اطمینان دارید؟"
+        title={t('Confirm Order')}
+        message={t('Are you sure you want to confirm this order?')}
         action={handleAcceptOrder}
         confirmationModal={acceptModal}
         setConfirmationModal={setAcceptModal}
       />
 
       <ConfirmationModal
-        title="لغو سفارش"
-        message="آیا از لغو سفارش خود اطمینان دارید؟"
+        title={t('Cancel Order')}
+        message={t('Are you sure you want to cancel your order?')}
         action={handleCancelOrder}
         confirmationModal={cancelModal}
         setConfirmationModal={setCancelModal}

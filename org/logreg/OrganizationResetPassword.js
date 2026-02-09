@@ -15,8 +15,10 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
+import { useTranslation } from 'react-i18next';
 
 const OrganizationResetPassword = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { organizationCode, phone } = route.params;
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -82,21 +84,21 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     // Validate code
     const verificationCode = code.join('');
     if (verificationCode.length !== 6) {
-      newErrors.code = 'لطفا کد 6 رقمی را وارد کنید';
+      newErrors.code = t('Please enter the complete 6-digit code');
     }
 
     // Validate new password
     if (!newPassword) {
-      newErrors.newPassword = 'رمز عبور جدید الزامی است';
+      newErrors.newPassword = t('Password is required');
     } else if (newPassword.length < 8) {
-      newErrors.newPassword = 'رمز عبور باید حداقل 8 کاراکتر باشد';
+      newErrors.newPassword = t('Password must be at least 8 characters');
     }
 
     // Validate confirm password
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'تکرار رمز عبور الزامی است';
+      newErrors.confirmPassword = t('Please enter Password Confirmation.');
     } else if (newPassword !== confirmPassword) {
-      newErrors.confirmPassword = 'رمز عبور و تکرار آن یکسان نیستند';
+      newErrors.confirmPassword = t('Password and repeat password do not match.');
     }
 
     setErrors(newErrors);
@@ -142,11 +144,11 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
       if (response.data.status === 'success') {
         showAlert(
-          'موفق',
-          'رمز عبور با موفقیت تغییر یافت. اکنون می‌توانید با رمز جدید وارد شوید.',
+          t('success'),
+          t('Your password has been successfully changed. Please log in with the new information.'),
           [
             {
-              text: 'ورود',
+              text: t('Login'),
               onPress: () => {
                 navigation.navigate('Login');
               },
@@ -157,24 +159,24 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     } catch (error) {
       console.error('❌ Reset password error:', error);
 
-      let errorMessage = 'خطا در تغییر رمز عبور';
+      let errorMessage = t('Error changing password');
 
       if (error.response) {
         console.error('Response error:', error.response.data);
-        errorMessage = error.response.data.message || 'کد تایید اشتباه است یا منقضی شده';
+        errorMessage = error.response.data.message || t('The verification code is incorrect or expired.');
 
         if (error.response.data.errors) {
           setErrors(error.response.data.errors);
         }
       } else if (error.request) {
         console.error('Request error:', error.request);
-        errorMessage = 'سرور پاسخگو نیست. لطفا اتصال اینترنت را بررسی کنید.';
+        errorMessage = t('Error connecting to server. Please check your internet connection');
       } else {
         console.error('Unknown error:', error.message);
-        errorMessage = error.message || 'خطای نامشخص رخ داد';
+        errorMessage = error.message || t('An unexpected error occurred!');
       }
 
-      showAlert('خطا', errorMessage);
+      showAlert(t('Error'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -182,7 +184,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
   const handleResendCode = async () => {
     if (timer > 0) {
-      showAlert('توجه', `لطفا ${formatTime(timer)} صبر کنید`);
+      showAlert(t('Notice'), `${t('Please wait')} ${formatTime(timer)}`);
       return;
     }
 
@@ -205,14 +207,14 @@ const OrganizationResetPassword = ({ route, navigation }) => {
       );
 
       if (response.data.status === 'success') {
-        showAlert('موفق', 'کد تایید مجددا ارسال شد');
+        showAlert(t('success'), t('Verification code resent'));
         setTimer(120);
         setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
       console.error('❌ Resend code error:', error);
-      showAlert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
+      showAlert(t('Error'), error.response?.data?.message || t('Error resending code'));
     } finally {
       setResendLoading(false);
     }
@@ -225,7 +227,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title="تغییر رمز عبور" 
+        title={t('Change Password')} 
       />
 
       <ScrollView
@@ -255,7 +257,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 textAlign: 'center',
               }}
             >
-              کد بازیابی ارسال شد
+              {t('Recovery code sent')}
             </Text>
             <Text
               style={{
@@ -265,7 +267,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 textAlign: 'center',
               }}
             >
-              کد 6 رقمی ارسال شده به {phone} را وارد کنید
+              {t('Enter the 6-digit code sent to {phone}')}
             </Text>
           </View>
 
@@ -288,7 +290,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 marginBottom: 8,
               }}
             >
-              کد سازمانی:
+              {t('Organization code')}:
             </Text>
             <Text
               style={{
@@ -312,7 +314,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
               textAlign: 'right',
             }}
           >
-            کد تایید *
+            {t('Verification code')} *
           </Text>
           <View
             style={{
@@ -373,7 +375,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 marginBottom: 20,
               }}
             >
-              زمان باقیمانده: {formatTime(timer)}
+              {t('Resend code in')}: {formatTime(timer)}
             </Text>
           )}
 
@@ -388,7 +390,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 textAlign: 'right',
               }}
             >
-              رمز عبور جدید *
+              {t('New Password')} *
             </Text>
             <View style={{ position: 'relative' }}>
               <TextInput
@@ -399,7 +401,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                     setErrors({ ...errors, newPassword: null });
                   }
                 }}
-                placeholder="حداقل 8 کاراکتر"
+                placeholder={t('Password must be at least 8 characters')}
                 secureTextEntry={!showPassword}
                 style={{
                   backgroundColor: '#f5f5f5',
@@ -457,7 +459,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 textAlign: 'right',
               }}
             >
-              تکرار رمز عبور جدید *
+              {t('Confirm Password')} *
             </Text>
             <View style={{ position: 'relative' }}>
               <TextInput
@@ -468,7 +470,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                     setErrors({ ...errors, confirmPassword: null });
                   }
                 }}
-                placeholder="تکرار رمز عبور"
+                placeholder={t('Confirm Password')}
                 secureTextEntry={!showConfirmPassword}
                 style={{
                   backgroundColor: '#f5f5f5',
@@ -539,7 +541,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                   fontFamily: 'VazirBold',
                 }}
               >
-                تغییر رمز عبور
+                {t('Change Password')}
               </Text>
             )}
           </TouchableOpacity>
@@ -569,7 +571,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                   fontFamily: 'VazirBold',
                 }}
               >
-                ارسال مجدد کد
+                {t('Resend Code')}
               </Text>
             )}
           </TouchableOpacity>

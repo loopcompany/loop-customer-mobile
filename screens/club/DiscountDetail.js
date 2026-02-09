@@ -1,10 +1,9 @@
 import { View, Text, ScrollView, StyleSheet, RefreshControl, Platform } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-
 import { cleanText, formatPrice, handleError, showToastOrAlert } from '../../helpers/Common';
 import { imageUri, uri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles';
@@ -15,9 +14,14 @@ import DiscountModal from './DiscountModal';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function DiscountDetail({ route, navigation }) {
-    const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const discountId = route?.params?.discountId;
     const dispatch = useDispatch();
 
@@ -81,24 +85,24 @@ export default function DiscountDetail({ route, navigation }) {
                     switch (status) {
                         case 400:
                             // کاربر امتیاز کافی ندارد
-                            errorMessage = 'امتیاز کافی برای دریافت این تخفیف ندارید';
+                            errorMessage = t('You don\'t have enough points to claim this discount');
                             break;
                         case 403:
                             // کاربر مجوز دریافت ندارد (قبلاً دریافت کرده یا VIP نیست)
-                            errorMessage = 'شما مجاز به دریافت این تخفیف نیستید';
+                            errorMessage = t('You are not authorized to claim this discount');
                             break;
                         case 404:
                             // تخفیف یافت نشد
-                            errorMessage = 'تخفیف مورد نظر یافت نشد';
+                            errorMessage = t('Discount not found');
                             break;
                         case 422:
                             // داده‌های ارسالی نامعتبر
-                            errorMessage = 'اطلاعات ارسالی نامعتبر است';
+                            errorMessage = t('Invalid data submitted');
                             break;
                         default:
                             if (status >= 500) {
                                 // خطای سرور
-                                errorMessage = 'خطای سرور. لطفاً بعداً تلاش کنید';
+                                errorMessage = t('Server error. Please try again later');
                             }
                             break;
                     }
@@ -127,7 +131,7 @@ export default function DiscountDetail({ route, navigation }) {
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
-            <ScreenHeaders title="جزئیات تخفیف" />
+            <ScreenHeaders title={t("Discount Details")} />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
                 <View style={Platform.OS === 'web' ? styles.imageContainer : {}}>
                     <Image style={{ maxWidth: 600, height: 250, width: '100%',resizeMode:"contain" }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
@@ -137,22 +141,22 @@ export default function DiscountDetail({ route, navigation }) {
                         <Ionicons name='ticket-outline' size={24} color={themeColor0.bgColor(1)} />
                         <Text style={NewStyles.title}>{data?.title}</Text>
                     </View>
-                    <Text style={NewStyles.text}>{data?.discount_percent} درصد تخفیف تا سقف {formatPrice(data?.max_price)} تومان</Text>
+                    <Text style={NewStyles.text}>{data?.discount_percent} {t("percent discount up to")} {formatPrice(data?.max_price)} {t("Tomans")}</Text>
                     <View style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor3.bgColor(1) }} />
                     <Text style={NewStyles.text10}>{cleanText(data?.des)}</Text>
                     <Text style={NewStyles.text10}>{cleanText(data?.long_des)}</Text>
-                    <Text style={NewStyles.text10}>📅  اعتبار کد: تا {data?.expire} روز</Text>
-                    <Text style={NewStyles.text10}>🟡  برای {data?.count} بار استفاده</Text>
-                    <Text style={NewStyles.text3}>کدهای تشویقی خود را در بخش کدهای دریافتی ببینید.</Text>
+                    <Text style={NewStyles.text10}>📅  {t("Code validity: up to")} {data?.expire} {t("days")}</Text>
+                    <Text style={NewStyles.text10}>🟡  {t("For")} {data?.count} {t("uses")}</Text>
+                    <Text style={NewStyles.text3}>{t("View your promotional codes in the received codes section.")}</Text>
                 </View>
             </ScrollView>
 
             <View style={[NewStyles.row, NewStyles.nav]}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
-                    <Text style={NewStyles.title}>{data?.gems} <Text style={NewStyles.title}>امتیاز مورد نیاز</Text></Text>
+                    <Text style={NewStyles.title}>{data?.gems} <Text style={NewStyles.title}>{t("Required Points")}</Text></Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                    <Button title={'دریافت تخفیف'} loading={loading} onPress={() => getDiscount()} textStyle={[NewStyles.title1, { fontSize: 14 }]}/>
+                    <Button title={t('Claim Discount')} loading={loading} onPress={() => getDiscount()} textStyle={[NewStyles.title1, { fontSize: 14 }]}/>
                 </View>
             </View>
 
@@ -161,7 +165,7 @@ export default function DiscountDetail({ route, navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     contentContainerStyle: {
         gap: 10,
         paddingTop: 10,

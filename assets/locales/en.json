@@ -732,5 +732,19 @@
   "Confirm End Date": "Confirm End Date",
   "Order Status:": "Order Status:",
   "Clear": "Clear",
-  "Apply Filter": "Apply Filter"
+  "Apply Filter": "Apply Filter",
+  "You don't have enough points to claim this discount": "You don't have enough points to claim this discount",
+  "You are not authorized to claim this discount": "You are not authorized to claim this discount",
+  "Discount not found": "Discount not found",
+  "Invalid data submitted": "Invalid data submitted",
+  "Server error. Please try again later": "Server error. Please try again later",
+  "Discount Details": "Discount Details",
+  "percent discount up to": "percent discount up to",
+  "Code validity: up to": "Code validity: up to",
+  "days": "days",
+  "For": "For",
+  "uses": "uses",
+  "View your promotional codes in the received codes section.": "View your promotional codes in the received codes section.",
+  "Required Points": "Required Points",
+  "Claim Discount": "Claim Discount"
 }

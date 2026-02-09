@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useMemo } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from "../components/ScreenHeaders";
 import NewStyles from "../styles/NewStyles";
 import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../theme/Color";
@@ -15,8 +16,13 @@ import { notesAPI } from "../services/Api";
 import { showToastOrAlert, showAlert } from "../helpers/Common";
 import Button from "../components/Button";
 import moment from "moment-jalaali";
-
+import { createStyles } from '../styles/NewStyles';
 export default function NotesScreen({ route, navigation }) {
+const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +50,7 @@ export default function NotesScreen({ route, navigation }) {
     } catch (error) {
       console.error('Error fetching notes:', error);
       if (notes.length > 0) {
-        showToastOrAlert('خطا در دریافت یادداشت‌ها');
+        showToastOrAlert(t('Error fetching notes'));
       }
     } finally {
       setLoading(false);
@@ -59,23 +65,23 @@ export default function NotesScreen({ route, navigation }) {
 
   const handleDelete = (id) => {
     showAlert(
-      'حذف یادداشت',
-      'آیا مطمئن هستید که می‌خواهید این یادداشت را حذف کنید؟',
+      t('Delete Note'),
+      t('Are you sure you want to delete this note?'),
       [
-        { text: 'لغو', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'حذف',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               const response = await notesAPI.delete(id);
               if (response.success) {
-                showToastOrAlert('یادداشت با موفقیت حذف شد');
+                showToastOrAlert(t('Note deleted successfully'));
                 fetchNotes();
               }
             } catch (error) {
               console.error('Error deleting note:', error);
-              showToastOrAlert('خطا در حذف یادداشت');
+              showToastOrAlert(t('Error deleting note'));
             }
           },
         },
@@ -96,7 +102,7 @@ export default function NotesScreen({ route, navigation }) {
     const date = moment(dateString);
     return date.format('jYYYY/jMM/jDD - HH:mm');
   };
-
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const renderNoteCard = ({ item }) => {
     return (
       <View style={[styles.noteCard, NewStyles.border10]}>
@@ -132,7 +138,7 @@ export default function NotesScreen({ route, navigation }) {
         {item.updated_at !== item.created_at && (
           <View style={styles.editedBadge}>
             <Text style={styles.editedText}>
-              ویرایش شده: {formatDate(item.updated_at)}
+              {t('Edited: ')}{formatDate(item.updated_at)}
             </Text>
           </View>
         )}
@@ -144,10 +150,10 @@ export default function NotesScreen({ route, navigation }) {
     <View style={styles.emptyContainer}>
       <Ionicons name="document-text-outline" size={80} color={themeColor3.bgColor(1)} />
       <Text style={[NewStyles.title10, { marginTop: 20 }]}>
-        یادداشتی ثبت نشده است
+        {t("You don't have any notes.")}
       </Text>
       <Text style={[NewStyles.text10, { marginTop: 10, textAlign: 'center' }]}>
-        برای افزودن یادداشت جدید روی دکمه زیر کلیک کنید
+        {t('Click the button below to add a new note')}
       </Text>
     </View>
   );
@@ -162,7 +168,7 @@ export default function NotesScreen({ route, navigation }) {
 
   return (
     <View style={NewStyles.container}>
-      <ScreenHeaders title="یادداشت‌ها" />
+      <ScreenHeaders title={t('My Notes')} />
 
       <FlatList
         data={notes}
@@ -180,7 +186,7 @@ export default function NotesScreen({ route, navigation }) {
 
       <View style={styles.footer}>
         <Button
-          title="افزودن یادداشت جدید"
+          title={t('Add New Note')}
           onPress={handleAddNew}
         />
       </View>
@@ -188,7 +194,7 @@ export default function NotesScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
 
   listContent: {
     padding: 16,

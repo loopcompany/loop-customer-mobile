@@ -40,7 +40,7 @@ export default function GemTransactions() {
 
     return (
         <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
-            <ScreenHeaders title="تاریخچه گردونه شانس" />
+            <ScreenHeaders title={t("Lucky Wheel History")} />
             <FlatList
                 contentContainerStyle={[styles.contentContainerStyle, NewStyles.center]}
                 showsVerticalScrollIndicator={false}
@@ -49,8 +49,8 @@ export default function GemTransactions() {
                 keyExtractor={(item) => item?.id?.toString()}
                 ListEmptyComponent={() => (
                     <View style={[NewStyles.center, { paddingTop: 50 }]}>
-                        <Text style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6 }]}>
-                            شما هنوز گردونه شانس را نچرخاندید و امتیازی ندارید
+                        <Text  style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6 }]}>
+                            {t("You have not spun the lucky wheel yet and have no points")}
                         </Text>
                     </View>
                 )}

@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from "react-native";
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeaders from "../components/ScreenHeaders";
 import { themeColor14, themeColor1, themeColor4 } from "../theme/Color";
@@ -22,6 +23,7 @@ import { showToastOrAlert } from "../helpers/Common";
 import Button from "../components/Button";
 
 export default function TrainingRegistrationScreen({ navigation }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     telephone: '',
     phone: '',
@@ -49,37 +51,37 @@ export default function TrainingRegistrationScreen({ navigation }) {
   const handleSubmit = async () => {
     // Validation
     if (!form.telephone.trim()) {
-      showToastOrAlert('لطفاً شماره تلفن ثابت را وارد کنید');
+      showToastOrAlert(t('Please enter landline phone number'));
       return;
     }
 
     if (!validateTelephone('021' + form.telephone)) {
-      showToastOrAlert('فرمت شماره تلفن صحیح نیست. باید 11 رقم و با 0 شروع شود (مثال: 02112345678)');
+      showToastOrAlert(t('Phone format is incorrect. Must be 11 digits starting with 0 (example: 02112345678)'));
       return;
     }
 
     if (!form.phone.trim()) {
-      showToastOrAlert('لطفاً شماره موبایل را وارد کنید');
+      showToastOrAlert(t('Please enter mobile number'));
       return;
     }
 
     if (!validatePhone(form.phone)) {
-      showToastOrAlert('فرمت شماره موبایل صحیح نیست. باید 11 رقم و با 09 شروع شود (مثال: 09123456789)');
+      showToastOrAlert(t('Mobile format is incorrect. Must be 11 digits starting with 09 (example: 09123456789)'));
       return;
     }
 
     if (!form.address.trim()) {
-      showToastOrAlert('لطفاً آدرس را وارد کنید');
+      showToastOrAlert(t('Please enter address'));
       return;
     }
 
     if (form.address.length > 191) {
-      showToastOrAlert('آدرس نباید بیشتر از 191 کاراکتر باشد');
+      showToastOrAlert(t('Address must not exceed 191 characters'));
       return;
     }
 
     if (form.description.length > 191) {
-      showToastOrAlert('توضیحات نباید بیشتر از 191 کاراکتر باشد');
+      showToastOrAlert(t('Description must not exceed 191 characters'));
       return;
     }
 
@@ -97,7 +99,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
       const response = await educationRegistrationAPI.create(payload);
 
       if (response.success) {
-        showToastOrAlert(response.message || 'درخواست ثبت‌نام آموزشی با موفقیت ثبت شد');
+        showToastOrAlert(response.message || t('Training registration request submitted successfully'));
 
         // Reset form
         setForm({
@@ -113,7 +115,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
     } catch (error) {
       console.error('Error submitting education registration:', error);
       const resp = error.response?.data;
-      let errorMessage = 'خطا در ثبت درخواست';
+      let errorMessage = t('Error submitting request');
 
       if (resp) {
         if (resp.message) {
@@ -144,7 +146,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>
       <ScreenHeaders
-        title="ثبت نام دوره‌های آموزشی"
+        title={t("Registration for Training Courses")}
       />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -155,21 +157,17 @@ export default function TrainingRegistrationScreen({ navigation }) {
 
           <View style={styles.infoBox}>
             <Text style={[NewStyles.text10, { lineHeight: 24 }]}>
-              📌 مراحل ثبت‌نام:{'\n'}
-              • شماره تلفن ثابت (02112345678){'\n'}
-              • شماره موبایل (09123456789){'\n'}
-              • آدرس کامل محل سکونت یا کار{'\n'}
-              • توضیحات و علایق آموزشی
+              {t('📌 Registration Steps:\n• Landline phone number (02112345678)\n• Mobile number (09123456789)\n• Complete residential or work address\n• Description and educational interests')}
             </Text>
           </View>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>شماره تلفن ثابت<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Landline Number')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <View style={[NewStyles.row, { gap: 10 }]}>
             <TextInput
-              placeholder="شماره تلفن ثابت (مثال: 02112345678)"
+              placeholder={t('Landline phone number ')}
               value={form.telephone}
               onChangeText={(t) => handleChange('telephone', t)}
-              style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { width: 'auto', flex: 1 }]}
+              style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { width: 'auto', flex: 1,fontsize:1 }]}
               placeholderTextColor="#999"
               keyboardType="phone-pad"
               maxLength={8}
@@ -177,10 +175,10 @@ export default function TrainingRegistrationScreen({ navigation }) {
             <TextInput style={[NewStyles.text10, styles.prefixInput,]} value="021" editable={false} />
 
           </View>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>شماره موبایل<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Mobile Number')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
-            placeholder="شماره موبایل (مثال: 09123456789)"
+            placeholder={t('Mobile number (example: 09123456789)')}
             value={form.phone}
             onChangeText={(t) => handleChange('phone', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
@@ -188,10 +186,10 @@ export default function TrainingRegistrationScreen({ navigation }) {
             keyboardType="phone-pad"
             maxLength={11}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>آدرس کامل<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Full Address')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
-            placeholder="آدرس کامل (حداکثر 191 کاراکتر)"
+            placeholder={t('Full address (max 191 characters)')}
             value={form.address}
             onChangeText={(t) => handleChange('address', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 100, textAlignVertical: 'top' }]}
@@ -199,10 +197,10 @@ export default function TrainingRegistrationScreen({ navigation }) {
             multiline
             maxLength={191}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>توضیحات و علایق آموزشی (اختیاری)</Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Description and educational interests (optional)')}</Text>
 
           <TextInput
-            placeholder="توضیحات و علایق آموزشی (اختیاری - حداکثر 191 کاراکتر)"
+            placeholder={t('Description and educational interests (optional - max 191 characters)')}
             value={form.description}
             onChangeText={(t) => handleChange('description', t)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}
@@ -215,7 +213,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
 
 
 
-          <Button title={'ثبت درخواست'} onPress={handleSubmit} loading={isSubmitting} />
+          <Button title={t('Submit Request')} onPress={handleSubmit} loading={isSubmitting} />
 
         </ScrollView>
       </KeyboardAvoidingView>

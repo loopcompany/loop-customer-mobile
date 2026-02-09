@@ -16,6 +16,7 @@ import {
   organizationAccessCache,
   PERFORMANCE_CONFIGS 
 } from '../utils/performanceOptimization';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Hook برای کنترل دسترسی کاربران سازمانی
@@ -25,6 +26,7 @@ import {
 export const useOrganizationAccess = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const { t } = useTranslation();
   
   const { userType, token, isAuthenticated } = useSelector(state => state.auth);
   const { 
@@ -141,21 +143,21 @@ export const useOrganizationAccess = () => {
         // Cache the successful result
         organizationAccessCache.set(cacheKey, response.data.data, PERFORMANCE_CONFIGS.CACHE_TTL);
       } else {
-        throw new Error(response.data.message || 'خطا در دریافت اطلاعات');
+        throw new Error(response.data.message || t('Error fetching information'));
       }
     } catch (error) {
       console.error('Error fetching organization access status:', error);
       
       if (error.response?.status === 401) {
         // Token منقضی شده
-        setError('لطفا مجدداً وارد شوید');
+        setError(t('Please log in again.'));
       } else if (error.response?.status === 403) {
         // دسترسی غیرمجاز
-        setError('شما کاربر سازمانی نیستید');
+        setError(t('You are not an organization user.'));
       } else if (error.response?.status === 500) {
-        setError('خطای سرور، لطفا دوباره تلاش کنید');
+        setError(t('Server error, please try again.'));
       } else {
-        setError(error.message || 'خطا در دریافت اطلاعات دسترسی');
+        setError(error.message || t('Error fetching access information.'));
       }
       
       // در صورت خطا، دسترسی محدود قرار دهیم
@@ -163,7 +165,7 @@ export const useOrganizationAccess = () => {
         profile_status: 'pending',
         contract_status: 'pending',
         has_complete_access: false,
-        blocked_message: 'خطا در دریافت اطلاعات دسترسی'
+        blocked_message: t('Error fetching access information.')
       }));
     } finally {
       dispatch(setAccessLoading(false));
@@ -211,13 +213,13 @@ export const useOrganizationAccess = () => {
               } else {
                 console.error('❌ Error determining user type from API:', apiError);
                 // در صورت خطای شبکه، منتظر بمانیم (نه اینکه individual فرض کنیم)
-                setError('خطا در تشخیص نوع حساب کاربری. لطفا دوباره تلاش کنید.');
+                setError(t('Error determining account type. Please try again.'));
               }
             }
           }
         } catch (error) {
           console.error('📱 Error loading userType from AsyncStorage:', error);
-          setError('خطا در بارگذاری اطلاعات حساب کاربری');
+          setError(t('Error loading account information.'));
         }
       }
     };
@@ -344,14 +346,14 @@ export const useOrganizationAccess = () => {
   const getBlockedMessage = useCallback(() => {
     // 🔒 اگر userType مشخص نیست
     if (!userType || userType === null) {
-      return 'در حال بررسی وضعیت کاربر...';
+      return t('Checking user status...');
     }
     
     if (userType === 'individual' || actualHasCompleteAccess) {
       return null;
     }
     
-    return blockedMessage || 'لطفا منتظر تایید ادمین باشید';
+    return blockedMessage || t('Please wait for admin approval.');
   }, [userType, actualHasCompleteAccess, blockedMessage]);
   
   /**
@@ -371,9 +373,9 @@ export const useOrganizationAccess = () => {
     if (nextSteps && nextSteps.length > 0) {
       return nextSteps.map(step => {
         switch (step) {
-          case 'upload_contract': return 'آپلود قرارداد امضا شده';
-          case 'wait_for_approval': return 'انتظار برای تایید ادمین';
-          case 'complete_profile': return 'تکمیل اطلاعات پروفایل';
+          case 'upload_contract': return t('Upload signed contract');
+          case 'wait_for_approval': return t('Waiting for admin approval');
+          case 'complete_profile': return t('Complete profile information');
           default: return step;
         }
       });
@@ -383,17 +385,17 @@ export const useOrganizationAccess = () => {
     const steps = [];
     
     if (profileStatus === 'rejected') {
-      steps.push('ویرایش و اصلاح اطلاعات پروفایل');
+      steps.push(t('Edit and correct profile information'));
     }
     
     if (contractStatus === 'not_uploaded') {
-      steps.push('آپلود قرارداد امضا شده');
+      steps.push(t('Upload signed contract'));
     } else if (contractStatus === 'rejected') {
-      steps.push('آپلود مجدد قرارداد با رفع مشکلات');
+      steps.push(t('Re-upload contract after fixing issues'));
     }
     
     if (profileStatus === 'pending' || contractStatus === 'pending') {
-      steps.push('انتظار برای تایید ادمین');
+      steps.push(t('Waiting for admin approval'));
     }
     
     return steps;

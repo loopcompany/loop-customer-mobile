@@ -213,7 +213,7 @@ function Preview({ navigation }) {
                     console.log('✅ [Preview] service_schedule به payload اضافه شد');
                 } else {
                     console.error('❌ [Preview] خطا: service_schedule برای کاربر سازمانی اجباری است اما ساخته نشد');
-                    showToastOrAlert(t('Please complete the maintenance and service time fields.'));
+                    showToastOrAlert('لطفاً فیلدهای زمان نگهداری و سرویس را تکمیل کنید.');
                     setLoading(false);
                     return;
                 }

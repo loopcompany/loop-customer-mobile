@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useTranslation } from 'react-i18next'
 
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
@@ -11,6 +12,7 @@ import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../../theme/
 import Button from '../../components/Button'
 
 const OrderExtraServices = ({ orderId, navigation }) => {
+    const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
     const [loading, setLoading] = useState(true)
     const [extraServices, setExtraServices] = useState([])
@@ -39,7 +41,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                 setExtraServices(response.data?.data?.extra_services || [])
             }
         } catch (error) {
-            const message = error?.response?.data?.message || 'خطا در دریافت هزینه‌های اضافی'
+            const message = error?.response?.data?.message || t('Error fetching extra costs')
             showToastOrAlert(message)
             setExtraServices([])
         } finally {
@@ -58,7 +60,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                     </View>
                 </View>
                 <Text style={[NewStyles.title, { fontSize: 14, textAlign:'left' }]}>
-                    {formatPrice(item?.price)} تومان
+                    {formatPrice(item?.price)} {t('Toman')}
                 </Text>
             </View>
             {item?.extra_service?.description && (
@@ -73,7 +75,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
         return (
             <View style={[styles.container, NewStyles.center]}>
                 <ActivityIndicator size="large" color={themeColor0.bgColor(1)} />
-                <Text style={[NewStyles.text10, { marginTop: 10 }]}>در حال بارگذاری...</Text>
+                <Text style={[NewStyles.text10, { marginTop: 10 }]}>{t('Loading...')}</Text>
             </View>
         )
     }
@@ -83,7 +85,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
             <View style={[styles.container, NewStyles.center]}>
                 <Ionicons name="file-tray-outline" size={50} color={themeColor0.bgColor(0.3)} />
                 <Text style={[NewStyles.text10, { marginTop: 10, color: themeColor0.bgColor(0.6) }]}>
-                    هزینه اضافی ثبت نشده است
+                    {t('No extra costs recorded')}
                 </Text>
             </View>
         )
@@ -99,7 +101,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                 <View style={[styles.headerWrapper]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>هزینه‌های اضافی</Text>
+                        <Text style={NewStyles.title}>{t('Extra Costs')}</Text>
                     </View>
                 </View>
 
@@ -114,14 +116,14 @@ const OrderExtraServices = ({ orderId, navigation }) => {
 
                 {/* Total */}
                 <View style={[styles.totalWrapper, { marginTop: 15 }]}>
-                    <Text style={NewStyles.title}>جمع هزینه‌های اضافی:</Text>
+                    <Text style={NewStyles.title}>{t('Total Extra Costs:')}</Text>
                     <Text style={[NewStyles.title, { color: themeColor0.bgColor(1) }]}>
-                        {formatPrice(totalExtraPrice)} تومان
+                        {formatPrice(totalExtraPrice)} {t('Toman')}
                     </Text>
             
                 </View>
                 <View style={{paddingHorizontal:'5%', width:'100%', alignItems:'center'}}>
-                    <Button title={'پیش رسید'} onPress={()=>{navigation.navigate('Invoice', { orderId: orderId })}} />
+                    <Button title={t('Quote')} onPress={()=>{navigation.navigate('Invoice', { orderId: orderId })}} />
                 </View>
             </View>
         </View>

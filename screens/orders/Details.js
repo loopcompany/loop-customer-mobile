@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import * as Linking from "expo-linking";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 
 import { imageUri, uri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles'
@@ -27,7 +28,7 @@ import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 
 
-const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
+const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t }) => {
     return (
         <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10 }, NewStyles.border10]}>
 
@@ -35,43 +36,43 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
                 <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
-                        <Text style={NewStyles.title}>جزئیات سفارش - شناسه: {data?.id}</Text>
+                        <Text style={NewStyles.title}>{t("Order details - ID")}: {data?.id}</Text>
                     </View>
                     <Text style={NewStyles.text3}>{data?.category?.title}</Text>
                 </View>
-                {renderRow('زمان مراجعه تکنسین', data?.is_urgent > 0 ? 'درخواست فوری' : formatDate(data?.date) + ' ساعت ' + data?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text, data?.is_urgent > 0 && NewStyles.title6)}
-                {renderRow('زمان ثبت سفارش', formatDateTime(data?.created_at))}
+                {renderRow(t("Technician visit time"), data?.is_urgent > 0 ? t("Urgent request") : formatDate(data?.date) + ' ' + t("hour") + ' ' + data?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text, data?.is_urgent > 0 && NewStyles.title6)}
+                {renderRow(t("Order registration time"), formatDateTime(data?.created_at))}
                 {Number(data?.category?.has_gender) > 0 && (
                     renderRow(
-                        'جنسیت تکنسین',
+                        t("Technician gender"),
                         (() => {
                             const male = Number(data.male_count) || 0;
                             const female = Number(data.female_count) || 0;
                             const unspecified = Number(data.unspecified_count) || 0;
                             const total = male + female + unspecified;
 
-                            if (total === 0) return 'مشخص نشده';
+                            if (total === 0) return t("Not specified");
 
                             let details = [];
-                            if (male > 0) details.push(`آقا`);
-                            if (female > 0) details.push(`خانم`);
+                            if (male > 0) details.push(t("Male"));
+                            if (female > 0) details.push(t("Female"));
 
                             return (details.length > 0 ? `${details.join(' ')}` : '');
                         })()
                     )
                 )}
 
-                {data?.status == 1 && renderRow('وضعیت سفارش', data?.started_at ? 'در حال انجام' : data?.arrived_at ? 'تکنسین به محل سفارش رسید' : data?.set_off_at ? 'تکنسین در راه است' : 'جاری', NewStyles.text, NewStyles.text7)}
-                {renderRow((Number(data?.is_fixed) == 1) ? 'مبلغ قطعی لوپ' : 'مبلغ پایه لوپ', data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' تومان' : 'نیاز به بررسی')}
-                {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow('مبلغ پایه تکنسین', data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' تومان' : '0 تومان')}
-                {data?.extra_price > 0 && renderRow('هزینه قطعات اضافه', data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' تومان' : '0 تومان')}
-                {data?.discount_price > 0 && renderRow('مبلغ تخفیف شما', data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' تومان' : '0 تومان')}
-                {totalPrice > totalDiscountedPrice > 0 && renderRow('مبلغ نهایی بدون تخفیف', `${formatPrice(totalPrice)}` + ' تومان', NewStyles.text, [NewStyles.text10,])}
+                {data?.status == 1 && renderRow(t("Order status"), data?.started_at ? t("In progress") : data?.arrived_at ? t("Technician arrived at order location") : data?.set_off_at ? t("Technician is on the way") : t("Current"), NewStyles.text, NewStyles.text7)}
+                {renderRow((Number(data?.is_fixed) == 1) ? t("Final Loop price") : t("Base Loop price"), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t("Tomans") : t("Needs review"))}
+                {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t("Technician base price"), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
+                {data?.extra_price > 0 && renderRow(t("Extra parts cost"), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
+                {data?.discount_price > 0 && renderRow(t("Your discount amount"), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
+                {totalPrice > totalDiscountedPrice > 0 && renderRow(t("Final amount without discount"), `${formatPrice(totalPrice)}` + ' ' + t("Tomans"), NewStyles.text, [NewStyles.text10,])}
 
                 <View style={NewStyles.rowWrapper}>
-                    <Text style={[NewStyles.text]}>وضعیت پرداخت</Text>
+                    <Text style={[NewStyles.text]}>{t("Payment status")}</Text>
                     <View style={[{ backgroundColor: data?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
-                        <Text style={NewStyles.text4}>{data?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
+                        <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t("Paid") : t("Not paid")}</Text>
                     </View>
                 </View>
 
@@ -81,12 +82,12 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
             <View style={{ paddingHorizontal: '5%', padding: 20, gap: 10 }}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Ionicons name={'locate'} size={24} color={themeColor0.bgColor(1)} />
-                    <Text style={NewStyles.title}>محل سفارش</Text>
+                    <Text style={NewStyles.title}>{t("Order location")}</Text>
                 </View>
                 <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                     <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
                     <View>
-                        <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.city + ' - منطقه ' + data?.user_address?.region + ' - ' + data?.user_address?.address}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.city + ' - ' + t("Region") + ' ' + data?.user_address?.region + ' - ' + data?.user_address?.address}</Text>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.fname + ' - ' + data?.user_address?.lname + ' - ' + data?.user_address?.telephone}</Text>
                     </View>
                 </View>
@@ -124,7 +125,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
             {data?.des && <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
-                    <Text style={NewStyles.title}>توضیحات کاربر</Text>
+                    <Text style={NewStyles.title}>{t("User description")}</Text>
                 </View>
                 <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                     <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
@@ -134,7 +135,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
             {data?.technician_des && <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
-                    <Text style={NewStyles.title}>توضیحات تکنسین</Text>
+                    <Text style={NewStyles.title}>{t("Technician description")}</Text>
                 </View>
                 <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                     <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
@@ -152,6 +153,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice }) => {
 
 function Details({ route, navigation }) {
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
@@ -229,7 +231,7 @@ function Details({ route, navigation }) {
                 setIsTechnicianVerified(response?.data?.is_technician_verified);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
             showToastOrAlert(message);
         } finally {
             setRefreshing(false);
@@ -238,7 +240,7 @@ function Details({ route, navigation }) {
 
     const handleVerifyTechnician = async () => {
         if (!isTechnicianVerified || (isTechnicianVerified != '1' && isTechnicianVerified != '2')) {
-            showToastOrAlert('لطفاً یکی از گزینه‌ها را انتخاب کنید');
+            showToastOrAlert(t("Please select one of the options"));
             return;
         }
 
@@ -259,12 +261,12 @@ function Details({ route, navigation }) {
             );
 
             if (response.status == 200) {
-                showToastOrAlert(response?.data?.message || 'تأیید هویت با موفقیت انجام شد');
+                showToastOrAlert(response?.data?.message || t("Identity verification completed successfully"));
                 // بروزرسانی داده‌ها
                 setRefreshing(true);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
             showToastOrAlert(message);
         } finally {
             setVerifying(false);
@@ -274,22 +276,22 @@ function Details({ route, navigation }) {
     const handleSubmitReceive = async () => {
         // بررسی انتخاب گزینه یا ثبت توضیحات
         if (!selectedReceiveOption && !showCustomReceive) {
-            showToastOrAlert('لطفاً یکی از گزینه‌ها را انتخاب کنید');
+            showToastOrAlert(t("Please select one of the options"));
             return;
         }
 
         if (showCustomReceive && !customReceiveText.trim()) {
-            showToastOrAlert('لطفاً توضیحات را وارد کنید');
+            showToastOrAlert(t("Please enter the description"));
             return;
         }
 
         // تعریف متن‌های مربوط به هر گزینه
         const optionTexts = {
-            1: 'محصول را با تست سلامت دریافت کردم',
-            2: 'محصول را بدون تست سلامت دریافت کردم',
-            3: 'محصول را تحویل گرفتم اما دارای نواقص فنی می باشد',
-            4: 'محصول پس از تست، به لوپ عودت داده شد',
-            5: 'محصول را طبق درخواست خودم دریافت کردم'
+            1: t("I received the product with health test"),
+            2: t("I received the product without health test"),
+            3: t("I received the product but it has technical defects"),
+            4: t("The product was returned to Loop after the test"),
+            5: t("I received the product as per my request")
         };
 
         const description = showCustomReceive ? customReceiveText.trim() : optionTexts[selectedReceiveOption];
@@ -308,12 +310,12 @@ function Details({ route, navigation }) {
             );
 
             if (response.status == 200) {
-                showToastOrAlert(response?.data?.message || 'توضیحات نهایی با موفقیت ثبت شد');
+                showToastOrAlert(response?.data?.message || t("Final description successfully submitted"));
                 // بروزرسانی داده‌ها
                 setRefreshing(true);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
             showToastOrAlert(message);
         } finally {
             setSubmittingReceive(false);
@@ -335,13 +337,13 @@ function Details({ route, navigation }) {
             );
 
             if (response.status == 200 || response.status == 201) {
-                showToastOrAlert(response?.data?.message || 'پرداخت با موفقیت انجام شد');
+                showToastOrAlert(response?.data?.message || t("Payment completed successfully"));
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
                 setRefreshing(true);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : 'خطای غیرمنتظره رخ داده است!') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
             showToastOrAlert(message);
         } finally {
             setLoadingWallet(false);
@@ -362,14 +364,14 @@ function Details({ route, navigation }) {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
                 setRefreshing(true);
-                showToastOrAlert('پرداخت با موفقیت انجام شد.');
+                showToastOrAlert(t("Payment completed successfully"));
                 // Cleanup listener after handling
                 if (paymentSubscriptionRef.current) {
                     paymentSubscriptionRef.current.remove();
                     paymentSubscriptionRef.current = null;
                 }
             } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert('پرداخت با خطا مواجه شد.');
+                showToastOrAlert(t("The payment encountered an error."));
                 // Cleanup listener after handling
                 if (paymentSubscriptionRef.current) {
                     paymentSubscriptionRef.current.remove();
@@ -401,11 +403,11 @@ function Details({ route, navigation }) {
                 _addLinkingListener();
                 await Linking.openURL(response.data.data.payment_url);
             } else {
-                showToastOrAlert('خطا در اتصال به درگاه پرداخت');
+                showToastOrAlert(t("Error connecting to payment gateway"));
                 setLoadingGateway(false);
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.data?.message || 'خطا در اتصال به درگاه پرداخت') : 'خطای شبکه!';
+            const message = error?.response ? (error?.response?.data?.message || t("Error connecting to payment gateway")) : t("Network error!");
             showToastOrAlert(message);
             setLoadingGateway(false);
         } finally {
@@ -443,32 +445,32 @@ function Details({ route, navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container,]}>
-            <ScreenHeaders title={'سفارش جاری'} />
+            <ScreenHeaders title={t("Current order")} />
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
 
                 <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
 
                     <AccordionHeader
-                        title="جزئیات سفارش"
+                        title={t("Order details")}
                         isActive={true}
                         isOpen={showDetails}
                         onPress={() => setShowDetails(!showDetails)}
                     />
-                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} />}
+                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} t={t} />}
 
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
-                        title="بررسی / جایگزین / پیش رسید"
+                        title={t("Review / Replacement / Receipt")}
                         isActive={(data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
                         isOpen={showReview}
                         onPress={() => {
                             if ((data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) {
                                 setShowReview(!showReview)
                             } else if (data?.status == 3) {
-                                showToastOrAlert('شما سفارش را لغو کرده اید')
+                                showToastOrAlert(t("You have canceled the order"))
                             }
                             else {
-                                showToastOrAlert('این مرحله هنوز فعال نشده است.')
+                                showToastOrAlert(t("This stage is not activated yet."))
                             }
                         }}
                     />
@@ -482,7 +484,7 @@ function Details({ route, navigation }) {
                     )}
 
                     <AccordionHeader
-                        title="اطلاعات تکنسین"
+                        title={t("Technician information")}
                         isActive={data?.technician}
                         isOpen={showTechnician}
                         onPress={() => {
@@ -490,7 +492,7 @@ function Details({ route, navigation }) {
                                 setShowTechnician(!showTechnician)
 
                             } else {
-                                showToastOrAlert('هنوز تکنسینی به سفارش شما اختصاص داده نشده است.')
+                                showToastOrAlert(t("No technician has been assigned to your order yet."))
                             }
                         }}
                     />
@@ -505,7 +507,7 @@ function Details({ route, navigation }) {
                                         <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor6.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                                             <View style={[NewStyles.row, { gap: 5 }]}>
                                                 <Ionicons name="close-circle-outline" size={24} color={themeColor6.color} />
-                                                <Text style={[NewStyles.title, { color: themeColor6.color }]}>علت لغو سفارش توسط متخصص</Text>
+                                                <Text style={[NewStyles.title, { color: themeColor6.color }]}>{t("Reason for order cancellation by technician")}</Text>
                                             </View>
                                         </View>
                                         <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.border10]}>
@@ -520,16 +522,16 @@ function Details({ route, navigation }) {
                     )}
 
                     <AccordionHeader
-                        title="در حال انجام"
+                        title={t("In progress")}
                         isActive={(data?.status == 1 || data?.status == 2 || isTechnicianVerified != '0') && data?.technician}
                         isOpen={showProcess}
                         onPress={() => {
                             if ((data?.status == 1 || data?.status == 2 || isTechnicianVerified != '0') && data?.technician) {
                                 setShowProcess(!showProcess)
                             } else if (data?.status == 0) {
-                                showToastOrAlert('سفارش شما به مرحله ی انجام نرسیده است.')
+                                showToastOrAlert(t("Your order has not reached the execution stage."))
                             } else {
-                                showToastOrAlert('سفارش شما لغو شده است.')
+                                showToastOrAlert(t("Your order has been canceled."))
                             }
                         }}
                     />
@@ -539,32 +541,32 @@ function Details({ route, navigation }) {
                         <View style={[{ width: '90%', alignSelf: 'center', paddingBottom: 10 }, NewStyles.center]}>
                             <View style={styles.noticeBox}>
                                 {(data?.set_off_at && !data?.arrived_at) && <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                                    تکنسین لوپ به سمت محل سفارش شما حرکت کرده است. لطفاً در صورت نیاز با تکنسین تماس بگیرید.
+                                    {t("The Loop technician is heading to your order location. Please contact the technician if needed.")}
                                 </Text>
                                 }
                                 {(!data?.set_off_at) &&
-                                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>کاربر گرامی، سفارش شما در حال بررسی تکنسین لوپ می‌باشد. از صبر و شکیبایی شما سپاس گزاریم.</Text>
+                                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t("Dear user, your order is being reviewed by Loop technician. Thank you for your patience.")}</Text>
                                 }
                                 {data?.arrived_at && <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                                    کاربر گرامی، در صورت عدم تطابق مشخصات کاربر تکنسین با اطلاعات ثبت شده، لطفاً به پشتیبانی لوپ اطلاع دهید.
+                                    {t("Dear user, if the technician's specifications do not match the registered information, please inform Loop support.")}
                                 </Text>}
                             </View>
 
                             {data?.arrived_at && <>
                                 <View style={styles.confirmButton} >
-                                    <Text style={[NewStyles.text10]}>تأیید حضور تکنسین</Text>
+                                    <Text style={[NewStyles.text10]}>{t("Confirm technician presence")}</Text>
                                 </View>
                                 <View style={{ borderBottomWidth: 1, borderBottomColor: themeColor10.bgColor(1), width: '100%', marginVertical: 15, borderStyle: 'dashed' }} />
                                 <View style={[NewStyles.center, { width: '100%', gap: 10 }]}>
                                     <TouchableOpacity disabled={data?.is_technician_verified != '0'} style={[styles.grayButton, isTechnicianVerified == 1 && { backgroundColor: themeColor0.bgColor(1) }]} onPress={() => { setIsTechnicianVerified('1'); }}>
-                                        <Text style={[NewStyles.text10, isTechnicianVerified == '1' && NewStyles.text4]}>مشخصات تکنسین درست است</Text>
+                                        <Text style={[NewStyles.text10, isTechnicianVerified == '1' && NewStyles.text4]}>{t("Technician specifications are correct")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity disabled={data?.is_technician_verified != '0'} style={[styles.grayButton, isTechnicianVerified == '2' && { backgroundColor: themeColor0.bgColor(1) }]} onPress={() => { setIsTechnicianVerified('2'); }}>
-                                        <Text style={[NewStyles.text10, isTechnicianVerified == '2' && NewStyles.text4]}>مشخصات تکنسین درست نیست</Text>
+                                        <Text style={[NewStyles.text10, isTechnicianVerified == '2' && NewStyles.text4]}>{t("Technician specifications are not correct")}</Text>
                                     </TouchableOpacity>
                                     {((isTechnicianVerified == '1' || isTechnicianVerified == '2') && data?.is_technician_verified == '0') && (
                                         <Button
-                                            title={'ثبت نهایی'}
+                                            title={t("Final submit")}
                                             onPress={handleVerifyTechnician}
                                             loading={verifying}
                                         />
@@ -576,14 +578,14 @@ function Details({ route, navigation }) {
 
                     {/* مشخصات / اطلاعات محصول */}
                     <AccordionHeader
-                        title="مشخصات / اطلاعات محصول"
+                        title={t("Specifications / Product information")}
                         isActive={hasReport}
                         isOpen={showLoopDispatch}
                         onPress={() => {
                             if (hasReport) {
                                 setShowLoopDispatch(!showLoopDispatch)
                             } else {
-                                showToastOrAlert('هنوز اطلاعات محصول توسط تکنسین ثبت نشده است.')
+                                showToastOrAlert(t("Product information has not been registered by technician yet."))
                             }
                         }}
                     />
@@ -597,14 +599,14 @@ function Details({ route, navigation }) {
 
                     {/* اعزام به لوپ / هزینه ها / مدت زمان */}
                     <AccordionHeader
-                        title="اعزام به لوپ / هزینه ها / مدت زمان"
+                        title={t("Send to Loop / Costs / Duration")}
                         isActive={data?.send_to_loop}
                         isOpen={showLoopSend}
                         onPress={() => {
                             if (data?.send_to_loop) {
                                 setShowLoopSend(!showLoopSend)
                             } else {
-                                showToastOrAlert('درخواست اعزام به لوپ هنوز ثبت نشده است.')
+                                showToastOrAlert(t("The request to send to Loop has not been registered yet."))
                             }
                         }}
                     />
@@ -620,7 +622,7 @@ function Details({ route, navigation }) {
                     {data?.user_cancellation_date && (
                         <>
                             <AccordionHeader
-                                title="زمان عودت"
+                                title={t("Return time")}
                                 isActive={true}
                                 isOpen={showReturnTime}
                                 onPress={() => setShowReturnTime(!showReturnTime)}
@@ -636,18 +638,18 @@ function Details({ route, navigation }) {
                     )}
                     {data?.returned_at &&
                         <View style={{ paddingHorizontal: '5%' }}>
-                            <Button style={{ backgroundColor: themeColor6.bgColor(1) }} title={'محصول با موفقیت عودت داده شد'} />
+                            <Button style={{ backgroundColor: themeColor6.bgColor(1) }} title={t("Product successfully returned")} />
                         </View>
                     }
                     <AccordionHeader
-                        title="قطعات / هزینه ها"
+                        title={t("Parts / Costs")}
                         isActive={data?.status >= 1 && data?.technician && data?.extra_price > 0}
                         isOpen={showMorePrices}
                         onPress={() => {
                             if (data?.status >= 1 && data?.technician && data?.extra_price > 0) {
                                 setShowMorePrices(!showMorePrices)
                             } else {
-                                showToastOrAlert('هیچ هزینه اضافی برای این سفارش ثبت نشده است.')
+                                showToastOrAlert(t("No additional costs have been registered for this order."))
                             }
                         }}
                     />
@@ -658,33 +660,33 @@ function Details({ route, navigation }) {
 
                     {/* مرحله پرداخت هزینه */}
                     <AccordionHeader
-                        title={"پرداخت هزینه"}
+                        title={t("Payment")}
                         isActive={data?.started_at}
                         isOpen={showPayment}
                         onPress={() => {
                             if (data?.started_at) {
                                 setShowPayment(!showPayment)
                             } else {
-                                showToastOrAlert('سفارش هنوز شروع نشده است.')
+                                showToastOrAlert(t("The order has not started yet."))
                             }
                         }}
                     />
                     {showPayment && data?.started_at && (
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                             <View style={styles.noticeBox}>
-                                <Text style={NewStyles.text10}>وضعیت پرداخت: {data?.payment_status == 1 ? 'پرداخت شده' : 'پرداخت نشده'}</Text>
+                                <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
                             </View>
 
                             <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
-                                <Text style={[NewStyles.title]}>مبلغ قابل پرداخت</Text>
+                                <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
-                                    {formatPrice(totalDiscountedPrice)} تومان
+                                    {formatPrice(totalDiscountedPrice)} {t("Tomans")}
                                 </Text>
                             </View>
 
                             <View style={NewStyles.rowWrapper}>
-                                <Text style={NewStyles.text}>موجودی کیف پول شما</Text>
-                                <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} تومان</Text>
+                                <Text style={NewStyles.text}>{t("Your wallet balance")}</Text>
+                                <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} {t("Tomans")}</Text>
                             </View>
 
                             {data?.payment_status == 0 ? (
@@ -692,7 +694,7 @@ function Details({ route, navigation }) {
                                     <View style={[NewStyles.row, { gap: 10 }]}>
                                         <View style={[{ flex: 1 }, NewStyles.center]}>
                                             <Button
-                                                title={'کسر هزینه از کیف پول'}
+                                                title={t("Deduct cost from wallet")}
                                                 style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }}
                                                 textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
                                                 loading={loadingWallet}
@@ -701,7 +703,7 @@ function Details({ route, navigation }) {
                                         </View>
                                         <View style={[{ flex: 1 }, NewStyles.center]}>
                                             <Button
-                                                title={'شارژ کیف پول'}
+                                                title={t("Charge wallet")}
                                                 textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
                                                 onPress={() => navigation.navigate('Increase')}
                                                 style={{ backgroundColor: themeColor7.bgColor(1) }}
@@ -712,7 +714,7 @@ function Details({ route, navigation }) {
 
 
                                         <Button
-                                            title={'پرداخت آنلاین'}
+                                            title={t("Online payment")}
                                             style={{ paddingHorizontal: 0 }}
                                             textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
                                             loading={loadingGateway}
@@ -723,7 +725,7 @@ function Details({ route, navigation }) {
                             ) : (
                                 <View style={{ paddingTop: 10, alignItems: 'center', width: '100%' }}>
                                     <Button
-                                        title={'پرداخت شده'}
+                                        title={t("Paid")}
                                         style={{ backgroundColor: themeColor7.bgColor(1) }}
                                         textStyle={{ color: themeColor4.bgColor(1) }}
                                         disabled={true}
@@ -735,14 +737,14 @@ function Details({ route, navigation }) {
 
                     {/* مرحله دریافت سفارش - فعال بعد از پرداخت */}
                     <AccordionHeader
-                        title={"دریافت محصول / سفارش"}
+                        title={t("Receive product / order")}
                         isActive={data?.payment_status == 1}
                         isOpen={showReceive}
                         onPress={() => {
                             if (data?.payment_status == 1) {
                                 setShowReceive(!showReceive)
                             } else {
-                                showToastOrAlert('ابتدا پرداخت را انجام دهید.')
+                                showToastOrAlert(t("Please complete the payment first."))
                             }
                         }}
                     />
@@ -750,41 +752,41 @@ function Details({ route, navigation }) {
                         <View style={{ paddingHorizontal: '5%', gap: 12 }}>
                             {data?.user_final_description ? (
                                 <View style={styles.noticeBox}>
-                                    <Text style={[NewStyles.title10, { marginBottom: 5 }]}>توضیحات ثبت شده:</Text>
+                                    <Text style={[NewStyles.title10, { marginBottom: 5 }]}>{t("Submitted description")}:</Text>
                                     <Text style={NewStyles.text10}>{data?.user_final_description}</Text>
                                 </View>
                             ) : (
                                 <>
-                                    <Text style={NewStyles.text}>لطفاً یکی از وضعیت‌های دریافت را انتخاب کنید:</Text>
+                                    <Text style={NewStyles.text}>{t("Please select one of the receiving statuses")}:</Text>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 1 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(1); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                        <Text style={NewStyles.text10}>محصول را با تست سلامت دریافت کردم</Text>
+                                        <Text style={NewStyles.text10}>{t("I received the product with health test")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 2 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(2); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                        <Text style={NewStyles.text10}>محصول را بدون تست سلامت دریافت کردم</Text>
+                                        <Text style={NewStyles.text10}>{t("I received the product without health test")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 3 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(3); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                        <Text style={NewStyles.text10}>محصول را تحویل گرفتم اما دارای نواقص فنی می باشد</Text>
+                                        <Text style={NewStyles.text10}>{t("I received the product but it has technical defects")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 4 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(4); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                        <Text style={NewStyles.text10}>محصول پس از تست، به لوپ عودت داده شد</Text>
+                                        <Text style={NewStyles.text10}>{t("The product was returned to Loop after the test")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, selectedReceiveOption == 5 && styles.optionBoxSelected]} onPress={() => { setSelectedReceiveOption(5); setShowCustomReceive(false); setCustomReceiveText(''); }}>
-                                        <Text style={NewStyles.text10}>محصول را طبق درخواست خودم دریافت کردم</Text>
+                                        <Text style={NewStyles.text10}>{t("I received the product as per my request")}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={[styles.optionBox, NewStyles.border10, showCustomReceive && styles.optionBoxSelected]} onPress={() => { setShowCustomReceive(true); setSelectedReceiveOption(null); }}>
-                                        <Text style={NewStyles.text10}>ثبت توضیح</Text>
+                                        <Text style={NewStyles.text10}>{t("Submit description")}</Text>
                                     </TouchableOpacity>
 
                                     {showCustomReceive && (
                                         <View>
-                                            <Text style={NewStyles.text}>توضیحات:</Text>
-                                            <TextInput style={[styles.textInput, NewStyles.border10]} placeholder={'توضیحات خود را وارد کنید...'} value={customReceiveText} onChangeText={setCustomReceiveText} multiline numberOfLines={3} textAlignVertical={'top'} />
+                                            <Text style={NewStyles.text}>{t("Description")}:</Text>
+                                            <TextInput style={[styles.textInput, NewStyles.border10]} placeholder={t("Enter your description...")} value={customReceiveText} onChangeText={setCustomReceiveText} multiline numberOfLines={3} textAlignVertical={'top'} />
                                         </View>
                                     )}
 
                                     <View style={{width:'100%', alignItems:'center', }}>
                                         <Button
-                                            title={'ثبت وضعیت دریافت'}
+                                            title={t("Submit receive status")}
                                             onPress={handleSubmitReceive}
                                             loading={submittingReceive}
                                         />
@@ -796,14 +798,14 @@ function Details({ route, navigation }) {
 
                     {/* مرحله ثبت نظر - فعال بعد از تکمیل سفارش (status=2 و finished_at) */}
                     <AccordionHeader
-                        title={"ثبت نظر"}
+                        title={t("Submit review")}
                         isActive={data?.status == 2 && data?.finished_at}
                         isOpen={showReviewRating}
                         onPress={() => {
                             if (data?.status == 2 && data?.finished_at) {
                                 setShowReviewRating(!showReviewRating)
                             } else {
-                                showToastOrAlert('این بخش بعد از تکمیل سفارش فعال می‌شود.')
+                                showToastOrAlert(t("This section will be activated after order completion."))
                             }
                         }}
                     />

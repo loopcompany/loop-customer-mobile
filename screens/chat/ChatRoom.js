@@ -95,7 +95,7 @@ export default function ChatRoom({ route }) {
         } catch (error) {
             // بررسی خطای 403 - چت بسته شده
             if (error?.response?.status === 403) {
-                const message = error?.response?.data?.message || 'چت بسته شده است. سفارش فعالی وجود ندارد.';
+                const message = error?.response?.data?.message || t('Chat is closed. There is no active order.');
                 showToastOrAlert(message);
                 setIsChatOpen(false);
             } else {
@@ -118,7 +118,7 @@ export default function ChatRoom({ route }) {
             // marginBottom: insets.bottom * 3,
         }]}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} keyboardVerticalOffset={Platform.OS == 'ios' ? 90 : undefined} style={{ flex: 1 }} >
-                <ScreenHeaders title={'پیام به تکنسین لوپ'} />
+                <ScreenHeaders title={t('Message to Loop technician')} />
                 {/* <ImageBackground source={require('../../assets/images/card/1.avif')} resizeMode='cover' blurRadius={20} style={{ justifyContent: 'space-between', flex: 1, overflow: 'visible' }}> */}
                     <MessagesList messeges={data} refreshing={refreshing} onRefresh={() => { fetchData() }} />
                     {!isClosed ?
@@ -136,7 +136,7 @@ export default function ChatRoom({ route }) {
                                         {loading && <ActivityIndicator color={themeColor5.bgColor(1)} size={20} />}
                                     </Pressable>
                                 </View>
-                                <TextInput style={[{ flex: 1, marginHorizontal: 10 }, NewStyles.text10]} placeholderTextColor={themeColor10.bgColor(1)} placeholder='پیام خود را بنویسید.' value={message} maxLength={800} onChangeText={(p) => { setMessage(p) }} multiline={true} />
+                                <TextInput style={[{ flex: 1, marginHorizontal: 10 }, NewStyles.text10]} placeholderTextColor={themeColor10.bgColor(1)} placeholder={t('Write your message')} value={message} maxLength={800} onChangeText={(p) => { setMessage(p) }} multiline={true} />
                             </View>
                         </View>
                         :
@@ -147,7 +147,7 @@ export default function ChatRoom({ route }) {
                                         <Ionicons name="close" size={20} color={themeColor4.bgColor(1)} />
                                     </View>
                                 </View>
-                                <Text style={[{ flex: 1, marginHorizontal: 10 }, NewStyles.text10]}>امکان ارسال پیام وجود ندارد.</Text>
+                                <Text style={[{ flex: 1, marginHorizontal: 10 }, NewStyles.text10]}>{t('Message sending is not available.')}</Text>
                             </View>
                         </View>
                     }

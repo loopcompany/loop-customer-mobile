@@ -14,8 +14,10 @@ import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
+import { useTranslation } from 'react-i18next';
 
 const Login = ({ navigation }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [organizationCode, setOrganizationCode] = useState('');
   const [password, setPassword] = useState('');
@@ -44,27 +46,27 @@ const Login = ({ navigation }) => {
     // Validation
     const newErrors = {};
     if (!organizationCode) {
-      newErrors.organizationCode = 'کد سازمانی الزامی است';
+      newErrors.organizationCode = t('Organization code is required');
     } else if (organizationCode.length !== 6) {
-      newErrors.organizationCode = 'کد سازمانی باید 6 رقم باشد';
+      newErrors.organizationCode = t('Organization code must be 6 digits');
     }
 
     if (!password) {
-      newErrors.password = 'رمز عبور الزامی است';
+      newErrors.password = t('Password is required');
     } else if (password.length < 8) {
-      newErrors.password = 'رمز عبور باید حداقل 8 کاراکتر باشد';
+      newErrors.password = t('Password must be at least 8 characters');
     }
 
     // Validate captcha
     if (!securityCode) {
-      newErrors.securityCode = 'کد امنیتی الزامی است';
+      newErrors.securityCode = t('Security code is required');
     } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
-      newErrors.securityCode = 'کد امنیتی صحیح نیست';
+      newErrors.securityCode = t('Security code is incorrect');
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      showAlert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
+      showAlert(t('Error'), t('Please fill in all the required fields.'));
       return;
     }
 
@@ -127,11 +129,11 @@ const Login = ({ navigation }) => {
 
         // Show success message and navigate
         showAlert(
-          'موفق',
-          'ورود با موفقیت انجام شد',
+          t('success'),
+          t('Login successful'),
           [
             {
-              text: 'تایید',
+              text: t('Confirm'),
               onPress: () => {
                 // Navigate to FolderScreen
                 navigation.reset({
@@ -150,23 +152,23 @@ const Login = ({ navigation }) => {
         const errorData = error.response.data;
 
         if (errorData.error === 'organization_not_found') {
-          setErrors({ organizationCode: 'کد سازمانی یافت نشد' });
-          showAlert('خطا', 'کد سازمانی یافت نشد');
+          setErrors({ organizationCode: t('Organization code not found') });
+          showAlert(t('Error'), t('Organization code not found'));
         } else if (errorData.error === 'phone_not_verified') {
           showAlert(
-            'توجه',
-            'شماره موبایل هنوز تایید نشده است. لطفا ابتدا شماره موبایل خود را تایید کنید.'
+            t('Notice'),
+            t('Phone number is not verified yet. Please verify your phone number first.')
           );
         } else if (errorData.error === 'invalid_password') {
-          setErrors({ password: 'رمز عبور اشتباه است' });
-          showAlert('خطا', 'رمز عبور اشتباه است');
+          setErrors({ password: t('Password is incorrect') });
+          showAlert(t('Error'), t('Password is incorrect'));
         } else if (errorData.error === 'account_disabled') {
-          showAlert('خطا', 'حساب کاربری شما غیرفعال شده است. لطفا با پشتیبانی تماس بگیرید');
+          showAlert(t('Error'), t('Your account has been disabled. Please contact support'));
         } else {
-          showAlert('خطا', errorData.message || 'خطا در ورود');
+          showAlert(t('Error'), errorData.message || t('Login error'));
         }
       } else {
-        showAlert('خطا', 'خطا در ارتباط با سرور');
+        showAlert(t('Error'), t('Error connecting to server. Please check your internet connection'));
       }
     } finally {
       setLoading(false);
@@ -179,14 +181,14 @@ const Login = ({ navigation }) => {
 
   const handleSecurityCode = () => {
     // Handle security code logic
-    showAlert('کد امنیتی', 'کد امنیتی ارسال شد');
+    showAlert(t('Security code'), t('Security code sent'));
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#d1e9ff' }}>
       <CustomStatusBar />
       <ScreenHeaders
-        title="سازمانی / دولتی"
+        title={t('Organization / Government')}
       />
 
       <KeyboardAvoidingView
@@ -220,18 +222,18 @@ const Login = ({ navigation }) => {
               fontSize: 16,
               fontFamily: 'VazirBold',
               textAlign: 'center'
-            }}>ورود به حساب کاربری</Text>
+            }}>{t('Login to account')}</Text>
           </View>
 
           {/* Form Container */}
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
             {/* کد سازمانی */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={NewStyles.title}>کد سازمانی <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={NewStyles.title}>{t('Organization code')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationCode}
                 onChangeText={setOrganizationCode}
-                placeholder="کد سازمانی * (6 رقم)"
+                placeholder={t('Organization code * (6 digits)')}
                 placeholderTextColor="#999"
                 keyboardType="numeric"
                 maxLength={6}
@@ -256,7 +258,7 @@ const Login = ({ navigation }) => {
             </View>
 
             {/* رمز عبور */}
-            <Text style={NewStyles.title}>رمز عبور <Text style={NewStyles.title6}>*</Text></Text>
+            <Text style={NewStyles.title}>{t('Password')} <Text style={NewStyles.title6}>*</Text></Text>
             <View style={[{
               marginBottom: 8, gap: 8, backgroundColor: '#f5f5f5',
               borderRadius: 8,
@@ -268,7 +270,7 @@ const Login = ({ navigation }) => {
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="رمز عبور * (حداقل 8 کاراکتر)"
+                placeholder={t('Password * (at least 8 characters)')}
                 placeholderTextColor="#999"
                 secureTextEntry={!showPassword}
                 style={{
@@ -322,7 +324,7 @@ const Login = ({ navigation }) => {
                   color: '#333',
                   fontFamily: 'VazirBold',
                   marginRight: 4
-                }}>ذخیره رمز عبور</Text>
+                }}>{t('Remember password')}</Text>
                 <View style={{
                   width: 16,
                   height: 16,
@@ -381,7 +383,7 @@ const Login = ({ navigation }) => {
                   <TextInput
                     value={securityCode}
                     onChangeText={setSecurityCode}
-                    placeholder="کد امنیتی"
+                    placeholder={t('Security code')}
                     placeholderTextColor="#999"
                     autoCapitalize="characters"
                     style={{
@@ -434,7 +436,7 @@ const Login = ({ navigation }) => {
                   fontSize: 16,
                   fontFamily: 'VazirBold',
                   textAlign: 'center'
-                }}>ورود</Text>
+                }}>{t('Login')}</Text>
               )}
             </TouchableOpacity>
 
@@ -448,7 +450,7 @@ const Login = ({ navigation }) => {
                   textAlign: 'center',
                   marginBottom: 2,
                   lineHeight: 16
-                }}>رمز عبور خود را فراموش کرده اید؟   بازگردانی رمز عبور</Text>
+                }}>{t('Forgot your password?   Password recovery')}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => { navigation.navigate('Register') }}>
                 <Text style={{
@@ -457,7 +459,7 @@ const Login = ({ navigation }) => {
                   fontFamily: 'VazirLight',
                   textAlign: 'center',
                   lineHeight: 16
-                }}>حساب کاربری ندارید؟ ثبت نام کنید</Text>
+                }}>{t("Don't have an account? Sign up")}</Text>
               </TouchableOpacity>
             </View>
           </View>

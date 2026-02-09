@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import { themeColor1 } from '../../theme/Color';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -32,6 +33,7 @@ import NewStyles from '../../styles/NewStyles';
 const OrganizationProfile = () => {
   const navigation = useNavigation();
   const { logoutWithConfirmation, isLoggingOut } = useLogout();
+  const { t } = useTranslation();
 
   // Form states - مطابق با فیلدهای ثبت‌نام
   const [profileImage, setProfileImage] = useState(null);
@@ -75,7 +77,7 @@ const OrganizationProfile = () => {
 
       if (!token) {
         console.log('❌ [OrganizationProfile] توکن یافت نشد');
-        showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        showAlert(t('Error'), t('Please log in first.'));
         navigation.navigate('Login');
         return;
       }
@@ -201,11 +203,11 @@ const OrganizationProfile = () => {
           console.log('✅ [OrganizationProfile] داده‌ها از AsyncStorage بارگذاری شد');
         } else {
           console.log('⚠️ [OrganizationProfile] داده‌ای در AsyncStorage یافت نشد');
-          showAlert('خطا', error.response?.data?.message || 'خطا در بارگذاری اطلاعات. لطفا دوباره وارد شوید.');
+          showAlert(t('Error'), error.response?.data?.message || t('Error loading information. Please log in again.'));
         }
       } catch (storageError) {
         console.error('❌ [OrganizationProfile] خطا در خواندن از AsyncStorage:', storageError);
-        showAlert('خطا', 'خطا در بارگذاری اطلاعات');
+        showAlert(t('Error'), t('Error loading information.'));
       }
     } finally {
       setLoadingProfile(false);
@@ -222,7 +224,7 @@ const OrganizationProfile = () => {
 
       if (permissionResult.granted === false) {
         console.log('❌ [OrganizationProfile] دسترسی رد شد');
-        showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
+        showAlert(t('Error'), t('Gallery access is required.'));
         return;
       }
 
@@ -253,7 +255,7 @@ const OrganizationProfile = () => {
       console.log('📸 [OrganizationProfile] ===== پایان انتخاب =====');
     } catch (error) {
       console.error('❌ [OrganizationProfile] خطا:', error);
-      showAlert('خطا', 'خطا در انتخاب تصویر');
+      showAlert(t('Error'), t('Error selecting image'));
     }
   };
 
@@ -266,7 +268,7 @@ const OrganizationProfile = () => {
 
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        showAlert(t('Error'), t('Please log in first.'));
         return;
       }
 
@@ -382,7 +384,7 @@ const OrganizationProfile = () => {
           setProfileImage({ uri: newImageUrl, uploaded: true });
         }
 
-        showAlert('موفق', 'پروفایل با موفقیت به‌روزرسانی شد');
+        showAlert(t('Success'), t('Profile updated successfully.'));
         setIsEditing(false);
 
         console.log('🔄 [OrganizationProfile] بارگذاری مجدد اطلاعات...');
@@ -404,17 +406,10 @@ const OrganizationProfile = () => {
         const method = errorMessage.includes('POST') ? 'POST' : 'PUT';
 
         showAlert(
-          '⚠️ قابلیت به‌روزرسانی هنوز فعال نشده',
-          `متأسفانه Backend هنوز امکان ویرایش پروفایل سازمانی را فعال نکرده است.\n\n` +
-          `📋 اطلاعات فعلی:\n` +
-          `✅ مشاهده پروفایل: فعال\n` +
-          `❌ ویرایش پروفایل: غیرفعال\n\n` +
-          `🔧 Endpoint مورد نیاز Backend:\n` +
-          `• POST /api/organization/profile (با _method=PUT)\n` +
-          `• یا PUT /api/organization/profile\n\n` +
-          `📞 لطفاً با تیم Backend هماهنگ کنید تا این endpoint را فعال کنند.`,
+          t('⚠️ Update is not enabled yet'),
+          t('Unfortunately, the backend has not enabled organizational profile editing yet.\n\n📋 Current status:\n✅ View profile: enabled\n❌ Edit profile: disabled\n\n🔧 Required backend endpoint:\n• POST /api/organization/profile (with _method=PUT)\n• or PUT /api/organization/profile\n\n📞 Please coordinate with the backend team to enable this endpoint.'),
           [{
-            text: 'متوجه شدم',
+            text: t('Got it'),
             onPress: () => {
               setIsEditing(false);
               loadOrganizationProfile();
@@ -425,14 +420,14 @@ const OrganizationProfile = () => {
         // نمایش خطاهای validation
         const errors = error.response.data.errors;
         const errorList = Object.keys(errors).map(key => `• ${errors[key].join('\n• ')}`).join('\n');
-        showAlert('خطای اعتبارسنجی', errorList);
+        showAlert(t('Validation error'), errorList);
       } else if (error.response?.status === 404) {
-        showAlert('خطا', 'اطلاعات سازمان یافت نشد');
+        showAlert(t('Error'), t('Organization information not found.'));
       } else if (error.response?.status === 401 || error.response?.status === 403) {
-        showAlert('خطا', 'دسترسی غیرمجاز. لطفاً دوباره وارد شوید');
+        showAlert(t('Error'), t('Unauthorized access. Please login.'));
       } else {
-        const errorMessage = error.response?.data?.message || 'خطا در به‌روزرسانی پروفایل';
-        showAlert('خطا', errorMessage);
+        const errorMessage = error.response?.data?.message || t('Error updating profile');
+        showAlert(t('Error'), errorMessage);
       }
     } finally {
       setLoading(false);
@@ -446,17 +441,17 @@ const OrganizationProfile = () => {
       const newErrors = {};
 
       if (!currentPassword) {
-        newErrors.currentPassword = 'رمز عبور فعلی الزامی است';
+        newErrors.currentPassword = t('Current password is required');
       }
 
       if (!newPassword) {
-        newErrors.newPassword = 'رمز عبور جدید الزامی است';
+        newErrors.newPassword = t('New password is required');
       } else if (newPassword.length < 8) {
-        newErrors.newPassword = 'رمز عبور جدید باید حداقل 8 کاراکتر باشد';
+        newErrors.newPassword = t('New password must be at least 8 characters');
       }
 
       if (newPassword !== confirmPassword) {
-        newErrors.confirmPassword = 'تکرار رمز عبور مطابقت ندارد';
+        newErrors.confirmPassword = t('Password and repeat password do not match.');
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -470,7 +465,7 @@ const OrganizationProfile = () => {
       console.log('🔑 [OrganizationProfile] توکن برای تغییر رمز:', token ? `${token.substring(0, 20)}...` : 'null');
 
       if (!token) {
-        showAlert('خطا', 'لطفا ابتدا وارد شوید');
+        showAlert(t('Error'), t('Please log in first.'));
         setLoading(false);
         return;
       }
@@ -498,7 +493,7 @@ const OrganizationProfile = () => {
       console.log('✅ [OrganizationProfile] پاسخ سرور:', response.data);
 
       if (response.data.success) {
-        showAlert('موفق', response.data.message || 'رمز عبور با موفقیت تغییر یافت');
+        showAlert(t('Success'), response.data.message || t('Password changed successfully.'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -506,8 +501,8 @@ const OrganizationProfile = () => {
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      const errorMessage = error.response?.data?.message || 'خطا در تغییر رمز عبور';
-      showAlert('خطا', errorMessage);
+      const errorMessage = error.response?.data?.message || t('Error changing password');
+      showAlert(t('Error'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -518,7 +513,7 @@ const OrganizationProfile = () => {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#d1e9ff' }}>
         <CustomStatusBar />
         <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-        <Text style={{ marginTop: 10, fontFamily: 'VazirLight', fontSize: 14 }}>در حال بارگذاری...</Text>
+        <Text style={{ marginTop: 10, fontFamily: 'VazirLight', fontSize: 14 }}>{t('Loading...')}</Text>
       </View>
     );
   }
@@ -530,7 +525,7 @@ const OrganizationProfile = () => {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title="پروفایل سازمانی"
+        title={t('Organization profile')}
       />
 
       <ScrollView
@@ -540,7 +535,7 @@ const OrganizationProfile = () => {
       >
         {/* Header با دکمه ویرایش */}
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>اطلاعات سازمان</Text>
+          <Text style={styles.headerTitle}>{t('Organization information')}</Text>
           <TouchableOpacity
             onPress={() => setIsEditing(!isEditing)}
             style={styles.editButton}
@@ -551,7 +546,7 @@ const OrganizationProfile = () => {
               color={themeColor1.bgColor(1)}
             />
             <Text style={styles.editButtonText}>
-              {isEditing ? 'انصراف' : 'ویرایش'}
+              {isEditing ? t('Cancel') : t('Edit')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -576,14 +571,14 @@ const OrganizationProfile = () => {
             )}
             {isEditing && (
               <Text style={styles.imageText}>
-                {profileImage ? 'تغییر تصویر' : 'انتخاب تصویر'}
+                {profileImage ? t('Change image') : t('Select image')}
               </Text>
             )}
           </TouchableOpacity>
 
           {/* نام سازمان */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>نام سازمان *</Text>
+            <Text style={styles.label}>{t('Organization name *')}</Text>
             <TextInput
               value={organizationName}
               onChangeText={setOrganizationName}
@@ -594,7 +589,7 @@ const OrganizationProfile = () => {
 
           {/* نام مدیر */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>نام و نام خانوادگی مدیر *</Text>
+            <Text style={styles.label}>{t('Manager full name *')}</Text>
             <TextInput
               value={familyName}
               onChangeText={setFamilyName}
@@ -605,7 +600,7 @@ const OrganizationProfile = () => {
 
           {/* کد ملی - غیرقابل ویرایش */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>شماره ملی مدیر</Text>
+            <Text style={styles.label}>{t('Manager national ID')}</Text>
             <TextInput
               value={nationalCode}
               editable={false}
@@ -615,7 +610,7 @@ const OrganizationProfile = () => {
 
           {/* شماره موبایل - غیرقابل ویرایش */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>شماره موبایل مدیر</Text>
+            <Text style={styles.label}>{t('Manager mobile number')}</Text>
             <TextInput
               value={mobileNumber}
               editable={false}
@@ -625,21 +620,21 @@ const OrganizationProfile = () => {
 
           {/* تاریخ تولد */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>تاریخ تولد مدیر</Text>
+            <Text style={styles.label}>{t('Manager date of birth')}</Text>
             <TouchableOpacity
               onPress={isEditing ? () => setDatePickerModal(true) : null}
               disabled={!isEditing}
               style={[styles.input, !isEditing && styles.inputDisabled]}
             >
               <Text style={[styles.dateText, !birthDate && styles.placeholderText]}>
-                {birthDate || 'انتخاب تاریخ'}
+                {birthDate || t('Select Date')}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* ایمیل سازمان */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>ایمیل سازمان *</Text>
+            <Text style={styles.label}>{t('Organization email *')}</Text>
             <TextInput
               value={organizationEmail}
               onChangeText={setOrganizationEmail}
@@ -652,7 +647,7 @@ const OrganizationProfile = () => {
 
           {/* تلفن ثابت سازمان */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>تلفن ثابت سازمان *</Text>
+            <Text style={styles.label}>{t('Organization landline *')}</Text>
             <View style={[NewStyles.row, { gap: 10 }]}>
               <TextInput
                 value={organizationPhoneNumber}
@@ -668,7 +663,7 @@ const OrganizationProfile = () => {
           {/* شهر و منطقه */}
           <View style={styles.rowContainer}>
             <View style={styles.halfField}>
-              <Text style={styles.label}>شهر *</Text>
+              <Text style={styles.label}>{t('City *')}</Text>
               <TextInput
                 value={city}
                 onChangeText={setCity}
@@ -677,7 +672,7 @@ const OrganizationProfile = () => {
               />
             </View>
             <View style={styles.halfField}>
-              <Text style={styles.label}>منطقه *</Text>
+              <Text style={styles.label}>{t('Region *')}</Text>
               <TextInput
                 value={region}
                 onChangeText={setRegion}
@@ -689,7 +684,7 @@ const OrganizationProfile = () => {
 
           {/* آدرس سازمان */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>آدرس سازمان *</Text>
+            <Text style={styles.label}>{t('Organization address *')}</Text>
             <TextInput
               value={organizationAddress}
               onChangeText={setOrganizationAddress}
@@ -702,7 +697,7 @@ const OrganizationProfile = () => {
 
           {/* کد پستی */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>کد پستی سازمان *</Text>
+            <Text style={styles.label}>{t('Organization postal code *')}</Text>
             <TextInput
               value={organizationPostalCode}
               onChangeText={setOrganizationPostalCode}
@@ -723,18 +718,18 @@ const OrganizationProfile = () => {
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.saveButtonText}>ذخیره تغییرات</Text>
+                <Text style={styles.saveButtonText}>{t('Save Changes')}</Text>
               )}
             </TouchableOpacity>
           )}
 
           {/* بخش تغییر رمز عبور */}
           <View style={styles.passwordSection}>
-            <Text style={styles.sectionTitle}>تغییر رمز عبور</Text>
+            <Text style={styles.sectionTitle}>{t('Change Password')}</Text>
 
             {/* رمز عبور فعلی */}
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>رمز عبور فعلی</Text>
+              <Text style={styles.label}>{t('Current password')}</Text>
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   value={currentPassword}
@@ -760,7 +755,7 @@ const OrganizationProfile = () => {
 
             {/* رمز عبور جدید */}
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>رمز عبور جدید</Text>
+              <Text style={styles.label}>{t('New password')}</Text>
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   value={newPassword}
@@ -786,7 +781,7 @@ const OrganizationProfile = () => {
 
             {/* تکرار رمز عبور */}
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>تکرار رمز عبور جدید</Text>
+              <Text style={styles.label}>{t('Confirm new password')}</Text>
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   value={confirmPassword}
@@ -819,7 +814,7 @@ const OrganizationProfile = () => {
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.saveButtonText}>تغییر رمز عبور</Text>
+                <Text style={styles.saveButtonText}>{t('Change Password')}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -831,7 +826,7 @@ const OrganizationProfile = () => {
             style={styles.logoutButton}
           >
             <Ionicons name="log-out-outline" size={20} color="#fff" />
-            <Text style={styles.logoutButtonText}>خروج از حساب</Text>
+            <Text style={styles.logoutButtonText}>{t('Log out of account')}</Text>
           </TouchableOpacity>
 
         </View>

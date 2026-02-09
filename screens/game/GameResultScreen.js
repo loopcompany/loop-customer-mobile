@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
@@ -15,6 +16,7 @@ import { getResultMessage } from './GameData';
 import Button from '../../components/Button';
 
 export default function GameResultScreen({ route, navigation }) {
+  const { t } = useTranslation();
   const {
     score = 0,
     correctAnswers = 0,
@@ -75,7 +77,7 @@ export default function GameResultScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <ScreenHeaders
-        title="نتیجه بازی"
+        title={t("Game Result")}
         onBackPress={handleBackToMenu}
       />
 
@@ -102,10 +104,10 @@ export default function GameResultScreen({ route, navigation }) {
               { color: resultMessage.color },
             ]}
           >
-            {resultMessage.title}
+            {t(resultMessage.title)}
           </Text>
           <Text style={[NewStyles.text10, styles.resultMessage]}>
-            {resultMessage.message}
+            {t(resultMessage.message)}
           </Text>
 
           {/* ستاره‌ها */}
@@ -135,14 +137,14 @@ export default function GameResultScreen({ route, navigation }) {
         {/* آمار بازی */}
         <View style={styles.statsCard}>
           <Text style={[NewStyles.title10, styles.statsTitle]}>
-            آمار بازی
+            {t("Game Stats")}
           </Text>
 
           <View style={styles.statRow}>
             <View style={styles.statItem}>
               <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
               <Text style={[NewStyles.text10, styles.statLabel]}>
-                پاسخ درست
+                {t("Correct answers")}
               </Text>
               <Text style={[NewStyles.title10, styles.statValue]}>
                 {correctAnswers}
@@ -154,7 +156,7 @@ export default function GameResultScreen({ route, navigation }) {
             <View style={styles.statItem}>
               <Ionicons name="close-circle" size={24} color="#F44336" />
               <Text style={[NewStyles.text10, styles.statLabel]}>
-                پاسخ غلط
+                {t("Wrong answers")}
               </Text>
               <Text style={[NewStyles.title10, styles.statValue]}>
                 {totalQuestions - correctAnswers}
@@ -166,7 +168,7 @@ export default function GameResultScreen({ route, navigation }) {
             <View style={styles.statItem}>
               <Ionicons name="trophy" size={24} color="#FF9800" />
               <Text style={[NewStyles.text10, styles.statLabel]}>
-                امتیاز
+                {t("Score")}
               </Text>
               <Text style={[NewStyles.title10, styles.statValue]}>
                 {score}%
@@ -180,17 +182,17 @@ export default function GameResultScreen({ route, navigation }) {
           <Text style={styles.motivationEmoji}>💪</Text>
           <Text style={[NewStyles.text10, styles.motivationText]}>
             {score >= 80
-              ? 'تو خیلی باهوشی! ادامه بده!'
+              ? t("You are very smart! Keep going!")
               : score >= 50
-              ? 'دفعه بعد بهتر می‌شی! تمرین کن!'
-              : 'عیبی نداره! بازی کردن خیلی خوبه!'}
+              ? t("You will do better next time! Practice!")
+              : t("No problem! Playing is great!")}
           </Text>
         </View>
 
         {/* دکمه‌های عملیاتی */}
         <View style={styles.buttonsContainer}>
           <Button
-            title="بازی دوباره! 🎮"
+            title={t("Play again! 🎮")}
             onPress={handlePlayAgain}
           />
           <TouchableOpacity
@@ -198,7 +200,7 @@ export default function GameResultScreen({ route, navigation }) {
             onPress={handleBackToMenu}
           >
             <Text style={[NewStyles.title10, styles.secondaryButtonText]}>
-              بازگشت به منو
+              {t("Back to menu")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -208,7 +210,7 @@ export default function GameResultScreen({ route, navigation }) {
           <View style={styles.tipCard}>
             <Ionicons name="bulb" size={20} color="#FFC107" />
             <Text style={[NewStyles.text10, styles.tipText]}>
-              می‌تونی دوباره بازی کنی و امتیاز بهتری بگیری!
+              {t("You can play again and get a better score!")}
             </Text>
           </View>
         )}

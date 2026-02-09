@@ -1,5 +1,5 @@
 // ProductIssueScreen.js
-import React, { useState } from 'react';
+import React, { useState,useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../components/ScreenHeaders';
 import NewStyles from '../styles/NewStyles';
 import Footer from './Footer';
@@ -23,10 +24,16 @@ import { faultReportAPI } from '../services/Api';
 import { showToastOrAlert } from '../helpers/Common';
 import { themeColor1, themeColor4 } from '../theme/Color';
 import Button from '../components/Button';
-
+import { createStyles } from '../styles/NewStyles';
 
 
 export default function ProductIssueScreen({ navigation }) {
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [form, setForm] = useState({
     name: '',
     orderDate: '',
@@ -54,13 +61,13 @@ export default function ProductIssueScreen({ navigation }) {
 
   const handleOrderSelect = (item) => {
     setSelectedOrder(item);
-    // پر کردن خودکار فیلدها با اطلاعات سفارش
+    // Auto-fill fields with order information
     setForm(prev => ({
       ...prev,
       orderNumber: item.order_id.toString(),
       techCode: item.technician_referral_code || '',
       amount: item.final_paid_amount ? item.final_paid_amount.toString() : '',
-      name: item.product_name || '', // فقط وقتی پر باشه پر می‌کنه
+      name: item.product_name || '',
       orderDate: item.created_at ? formatDate(item.created_at) : '',
       completeDate: item.finished_at ? formatDate(item.finished_at) : '',
     }));
@@ -69,17 +76,17 @@ export default function ProductIssueScreen({ navigation }) {
   const handleSubmit = async () => {
     // Validation
     if (!selectedOrder) {
-      showToastOrAlert('لطفاً یک سفارش انتخاب کنید');
+      showToastOrAlert(t('Please select an order'));
       return;
     }
 
     if (!form.name || form.name.trim().length < 3) {
-      showToastOrAlert('لطفاً نام محصول/سرویس را وارد کنید (حداقل 3 کاراکتر)');
+      showToastOrAlert(t('Please enter product/service name (minimum 3 characters)'));
       return;
     }
 
     if (!form.desc || form.desc.trim().length < 10) {
-      showToastOrAlert('لطفاً توضیحات را وارد کنید (حداقل 10 کاراکتر)');
+      showToastOrAlert(t('Please enter description (minimum 10 characters)'));
       return;
     }
 
@@ -100,7 +107,7 @@ export default function ProductIssueScreen({ navigation }) {
       const response = await faultReportAPI.create(payload);
 
       if (response.success) {
-        showToastOrAlert(response.message || 'گزارش خرابی با موفقیت ثبت شد');
+        showToastOrAlert(response.message || t('Fault report successfully submitted'));
 
         // Reset form
         setForm({
@@ -121,7 +128,7 @@ export default function ProductIssueScreen({ navigation }) {
       // Detailed error handling: surface server message, validation errors or fallback to generic
       console.error('Error submitting fault report:', error);
       const resp = error.response?.data;
-      let errorMessage = 'خطا در ثبت گزارش خرابی';
+      let errorMessage = t('Error submitting fault report');
 
       if (resp) {
         // Prefer the server message
@@ -143,7 +150,7 @@ export default function ProductIssueScreen({ navigation }) {
           try {
             errorMessage = JSON.stringify(resp);
           } catch (e) {
-            errorMessage = 'خطای ناشناخته از سرور';
+            errorMessage = t('Unknown server error');
           }
         }
         // Log status code and full response for debugging
@@ -161,58 +168,58 @@ export default function ProductIssueScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={{ top: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={'عیب سرویس / محصول'} />
+      <ScreenHeaders title={t('Service / Product Fault')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={[NewStyles.wrapper]}>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>نام محصول / سرویس<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Product / Service Name')}<Text style={NewStyles.title6}>*</Text></Text>
 
-          <TextInput placeholder="نام محصول / سرویس" value={form.name} onChangeText={(t) => handleChange('name', t)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>تاریخ ثبت سفارش<Text style={NewStyles.title6}>*</Text></Text>
+          <TextInput placeholder={t('Product / Service Name')} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Order Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
-              {form.orderDate || 'تاریخ ثبت سفارش'}
+              {form.orderDate || t('Order Registration Date')}
             </Text>
           </TouchableOpacity>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>تاریخ دریافت / انجام</Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Delivery / Completion Date')}</Text>
 
           <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
-              {form.completeDate || 'تاریخ دریافت / انجام'}
+              {form.completeDate || t('Delivery / Completion Date')}
             </Text>
           </TouchableOpacity>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>شماره سفارش<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Order Number')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <OrderDropdown
             value={selectedOrder?.value}
             onChange={handleOrderSelect}
-            placeholder="انتخاب شماره سفارش"
+            placeholder={t('Select Order Number')}
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>کد تکنسین</Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Technician Code')}</Text>
 
           <TextInput
-            placeholder="کد تکنسین"
+            placeholder={t('Technician Code')}
             value={form.techCode}
-            onChangeText={(t) => handleChange('techCode', t)}
+            onChangeText={(text) => handleChange('techCode', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>مبلغ پرداختی</Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Paid Amount')}</Text>
 
           <TextInput
-            placeholder="مبلغ پرداختی"
+            placeholder={t('Paid Amount')}
             value={form.amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            onChangeText={(t) => handleChange('amount', t)}
+            onChangeText={(text) => handleChange('amount', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
             keyboardType="numeric"
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>توضیحات<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
-            placeholder="توضیحات"
+            placeholder={t('Description')}
             value={form.desc}
-            onChangeText={(t) => handleChange('desc', t)}
+            onChangeText={(text) => handleChange('desc', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}
             placeholderTextColor="#999"
             multiline
@@ -221,7 +228,7 @@ export default function ProductIssueScreen({ navigation }) {
           <View style={styles.spacer} />
 
 
-          <Button title={'ثبت'} onPress={handleSubmit} loading={isSubmitting} />
+          <Button title={t('Submit')} onPress={handleSubmit} loading={isSubmitting} />
 
         </ScrollView>
       </KeyboardAvoidingView>
@@ -245,7 +252,7 @@ export default function ProductIssueScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   placeholder: {
     color: '#999',
   },

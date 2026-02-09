@@ -14,8 +14,10 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
+import { useTranslation } from 'react-i18next';
 
 const OrganizationForgotPassword = ({ navigation }) => {
+  const { t } = useTranslation();
   const [organizationCode, setOrganizationCode] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,16 +28,16 @@ const OrganizationForgotPassword = ({ navigation }) => {
 
     // Validate organization code (6 digits)
     if (!organizationCode) {
-      newErrors.organizationCode = 'کد سازمانی الزامی است';
+      newErrors.organizationCode = t('Organization code is required');
     } else if (organizationCode.length !== 6 || !/^\d{6}$/.test(organizationCode)) {
-      newErrors.organizationCode = 'کد سازمانی باید 6 رقم باشد';
+      newErrors.organizationCode = t('Organization code must be 6 digits');
     }
 
     // Validate mobile number
     if (!mobileNumber) {
-      newErrors.mobileNumber = 'شماره موبایل الزامی است';
+      newErrors.mobileNumber = t('Mobile number is required');
     } else if (!/^09\d{9}$/.test(mobileNumber)) {
-      newErrors.mobileNumber = 'فرمت شماره موبایل صحیح نیست (مثال: 09123456789)';
+      newErrors.mobileNumber = t('Mobile format is incorrect. Must be 11 digits starting with 09 (example: 09123456789)');
     }
 
     setErrors(newErrors);
@@ -73,11 +75,11 @@ const OrganizationForgotPassword = ({ navigation }) => {
 
       if (response.data.status === 'success') {
         showAlert(
-          'موفق',
-          response.data.message || 'کد بازیابی رمز عبور به شماره موبایل شما ارسال شد.',
+          t('success'),
+          response.data.message || t('Recovery code has been sent to your mobile number.'),
           [
             {
-              text: 'ادامه',
+              text: t('Next'),
               onPress: () => {
                 navigation.navigate('OrganizationResetPassword', {
                   organizationCode: organizationCode,
@@ -91,11 +93,11 @@ const OrganizationForgotPassword = ({ navigation }) => {
     } catch (error) {
       console.error('❌ Forgot password error:', error);
 
-      let errorMessage = 'خطا در ارسال درخواست';
+      let errorMessage = t('Error submitting request');
 
       if (error.response) {
         console.error('Response error:', error.response.data);
-        errorMessage = error.response.data.message || 'اطلاعات وارد شده صحیح نیست';
+        errorMessage = error.response.data.message || t('The entered information is incorrect');
 
         // Set specific field errors if provided
         if (error.response.data.errors) {
@@ -103,13 +105,13 @@ const OrganizationForgotPassword = ({ navigation }) => {
         }
       } else if (error.request) {
         console.error('Request error:', error.request);
-        errorMessage = 'سرور پاسخگو نیست. لطفا اتصال اینترنت را بررسی کنید.';
+        errorMessage = t('Error connecting to server. Please check your internet connection');
       } else {
         console.error('Unknown error:', error.message);
-        errorMessage = error.message || 'خطای نامشخص رخ داد';
+        errorMessage = error.message || t('An unexpected error occurred!');
       }
 
-      showAlert('خطا', errorMessage);
+      showAlert(t('Error'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title="فراموشی رمز عبور"
+        title={t('Password recovery')}
       />
 
       <ScrollView
@@ -152,7 +154,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 textAlign: 'center',
               }}
             >
-              بازیابی رمز عبور سازمانی
+              {t('Organization password recovery')}
             </Text>
             <Text
               style={{
@@ -163,7 +165,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 paddingHorizontal: 20,
               }}
             >
-              کد سازمانی و شماره موبایل مدیر را وارد کنید
+              {t('Enter organization code and admin mobile number')}
             </Text>
           </View>
 
@@ -178,7 +180,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 textAlign: 'right',
               }}
             >
-              کد سازمانی *
+              {t('Organization code')} *
             </Text>
             <TextInput
               value={organizationCode}
@@ -188,7 +190,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   setErrors({ ...errors, organizationCode: null });
                 }
               }}
-              placeholder="کد 6 رقمی سازمان"
+              placeholder={t('Organization code * (6 digits)')}
               keyboardType="number-pad"
               maxLength={6}
               style={{
@@ -198,10 +200,10 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 paddingHorizontal: 15,
                 borderWidth: 1,
                 borderColor: errors.organizationCode ? '#ff0000' : '#ccc',
-                fontSize: 16,
+                fontSize: 12,
                 fontFamily: 'VazirLight',
                 textAlign: 'center',
-                letterSpacing: 8,
+                letterSpacing: 2,
               }}
             />
             {errors.organizationCode && (
@@ -230,7 +232,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 textAlign: 'right',
               }}
             >
-              شماره موبایل مدیر *
+              {t('Admin mobile number')} *
             </Text>
             <TextInput
               value={mobileNumber}
@@ -240,7 +242,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   setErrors({ ...errors, mobileNumber: null });
                 }
               }}
-              placeholder="09123456789"
+              placeholder={t('Mobile number (example: 09123456789)')}
               keyboardType="phone-pad"
               maxLength={11}
               style={{
@@ -290,8 +292,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 textAlign: 'right',
               }}
             >
-              💡 کد بازیابی به شماره موبایل ثبت شده در حساب مدیر سازمان ارسال خواهد
-              شد.
+              {t('💡 The recovery code will be sent to the mobile number registered in the organization admin account.')}
             </Text>
           </View>
 
@@ -319,7 +320,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   fontFamily: 'VazirBold',
                 }}
               >
-                ارسال کد بازیابی
+                {t('Send recovery code')}
               </Text>
             )}
           </TouchableOpacity>
@@ -345,7 +346,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 fontFamily: 'VazirLight',
               }}
             >
-              بازگشت به صفحه ورود
+              {t('Back to login')}
             </Text>
           </TouchableOpacity>
         </View>

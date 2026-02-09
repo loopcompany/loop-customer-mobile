@@ -9,6 +9,7 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import ScreenTitle from '../../components/ScreenTitle';
 import NewStyles from '../../styles/NewStyles';
 import CustomStatusBar from '../../components/CustomStatusBar';
@@ -17,6 +18,7 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
 
 export default function DeviceOrderSummary({ navigation }) {
+  const { t } = useTranslation();
   const [visibleSection, setVisibleSection] = useState(null);
 
   const toggleSection = (section) => {
@@ -24,16 +26,16 @@ export default function DeviceOrderSummary({ navigation }) {
   };
 
   const sections = [
-    { key: 'check', label: 'بررسی / جایگزین زمانی / پیش رسید' },
-    { key: 'techInfo', label: 'اطلاعات تکنسین' },
-    { key: 'progress', label: 'در حال انجام / اتمام' },
-    { key: 'loop', label: 'اعزام به لوپ / هزینه ها / مدت زمان انجام' },
-    { key: 'followup', label: 'پیگیری / زمان عودت' },
-    { key: 'parts', label: 'قطعات / هزینه ها / نماینده' },
-    { key: 'payment', label: 'پرداخت هزینه' },
-    { key: 'delivery', label: 'دریافت محصول / اتمام' },
-    { key: 'invoice', label: 'فاکتور' },
-    { key: 'survey', label: 'نظرسنجی / امتیازدهی' },
+    { key: 'check', label: t('Review / Replacement / Receipt') },
+    { key: 'techInfo', label: t('Technician information') },
+    { key: 'progress', label: t('In Progress / Completion') },
+    { key: 'loop', label: t('Send to Loop / Costs / Duration') },
+    { key: 'followup', label: t('Follow-up / Return time') },
+    { key: 'parts', label: t('Parts / Costs / Representative') },
+    { key: 'payment', label: t('Pay cost') },
+    { key: 'delivery', label: t('Receive product / Completion') },
+    { key: 'invoice', label: t('Invoice') },
+    { key: 'survey', label: t('Survey / Rating') },
   ];
 
   return (
@@ -42,7 +44,7 @@ export default function DeviceOrderSummary({ navigation }) {
       {/* <View style={{ padding: 10 }}>
         <ScreenTitle title={'سفارش‌های جاری من'} />
       </View> */}
-      <ScreenHeaders title={'سفارش های جاری من'}/>
+      <ScreenHeaders title={t('My current orders')}/>
       <ScrollView contentContainerStyle={styles.container}>
 
         {sections.map((section) => (
@@ -52,11 +54,12 @@ export default function DeviceOrderSummary({ navigation }) {
             visible={visibleSection === section.key}
             onPress={() => toggleSection(section.key)}
             sectionKey={section.key}
+            t={t}
           />
         ))}
 
         <TouchableOpacity style={styles.sectionButton}>
-          <Text style={styles.sectionButtonText}>بازگشت به صفحه اصلی</Text>
+          <Text style={styles.sectionButtonText}>{t('Back to home page')}</Text>
         </TouchableOpacity>
       </ScrollView>
       
@@ -64,7 +67,7 @@ export default function DeviceOrderSummary({ navigation }) {
   );
 }
 
-const FormSection = ({ label, visible, onPress, sectionKey }) => (
+const FormSection = ({ label, visible, onPress, sectionKey, t }) => (
   <>
     <TouchableOpacity style={styles.sectionButton} onPress={onPress}>
       <Text style={NewStyles.text4}>{label}</Text>
@@ -76,15 +79,15 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
           <>
             <View style={styles.noticeBox}>
               <Text style={NewStyles.text10}>
-                کاربر گرامی، سفارش شما در حال بررسی توسط لوپ می‌باشد. از صبر و شکیبایی شما سپاسگزاریم.
+                {t('Dear user, your order is being reviewed by Loop. Thank you for your patience.')}
               </Text>
             </View>
 
             <View style={styles.whiteBox}>
-              <Text style={NewStyles.text10}>توضیحات لوپ</Text>
+              <Text style={NewStyles.text10}>{t('Loop comments')}</Text>
             </View>
 
-            <Text style={NewStyles.text10}>تاریخ و ساعت مراجعه تکنسین / جایگزین زمانی</Text>
+            <Text style={NewStyles.text10}>{t('Technician visit date and time / Time replacement')}</Text>
 
             <View style={[styles.row, { marginTop: 10 }]}>
               <View style={styles.smallWhiteBox}>
@@ -96,12 +99,12 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
             </View>
 
             <View style={styles.centerBox}>
-              <Text style={NewStyles.text10}>پیش رسید</Text>
+              <Text style={[NewStyles.text10]}>{t('Quote')}</Text>
             </View>
 
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="توضیحات دیگری دارید؟ بنویسید:"
+                placeholder={t('Do you have more details? Write:')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 multiline
                 numberOfLines={4}
@@ -113,11 +116,11 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
 
 
             <TouchableOpacity style={styles.submitButton}>
-              <Text style={NewStyles.text4}>ثبت سفارش</Text>
+              <Text style={NewStyles.text4}>{t('Submit Order')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.cancelButton}>
-              <Text style={NewStyles.text10}>لغو سفارش</Text>
+              <Text style={NewStyles.text10}>{t('Cancel Order')}</Text>
             </TouchableOpacity>
           </>
         )}
@@ -131,32 +134,32 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
                 style={styles.techImage}
               />
             </View>
-            <Text style={[NewStyles.text10, { textAlign: 'center' }]}>اکبر امدادی</Text>
-            <Text style={[NewStyles.text10, { textAlign: 'center' }]}>تکنسین جامع میدانی</Text>
+            <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Akbar Emdadi')}</Text>
+            <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Comprehensive Field Technician')}</Text>
             <View style={styles.dottedLine} />
             <View style={styles.techInfoRow}>
               <View style={styles.techInfoItem}>
-                <Text style={[NewStyles.text10]}>کد تکنسین</Text>
+                <Text style={[NewStyles.text10]}>{t('Technician Code')}</Text>
                 <Text style={[NewStyles.text10]}>۲۱۶-۰۰۰۰-۱۵۴۲</Text>
               </View>
               <View style={styles.techInfoItem}>
-                <Text style={[NewStyles.text10]}>شروع فعالیت</Text>
+                <Text style={[NewStyles.text10]}>{t('Start of activity')}</Text>
                 <Text style={[NewStyles.text10]}>۱۴۰۳/۰۹/۲۰</Text>
               </View>
             </View>
 
             <View style={styles.contactButtons}>
               <TouchableOpacity style={styles.buttonWhite}>
-                <Text style={[NewStyles.text10]}>تماس با تکنسین</Text>
+                <Text style={[NewStyles.text10]}>{t('Call technician')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonWhite}>
-                <Text style={[NewStyles.text10]}>پیام به تکنسین</Text>
+                <Text style={[NewStyles.text10]}>{t('Message to technician')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonWhite}>
-                <Text style={[NewStyles.text10]}>ارسال به دوستان</Text>
+                <Text style={[NewStyles.text10]}>{t('Send to friends')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonWhite}>
-                <Text style={[NewStyles.text10]}>اسکن QR کد</Text>
+                <Text style={[NewStyles.text10]}>{t('Scan QR code')}</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -166,28 +169,28 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
           <>
             <View style={styles.noticeBox}>
               <Text style={[NewStyles.text10]}>
-                کاربر گرامی، در صورت عدم تطابق مشخصات کاربر تکنسین با اطلاعات ثبت شده، لطفاً به پشتیبانی لوپ اطلاع دهید.
+                {t('Dear user, if the technician\'s specifications do not match the registered information, please inform Loop support.')}
               </Text>
             </View>
 
             <TouchableOpacity style={styles.confirmButton}>
-              <Text style={[NewStyles.text10]}>تأیید حضور تکنسین</Text>
+              <Text style={[NewStyles.text10]}>{t('Confirm technician presence')}</Text>
             </TouchableOpacity>
 
             <View style={styles.dottedLine}>
               <TouchableOpacity style={styles.grayButton}>
-                <Text style={[NewStyles.text10]}>مشخصات تکنسین درست است</Text>
+                <Text style={[NewStyles.text10]}>{t('Technician specifications are correct')}</Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.dottedLine}>
               <TouchableOpacity style={styles.grayButton}>
-                <Text style={[NewStyles.text10]}>مشخصات تکنسین درست نیست</Text>
+                <Text style={[NewStyles.text10]}>{t('Technician specifications are not correct')}</Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.linkButton}>
-              <Text style={[NewStyles.text10]}>شرایط و قوانین اعزام محصول</Text>
+              <Text style={[NewStyles.text10]}>{t('Terms and conditions for product dispatch')}</Text>
             </TouchableOpacity>
           </>
         )}
@@ -196,35 +199,35 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
           <>
             <View style={styles.noticeBox}>
               <Text style={NewStyles.text10}>
-                کاربر گرامی ، محصول آورده شده در حال بررسی و عیب یابی توسط کارشناس مرتبط می باشد. از صبر و شکیبایی شما سپاسگزاریم.
+                {t('Dear user, the product is being reviewed and diagnosed by the relevant expert. Thank you for your patience.')}
               </Text>
             </View>
 
             <View style={styles.whiteBox}>
-              <Text style={NewStyles.text10}>توضیحات کارشناس لوپ</Text>
+              <Text style={NewStyles.text10}>{t('Loop expert comments')}</Text>
             </View>
 
             <View style={[styles.row, { alignItems: 'center', marginBottom: 8, justifyContent: 'space-between' }]}>
               <View>
-                <Text style={styles.timeTitle}>اعلام هزینه تقریبی :</Text>
+                <Text style={styles.timeTitle}>{t('Approximate cost statement:')}</Text>
               </View>
 
               <View style={styles.smallWhiteBox}>
-                <Text style={NewStyles.text10}>پیش رسید سفارش</Text>
+                <Text style={NewStyles.text10}>{t('Order receipt')}</Text>
               </View>
 
             </View>
 
             <View style={[styles.row, { alignItems: 'center', marginBottom: 10 }]}> 
-              <Text style={styles.timeTitle}>مدت زمان تقریبی انجام سفارش</Text>
+              <Text style={styles.timeTitle}>{t('Approximate order completion time')}</Text>
               <View style={[styles.smallWhiteBox, { width: "40%" }]}>
-                <Text style={NewStyles.text10}>2 روز کاری</Text>
+                <Text style={NewStyles.text10}>{t('2 working days')}</Text>
               </View>
             </View>
 
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="درخواست / توضیحات بنویسید:"
+                placeholder={t('Write request / comments:')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 multiline
                 numberOfLines={3}
@@ -234,10 +237,10 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
 
             <View style={styles.buttonRow}>
               <TouchableOpacity style={styles.buttonBlue}>
-                <Text style={[NewStyles.text4, { color: '#fff' }]}>می پذیرم</Text>
+                <Text style={[NewStyles.text4, { color: '#fff' }]}>{t('I accept')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonYellow}>
-                <Text style={[NewStyles.text4, { color: '#000' }]}>لغو سفارش / عودت</Text>
+                <Text style={[NewStyles.text4, { color: '#000' }]}>{t('Cancel order / Return')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -249,25 +252,25 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
           <>
             <View style={styles.noticeBox}>
               <Text style={NewStyles.text10}>
-                کاربر گرامی ، محصول آورده شده در حال انجام توسط کارشناس مربوطه می باشد. از صبر و شکیبایی شما سپاسگزاریم.
+                {t('Dear user, the product is in progress by the relevant expert. Thank you for your patience.')}
               </Text>
             </View>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 10 }]}> 
-              <Text style={[NewStyles.text4]}>در زمان عودت با من تماس گرفته شود</Text>
+              <Text style={[NewStyles.text4]}>{t('Contact me at return time')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.whiteBorderButton}>
-              <Text style={[NewStyles.text10]}>در چه تاریخی محصول عودت داده می شود؟</Text>
+              <Text style={[NewStyles.text10]}>{t('On what date will the product be returned?')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.whiteBorderButton}>
-              <Text style={[NewStyles.text10]}>عجله دارم ، سریع تر انجام شود</Text>
+              <Text style={[NewStyles.text10]}>{t('I\'m in a hurry, do it faster')}</Text>
             </TouchableOpacity>
 
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="درخواست / توضیحات بنویسید:"
+                placeholder={t('Write request / comments:')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 multiline
                 numberOfLines={3}
@@ -289,32 +292,32 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
         {sectionKey === 'parts' && (
           <>
             <View style={styles.blueHeader}>
-              <Text style={[NewStyles.text4, { color: '#fff' }]}>قطعات / هزینه ها / نماینده</Text>
+              <Text style={[NewStyles.text4, { color: '#fff' }]}>{t('Parts / Costs / Representative')}</Text>
             </View>
 
             <View style={{ height: 8 }} />
 
             <View style={styles.smallButtonsRow}>
               <TouchableOpacity style={{margin:10}}>
-                <Text style={[NewStyles.text10]}>تعمیری/تعویضی/سایر</Text>
+                <Text style={[NewStyles.text10]}>{t('Repair/Replacement/Other')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.smallWhiteBtn,{width:"50%"}]}>
-                <Text style={[NewStyles.text10]}> توضیحات کارشناس اعزامی</Text>
+                <Text style={[NewStyles.text10]}>{t('Deployed expert comments')}</Text>
               </TouchableOpacity>
             </View>
 
             <View style={{ height: 8 }} />
 
             <View style={NewStyles.rowWrapper}>
-              <Text style={[NewStyles.text10]}>مبلغ کل :</Text>
+              <Text style={[NewStyles.text10]}>{t('Total amount:')}</Text>
               <View style={styles.amountBox}>
-                <Text style={[NewStyles.text10]}>رسید سفارش</Text>
+                <Text style={[NewStyles.text10]}>{t('Order receipt')}</Text>
               </View>
             </View>
 
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="درخواست / توضیحات بنویسید :"
+                placeholder={t('Write request / comments :')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 multiline
                 numberOfLines={3}
@@ -324,11 +327,11 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
             </View>
 
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text10]}>معرفی نماینده جهت دریافت محصول : آقا / خانم</Text>
+              <Text style={[NewStyles.text10]}>{t('Introduce representative to receive product: Mr. / Mrs.')}</Text>
             </View>
 
             <TextInput
-              placeholder="نام نماینده"
+              placeholder={t('Representative name')}
               placeholderTextColor={themeColor10.bgColor(0.7)}
               style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
             />
@@ -351,32 +354,32 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
         {sectionKey === 'delivery' && (
           <>
             <View style={styles.centerBox}>
-              <Text style={[NewStyles.text4, { color: '#003366' }]}>دریافت محصول / سفارش</Text>
+              <Text style={[NewStyles.text4, { color: '#003366' }]}>{t('Receive product / order')}</Text>
             </View>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 8 }]}> 
-              <Text style={[NewStyles.text4]}>محصول را با تست سلامت دریافت کردم</Text>
+              <Text style={[NewStyles.text4]}>{t('I received the product with health test')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 8 }]}> 
-              <Text style={[NewStyles.text4]}>محصول را بدون تست سلامت دریافت کردم</Text>
+              <Text style={[NewStyles.text4]}>{t('I received the product without health test')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 8 }]}> 
-              <Text style={[NewStyles.text4]}>محصول را تحویل گرفتم، اما دارای نواقص فنی می‌باشد</Text>
+              <Text style={[NewStyles.text4]}>{t('I received the product but it has technical defects')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 8 }]}> 
-              <Text style={[NewStyles.text4]}>محصول پس از تست به لوپ عودت داده شد</Text>
+              <Text style={[NewStyles.text4]}>{t('The product was returned to Loop after the test')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.buttonYellow, { marginBottom: 10 }]}> 
-              <Text style={[NewStyles.text4]}>محصول را طبق درخواست خودم، دریافت کردم</Text>
+              <Text style={[NewStyles.text4]}>{t('I received the product as per my request')}</Text>
             </TouchableOpacity>
 
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="درخواست / توضیحات بنویسید :"
+                placeholder={t('Write request / comments :')}
                 placeholderTextColor={themeColor10.bgColor(0.7)}
                 multiline
                 numberOfLines={3}
@@ -389,23 +392,23 @@ const FormSection = ({ label, visible, onPress, sectionKey }) => (
         {sectionKey === 'payment' && (
           <>
             <View style={styles.priceRow}>
-              <Text style={[NewStyles.text10]}>جمع مبلغ کل:</Text>
+              <Text style={[NewStyles.text10]}>{t('Total amount sum:')}</Text>
               <View style={styles.priceBox}>
-                <Text style={[NewStyles.text10]}>۵٬۰۰۰٬۰۰۰ ریال</Text>
+                <Text style={[NewStyles.text10]}>۵٬۰۰۰٬۰۰۰ {t('Rial')}</Text>
               </View>
             </View>
 
             <View style={styles.walletButtons}>
               <TouchableOpacity style={styles.walletButton}>
-                <Text style={[NewStyles.text4]}>کسر هزینه از کیف پول</Text>
+                <Text style={[NewStyles.text4]}>{t('Deduct cost from wallet')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.walletButton}>
-                <Text style={[NewStyles.text4]}>شارژ کیف پول</Text>
+                <Text style={[NewStyles.text4]}>{t('Charge wallet')}</Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.payButton}>
-              <Text style={[NewStyles.text4]}>پرداخت آنلاین</Text>
+              <Text style={[NewStyles.text4]}>{t('Online payment')}</Text>
             </TouchableOpacity>
           </>
         )}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform } from "react-native";
+import { useTranslation } from "react-i18next";
 import Footer from "../../screens/Footer";
 import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
@@ -8,6 +9,7 @@ import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
 
 const Grouping = ({ navigation }) => {
+  const { t } = useTranslation();
   const [isOrganizationalGuideOpen, setIsOrganizationalGuideOpen] = useState(false);
   const handleOrganizationalLogin = () => {
     navigation.navigate("Login");
@@ -22,7 +24,7 @@ const Grouping = ({ navigation }) => {
     <View style={[NewStyles.container, { flex: 1 }]}>
       <CustomStatusBar />
       <ScreenHeaders
-        title="سازمانی / شرکتی"
+        title={t("Organization / Company")}
       />
 
       {/* Background with image */}
@@ -62,7 +64,7 @@ const Grouping = ({ navigation }) => {
                 lineHeight: 18,
               }}
             >
-              قوانین و مقررات سامانه در پنل سازمانی / شرکتی
+              {t("System terms and conditions in the organization / company panel")}
             </Text>
           </View>
         </Pressable>
@@ -111,7 +113,7 @@ const Grouping = ({ navigation }) => {
                 }}
               >
           
-                سازمانی / شرکتی
+                {t("Organization / Company")}
               </Text>
               {/* Arrow down */}
               <View
@@ -156,7 +158,7 @@ const Grouping = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                ورود به حساب کاربری
+                {t("Login to account")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -218,7 +220,7 @@ const Grouping = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-                راهنمای پنل سازمانی / دولتی 
+                {t("Organizational / Government panel guide")}
               </Text>
               {/* Red arrow pointing down or up based on state */}
               <View
@@ -266,7 +268,7 @@ const Grouping = ({ navigation }) => {
                     lineHeight: 20,
                   }}
                 >
-                  پنل سازمانی / شرکتی لوپ برای کاربرانی که دارای تعداد زیادی از محصولات / دستگاه / قطعات کامپیوتری می‌باشد و ثبت نام در این پنل به منظور تسریع در انجام خدمات و نیز کاهش درصد هزینه‌ها انجام گردیده است.
+                  {t("Loop's organizational/company panel is for users with a large number of products/devices/computer parts, and registration in this panel speeds up services and reduces costs.")}
                 </Text>
               </View>
             )}

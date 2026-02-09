@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../components/ScreenHeaders';
 import NewStyles from '../styles/NewStyles';
 import { themeColor1, themeColor0, themeColor10 } from '../theme/Color';
@@ -10,6 +11,7 @@ import violationReportAPI from '../services/ViolationReportApi';
 import { formatJalaaliDate, formatPrice, showToastOrAlert } from '../helpers/Common';
 
 export default function ViolationReportsListScreen({ navigation }) {
+    const { t } = useTranslation();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -45,7 +47,7 @@ export default function ViolationReportsListScreen({ navigation }) {
         } catch (error) {
             console.error('Fetch reports error:', error);
 
-            let errorMessage = 'خطا در دریافت گزارش‌ها';
+            let errorMessage = t('Error fetching reports');
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
             }
@@ -72,7 +74,7 @@ export default function ViolationReportsListScreen({ navigation }) {
         <View style={styles.reportCard}>
             <View style={styles.reportHeader}>
                 <Text style={styles.reportSubject} numberOfLines={1}>
-                    {item.subject || 'بدون موضوع'}
+                    {item.subject || t('No subject')}
                 </Text>
                 <Text style={styles.reportDate}>{item.date}</Text>
             </View>
@@ -86,7 +88,7 @@ export default function ViolationReportsListScreen({ navigation }) {
 
             <View style={styles.reportRow}>
                 <Ionicons name="cash-outline" size={16} color={themeColor10.bgColor(0.7)} />
-                <Text style={styles.reportAmount}>{formatPrice(item.amount)} تومان</Text>
+                <Text style={styles.reportAmount}>{formatPrice(item.amount)} {t('Toman')}</Text>
             </View>
 
             <Text style={styles.reportDescription} numberOfLines={3}>
@@ -94,9 +96,9 @@ export default function ViolationReportsListScreen({ navigation }) {
             </Text>
 
             <View style={styles.reportFooter}>
-                <Text style={styles.reportId}>شناسه: #{item.id}</Text>
+                <Text style={styles.reportId}>{t('ID:')} #{item.id}</Text>
                 <Text style={styles.reportCreatedAt}>
-                    ثبت شده: {formatJalaaliDate(item?.created_at)}
+                    {t('Registered:')} {formatJalaaliDate(item?.created_at)}
                 </Text>
             </View>
         </View>
@@ -105,9 +107,9 @@ export default function ViolationReportsListScreen({ navigation }) {
     const renderEmptyState = () => (
         <View style={styles.emptyContainer}>
             <Ionicons name="document-text-outline" size={80} color={themeColor10.bgColor(0.5)} />
-            <Text style={styles.emptyTitle}>هیچ گزارش تخلفی یافت نشد</Text>
+            <Text style={styles.emptyTitle}>{t('No violation reports found')}</Text>
             <Text style={styles.emptyMessage}>
-                شما هنوز هیچ گزارش تخلفی ثبت نکرده‌اید
+                {t('You haven\'t submitted any violation reports yet')}
             </Text>
         </View>
     );
@@ -117,7 +119,7 @@ export default function ViolationReportsListScreen({ navigation }) {
         return (
             <View style={styles.footerLoader}>
                 <ActivityIndicator size="small" color={themeColor1.bgColor(1)} />
-                <Text style={styles.loadingText}>در حال بارگذاری...</Text>
+                <Text style={styles.loadingText}>{t('Loading...')}</Text>
             </View>
         );
     };
@@ -126,12 +128,12 @@ export default function ViolationReportsListScreen({ navigation }) {
         return (
             <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
                 <ScreenHeaders
-                    title="پیگیری گزارش‌ها"
+                    title={t('Track Reports')}
                     showLeftIcon={true}
                 />
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-                    <Text style={styles.loadingText}>در حال بارگذاری...</Text>
+                    <Text style={styles.loadingText}>{t('Loading...')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -140,7 +142,7 @@ export default function ViolationReportsListScreen({ navigation }) {
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
             <ScreenHeaders
-                title="پیگیری گزارش‌ها"
+                title={t('Track Reports')}
                 showLeftIcon={true}
             />
 

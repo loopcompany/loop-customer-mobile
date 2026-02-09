@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useTranslation } from 'react-i18next'
 
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
@@ -12,6 +13,7 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
+    const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
     const [userDescription, setUserDescription] = useState('')
     const [accepting, setAccepting] = useState(false)
@@ -48,11 +50,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
             )
 
             if (response.status == 200 && response.data?.success) {
-                showToastOrAlert(response.data?.message || 'سفارش با موفقیت تایید شد')
+                showToastOrAlert(response.data?.message || t('Order confirmed successfully'))
                 if (onUpdate) onUpdate()
             }
         } catch (error) {
-            const message = error?.response?.data?.message || 'خطا در تایید سفارش'
+            const message = error?.response?.data?.message || t('Error confirming order')
             showToastOrAlert(message)
         } finally {
             setAccepting(false)
@@ -78,11 +80,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
             )
 
             if (response.status == 200 && response.data?.success) {
-                showToastOrAlert(response.data?.message || 'سفارش با موفقیت لغو شد')
+                showToastOrAlert(response.data?.message || t('Order canceled successfully'))
                 if (onUpdate) onUpdate()
             }
         } catch (error) {
-            const message = error?.response?.data?.message || 'خطا در رد سفارش'
+            const message = error?.response?.data?.message || t('Error rejecting order')
             showToastOrAlert(message)
         } finally {
             setRejecting(false)
@@ -103,11 +105,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 <Text style={[NewStyles.text10]}>
                     {isLocked
                         ? isAccepted
-                            ? 'شما این درخواست را تایید کرده‌اید'
-                            : 'شما این درخواست را رد کرده‌اید'
+                            ? t('You have confirmed this request')
+                            : t('You have rejected this request')
                         : isInfoComplete
-                            ? 'لطفاً اطلاعات زیر را بررسی کرده و در صورت موافقت، درخواست اعزام به لوپ را تایید یا رد کنید'
-                            : 'کاربر گرامی، محصول آورده شما در حال بررسی و عیب یابی توسط لوپ می باشد. از صبر و شکیبایی شما سپاس گزاریم'}
+                            ? t('Please review the information below and confirm or reject the dispatch request to Loop if you agree')
+                            : t('Dear user, your product is being reviewed and diagnosed by Loop. Thank you for your patience.')}
                 </Text>
             </View>
 
@@ -119,11 +121,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <View style={{ gap: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="time-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>مدت زمان تقریبی انجام سفارش</Text>
+                            <Text style={NewStyles.title}>{t('Approximate order completion time')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
-                            <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.duration} روز کاری</Text>
+                            <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.duration} {t('working days')}</Text>
                         </View>
                     </View>
                 )}
@@ -133,12 +135,12 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <View style={{ gap: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>هزینه تقریبی اعلامی توسط لوپ</Text>
+                            <Text style={NewStyles.title}>{t('Estimated cost announced by Loop')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
                             <Text style={[NewStyles.text10, { flex: 1 }]}>
-                                {formatPrice(data?.loop_cost_estimate)} تومان
+                                {formatPrice(data?.loop_cost_estimate)} {t('Toman')}
                             </Text>
                         </View>
                     </View>
@@ -149,7 +151,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <View style={{ gap: 5 }}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="document-text-outline" size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>توضیحات لوپ</Text>
+                            <Text style={NewStyles.title}>{t('Loop description')}</Text>
                         </View>
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
@@ -170,11 +172,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <Text style={[NewStyles.title, {
                         color: isAccepted ? themeColor7.bgColor(1) : themeColor6.bgColor(1)
                     }]}>
-                        {isAccepted ? 'تایید شده' : 'رد شده'}
+                        {isAccepted ? t('Confirmed') : t('Rejected')}
                     </Text>
                     {data?.user_cancellation_reason && (
                         <>
-                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>{isAccepted ? 'توضیحات شما:' : 'دلیل شما:'}</Text>
+                            <Text style={[NewStyles.text10, { marginTop: 10 }]}>{isAccepted ? t('Your description:') : t('Your reason:')}</Text>
                             <Text style={[NewStyles.text10]}>{data?.user_cancellation_reason}</Text>
                         </>
                     )}
@@ -183,10 +185,10 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 <View style={{ width: '100%', marginTop: 15, gap: 10 }}>
                     {/* فیلد توضیحات کاربر */}
                     <View style={{ gap: 5 }}>
-                        <Text style={NewStyles.text}>توضیحات شما (اختیاری)</Text>
+                        <Text style={NewStyles.text}>{t('Your description (optional)')}</Text>
                         <TextInput
                             style={[styles.textInput, NewStyles.border10]}
-                            placeholder="توضیحات خود را وارد کنید..."
+                            placeholder={t('Enter your description...')}
                             placeholderTextColor={themeColor0.bgColor(0.4)}
                             multiline
                             numberOfLines={4}
@@ -200,7 +202,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <View style={[NewStyles.row, { gap: 10, maxWidth: 900, width: '100%', alignSelf:'center' }]}>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
-                                title="لغو سفارش"
+                                title={t('Cancel Order')}
                                 onPress={() => setRejectModal(true)}
                                 loading={rejecting}
                                 textStyle={{ color: themeColor4.bgColor(1) }}
@@ -209,7 +211,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                         </View>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
-                                title="می پذیرم"
+                                title={t('I accept')}
                                 onPress={() => setAcceptModal(true)}
                                 loading={accepting}
                                 textStyle={{ color: themeColor4.bgColor(1) }}
@@ -219,15 +221,15 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     </View>
 
                     <Text style={[NewStyles.text10, { textAlign: 'center', color: themeColor0.bgColor(0.6) }]}>
-                        با تایید، موافقت خود را با اعزام دستگاه به لوپ اعلام می‌کنید
+                        {t('By confirming, you agree to dispatch the device to Loop')}
                     </Text>
                 </View>
             ) : null}
 
             {/* Modal تایید */}
             <ConfirmationModal
-                title="تایید اعزام به لوپ"
-                message="آیا مبلغ و  مدت زمان اعلامی توسط لوپ را می‌پذیرید؟"
+                title={t('Confirm dispatch to Loop')}
+                message={t('Do you accept the price and duration announced by Loop?')}
                 action={handleAccept}
                 confirmationModal={acceptModal}
                 setConfirmationModal={setAcceptModal}
@@ -235,8 +237,8 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
 
             {/* Modal رد */}
             <ConfirmationModal
-                title="لغو سفارش"
-                message="آیا لغو سفارش و عودت محصول را تایید می‌کنید؟"
+                title={t('Cancel Order')}
+                message={t('Do you confirm the order cancellation and product return?')}
                 action={handleReject}
                 confirmationModal={rejectModal}
                 setConfirmationModal={setRejectModal}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
@@ -14,6 +15,7 @@ import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
 
 export default function WarrantyScreen() {
+  const { t } = useTranslation();
   const [warranties, setWarranties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -35,12 +37,12 @@ export default function WarrantyScreen() {
         }
       } else {
         console.log('❌ Warranty response not successful:', response);
-        showToastOrAlert('خطا در بارگذاری ضمانت‌نامه');
+        showToastOrAlert(t('Error loading warranty'));
       }
     } catch (error) {
       console.error('❌ Error loading warranties:', error);
       console.error('❌ Error response:', error.response);
-      showToastOrAlert('خطا در بارگذاری ضمانت‌نامه');
+      showToastOrAlert(t('Error loading warranty'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -62,7 +64,7 @@ export default function WarrantyScreen() {
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title="ضمانت نامه/ گارانتی" />
+      <ScreenHeaders title={t("Warranty / Guarantee")} />
       <FlatList
         data={warranties}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}

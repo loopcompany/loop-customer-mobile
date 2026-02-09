@@ -2,6 +2,7 @@ import { View, Text, Pressable, Image, StyleSheet, Platform } from 'react-native
 import React from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles, { deviceWidth } from '../../styles/NewStyles';
 import { imageUri } from '../../services/URL';
@@ -10,18 +11,20 @@ import { formatDate, showToastOrAlert } from '../../helpers/Common';
 
 export default function UserDiscountItem({ item, navigation }) {
 
+    const { t } = useTranslation();
+
     const copyToClipboard = () => {
         Clipboard.setStringAsync(item?.code);
-        showToastOrAlert('کد با موفقیت کپی شد.')
+        showToastOrAlert(t('The code was successfully copied.'))
     };
 
     return (
-        <Pressable style={[styles.discountItem, NewStyles.border10, NewStyles.shadow]} onPress={() => navigation.navigate('Discount Detail', { discountId: item?.club?.id })}>
+        <Pressable style={[styles.discountItem, NewStyles.border10, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item?.club?.id })}>
             <View style={[styles.discountWrapper, NewStyles.row]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.club?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}>
                     <Text style={NewStyles.text10}>{item?.club?.title}</Text>
-                    {item?.count > 0 ? <Text style={NewStyles.text}>{item?.count} بار استفاده دیگر</Text> : <Text style={NewStyles.text}>پایان دفعات مجاز</Text>}
+                    {item?.count > 0 ? <Text style={NewStyles.text}>{item?.count} {t('more uses remaining')}</Text> : <Text style={NewStyles.text}>{t('Allowed uses ended')}</Text>}
                 </View>
             </View>
             <Pressable style={[NewStyles.textInput, NewStyles.border10, NewStyles.row, { gap: 5 }]} onPress={copyToClipboard}>
@@ -30,9 +33,9 @@ export default function UserDiscountItem({ item, navigation }) {
             </Pressable>
             
             <View style={[NewStyles.rowWrapper, { width: '100%', paddingHorizontal: '5%' }]}>
-                <Text style={NewStyles.text3}>{item?.discount_percent} درصد تخفیف</Text>
+                <Text style={NewStyles.text3}>{item?.discount_percent} {t('percent discount')}</Text>
                 <View style={NewStyles.row}>
-                    <Text style={NewStyles.text}>قابل استفاده تا {formatDate(item?.expiry_date)}</Text>
+                    <Text style={NewStyles.text}>{t('Usable until')} {formatDate(item?.expiry_date)}</Text>
                     <Ionicons name="chevron-back" size={15} color={themeColor0.bgColor(1)} />
                 </View>
             </View>

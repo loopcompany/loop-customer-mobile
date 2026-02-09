@@ -4,12 +4,14 @@ import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fetchOrders } from '../../slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import OrderItem from '../../components/OrderItem';
 import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
 function CanceledOrdersScreen({ navigation }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
 
@@ -33,7 +35,7 @@ function CanceledOrdersScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={'لغو شده ها'} />
+      <ScreenHeaders title={t('Canceled Orders')} />
 
       <FlatList
         contentContainerStyle={{  paddingVertical: 20, gap: 15 }}
@@ -45,7 +47,7 @@ function CanceledOrdersScreen({ navigation }) {
         ListHeaderComponent={() => {
           return (
             <View style={styles.header}>
-              <Text style={[NewStyles.text10, { textAlign: 'center' }]}>لغو شده</Text>
+              <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Canceled')}</Text>
             </View>
           )
         }}

@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, StatusBar, Platform } from "react-native";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import NewStyles from "../styles/NewStyles";
 import { themeColor4 } from "../theme/Color";
 import { useNavigation } from "@react-navigation/native";
@@ -12,6 +13,7 @@ const ScreenHeaders = ({
   // New API (recommended - more clear naming)
   onBackPress
 }) => {
+  const { t } = useTranslation();
   const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
   const navigation = useNavigation();
@@ -45,7 +47,7 @@ const ScreenHeaders = ({
         style={[styles.iconContainer, NewStyles.row]}
       >
         <Image source={require("../assets/back.png")} style={styles.arrow} />
-        <Text style={[NewStyles.title10, styles.titleText]}>قبلی</Text>
+        <Text style={[NewStyles.title10, styles.titleText]}>{t("Back")}</Text>
       </TouchableOpacity>
     </View>
   );

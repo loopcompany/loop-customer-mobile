@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment-jalaali';
-
+import { useTranslation } from 'react-i18next';
+import { createStyles } from '../styles/NewStyles';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor5 } from '../theme/Color';
 import { orderAPI } from '../services/Api';
 import { showToastOrAlert } from '../helpers/Common';
 
-export default function OrderDropdown({ value, onChange, placeholder = "انتخاب شماره سفارش" }) {
+export default function OrderDropdown({ value, onChange, placeholder }) {
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isFocus, setIsFocus] = useState(false);
+
+    const defaultPlaceholder = placeholder || t("Select order number");
 
     useEffect(() => {
         fetchOrders();
@@ -35,7 +44,7 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
             }
         } catch (error) {
             console.error('Error fetching orders:', error);
-            showToastOrAlert('خطا در دریافت لیست سفارشات');
+            showToastOrAlert(t('Error fetching orders list'));
         } finally {
             setLoading(false);
         }
@@ -50,8 +59,8 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
     };
 
     const formatPrice = (price) => {
-        if (!price || price === 0) return 'تعیین نشده';
-        return new Intl.NumberFormat('fa-IR').format(price) + ' تومان';
+        if (!price || price === 0) return t('Not determined');
+        return new Intl.NumberFormat('fa-IR').format(price) + ' ' + t('Toman');
     };
 
     const renderItem = (item) => {
@@ -60,12 +69,12 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
                 <View style={styles.itemHeader}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={[NewStyles.title10, { fontSize: 14 }]}>
-                            سفارش #{item.order_id}
+                            {t('Order #')}#{item.order_id}
                         </Text>
                         {item.finished_at && (
                             <View style={[styles.statusBadge, { backgroundColor: themeColor1.bgColor(0.1) }]}>
                                 <Text style={[NewStyles.text10, { fontSize: 10, color: themeColor1.bgColor(1) }]}>
-                                    ✓ تکمیل شده
+                                    ✓ {t('Completed')}
                                 </Text>
                             </View>
                         )}
@@ -84,7 +93,7 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
                 <View style={styles.itemFooter}>
                     {item.technician_referral_code && (
                         <Text style={[NewStyles.text10, { fontSize: 11, opacity: 0.6 }]}>
-                            تکنسین: {item.technician_referral_code}
+                            {t('Technician:')} {item.technician_referral_code}
                         </Text>
                     )}
                     
@@ -102,7 +111,7 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
         return (
             <View style={[styles.loadingContainer, NewStyles.border10]}>
                 <ActivityIndicator size="small" color={themeColor1.bgColor(1)} />
-                <Text style={[NewStyles.text10, { marginRight: 10 }]}>در حال بارگذاری سفارشات...</Text>
+                <Text style={[NewStyles.text10, { marginRight: 10 }]}>{t('Loading orders...')}</Text>
             </View>
         );
     }
@@ -112,7 +121,7 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
             <View style={[styles.emptyContainer, NewStyles.border10]}>
                 <Ionicons name="clipboard-outline" size={24} color={themeColor0.bgColor(0.5)} />
                 <Text style={[NewStyles.text10, { marginRight: 10, opacity: 0.7 }]}>
-                    سفارشی یافت نشد
+                    {t('No order found')}
                 </Text>
             </View>
         );
@@ -131,8 +140,8 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder={!isFocus ? placeholder : '...'}
-                searchPlaceholder="جستجو در سفارشات..."
+                placeholder={!isFocus ? defaultPlaceholder : '...'}
+                searchPlaceholder={t('Search orders...')}
                 
                 value={value}
                 onFocus={() => setIsFocus(true)}
@@ -155,7 +164,7 @@ export default function OrderDropdown({ value, onChange, placeholder = "انتخ
     );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>StyleSheet.create({
     container: {
         marginBottom: 10,
     },

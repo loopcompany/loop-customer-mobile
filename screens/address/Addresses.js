@@ -1,6 +1,7 @@
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor5 } from '../../theme/Color';
@@ -12,6 +13,7 @@ import BlankScreen from '../../components/BlankScreen';
 
 export default function Addresses({ navigation }) {
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -47,7 +49,7 @@ export default function Addresses({ navigation }) {
                 }}
             />
             <View style={[NewStyles.row, NewStyles.nav, NewStyles.shadow, NewStyles.center]}>
-                <Button title={'افزودن آدرس'} loading={loading} onPress={() => {
+                <Button title={t('Add Address')} loading={loading} onPress={() => {
                     navigation.navigate('AddNewAddress')
                 }} />
             </View>

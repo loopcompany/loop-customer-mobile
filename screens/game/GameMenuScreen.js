@@ -8,6 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
@@ -15,6 +16,7 @@ import { GAME_LEVELS } from './GameData';
 import Button from '../../components/Button';
 
 export default function GameMenuScreen({ navigation }) {
+  const { t } = useTranslation();
   const [selectedLevel, setSelectedLevel] = useState('easy');
   const scaleAnim = new Animated.Value(1);
 
@@ -41,7 +43,7 @@ export default function GameMenuScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScreenHeaders title="فکر و بکر" />
+      <ScreenHeaders title={t("Think and Play")} />
 
       <ScrollView
         style={styles.scrollView}
@@ -52,13 +54,13 @@ export default function GameMenuScreen({ navigation }) {
         <View style={styles.header}>
           <Text style={styles.gameEmoji}>🎮</Text>
           <Text style={[NewStyles.title10, styles.title]}>
-            دوست لوپ سلام
+            {t("Hello Loop Friend")}
           </Text>
           <Text style={[NewStyles.text10, styles.subtitle]}>
-            فکر و بکر برای آشنایی و یادگیری با شاخه های کامپیوتر بصورت سرگرمی و بازی می باشد.
+            {t("Think and Play is for learning about computer fields in a fun and game-like way.")}
           </Text>
           <Text style={[NewStyles.text10, styles.subtitle]}>
-            گروه سنی: 1 تا 5 سال
+            {t("Age group: 1 to 5 years")}
           </Text>
         </View>
 
@@ -67,19 +69,19 @@ export default function GameMenuScreen({ navigation }) {
           <View style={styles.infoRow}>
             <Text style={styles.infoEmoji}>👀</Text>
             <Text style={[NewStyles.text10, styles.infoText]}>
-              تصویر وسیله کامپیوتری را ببین
+              {t("See the computer device image")}
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoEmoji}>👆</Text>
             <Text style={[NewStyles.text10, styles.infoText]}>
-              روی وسیله درست کلیک کن
+              {t("Click on the correct device")}
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoEmoji}>⭐</Text>
             <Text style={[NewStyles.text10, styles.infoText]}>
-              ستاره جمع کن و قهرمان شو!
+              {t("Collect stars and become a champion!")}
             </Text>
           </View>
         </View>
@@ -87,7 +89,7 @@ export default function GameMenuScreen({ navigation }) {
         {/* انتخاب سطح */}
         <View style={styles.levelsSection}>
           <Text style={[NewStyles.title10, styles.sectionTitle]}>
-            سطح بازی را انتخاب کن:
+            {t("Choose the game level:")}
           </Text>
 
           {Object.entries(GAME_LEVELS).map(([key, level]) => {
@@ -111,7 +113,7 @@ export default function GameMenuScreen({ navigation }) {
                       isSelected && styles.levelNameSelected,
                     ]}
                   >
-                    {level.name}
+                    {t(level.name)}
                   </Text>
                   {isSelected && (
                     <Ionicons
@@ -126,13 +128,13 @@ export default function GameMenuScreen({ navigation }) {
                   <View style={styles.detailItem}>
                     <Ionicons name="apps" size={16} color={themeColor3.bgColor(1)} />
                     <Text style={[NewStyles.text10, styles.detailText]}>
-                      {level.options} گزینه
+                      {level.options} {t("options")}
                     </Text>
                   </View>
                   <View style={styles.detailItem}>
                     <Ionicons name="help-circle" size={16} color={themeColor3.bgColor(1)} />
                     <Text style={[NewStyles.text10, styles.detailText]}>
-                      {level.questions} سوال
+                      {level.questions} {t("questions")}
                     </Text>
                   </View>
                 </View>
@@ -144,7 +146,7 @@ export default function GameMenuScreen({ navigation }) {
         {/* دکمه شروع بازی */}
         <View style={styles.buttonContainer}>
           <Button
-            title="شروع بازی! 🚀"
+            title={t("Start Game! 🚀")}
             onPress={handleStartGame}
 
           />
@@ -154,8 +156,7 @@ export default function GameMenuScreen({ navigation }) {
         <View style={styles.parentNote}>
           <Ionicons name="information-circle" size={20} color={themeColor1.bgColor(1)} />
           <Text style={[NewStyles.text10, styles.parentNoteText]}>
-            این بازی برای کودکان 1 تا 5 سال طراحی شده و به آن‌ها کمک می‌کند
-            با وسایل کامپیوتری و تکنولوژی آشنا شوند.
+            {t("This game is designed for children aged 1 to 5 years and helps them become familiar with computer devices and technology.")}
           </Text>
         </View>
       </ScrollView>

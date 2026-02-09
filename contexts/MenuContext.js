@@ -14,6 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1 } from '../theme/Color';
 import NewStyles, { deviceHeight } from '../styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ const MenuContext = createContext();
 
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -106,32 +108,32 @@ export const MenuProvider = ({ children }) => {
         console.log('🔍 [MenuContext] Current userType:', userType);
 
         const baseMenuItems = [
-            { id: 23, title: "ثبت سفارش", screen: "FolderScreen" },
-            { id: 22, title: "کیف پول لوپ", screen: "Increase" },
-            { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
+            { id: 23, title: t("Submit Order"), screen: "FolderScreen" },
+            { id: 22, title: t("Loop Wallet"), screen: "Increase" },
+            { id: 21, title: t("Privacy"), screen: "PrivacyScreen" },
             // برای سازمانی: قوانین سازمانی | برای عادی: قوانین عمومی
             {
                 id: 20,
-                title: userType === 'organization' ? "قوانین و مقررات سازمانی" : "قوانین / درباره لوپ",
+                title: userType === 'organization' ? t("Organization Terms and Conditions") : t("Terms / About Loop"),
                 screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen"
             },
-            { id: 19, title: " سوالات متداول", screen: "LearnMoreScreen" },
-            { id: 18, title: "یادداشت", screen: "NotesScreen" },
-            { id: 17, title: " ضمانت نامه / گارانتی", screen: "WarrantyScreen" },
-            { id: 16, title: "نظرات و پیشنهادات", screen: "FeedbackSurveyScreen" },
-            { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
-            { id: 14, title: "نرخنامه", screen: "RateCategory" },
-            { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
-            { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
-            { id: 11, title: "فکروبکر", screen: "GameMenu" },
-            { id: 10, title: "ثبت‌نام دوره‌های آموزشی ", screen: "TrainingRegistrationScreen", },
-            { id: 9, title: "آدرس‌های منتخب", screen: "AddressScreen" },
-            { id: 8, title: "قراردادنامه", screen: "OrganizationContract", organizationOnly: true },
-            { id: 7, title: "حساب کاربری", screen: "Profile" },
-            { id: 6, title: "پیام", screen: "MessageScreen" },
-            { id: 5, title: "لغوشده ها", screen: "CanceledOrdersScreen" },
-            { id: 4, title: "تراکنش‌ها", screen: "TransactionsScreen" },
-            { id: 3, title: "سفارش‌ها", screen: "OrdersScreen" },
+            { id: 19, title: t("FAQ"), screen: "LearnMoreScreen" },
+            { id: 18, title: t("Note"), screen: "NotesScreen" },
+            { id: 17, title: t("Warranty / Guarantee"), screen: "WarrantyScreen" },
+            { id: 16, title: t("Feedback and Suggestions"), screen: "FeedbackSurveyScreen" },
+            { id: 15, title: t("Report/Track Violation"), screen: "ViolationReportScreen" },
+            { id: 14, title: t("Rate List"), screen: "RateCategory" },
+            { id: 13, title: t("Service / Product Faults"), screen: "ProductIssueScreen" },
+            { id: 12, title: t("Promotional Plans"), screen: "Club" },
+            { id: 11, title: t("Think and Play"), screen: "GameMenu" },
+            { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen", },
+            { id: 9, title: t("Selected Addresses"), screen: "AddressScreen" },
+            { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true },
+            { id: 7, title: t("User Account"), screen: "Profile" },
+            { id: 6, title: t("Messages"), screen: "MessageScreen" },
+            { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen" },
+            { id: 4, title: t("Transactions"), screen: "TransactionsScreen" },
+            { id: 3, title: t("Orders"), screen: "OrdersScreen" },
         ];
 
         if (userType === 'organization') {
@@ -194,7 +196,7 @@ export const MenuProvider = ({ children }) => {
                             </Text>
                         </View>
                         <TouchableOpacity style={styles.supportButton} onPress={() => { navigation.navigate('MessageScreen') }}>
-                            <Text style={NewStyles.text4}>پشتیبانی</Text>
+                            <Text style={NewStyles.text4}>{t('Support')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={openMenu} style={{ backgroundColor: themeColor4.bgColor(1), borderRadius: 100, marginVertical: 5 }}>
                             <Image
@@ -233,7 +235,7 @@ export const MenuProvider = ({ children }) => {
                                         >
                                             <Ionicons name="power" size={20} color="#fff" />
                                             <Text style={styles.logoutText}>
-                                                {isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
+                                                {isLoggingOut ? t('Logging out...') : t('Log out of account')}
                                             </Text>
                                         </TouchableOpacity>
                                     </View>

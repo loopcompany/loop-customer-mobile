@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import Button from '../../components/Button';
 import useLogout from '../../hooks/useLogout';
@@ -20,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { imageUri } from '../../services/URL';
 
 export default function Profile() {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const { logoutWithConfirmation, logoutFromAllDevicesWithConfirmation, isLoggingOut } = useLogout();
     const [datePickerModal, setDatePickerModal] = useState(false);
@@ -158,21 +160,21 @@ export default function Profile() {
                 // First check if user has a valid token
                 const currentToken = await TokenManager.getToken();
                 if (!currentToken) {
-                    showToastOrAlert('ابتدا وارد شوید تا ورود خودکار فعال شود');
+                    showToastOrAlert(t('Please log in first to enable auto-login'));
                     setAutoLoginEnabled(false);
                     return;
                 }
 
                 await AsyncStorage.setItem('autoLoginEnabled', 'true');
                 await AsyncStorage.setItem('rememberLogin', 'true');
-                showToastOrAlert('ورود خودکار فعال شد');
+                showToastOrAlert(t('Auto-login enabled'));
             } else {
                 await AsyncStorage.removeItem('autoLoginEnabled');
-                showToastOrAlert('ورود خودکار غیرفعال شد');
+                showToastOrAlert(t('Auto-login disabled'));
             }
         } catch (error) {
             console.log('Error toggling auto-login:', error);
-            showToastOrAlert('خطا در تغییر تنظیمات');
+            showToastOrAlert(t('Error changing settings'));
         }
     };
 
@@ -182,7 +184,7 @@ export default function Profile() {
             // Request permission
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
-                showToastOrAlert('برای انتخاب عکس، دسترسی به گالری نیاز است');
+                showToastOrAlert(t('Gallery access is required to select a photo'));
                 return;
             }
 
@@ -200,11 +202,11 @@ export default function Profile() {
                 console.log('📱 Platform:', Platform.OS);
                 setProfileImage(selectedImage.uri);
                 setPickedImageUri(selectedImage.uri);
-                showToastOrAlert('عکس انتخاب شد. برای ذخیره، دکمه "ذخیره اطلاعات پروفایل" را بزنید');
+                showToastOrAlert(t('Image selected. To save, click Save Profile Information button'));
             }
         } catch (error) {
             console.log('Error picking image:', error);
-            showToastOrAlert('خطا در انتخاب عکس');
+            showToastOrAlert(t('Error selecting image'));
         }
     };
 
@@ -243,7 +245,7 @@ export default function Profile() {
                 }
             }
         } catch (error) {
-            showToastOrAlert('خطا در بارگذاری اطلاعات پروفایل');
+            showToastOrAlert(t('Error loading profile information'));
         }
     };
 
@@ -274,7 +276,7 @@ export default function Profile() {
                         console.log('📷 Web: Image converted to File object');
                     } catch (err) {
                         console.error('❌ Error converting image:', err);
-                        showToastOrAlert('خطا در پردازش عکس');
+                        showToastOrAlert(t('Error processing image'));
                         return;
                     }
                 } else {
@@ -382,7 +384,7 @@ export default function Profile() {
                 }
 
                 if (Object.keys(updateData).length === 0) {
-                    showToastOrAlert('هیچ اطلاعاتی برای بروزرسانی وجود ندارد');
+                    showToastOrAlert(t('No information to update'));
                     return;
                 }
 
@@ -434,9 +436,9 @@ export default function Profile() {
             console.error('❌ Error response:', error.response);
 
             if (error.message === 'Network Error' || !error.response) {
-                showToastOrAlert('خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید');
+                showToastOrAlert(t('Error connecting to server. Please check your internet connection'));
             } else if (error.response?.status === 401) {
-                showToastOrAlert('نشست شما منقضی شده است. لطفاً دوباره وارد شوید');
+                showToastOrAlert(t('Your session has expired. Please log in again'));
             } else if (error.response?.status === 403) {
                 showToastOrAlert(error.response.data.message || 'دسترسی شما محدود شده است');
             } else if (error.response?.status === 422) {
@@ -446,14 +448,14 @@ export default function Profile() {
                     const firstError = errors[firstErrorKey][0];
                     showToastOrAlert(firstError);
                 } else {
-                    showToastOrAlert(error.response.data.message || 'خطا در اعتبارسنجی اطلاعات');
+                    showToastOrAlert(error.response.data.message || t('Error validating information'));
                 }
             } else if (error.response?.status === 400) {
-                showToastOrAlert(error.response.data.message || 'خطا در بروزرسانی اطلاعات');
+                showToastOrAlert(error.response.data.message || t('Error updating information'));
             } else if (error.response?.status === 413) {
-                showToastOrAlert('حجم فایل عکس بیش از حد مجاز است (حداکثر 5 مگابایت)');
+                showToastOrAlert(t('Image file size exceeds limit (max 5MB)'));
             } else if (error.response?.status >= 500) {
-                showToastOrAlert('خطای سرور. لطفاً بعداً تلاش کنید');
+                showToastOrAlert(t('Server error. Please try again later'));
             } else {
                 showToastOrAlert(error.response?.data?.message || 'خطا در بروزرسانی اطلاعات');
             }
@@ -469,19 +471,19 @@ export default function Profile() {
             setPasswordErrors({ currentPassword: '', newPassword: '' });
             // Validate captcha
             if (captchaInput !== captcha) {
-                showToastOrAlert('کد امنیتی اشتباه است');
+                showToastOrAlert(t('Security code is incorrect'));
                 generateCaptcha();
                 setCaptchaInput('');
                 return;
             }
 
             if (!passwordData.currentPassword || !passwordData.newPassword) {
-                showToastOrAlert('لطفاً رمز عبور فعلی و جدید را وارد کنید');
+                showToastOrAlert(t('Please enter current and new password'));
                 return;
             }
 
             if (passwordData.newPassword.length < 8) {
-                showToastOrAlert('رمز عبور جدید باید حداقل 8 کاراکتر باشد');
+                showToastOrAlert(t('New password must be at least 8 characters'));
                 return;
             }
 
@@ -503,7 +505,7 @@ export default function Profile() {
 
             // Handle validation errors and show inline messages
             if (error.response?.status === 400) {
-                showToastOrAlert('رمز عبور فعلی اشتباه است');
+                showToastOrAlert(t('Current password is incorrect'));
             } else if (error.response?.status === 422) {
                 const errors = error.response.data.errors || {};
                 // Map backend keys to our fields
@@ -528,7 +530,7 @@ export default function Profile() {
                     else showToastOrAlert('خطا در اعتبارسنجی اطلاعات');
                 }
             } else {
-                showToastOrAlert('خطا در تغییر رمز عبور');
+                showToastOrAlert(t('Error changing password'));
             }
 
             generateCaptcha();
@@ -549,7 +551,7 @@ export default function Profile() {
         return (
             <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
                 <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
-                <Text style={{ marginTop: 10, fontFamily: 'VazirLight' }}>در حال بارگذاری...</Text>
+                <Text style={{ marginTop: 10, fontFamily: 'VazirLight' }}>{t('Loading...')}</Text>
             </SafeAreaView>
         );
     }
@@ -565,12 +567,12 @@ export default function Profile() {
     return (
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-            <ScreenHeaders title={"پروفایل من"} />
+            <ScreenHeaders title={t("My Profile")} />
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
                 <ScrollView contentContainerStyle={styles.container}>
 
                     <View style={styles.header}>
-                        <Text style={[NewStyles.text10]}>پروفایل من</Text>
+                        <Text style={[NewStyles.text10]}>{t('My Profile')}</Text>
                     </View>
 
                     {/* Profile Image Section */}
@@ -594,32 +596,32 @@ export default function Profile() {
 
                         </TouchableOpacity>
                         <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 10, fontSize: 12, color: themeColor10.bgColor(0.6) }]}>
-                            برای تغییر عکس پروفایل کلیک کنید
+                            {t('Click to change profile picture')}
                         </Text>
                     </View>
 
                     <View style={{ gap: 10 }}>
-                        <Text style={NewStyles.text10}>نام</Text>
+                        <Text style={NewStyles.text10}>{t('First Name')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="نام *"
+                            placeholder={t('First Name *')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
                         />
-                        <Text style={NewStyles.text10}>نام خانوادگی</Text>
+                        <Text style={NewStyles.text10}>{t('Last Name')}</Text>
 
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="نام خانوادگی *"
+                            placeholder={t('Last Name *')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.last_name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
-                        <Text style={NewStyles.text10}>شماره موبایل</Text>
+                        <Text style={NewStyles.text10}>{t('Mobile Number')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="شماره موبایل"
+                            placeholder={t('Mobile Number')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="phone-pad"
                             value={profileData.phone}
@@ -628,17 +630,17 @@ export default function Profile() {
                         />
 
                         {/* تاریخ تولد */}
-                        <Text style={NewStyles.text10}>تاریخ تولد</Text>
+                        <Text style={NewStyles.text10}>{t('Birth Date')}</Text>
                         <TouchableOpacity onPress={() => setDatePickerModal(true)} style={[NewStyles.textInput, NewStyles.border10]}>
                             <Text style={[NewStyles.text10, { color: birthDate ? themeColor10.bgColor(0.6) : themeColor10.bgColor(1) }]}>
-                                {birthDate || 'تاریخ تولد'}
+                                {birthDate || t('Birth Date')}
                             </Text>
                         </TouchableOpacity>
 
-                        <Text style={NewStyles.text10}>آدرس ایمیل</Text>
+                        <Text style={NewStyles.text10}>{t('Email Address')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="آدرس ایمیل"
+                            placeholder={t('Email Address')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="email-address"
                             value={profileData.email}
@@ -646,11 +648,11 @@ export default function Profile() {
                         />
 
                         {/* شماره ثابت */}
-                        <Text style={NewStyles.text10}>شماره تماس ثابت</Text>
+                        <Text style={NewStyles.text10}>{t('Landline Number')}</Text>
                         <View style={styles.row}>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }, NewStyles.text10]}
-                                placeholder="شماره تماس ثابت"
+                                placeholder={t('Landline Number')}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
                                 value={profileData.phone_number}
@@ -660,11 +662,11 @@ export default function Profile() {
                         </View>
 
                         {/* موبایل دوم با پیش‌شماره */}
-                        <Text style={NewStyles.text10}>شماره موبایل دوم</Text>
+                        <Text style={NewStyles.text10}>{t('Second Mobile Number')}</Text>
                         <View style={styles.row}>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.border10, { flex: 1 }, NewStyles.text10]}
-                                placeholder="شماره موبایل دوم"
+                                placeholder={t('Second Mobile Number')}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 keyboardType="number-pad"
                                 value={profileData.mobile_number}
@@ -672,10 +674,10 @@ export default function Profile() {
                             />
                             {/* <TextInput style={styles.prefixInput} value="09" editable={false} /> */}
                         </View>
-                        <Text style={NewStyles.text10}>کدپستی</Text>
+                        <Text style={NewStyles.text10}>{t('Postal Code')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="کدپستی "
+                            placeholder={t('Postal Code')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="number-pad"
                             value={profileData.postal_code}
@@ -686,20 +688,20 @@ export default function Profile() {
 
                         <View style={styles.row}>
                             <View style={{ flex: 1 }}>
-                                <Text style={NewStyles.text10}>شهر</Text>
+                                <Text style={NewStyles.text10}>{t('City')}</Text>
                                 <TextInput
                                     style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                    placeholder="شهر "
+                                    placeholder={t('City')}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
                                     value={profileData.city}
                                     onChangeText={(text) => setProfileData(prev => ({ ...prev, city: text }))}
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={NewStyles.text10}>منطقه</Text>
+                                <Text style={NewStyles.text10}>{t('District')}</Text>
                                 <TextInput
                                     style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                    placeholder="منطقه"
+                                    placeholder={t('District')}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
                                     value={profileData.region}
                                     keyboardType='number-pad'
@@ -709,10 +711,10 @@ export default function Profile() {
                         </View>
 
                         {/* آدرس منزل */}
-                        <Text style={NewStyles.text10}>آدرس منزل</Text>
+                        <Text style={NewStyles.text10}>{t('Home Address')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="آدرس منزل"
+                            placeholder={t('Home Address')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             multiline
                             value={profileData.home_address}
@@ -720,10 +722,10 @@ export default function Profile() {
                         />
 
                         {/* محل کار */}
-                        <Text style={NewStyles.text10}>آدرس محل کار</Text>
+                        <Text style={NewStyles.text10}>{t('Work Address')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="آدرس محل کار"
+                            placeholder={t('Work Address')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             multiline
                             value={profileData.work_address}
@@ -731,19 +733,19 @@ export default function Profile() {
                         />
 
                         {/* معرفی به دوستان */}
-                        <Text style={NewStyles.text10}>شماره کارت کاربر</Text>
+                        <Text style={NewStyles.text10}>{t('User Card Number')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="شماره کارت کاربر:(اختیاری)"
+                            placeholder={t('User Card Number (optional)')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.card_number}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, card_number: text }))}
                             keyboardType="number-pad"
                         />
-                        <Text style={NewStyles.text10}>شماره شبا کاربر</Text>
+                        <Text style={NewStyles.text10}>{t('User SHEBA Number')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder="شماره شبا کاربر:(اختیاری)"
+                            placeholder={t('User SHEBA Number (optional)')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.sheba_number}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, sheba_number: text }))}
@@ -752,7 +754,7 @@ export default function Profile() {
                     <View style={{ width: '100%', alignItems: 'center' }}>
                         <Button
                             style={{ backgroundColor: themeColor4.bgColor(1) }}
-                            title={isLoading ? 'در حال ذخیره...' : 'ذخیره اطلاعات پروفایل'}
+                            title={isLoading ? t('Saving...') : t('Save Profile Information')}
                             onPress={updateProfile}
                             disabled={isLoading}
                         />
@@ -760,11 +762,11 @@ export default function Profile() {
 
                     <View style={[NewStyles.row, { marginVertical: 10, gap: 10, alignItems: 'flex-start' }]}>
                         <View style={{ flex: 1 }}>
-                            <Text style={NewStyles.text10}>رمز عبور فعلی</Text>
+                            <Text style={NewStyles.text10}>{t('Current Password')}</Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
-                                placeholder="رمز عبور فعلی"
+                                placeholder={t('Current Password')}
                                 secureTextEntry
                                 value={passwordData.currentPassword}
                                 onChangeText={(text) => {
@@ -778,11 +780,11 @@ export default function Profile() {
                             ) : null}
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Text style={NewStyles.text10}>رمز عبور جدید</Text>
+                            <Text style={NewStyles.text10}>{t('New Password')}</Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
-                                placeholder="رمز عبور جدید"
+                                placeholder={t('New Password')}
                                 secureTextEntry
                                 value={passwordData.newPassword}
                                 onChangeText={(text) => {
@@ -798,11 +800,11 @@ export default function Profile() {
                     </View>
                     <View style={[NewStyles.row, { marginTop: 10, gap: 30, alignItems: 'flex-end' }]}>
                         <View style={{ flex: 1 }}>
-                            <Text style={NewStyles.text10}>کد امنیتی</Text>
+                            <Text style={NewStyles.text10}>{t('Security Code')}</Text>
                             <TextInput
                                 style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: 'right' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
-                                placeholder="کد امنیتی"
+                                placeholder={t('Security Code')}
                                 value={captchaInput}
                                 onChangeText={setCaptchaInput}
                             />
@@ -820,7 +822,7 @@ export default function Profile() {
                     <View style={{ width: '100%', alignItems: 'center' }}>
                         <Button
                             style={{ backgroundColor: themeColor4.bgColor(1) }}
-                            title={isLoadingPassword ? 'در حال تغییر...' : 'تغییر رمز عبور'}
+                            title={isLoadingPassword ? t('Changing...') : t('Change Password')}
                             onPress={changePassword}
                             disabled={isLoadingPassword}
                         />
@@ -839,7 +841,7 @@ export default function Profile() {
                             />
                         </TouchableOpacity>
                         <Text style={[NewStyles.text10, { flex: 1, textAlign: 'right', marginRight: 10 }]}>
-                            ورود خودکار (بدون نیاز به رمز عبور)
+                            {t('Automatic login (without password)')}
                         </Text>
                     </View>
 
@@ -848,7 +850,7 @@ export default function Profile() {
                     <View style={{ width: '100%', alignItems: 'center' }}>
                         <Button
                             style={{ backgroundColor: themeColor6.bgColor(1) }}
-                            title={isLoggingOut ? 'در حال خروج...' : 'خروج از حساب کاربری'}
+                            title={isLoggingOut ? t('Logging out...') : t('Log Out')}
                             onPress={logoutWithConfirmation}
                             disabled={isLoggingOut}
                         />
