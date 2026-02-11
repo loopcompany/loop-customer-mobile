@@ -1,5 +1,5 @@
 import { FlatList, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useMemo } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { uri } from '../../services/URL';
@@ -10,10 +10,15 @@ import UserDiscountItem from './UserDiscountItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import BlankScreen from './../../components/BlankScreen';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function UserDiscounts({ navigation }) {
 
-    const { t } = useTranslation();
+const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(true);
     const token = useSelector((state) => state?.auth?.token)

@@ -21,13 +21,18 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import useLogout from '../hooks/useLogout';
 import { fetchContacts } from '../slices/contactSlice';
 import { fetchUser } from '../slices/userSlice';
-
+import { createStyles } from '../styles/NewStyles';
 // Create Context
 const MenuContext = createContext();
 
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
-    const { t } = useTranslation();
+      const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -260,7 +265,7 @@ export const useMenu = () => {
 };
 
 // Styles
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     coverlist: {
         width: '80%',
         backgroundColor: themeColor0.bgColor(0),

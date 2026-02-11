@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -15,9 +15,14 @@ import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../../styles/NewStyles';
 const Login = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const dispatch = useDispatch();
   const [organizationCode, setOrganizationCode] = useState('');
   const [password, setPassword] = useState('');
@@ -229,7 +234,7 @@ const Login = ({ navigation }) => {
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
             {/* کد سازمانی */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={NewStyles.title}>{t('Organization code')} <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.title,NewStyles.row]}>{t('Organization code')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationCode}
                 onChangeText={setOrganizationCode}
@@ -246,7 +251,7 @@ const Login = ({ navigation }) => {
                   borderColor: errors.organizationCode ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                  ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -277,7 +282,7 @@ const Login = ({ navigation }) => {
                   borderRadius: 8,
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+             ...NewStyles.text10,
                   height: 40,
                   flex: 1
                 }}
@@ -395,7 +400,7 @@ const Login = ({ navigation }) => {
                       borderColor: errors.securityCode ? '#ff0000' : '#ccc',
                       fontSize: 14,
                       fontFamily: 'VazirLight',
-                      textAlign: 'right',
+                      textAlign: 'center',
                       height: 36
                     }}
                   />

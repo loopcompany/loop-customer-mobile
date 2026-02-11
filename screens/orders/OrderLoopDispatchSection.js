@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-
+import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '../../helpers/Common'
@@ -13,7 +13,12 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) => {
-    const { t } = useTranslation()
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const token = useSelector((state) => state?.auth?.token)
     const [loading, setLoading] = useState(true)
     const [confirming, setConfirming] = useState(false)
@@ -337,7 +342,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
 
 export default OrderLoopDispatchSection
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     container: {
         paddingVertical: 10,
         width: '90%',

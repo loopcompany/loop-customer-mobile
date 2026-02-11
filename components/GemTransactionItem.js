@@ -1,15 +1,19 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 
 import NewStyles, { deviceWidth } from '../styles/NewStyles';
 import { themeColor5 } from '../theme/Color';
 import { formatDateTime } from '../helpers/Common';
-
+import { createStyles } from '../styles/NewStyles';
 export default function GemTransactionItem({ item }) {
 
-    const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const renderRow = (label, value, textStyle = NewStyles.text10) =>
         value ? (
             <View style={NewStyles.rowWrapper}>
@@ -26,7 +30,7 @@ export default function GemTransactionItem({ item }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>StyleSheet.create({
     itemWrapper: {
         width: deviceWidth * 0.9,
         backgroundColor: themeColor5.bgColor(1),

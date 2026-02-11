@@ -1,12 +1,11 @@
 import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, ActivityIndicator, I18nManager, Image, SectionList, FlatList } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useMemo} from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
-
-import NewStyles from '../../styles/NewStyles';
+import { createStyles } from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
 import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,11 +18,15 @@ import ProgressBar from '../../components/ProgressBar';
 import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 function Preview({ navigation }) {
 
     const dispatch = useDispatch();
-    const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(false);
 
@@ -439,7 +442,7 @@ function Preview({ navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     textInput: {
         width: '100%',
         height: 50,

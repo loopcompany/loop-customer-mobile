@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,14 @@ import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../../styles/NewStyles';
 const OrganizationResetPassword = ({ route, navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+      // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const { organizationCode, phone } = route.params;
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -288,6 +293,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 fontFamily: 'VazirLight',
                 color: '#666',
                 marginBottom: 8,
+                ...NewStyles.title10
               }}
             >
               {t('Organization code')}:
@@ -569,6 +575,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                   fontSize: 14,
                   fontWeight: 'bold',
                   fontFamily: 'VazirBold',
+                  // ...NewStyles.text
                 }}
               >
                 {t('Resend Code')}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateContractStatus } from '../../slices/organizationSlice';
 import { useOrganizationAccess } from '../../hooks/useOrganizationAccess';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import NewStyles from '../../styles/NewStyles';
@@ -31,7 +31,12 @@ const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
   const reduxContractStatus = useSelector(state => state.organization.contractStatus);
   const { refetch } = useOrganizationAccess(); // برای رفرش کردن وضعیت کامل (پروفایل + قرارداد)
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
 
   const [loading, setLoading] = useState(false);
   const [loadingContract, setLoadingContract] = useState(true);
@@ -685,7 +690,7 @@ const OrganizationContract = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -702,16 +707,17 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   loadingText: {
+     ...NewStyles.text10,
     marginTop: 10,
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#666',
-    writingDirection: 'rtl',
+
   },
 
   // Info Box
   infoBox: {
-    flexDirection: 'row-reverse',
+ ...NewStyles.row,
     backgroundColor: '#e3f2fd',
     borderRadius: 10,
     padding: 15,
@@ -725,7 +731,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#333',
-    textAlign: 'right',
+ ...NewStyles.text10,
     lineHeight: 22,
     writingDirection: 'rtl',
   },
@@ -735,7 +741,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   sectionHeader: {
-    flexDirection: 'row-reverse',
+ ...NewStyles.row,
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -744,7 +750,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginRight: 8,
-    textAlign: 'right',
+ ...NewStyles.text10,
     writingDirection: 'rtl',
   },
 
@@ -760,7 +766,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   contractInfo: {
-    flexDirection: 'row-reverse',
+ ...NewStyles.row,
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -773,21 +779,21 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 5,
-    textAlign: 'right',
+ ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   contractDate: {
     fontSize: 13,
     fontFamily: 'VazirLight',
     color: '#666',
-    textAlign: 'right',
+ ...NewStyles.row,
     writingDirection: 'rtl',
   },
   contractActions: {
     marginTop: 10,
   },
   downloadBtn: {
-    flexDirection: 'row-reverse',
+ ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor1.bgColor(1),
@@ -818,13 +824,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#999',
-    textAlign: 'right',
+ ...NewStyles.text3,
     writingDirection: 'rtl',
   },
 
   // Selected File Card
   selectedFileCard: {
-    flexDirection: 'row-reverse',
+     ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
@@ -836,7 +842,7 @@ const styles = StyleSheet.create({
     borderColor: themeColor4.bgColor(1),
   },
   fileInfo: {
-    flexDirection: 'row-reverse',
+     ...NewStyles.row,
     alignItems: 'center',
     flex: 1,
   },
@@ -849,26 +855,26 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 4,
-    textAlign: 'right',
+     ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   fileSize: {
     fontSize: 12,
     fontFamily: 'VazirLight',
     color: '#666',
-    textAlign: 'right',
+     ...NewStyles.text10,
     writingDirection: 'rtl',
   },
 
   // Upload Actions
   uploadActions: {
-    flexDirection: 'row-reverse',
+     ...NewStyles.row,
     gap: 10,
     marginBottom: 15,
   },
   selectFileBtn: {
     flex: 1,
-    flexDirection: 'row-reverse',
+   ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -887,7 +893,7 @@ const styles = StyleSheet.create({
   },
   uploadBtn: {
     flex: 1,
-    flexDirection: 'row-reverse',
+     ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor4.bgColor(1),
@@ -916,7 +922,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 10,
-    textAlign: 'right',
+   ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   uploadedCard: {
@@ -935,7 +941,7 @@ const styles = StyleSheet.create({
     borderRightColor: '#f44336',
   },
   uploadedInfo: {
-    flexDirection: 'row-reverse',
+     ...NewStyles.row,
     alignItems: 'flex-start',
   },
   uploadedDetails: {
@@ -947,7 +953,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 4,
-    textAlign: 'right',
+     ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   uploadedDate: {
@@ -955,13 +961,13 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirLight',
     color: '#666',
     marginBottom: 4,
-    textAlign: 'right',
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   uploadedStatus: {
     fontSize: 13,
     fontFamily: 'VazirBold',
-    textAlign: 'right',
+    ...NewStyles.text10,
     marginBottom: 8,
     writingDirection: 'rtl',
   },
@@ -990,21 +996,21 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#f44336',
     marginBottom: 5,
-    textAlign: 'right',
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   rejectionText: {
     fontSize: 13,
     fontFamily: 'VazirLight',
     color: '#666',
-    textAlign: 'right',
+    ...NewStyles.text10,
     lineHeight: 20,
     writingDirection: 'rtl',
   },
 
   // View Uploaded Button
   viewUploadedBtn: {
-    flexDirection: 'row-reverse',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -1037,7 +1043,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 10,
-    textAlign: 'right',
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   helpText: {
@@ -1045,7 +1051,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirLight',
     color: '#666',
     marginBottom: 6,
-    textAlign: 'right',
+    ...NewStyles.text10,
     lineHeight: 20,
     writingDirection: 'rtl',
   },

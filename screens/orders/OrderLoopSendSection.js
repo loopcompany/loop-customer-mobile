@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState,useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-
+import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '../../helpers/Common'
@@ -13,7 +13,12 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
-    const { t } = useTranslation()
+      const { t, i18n } = useTranslation();
+      const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+      );
+        const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const token = useSelector((state) => state?.auth?.token)
     const [userDescription, setUserDescription] = useState('')
     const [accepting, setAccepting] = useState(false)
@@ -249,7 +254,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
 
 export default OrderLoopSendSection
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     noticeBox: {
         backgroundColor: themeColor1.bgColor(1),
         padding: 10,

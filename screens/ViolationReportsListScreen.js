@@ -1,5 +1,5 @@
 // ViolationReportsListScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,9 +9,14 @@ import NewStyles from '../styles/NewStyles';
 import { themeColor1, themeColor0, themeColor10 } from '../theme/Color';
 import violationReportAPI from '../services/ViolationReportApi';
 import { formatJalaaliDate, formatPrice, showToastOrAlert } from '../helpers/Common';
-
+import { createStyles } from '../styles/NewStyles';
 export default function ViolationReportsListScreen({ navigation }) {
-    const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -169,7 +174,7 @@ export default function ViolationReportsListScreen({ navigation }) {
     );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',

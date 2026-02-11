@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useMemo } from "react";
 import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useDispatch } from "react-redux";
 import Button from "../../components/Button";
@@ -10,10 +10,15 @@ import { validateMelicode, validatePhone, validateEmail, showToastOrAlert } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-
+import { createStyles } from '../../styles/NewStyles';
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
-    const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [formData, setFormData] = useState({
         melicode: "",
         phone: "",
@@ -246,7 +251,7 @@ export default function ForgotPassword({ navigation }) {
     );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",

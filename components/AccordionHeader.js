@@ -1,9 +1,10 @@
 import { TouchableOpacity, Text } from 'react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import NewStyles from '../styles/NewStyles'
+import { useTranslation } from 'react-i18next';
 import { themeColor0, themeColor4 } from '../theme/Color'
-
+import { createStyles } from '../styles/NewStyles';
 const AccordionHeader = ({
     title,
     isActive,
@@ -11,11 +12,16 @@ const AccordionHeader = ({
     onPress,
     inactiveMessage
 }) => {
+    const { t, i18n } = useTranslation();
+      const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+      );
     return (
         <TouchableOpacity
             style={[
-                NewStyles.rowWrapper,
-                NewStyles.center,
+                NewStyles.row,
+                
                 {
                     paddingHorizontal: '5%',
                     paddingVertical: 10,
@@ -29,7 +35,7 @@ const AccordionHeader = ({
             onPress={onPress}
         >
             {isActive && <Ionicons name="checkmark" size={20} color={themeColor4.bgColor(1)} />}
-            <Text style={[NewStyles.title4, { flex: 1,textAlign:'right' }]}>{title}</Text>
+            <Text style={[NewStyles.title4, { flex: 1}]}>{title}</Text>
             <Ionicons name={isOpen ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color={themeColor4.bgColor(1)} />
         </TouchableOpacity>
     )

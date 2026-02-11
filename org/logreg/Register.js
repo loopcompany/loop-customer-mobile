@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,8 +16,14 @@ import { uri } from '../../services/URL';
 import { jalaliToGregorian, showAlert } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/Button';
-
+import { createStyles } from '../../styles/NewStyles';
 const Register = ({ navigation }) => {
+ const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   // Form states
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
@@ -88,69 +95,69 @@ const Register = ({ navigation }) => {
     const newErrors = {};
 
     if (!organizationName || organizationName.length < 2) {
-      newErrors.organizationName = 'نام سازمان باید حداقل 2 کاراکتر باشد';
+      newErrors.organizationName = t('Organization name must be at least 2 characters');
     }
 
     if (!familyName || familyName.length < 2) {
-      newErrors.familyName = 'نام و نام خانوادگی مدیر باید حداقل 2 کاراکتر باشد';
+      newErrors.familyName = t('Manager full name must be at least 2 characters');
     }
 
     if (!nationalCode) {
-      newErrors.nationalCode = 'کد ملی الزامی است';
+      newErrors.nationalCode = t('National ID is required');
     } else if (!validateNationalCode(nationalCode)) {
-      newErrors.nationalCode = 'کد ملی نامعتبر است';
+      newErrors.nationalCode = t('National ID is invalid');
     }
 
     if (!mobileNumber) {
-      newErrors.mobileNumber = 'شماره موبایل الزامی است';
+      newErrors.mobileNumber = t('Mobile number is required');
     } else if (!validateMobile('0' + mobileNumber)) {
-      newErrors.mobileNumber = 'شماره موبایل باید با 09 شروع شود و 11 رقم باشد';
+      newErrors.mobileNumber = t('Mobile number must be 11 digits and start with 09');
     }
 
     if (!birthDate) {
-      newErrors.birthDate = 'تاریخ تولد الزامی است';
+      newErrors.birthDate = t('Birth date is required');
     }
 
     if (!organizationEmail) {
-      newErrors.organizationEmail = 'ایمیل سازمان الزامی است';
+      newErrors.organizationEmail = t('Email address is required');
     } else if (!validateEmail(organizationEmail)) {
-      newErrors.organizationEmail = 'فرمت ایمیل نامعتبر است';
+      newErrors.organizationEmail = t('The email address you entered is not valid.');
     }
 
     if (!organizationPhoneNumber) {
-      newErrors.organizationPhoneNumber = 'تلفن ثابت سازمان الزامی است';
+      newErrors.organizationPhoneNumber = t('Organization landline number is required');
     }
 
     if (!password || password.length < 8) {
-      newErrors.password = 'رمز عبور باید حداقل 8 کاراکتر باشد';
+      newErrors.password = t('Password must be at least 8 characters');
     }
 
     // Location validation
     if (!selectedProvince) {
-      newErrors.province = 'انتخاب استان الزامی است';
+      newErrors.province = t('Province is required');
     }
     if (!selectedCity) {
-      newErrors.city = 'انتخاب شهر الزامی است';
+      newErrors.city = t('City is required');
     }
     if (!selectedRegion) {
-      newErrors.region = 'انتخاب منطقه الزامی است';
+      newErrors.region = t('Region is required');
     }
 
     if (!organizationAddress || organizationAddress.length < 10) {
-      newErrors.organizationAddress = 'آدرس باید حداقل 10 کاراکتر باشد';
+      newErrors.organizationAddress = t('Address must be at least 10 characters');
     }
 
     if (!organizationPostalCode) {
-      newErrors.organizationPostalCode = 'کد پستی الزامی است';
+      newErrors.organizationPostalCode = t('Postal code is required');
     } else if (!validatePostalCode(organizationPostalCode)) {
-      newErrors.organizationPostalCode = 'کد پستی باید 10 رقم باشد';
+      newErrors.organizationPostalCode = t('Postal code must be 10 digits');
     }
 
     // Captcha validation
     if (!securityCode) {
-      newErrors.securityCode = 'کد امنیتی الزامی است';
+      newErrors.securityCode = t('Security code is required');
     } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
-      newErrors.securityCode = 'کد امنیتی صحیح نیست';
+      newErrors.securityCode = t('Security code is incorrect');
     }
 
     setErrors(newErrors);
@@ -163,7 +170,7 @@ const Register = ({ navigation }) => {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.granted === false) {
-        showAlert('خطا', 'دسترسی به گالری مورد نیاز است');
+        showAlert(t('Error'), t('Gallery access is required'));
         return;
       }
 
@@ -179,7 +186,7 @@ const Register = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      showAlert('خطا', 'خطا در انتخاب تصویر');
+      showAlert(t('Error'), t('Error selecting image'));
     }
   };
 
@@ -190,18 +197,18 @@ const Register = ({ navigation }) => {
 
     // Validate form
     if (!validateForm()) {
-      showAlert('خطا', 'لطفا تمام فیلدها را به درستی پر کنید');
+      showAlert(t('Error'), t('Please fill in all the required fields.'));
       return;
     }
 
     // Validate captcha
     if (!securityCode) {
-      setErrors({ securityCode: 'کد امنیتی الزامی است' });
-      showAlert('خطا', 'لطفا کد امنیتی را وارد کنید');
+      setErrors({ securityCode: t('Security code is required') });
+      showAlert(t('Error'), t('Please enter the security code'));
       return;
     } else if (securityCode.toLowerCase() !== displayedCaptcha.toLowerCase()) {
-      setErrors({ securityCode: 'کد امنیتی صحیح نیست' });
-      showAlert('خطا', 'کد امنیتی صحیح نیست');
+      setErrors({ securityCode: t('Security code is incorrect') });
+      showAlert(t('Error'), t('Security code is incorrect'));
       setDisplayedCaptcha(generateCaptcha());
       setSecurityCode('');
       return;
@@ -280,11 +287,11 @@ const Register = ({ navigation }) => {
 
       if (response.data.status === 'success') {
         showAlert(
-          'موفق',
-          'ثبت نام با موفقیت انجام شد. کد تایید به شماره موبایل ارسال شد.',
+          t('Success'),
+          t('Registration completed successfully. A verification code was sent to the mobile number.'),
           [
             {
-              text: 'تایید',
+              text: t('Confirm'),
               onPress: () => {
                 // Navigate to OTP verification screen
                 navigation.navigate('OTPVerification', {
@@ -324,23 +331,24 @@ const Register = ({ navigation }) => {
           });
           setErrors(serverErrors);
 
-          showAlert('خطا در اعتبارسنجی', errorData.message || 'لطفا فیلدها را بررسی کنید');
+          showAlert(t('Validation error'), errorData.message || t('Please check the fields'));
         } else {
-          showAlert('خطا', errorData.message || 'خطا در ثبت نام');
+          showAlert(t('Error'), errorData.message || t('Registration error'));
         }
       } else if (error.request) {
         // Request made but no response (network error)
         console.log('No response received');
         showAlert(
-          'خطا در اتصال',
-          `سرور پاسخگو نیست. لطفا موارد زیر را بررسی کنید:\n\n` +
-          `1. اتصال اینترنت دستگاه\n` +
-          `2. سرور در آدرس ${uri} در حال اجرا باشد\n` +
-          `3. دستگاه و سرور در یک شبکه باشند`,
+          t('Connection error'),
+          t('Server is not responding. Please check the following:') +
+          '\n\n' +
+          `${t('1. Device internet connection')}\n` +
+          `${t('2. The server is running at address')} ${uri}\n` +
+          t('3. The device and server are on the same network'),
           [
-            { text: 'بستن' },
+            { text: t('Close') },
             {
-              text: 'تلاش مجدد',
+              text: t('Try again'),
               onPress: () => handleRegister()
             }
           ]
@@ -348,7 +356,7 @@ const Register = ({ navigation }) => {
       } else {
         // Something else happened
         console.log('Unknown error:', error.message);
-        showAlert('خطا', `خطای نامشخص: ${error.message}`);
+        showAlert(t('Error'), `${t('Unknown error:')} ${error.message}`);
       }
     } finally {
       setLoading(false);
@@ -363,7 +371,7 @@ const Register = ({ navigation }) => {
       >
         <CustomStatusBar />
         <ScreenHeaders
-          title="سازمانی / دولتی"
+          title={t('Organization / Government')}
           onPressRight={() => navigation.navigate('TestConnection')}
           rightIcon="🔧"
         />
@@ -388,7 +396,7 @@ const Register = ({ navigation }) => {
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
-            <Text style={[NewStyles.title4]}>اطلاعات تکمیلی</Text>
+            <Text style={[NewStyles.title4]}>{t('Additional information')}</Text>
           </View>
 
           {/* Form Container */}
@@ -436,17 +444,17 @@ const Register = ({ navigation }) => {
                 fontFamily: 'VazirLight',
                 color: '#666'
               }}>
-                {profileImage ? 'تغییر تصویر پروفایل' : 'انتخاب تصویر پروفایل (اختیاری)'}
+                {profileImage ? t('Change profile image') : t('Select profile image (optional)')}
               </Text>
             </TouchableOpacity>
 
             {/* نام سازمان */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>نام سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization name')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationName}
                 onChangeText={setOrganizationName}
-                placeholder="نام سازمان *"
+                placeholder={t('Organization name *')}
                 style={{
                   backgroundColor: '#f5f5f5',
                   borderRadius: 8,
@@ -456,7 +464,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationName ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                 ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -469,12 +477,12 @@ const Register = ({ navigation }) => {
 
             {/* نام و نام خانوادگی مدیر */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>نام و نام خانوادگی مدیر <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Manager full name')} <Text style={NewStyles.title6}>*</Text></Text>
 
               <TextInput
                 value={familyName}
                 onChangeText={setFamilyName}
-                placeholder="نام و نام خانوادگی مدیر *"
+                placeholder={t('Manager full name *')}
                 style={{
                   backgroundColor: '#f5f5f5',
                   borderRadius: 8,
@@ -484,7 +492,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.familyName ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                  ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -497,12 +505,12 @@ const Register = ({ navigation }) => {
 
             {/* شماره ملی مدیر */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره ملی مدیر <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Manager national ID')} <Text style={NewStyles.title6}>*</Text></Text>
 
               <TextInput
                 value={nationalCode}
                 onChangeText={setNationalCode}
-                placeholder="شماره ملی مدیر *"
+                placeholder={t('Manager national ID *')}
                 keyboardType="numeric"
                 maxLength={10}
                 style={{
@@ -514,7 +522,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+               ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -527,12 +535,24 @@ const Register = ({ navigation }) => {
 
             {/* شماره تلفن همراه مدیر */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره تلفن همراه مدیر <Text style={NewStyles.title6}>*</Text></Text>
-              <View style={[NewStyles.row, { gap: 10 }]}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Manager mobile number')} <Text style={NewStyles.title6}>*</Text></Text>
+              <View style={ { gap: 10,flexDirection:"row" }}>
+                           <View style={{
+                  backgroundColor: '#ffeb3b',
+                  borderRadius: 4,
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 40,
+                  minWidth: 50
+                }}>
+                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>+98-</Text>
+                </View>
                 <TextInput
                   value={mobileNumber}
                   onChangeText={setMobileNumber}
-                  placeholder="شماره تلفن همراه مدیر *"
+                  placeholder={t('Manager mobile number *')}
                   keyboardType="numeric"
                   maxLength={10}
                   style={{
@@ -545,23 +565,12 @@ const Register = ({ navigation }) => {
                     borderColor: errors.mobileNumber ? '#ff0000' : '#ccc',
                     fontSize: 14,
                     fontFamily: 'VazirLight',
-                    textAlign: 'right',
+                    ...NewStyles.text10,
                     height: 40,
                     flex: 1
                   }}
                 />
-                <View style={{
-                  backgroundColor: '#ffeb3b',
-                  borderRadius: 4,
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: 40,
-                  minWidth: 50
-                }}>
-                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>+98-</Text>
-                </View>
+     
               </View>
               {errors.mobileNumber && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -572,7 +581,7 @@ const Register = ({ navigation }) => {
 
             {/* متولد */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>تاریخ تولد <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Birth date')} <Text style={NewStyles.title6}>*</Text></Text>
 
               <TouchableOpacity
                 onPress={() => setDatePickerModal(true)}
@@ -590,10 +599,10 @@ const Register = ({ navigation }) => {
                 <Text style={{
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                  ...NewStyles.text10,
                   color: birthDate ? '#333' : '#999'
                 }}>
-                  {birthDate ? `تاریخ تولد: ${birthDate}` : 'تاریخ تولد * : (انتخاب تاریخ)'}
+                  {birthDate ? `${t('Birth date:')} ${birthDate}` : t('Birth date *: (Select date)')}
                 </Text>
               </TouchableOpacity>
               {errors.birthDate && (
@@ -605,11 +614,11 @@ const Register = ({ navigation }) => {
 
             {/* آدرس ایمیل سازمان */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>آدرس ایمیل سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization email address')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationEmail}
                 onChangeText={setOrganizationEmail}
-                placeholder="آدرس ایمیل سازمان *"
+                placeholder={t('Organization email address *')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={{
@@ -621,7 +630,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationEmail ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                  ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -634,13 +643,25 @@ const Register = ({ navigation }) => {
 
             {/* شماره تلفن ثابت سازمان */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>شماره تلفن ثابت سازمان <Text style={NewStyles.title6}>*</Text></Text>
-              <View style={[NewStyles.row, { gap: 8 }]}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization landline number')} <Text style={NewStyles.title6}>*</Text></Text>
+              <View style={ { gap: 8 ,flexDirection:"row"}}>
+                               <View style={{
+                  backgroundColor: '#ffeb3b',
+                  borderRadius: 4,
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 40,
+                  minWidth: 50
+                }}>
+                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold'  }}>021-</Text>
+                </View>
                 <View style={{ flex: 2 }}>
                   <TextInput
                     value={organizationPhoneNumber}
                     onChangeText={setOrganizationPhoneNumber}
-                    placeholder="شماره تلفن ثابت سازمان * "
+                    placeholder={t('Organization landline number *')}
                     keyboardType="phone-pad"
                     maxLength={8}
                     style={{
@@ -652,23 +673,12 @@ const Register = ({ navigation }) => {
                       borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
                       fontSize: 14,
                       fontFamily: 'VazirLight',
-                      textAlign: 'right',
+                       ...NewStyles.text10,
                       height: 40
                     }}
                   />
                 </View>
-                <View style={{
-                  backgroundColor: '#ffeb3b',
-                  borderRadius: 4,
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: 40,
-                  minWidth: 50
-                }}>
-                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
-                </View>
+ 
               </View>
               {errors.organizationPhoneNumber && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -679,7 +689,7 @@ const Register = ({ navigation }) => {
 
             {/* رمز عبور */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>رمز عبور <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Password')} <Text style={NewStyles.title6}>*</Text></Text>
               <View style={[NewStyles.row, {
                 gap: 10, backgroundColor: '#f5f5f5',
                 borderWidth: 1,
@@ -688,7 +698,7 @@ const Register = ({ navigation }) => {
                 <TextInput
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="رمز عبور * (حداقل 8 کاراکتر)"
+                  placeholder={t('Password * (minimum 8 characters)')}
                   secureTextEntry={!showPassword}
                   style={{
 
@@ -696,9 +706,9 @@ const Register = ({ navigation }) => {
                     paddingVertical: 10,
                     paddingHorizontal: 5,
                     paddingLeft: 45,
-                    fontSize: 14,
+                    fontSize: 12,
                     fontFamily: 'VazirLight',
-                    textAlign: 'right',
+                     ...NewStyles.text10,
                     height: 40,
                     flex: 1
                   }}
@@ -724,7 +734,7 @@ const Register = ({ navigation }) => {
 
             {/* استان، شهر و منطقه با LocationPicker */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>استان، شهر و منطقه <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Province, city, and region')} <Text style={NewStyles.title6}>*</Text></Text>
               <LocationPicker
                 selectedProvince={selectedProvince}
                 selectedCity={selectedCity}
@@ -743,11 +753,11 @@ const Register = ({ navigation }) => {
 
             {/* آدرس سازمان */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>آدرس سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization address')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationAddress}
                 onChangeText={setOrganizationAddress}
-                placeholder="آدرس سازمان *"
+                placeholder={t('Organization address *')}
                 multiline
                 numberOfLines={2}
                 style={{
@@ -759,7 +769,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                   ...NewStyles.text10,
                   height: 60,
                   textAlignVertical: 'top'
                 }}
@@ -773,12 +783,12 @@ const Register = ({ navigation }) => {
 
             {/* کد پستی سازمان */}
             <View style={{ marginBottom: 15 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>کد پستی سازمان <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization postal code')} <Text style={NewStyles.title6}>*</Text></Text>
 
               <TextInput
                 value={organizationPostalCode}
                 onChangeText={setOrganizationPostalCode}
-                placeholder="کد پستی سازمان * (10 رقم)"
+                placeholder={t('Organization postal code * (10 digits)')}
                 keyboardType="numeric"
                 maxLength={10}
                 style={{
@@ -790,7 +800,7 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                   ...NewStyles.text10,
                   height: 40
                 }}
               />
@@ -839,11 +849,11 @@ const Register = ({ navigation }) => {
 
                 {/* کد امنیتی - Text Input سمت راست */}
                 <View style={{ flex: 1 }}>
-                  <Text style={[NewStyles.text, { marginBottom: 5 }]}>کد امنیتی <Text style={NewStyles.title6}>*</Text></Text>
+                  <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Security code')} <Text style={NewStyles.title6}>*</Text></Text>
                   <TextInput
                     value={securityCode}
                     onChangeText={setSecurityCode}
-                    placeholder="کد امنیتی *"
+                    placeholder={t('Security code *')}
                     autoCapitalize="characters"
                     style={{
                       backgroundColor: '#f5f5f5',
@@ -854,7 +864,7 @@ const Register = ({ navigation }) => {
                       borderColor: errors.securityCode ? '#ff0000' : '#ccc',
                       fontSize: 14,
                       fontFamily: 'VazirLight',
-                      textAlign: 'right',
+                      ...NewStyles.text10,
                       height: 36
                     }}
                   />
@@ -872,12 +882,12 @@ const Register = ({ navigation }) => {
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
 
             <Button
-              title={'ثبت نام'}
+              title={t('Sign Up')}
               onPress={handleRegister}
               loading={loading}
             />
             <Button
-              title={'ورود به حساب کاربری'}
+              title={t('Login to account')}
               onPress={() => { navigation.navigate('Login') }}
             />
           </View>

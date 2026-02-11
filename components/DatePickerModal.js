@@ -1,5 +1,6 @@
 import { View, Modal, StyleSheet, TouchableWithoutFeedback, Text, TouchableOpacity } from 'react-native';
 import React, { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 
 import NewStyles from '../styles/NewStyles';
@@ -29,6 +30,7 @@ const DatePickerModal = React.memo(function DatePickerModal({
     minimumDate = null, // تاریخ حداقل (اختیاری)
     maximumDate = null  // تاریخ حداکثر (اختیاری)
 }) {
+    const { t } = useTranslation();
 
     const date = useMemo(() => new Date(), []);
 
@@ -96,7 +98,7 @@ const DatePickerModal = React.memo(function DatePickerModal({
 
                             {/* دکمه بستن */}
 
-                            <Button title="تأیید" onPress={handleConfirm} />
+                            <Button title={t('Confirm')} onPress={handleConfirm} />
                         </View>
                     </TouchableWithoutFeedback>
                 </View>

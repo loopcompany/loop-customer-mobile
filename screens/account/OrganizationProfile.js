@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../../styles/NewStyles';
 import { themeColor1 } from '../../theme/Color';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
@@ -33,8 +33,12 @@ import NewStyles from '../../styles/NewStyles';
 const OrganizationProfile = () => {
   const navigation = useNavigation();
   const { logoutWithConfirmation, isLoggingOut } = useLogout();
-  const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   // Form states - مطابق با فیلدهای ثبت‌نام
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
@@ -844,16 +848,16 @@ const OrganizationProfile = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   headerContainer: {
     width: '90%',
     alignSelf: 'center',
     backgroundColor: '#1976d2',
-    borderRadius: 10,
+    ...NewStyles.border10,
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 15,
-    flexDirection: 'row',
+    ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 3,
@@ -864,7 +868,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
   },
   editButton: {
-    flexDirection: 'row',
+   ...NewStyles.row,
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 12,
@@ -917,7 +921,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirLight',
     color: '#333',
     marginBottom: 6,
-    textAlign: 'right',
+    ...NewStyles.text10,
   },
   input: {
     backgroundColor: '#f5f5f5',
@@ -928,7 +932,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     fontSize: 14,
     fontFamily: 'VazirLight',
-    textAlign: 'right',
+     ...NewStyles.text10,
     minHeight: 40,
   },
   inputDisabled: {
@@ -1009,7 +1013,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'VazirLight',
     marginTop: 4,
-    textAlign: 'right',
+    ...NewStyles.text,
   },
   changePasswordButton: {
     backgroundColor: '#ff9800',

@@ -4,7 +4,6 @@ import axios from 'axios';
 import * as Linking from "expo-linking";
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
 import { formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
@@ -12,15 +11,21 @@ import Button from '../../components/Button';
 import { uri } from '../../services/URL';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
+
 import Loader from '../../components/Loader';
 import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import { createStyles } from '../../styles/NewStyles';
 function Invoice({ route }) {
 
     const dispatch = useDispatch()
-    const { t } = useTranslation();
+      const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+//    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)

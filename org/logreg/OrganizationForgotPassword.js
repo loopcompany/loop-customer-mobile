@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,14 @@ import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
-
+import NewStyles from '../../styles/NewStyles';
+import { createStyles } from '../../styles/NewStyles';
 const OrganizationForgotPassword = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
   const [organizationCode, setOrganizationCode] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -177,7 +182,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 fontFamily: 'VazirBold',
                 color: '#333',
                 marginBottom: 8,
-                textAlign: 'right',
+                ...NewStyles.title10,
               }}
             >
               {t('Organization code')} *
@@ -229,7 +234,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 fontFamily: 'VazirBold',
                 color: '#333',
                 marginBottom: 8,
-                textAlign: 'right',
+                   ...NewStyles.title10,
               }}
             >
               {t('Admin mobile number')} *
@@ -289,7 +294,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 fontFamily: 'VazirLight',
                 color: '#1565c0',
                 lineHeight: 22,
-                textAlign: 'right',
+                   ...NewStyles.text,
               }}
             >
               {t('💡 The recovery code will be sent to the mobile number registered in the organization admin account.')}

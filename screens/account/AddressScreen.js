@@ -1,5 +1,5 @@
 // AddressScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useMemo } from "react";
 import {
   View,
   Text,
@@ -18,9 +18,14 @@ import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../../theme/
 import { addressAPI } from "../../services/Api";
 import { showToastOrAlert, showAlert } from "../../helpers/Common";
 import Button from "../../components/Button";
-
+import { createStyles } from '../../styles/NewStyles';
 export default function AddressScreen({ route, navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -204,7 +209,7 @@ export default function AddressScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -227,7 +232,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
@@ -242,7 +247,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   infoRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   footer: {

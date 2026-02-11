@@ -3,15 +3,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState,useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchOrders } from '../../slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
 import OrderItem from '../../components/OrderItem';
 import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
-
+import { createStyles } from '../../styles/NewStyles';
 function CanceledOrdersScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
 
@@ -62,7 +67,7 @@ function CanceledOrdersScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#e0f0ff',

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback,useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,9 +23,14 @@ import { getTicketsList, sendTicketMessage } from '../services/Api';
 import { formatDate, formatDateTime } from '../helpers/Common';
 import Button from '../components/Button';
 import { useSelector } from 'react-redux';
-
+import { createStyles } from '../styles/NewStyles';
 export default function MessageScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -269,7 +274,7 @@ export default function MessageScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   background: {
     flex: 1,
   },
@@ -382,7 +387,7 @@ const styles = StyleSheet.create({
   messageContent: {
     ...NewStyles.text,
     fontSize: 14,
-    textAlign: 'right',
+
     lineHeight: 22,
   },
   unreadBadge: {
@@ -410,12 +415,12 @@ const styles = StyleSheet.create({
     ...NewStyles.title10,
     fontSize: 14,
     marginBottom: 10,
-    textAlign: 'right',
+
   },
   messageInput: {
     ...NewStyles.text10,
     fontSize: 14,
-    textAlign: 'right',
+
     minHeight: 100,
     borderWidth: 1,
     borderColor: themeColor10.bgColor(0.2),
@@ -444,6 +449,6 @@ const styles = StyleSheet.create({
     ...NewStyles.text4,
     flex: 1,
     fontSize: 12,
-    textAlign: 'right',
+   
   },
 });

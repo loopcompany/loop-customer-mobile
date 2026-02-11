@@ -1,5 +1,5 @@
 import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect,useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
@@ -14,10 +14,15 @@ import { uri } from '../services/URL';
 import ConfirmationModal from './ConfirmationModal';
 import { fetchAddresses } from '../slices/addressSlice';
 import { handleError } from '../helpers/Common';
-
+import { createStyles } from '../styles/NewStyles';
 export default function Address({ step, data, navigation }) {
 
-    const { t } = useTranslation();
+      const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const dispatch = useDispatch();
     const [refreshing, setRefreshing] = useState(false);
     const [id, setId] = useState(null);
@@ -38,7 +43,7 @@ export default function Address({ step, data, navigation }) {
     }, [dispatch, token]);
 
     const renderRow = (label, value, textStyle = NewStyles.text10) =>
-        <View style={NewStyles.rowWrapper}>
+        <View style={NewStyles.row}>
             <Text style={NewStyles.text3}>{label}</Text>
             <Text style={textStyle}>{value}</Text>
         </View>;
@@ -100,7 +105,7 @@ export default function Address({ step, data, navigation }) {
         </View>
     )
 }
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     contentContainerStyle: {
         // backgroundColor: 'red'
         // gap: 15,

@@ -1,10 +1,10 @@
 import { View, TextInput, Pressable, ImageBackground, Platform, KeyboardAvoidingView, Text, ActivityIndicator } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState,useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-
+import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL';
 import { showToastOrAlert } from '../../helpers/Common';
 import NewStyles from '../../styles/NewStyles';
@@ -14,7 +14,12 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 
 export default function ChatRoom({ route }) {
 
-    const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const technicianId = route?.params?.technicianId;
     const [message, setMessage] = useState('');
     const token = useSelector((state) => state?.auth?.token);

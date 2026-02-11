@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer,useMemo } from "react";
 import { Text, TextInput, Image, Platform, StyleSheet, ScrollView, View, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from "react-redux";
@@ -16,7 +16,7 @@ import { fetchUser } from "../../slices/userSlice";
 import { fetchAddresses } from "../../slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
-
+import { createStyles } from '../../styles/NewStyles';
 const initialState = {
   phone: '',
   password: '',
@@ -71,8 +71,12 @@ const formReducer = (state, action) => {
 export default function LoginScreen({ navigation }) {
   const [state, dispatch] = useReducer(formReducer, initialState);
   const reduxDispatch = useDispatch();
-  const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   // Form validation
   const validateForm = () => {
     const errors = {};
@@ -493,7 +497,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>   StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: "cover",

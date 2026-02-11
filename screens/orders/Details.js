@@ -26,10 +26,13 @@ import OrderReturnTimeSection from './OrderReturnTimeSection';
 import AccordionHeader from '../../components/AccordionHeader';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
+import { createStyles } from '../../styles/NewStyles';
+
+const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
 
 
-const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t }) => {
     return (
+
         <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '90%', alignSelf: 'center', paddingBottom: 10, marginBottom: 10 }, NewStyles.border10]}>
 
             <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
@@ -50,41 +53,33 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t }) =
                             const female = Number(data.female_count) || 0;
                             const unspecified = Number(data.unspecified_count) || 0;
                             const total = male + female + unspecified;
-
                             if (total === 0) return t("Not specified");
-
                             let details = [];
                             if (male > 0) details.push(t("Male"));
                             if (female > 0) details.push(t("Female"));
-
                             return (details.length > 0 ? `${details.join(' ')}` : '');
                         })()
                     )
                 )}
 
-                {data?.status == 1 && renderRow(t("Order status"), data?.started_at ? t("In progress") : data?.arrived_at ? t("Technician arrived at order location") : data?.set_off_at ? t("Technician is on the way") : t("Current"), NewStyles.text, NewStyles.text7)}
-                {renderRow((Number(data?.is_fixed) == 1) ? t("Final Loop price") : t("Base Loop price"), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t("Tomans") : t("Needs review"))}
-                {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t("Technician base price"), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
-                {data?.extra_price > 0 && renderRow(t("Extra parts cost"), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
-                {data?.discount_price > 0 && renderRow(t("Your discount amount"), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t("Tomans") : '0 ' + t("Tomans"))}
-                {totalPrice > totalDiscountedPrice > 0 && renderRow(t("Final amount without discount"), `${formatPrice(totalPrice)}` + ' ' + t("Tomans"), NewStyles.text, [NewStyles.text10,])}
-
-                <View style={NewStyles.rowWrapper}>
-                    <Text style={[NewStyles.text]}>{t("Payment status")}</Text>
-                    <View style={[{ backgroundColor: data?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
-                        <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t("Paid") : t("Not paid")}</Text>
-                    </View>
-                </View>
+                {user?.apple_check == 1
+                    ? null
+                    : <View style={NewStyles.rowWrapper}>
+                        <Text style={[NewStyles.text]}>{t("Payment status")}</Text>
+                        <View style={[{ backgroundColor: data?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
+                            <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t("Paid") : t("Not paid")}</Text>
+                        </View>
+                    </View>}
 
 
             </View>
 
-            <View style={{ paddingHorizontal: '5%', padding: 20, gap: 10 }}>
+            <View style={[{ paddingHorizontal: '5%', padding: 20, gap: 10 }]}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Ionicons name={'locate'} size={24} color={themeColor0.bgColor(1)} />
                     <Text style={NewStyles.title}>{t("Order location")}</Text>
                 </View>
-                <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
+                <View style={[NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                     <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
                     <View>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.city + ' - ' + t("Region") + ' ' + data?.user_address?.region + ' - ' + data?.user_address?.address}</Text>
@@ -132,7 +127,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t }) =
                     <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.des}</Text>
                 </View>
             </View>}
-            {data?.technician_des && <View style={{ paddingHorizontal: '5%', gap: 10 }}>
+            {data?.technician_des && <View style={[{ paddingHorizontal: '5%', gap: 10 }]}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
                     <Text style={NewStyles.title}>{t("Technician description")}</Text>
@@ -153,7 +148,13 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t }) =
 
 function Details({ route, navigation }) {
 
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+
     const dispatch = useDispatch();
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
@@ -439,7 +440,6 @@ function Details({ route, navigation }) {
             <Text style={[NewStyles.text10, textStyle2]}>{text2}</Text>
         </View>
     ), []);
-
     if (data.length <= 0) { return <Loader /> }
 
 
@@ -456,7 +456,7 @@ function Details({ route, navigation }) {
                         isOpen={showDetails}
                         onPress={() => setShowDetails(!showDetails)}
                     />
-                    {showDetails && <OrderDetail data={data} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} t={t} />}
+                    {showDetails && <OrderDetail data={data} user={user} renderRow={renderRow} totalDiscountedPrice={totalDiscountedPrice} totalPrice={totalPrice} t={t} styles={styles} NewStyles={NewStyles} />}
 
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
@@ -784,7 +784,7 @@ function Details({ route, navigation }) {
                                         </View>
                                     )}
 
-                                    <View style={{width:'100%', alignItems:'center', }}>
+                                    <View style={{ width: '100%', alignItems: 'center', }}>
                                         <Button
                                             title={t("Submit receive status")}
                                             onPress={handleSubmitReceive}
@@ -823,7 +823,7 @@ function Details({ route, navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     itemWrapper: {
         backgroundColor: themeColor5.bgColor(1),
         paddingVertical: '5%',

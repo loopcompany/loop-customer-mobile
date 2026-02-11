@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Linking } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState,useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-
+import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatDate, showToastOrAlert } from '../../helpers/Common'
@@ -13,7 +13,12 @@ import ConfirmationModal from '../../components/ConfirmationModal'
 import Button from '../../components/Button'
 
 const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector((state) => state?.auth?.token)
   const [loadingAccept, setLoadingAccept] = useState(false)
   const [loadingCancel, setLoadingCancel] = useState(false)
@@ -189,7 +194,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
 
 export default OrderReviewSection
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>   StyleSheet.create({
   noticeBox: {
     backgroundColor: themeColor1.bgColor(1),
     padding: 10,

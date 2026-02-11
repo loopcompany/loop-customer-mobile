@@ -1,13 +1,19 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { themeColor10, themeColor3, themeColor4 } from '../theme/Color';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import NewStyles from '../styles/NewStyles';
 import { cleanText } from '../helpers/Common';
-
+import { createStyles } from '../styles/NewStyles';
 const AccardeonComponent = ({ item, expandedItems, setExpandedItems }) => {
   const isExpanded = expandedItems[item.id];
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const toggleExpanded = (id) => {
     setExpandedItems(prev => ({
       ...prev,
@@ -39,7 +45,7 @@ const AccardeonComponent = ({ item, expandedItems, setExpandedItems }) => {
 
 export default AccardeonComponent
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor4.bgColor(1),

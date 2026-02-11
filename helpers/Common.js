@@ -425,6 +425,10 @@ export const getOrderStatusColor = (status) => {
   };
   return colorMap[status] || '#9E9E9E';
 };
+
+  const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
+export const langIsRTL =(lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
+
 export const formatDateTime = (isoDate) => {
   if (!isoDate) return '';
   const date = new Date(isoDate);

@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
@@ -12,11 +12,16 @@ import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTeleph
 import { showToastOrAlert } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function AddNewAddress({ navigation }) {
 
     const dispatch = useDispatch()
-    const { t } = useTranslation();
+     const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const token = useSelector((state) => state?.auth?.token)
     const address = useSelector(state => state?.address);
 
@@ -184,7 +189,7 @@ export default function AddNewAddress({ navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     contentContainerStyle: {
         paddingHorizontal: 0,
         paddingVertical: '5%',

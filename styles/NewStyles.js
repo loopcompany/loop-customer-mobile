@@ -192,7 +192,7 @@ export const createStyles = (lang) => {
       },
 
       row: {
-        flexDirection: langIsRTL(lang) ? "row-reverse" : "row",
+        flexDirection: langIsRTL(lang) ? "row" : "row",
         alignItems: "center",
       },
 

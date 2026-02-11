@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from '../services/URL';
 import { showAlert } from '../helpers/Common';
+import NewStyles from '../styles/NewStyles';
+import { createStyles } from '../styles/NewStyles';
 
 /**
  * LocationPicker Component
@@ -31,6 +34,12 @@ const LocationPicker = ({
   required = true,
   style = {}
 }) => {
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -88,9 +97,9 @@ const LocationPicker = ({
     } catch (error) {
       console.error('Error fetching provinces:', error);
       if (Platform.OS === 'web') {
-        window.alert('خطا در دریافت لیست استان‌ها');
+        window.alert(t('Error fetching province list'));
       } else {
-        showAlert('خطا', 'خطا در دریافت لیست استان‌ها');
+        showAlert(t('Error'), t('Error fetching province list'));
       }
     } finally {
       setLoadingProvinces(false);
@@ -273,7 +282,7 @@ const LocationPicker = ({
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="جستجو..."
+              placeholder={t('Search...')}
               style={{
                 backgroundColor: '#f5f5f5',
                 borderRadius: 8,
@@ -283,7 +292,8 @@ const LocationPicker = ({
                 borderColor: '#ccc',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right'
+                ...NewStyles.text10,
+                
               }}
             />
           </View>
@@ -303,7 +313,7 @@ const LocationPicker = ({
                     color: '#999',
                     textAlign: 'center'
                   }}>
-                    موردی یافت نشد
+                    {t('No results found.')}
                   </Text>
                 </View>
               ) : (
@@ -340,7 +350,7 @@ const LocationPicker = ({
     <View>
       {/* Province Picker */}
       {renderPickerButton(
-        'استان',
+        t('Province'),
         selectedProvince,
         () => setShowProvinceModal(true),
         errors.province
@@ -351,12 +361,12 @@ const LocationPicker = ({
         provinces,
         handleProvinceSelect,
         loadingProvinces,
-        'انتخاب استان'
+        t('Select province')
       )}
 
       {/* City Picker */}
       {renderPickerButton(
-        'شهر',
+        t('City'),
         selectedCity,
         () => setShowCityModal(true),
         errors.city,
@@ -368,12 +378,12 @@ const LocationPicker = ({
         cities,
         handleCitySelect,
         loadingCities,
-        'انتخاب شهر'
+        t('Select city')
       )}
 
       {/* Region Picker */}
       {renderPickerButton(
-        'منطقه',
+        t('Region'),
         selectedRegion,
         () => setShowRegionModal(true),
         errors.region,
@@ -385,7 +395,7 @@ const LocationPicker = ({
         regions,
         handleRegionSelect,
         loadingRegions,
-        'انتخاب منطقه'
+        t('Select region')
       )}
     </View>
   );

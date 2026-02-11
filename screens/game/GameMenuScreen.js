@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,9 +14,14 @@ import NewStyles from '../../styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
 import { GAME_LEVELS } from './GameData';
 import Button from '../../components/Button';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function GameMenuScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [selectedLevel, setSelectedLevel] = useState('easy');
   const scaleAnim = new Animated.Value(1);
 
@@ -164,7 +169,7 @@ export default function GameMenuScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor5.bgColor(1),

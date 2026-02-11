@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,9 +13,14 @@ import BlankScreen from '../../components/BlankScreen';
 import { RefreshControl } from 'react-native';
 import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
-
+import { createStyles } from '../../styles/NewStyles';
 export default function WarrantyScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [warranties, setWarranties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -82,7 +87,7 @@ export default function WarrantyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   warrantiesContainer: {
     padding: 15,
   },

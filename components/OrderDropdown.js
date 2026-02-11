@@ -185,13 +185,13 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     placeholderStyle: {
         fontSize: 14,
         fontFamily: 'VazirLight',
-        textAlign: 'right',
+        ...NewStyles.text10,
         color: '#999',
     },
     selectedTextStyle: {
         fontSize: 14,
         fontFamily: 'VazirBold',
-        textAlign: 'right',
+         ...NewStyles.text10,
         color: themeColor0.bgColor(1),
     },
     iconStyle: {
@@ -202,7 +202,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
         height: 40,
         fontSize: 14,
         fontFamily: 'VazirLight',
-        textAlign: 'right',
+         ...NewStyles.text10,
         borderRadius: 8,
     },
     item: {
@@ -212,13 +212,13 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
         backgroundColor: '#fff',
     },
     itemHeader: {
-        flexDirection: 'row',
+        ...NewStyles.row,
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 6,
     },
     itemFooter: {
-        flexDirection: 'row',
+         ...NewStyles.row,
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 8,
@@ -230,7 +230,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
         marginRight: 8,
     },
     loadingContainer: {
-        flexDirection: 'row',
+        ...NewStyles.row,
         alignItems: 'center',
         padding: 15,
         backgroundColor: '#fff',
@@ -238,7 +238,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
         borderColor: '#ddd',
     },
     emptyContainer: {
-        flexDirection: 'row',
+         ...NewStyles.row,
         alignItems: 'center',
         padding: 15,
         backgroundColor: '#f9f9f9',

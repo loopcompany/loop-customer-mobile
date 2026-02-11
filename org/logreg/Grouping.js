@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import Footer from "../../screens/Footer";
@@ -7,9 +7,14 @@ import NewStyles from "../../styles/NewStyles";
 import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
 import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
-
+import { createStyles } from '../../styles/NewStyles';
 const Grouping = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [isOrganizationalGuideOpen, setIsOrganizationalGuideOpen] = useState(false);
   const handleOrganizationalLogin = () => {
     navigation.navigate("Login");
@@ -197,8 +202,8 @@ const Grouping = ({ navigation }) => {
                 width: "100%",
                 backgroundColor: "#ffeb3b",
                 paddingVertical: 8,
-                flexDirection: "row",
-                alignItems: "center",
+                ...NewStyles.rowWrapper,
+                // alignItems: "center",
                 paddingHorizontal: 10,
               }}
             >
@@ -217,7 +222,7 @@ const Grouping = ({ navigation }) => {
                   fontSize: 12,
                   fontFamily: "VazirBold",
                   color: "#000",
-                  textAlign: "center",
+                 ...NewStyles.text10
                 }}
               >
                 {t("Organizational / Government panel guide")}
@@ -264,7 +269,7 @@ const Grouping = ({ navigation }) => {
                     fontSize: 11,
                     fontFamily: "VazirBold",
                     color: "#000",
-                    textAlign: "right",
+                    ...NewStyles.text10,
                     lineHeight: 20,
                   }}
                 >

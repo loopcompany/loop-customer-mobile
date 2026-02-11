@@ -48,8 +48,8 @@ export default function GemTransactions() {
                 data={data}
                 keyExtractor={(item) => item?.id?.toString()}
                 ListEmptyComponent={() => (
-                    <View style={[NewStyles.center, { paddingTop: 50 }]}>
-                        <Text  style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6 }]}>
+                    <View style={[NewStyles.center, { flex:1,paddingTop: 50 }]}>
+                        <Text  style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6, paddingHorizontal: 20,  }]}>
                             {t("You have not spun the lucky wheel yet and have no points")}
                         </Text>
                     </View>

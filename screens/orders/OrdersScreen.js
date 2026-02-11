@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   confirmDateBtn: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor0.bgColor(1),
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
   },
   filterButton: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   activeFilterBadge: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#f0f8ff',
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   activeFilterText: {
     fontSize: 13,
     flex: 1,
-    textAlign: 'right',
+   ...NewStyles.text10
   },
   clearFilterBtn: {
     padding: 5,
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
   },
   modalHeader: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    textAlign: 'right',
+   ...NewStyles.text10
   },
   dateInputContainer: {
     marginBottom: 20,
@@ -456,10 +456,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
-    textAlign: 'right',
+  ...NewStyles.text10
   },
   dateInput: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
@@ -473,17 +473,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#333',
-    textAlign: 'right',
+    ...NewStyles.text10
   },
   dateTextSelected: {
     fontFamily: 'VazirBold',
     color: themeColor0.bgColor(1),
   },
   statusContainer: {
+    
     marginBottom: 20,
   },
   statusButtons: {
-    flexDirection: 'row-reverse',
+    ...NewStyles.row,
     flexWrap: 'wrap',
     gap: 10,
   },
@@ -508,13 +509,13 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   modalButtons: {
-    flexDirection: 'row',
+    ...NewStyles.row,
     gap: 10,
     marginTop: 10,
   },
   modalBtn: {
     flex: 1,
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

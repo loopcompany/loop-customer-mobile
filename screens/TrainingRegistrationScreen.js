@@ -1,5 +1,5 @@
 // screens/TrainingRegistrationScreen.js
-import React, { useState } from "react";
+import React, { useState,useMemo } from "react";
 import {
   View,
   Text,
@@ -21,9 +21,14 @@ import NewStyles from "../styles/NewStyles";
 import { educationRegistrationAPI } from "../services/Api";
 import { showToastOrAlert } from "../helpers/Common";
 import Button from "../components/Button";
-
+import { createStyles } from '../styles/NewStyles';
 export default function TrainingRegistrationScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [form, setForm] = useState({
     telephone: '',
     phone: '',
@@ -162,7 +167,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
           </View>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Landline Number')}<Text style={NewStyles.title6}>*</Text></Text>
 
-          <View style={[NewStyles.row, { gap: 10 }]}>
+          <View style={[ { gap: 10 ,flexDirection:"row-reverse"}]}>
             <TextInput
               placeholder={t('Landline phone number ')}
               value={form.telephone}
@@ -221,7 +226,7 @@ export default function TrainingRegistrationScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   infoBox: {
     backgroundColor: themeColor4.bgColor(0.5),
     padding: 15,

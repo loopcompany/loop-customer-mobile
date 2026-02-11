@@ -1,18 +1,23 @@
 import { View, Text, Pressable, Image, StyleSheet, Platform } from 'react-native';
-import React from 'react';
+import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../../styles/NewStyles';
 import NewStyles, { deviceWidth } from '../../styles/NewStyles';
 import { imageUri } from '../../services/URL';
 import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
 import { formatDate, showToastOrAlert } from '../../helpers/Common';
-
+import {langIsRTL} from'../../helpers/Common';
 export default function UserDiscountItem({ item, navigation }) {
 
-    const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const isRtl = langIsRTL(i18n.language)
     const copyToClipboard = () => {
         Clipboard.setStringAsync(item?.code);
         showToastOrAlert(t('The code was successfully copied.'))
@@ -36,14 +41,14 @@ export default function UserDiscountItem({ item, navigation }) {
                 <Text style={NewStyles.text3}>{item?.discount_percent} {t('percent discount')}</Text>
                 <View style={NewStyles.row}>
                     <Text style={NewStyles.text}>{t('Usable until')} {formatDate(item?.expiry_date)}</Text>
-                    <Ionicons name="chevron-back" size={15} color={themeColor0.bgColor(1)} />
+                    <Ionicons   name={isRtl ? 'chevron-back' : 'chevron-forward'} size={15} color={themeColor0.bgColor(1)} />
                 </View>
             </View>
         </Pressable>
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     discountItem: {
         backgroundColor: themeColor4.bgColor(1),
         width: deviceWidth * 0.9,

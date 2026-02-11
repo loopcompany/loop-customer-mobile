@@ -1,10 +1,10 @@
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, Modal, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useMemo } from 'react';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment-jalaali';
-
+import { createStyles } from '../../styles/NewStyles';
 import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor5 } from '../../theme/Color';
 import { mainUri, uri } from '../../services/URL';
@@ -20,10 +20,16 @@ import WinnerModal from '../../components/WinnerModal';
 import { getGemActions, spinWheel, canPlayWheel } from '../../services/GemApi';
 import { showToastOrAlert } from '../../helpers/Common';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import {langIsRTL} from'../../helpers/Common';
 export default function Club({ navigation }) {
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const isRtl = langIsRTL(i18n.language)
+    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector(state => state.auth.token);
 
   const [refreshing, setRefreshing] = useState(true);
@@ -228,8 +234,8 @@ export default function Club({ navigation }) {
           )}
         </Pressable>
 
-        <View style={{ paddingHorizontal: '5%', alignItems: 'flex-end' }}>
-          <Text style={NewStyles.title10}>{t("This Week's Offers")}</Text>
+        <View style={{ paddingHorizontal: '5%' }}>
+          <Text style={[NewStyles.title10]}>{t("This Week's Offers")}</Text>
         </View>
         <View>
           <FlatList
@@ -243,7 +249,7 @@ export default function Club({ navigation }) {
         <View style={[NewStyles.strip, NewStyles.center, { backgroundColor: themeColor1.bgColor(1) }]}>
           <Text style={NewStyles.title}>{t('Promotional Plans')}</Text>
         </View>
-        <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+        <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex}   isRtl={isRtl} />
         <FlatList
           contentContainerStyle={NewStyles.center} scrollEnabled={false}
           showsVerticalScrollIndicator={false}

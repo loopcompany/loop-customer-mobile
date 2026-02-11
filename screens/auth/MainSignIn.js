@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer ,useMemo} from "react";
 import {
     View,
     Text,
@@ -24,7 +24,8 @@ import LocationPicker from "../../components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-
+import { createStyles } from '../../styles/NewStyles';
+import {langIsRTL} from'../../helpers/Common';
 const initialState = {
     melicode: '',
     phone: '',
@@ -72,8 +73,13 @@ const formReducer = (state, action) => {
 export default function MainSignIn({ navigation }) {
     const [state, dispatch] = useReducer(formReducer, initialState);
     const inviteLetter = 'L'; // Static invite letter
-    const { t } = useTranslation();
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+     const isRtl = langIsRTL(i18n.language)
     // Form validation
     const validateForm = () => {
         const errors = {};
@@ -202,7 +208,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Melicode (National ID) */}
                         <View style={styles.inputContainer}>
-                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                            <View style={{   alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("National ID")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -229,7 +235,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Phone Number */}
                         <View style={styles.inputContainer}>
-                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                            <View style={{  alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("Mobile number")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -265,7 +271,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Email */}
                         <View style={styles.inputContainer}>
-                            <View style={{ alignItems: 'flex-end', width: '100%' }}>
+                            <View style={{  alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("Email address")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -377,7 +383,7 @@ export default function MainSignIn({ navigation }) {
     );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",

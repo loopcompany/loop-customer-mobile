@@ -202,7 +202,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     marginBottom: 20,
   },
   labelRow: {
-    flexDirection: 'row-reverse',
+    ...NewStyles.row,
     alignItems: 'center',
     marginBottom: 8,
   },
@@ -216,7 +216,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     padding: 14,
     fontFamily: 'VazirLight',
     fontSize: 14,
-    textAlign: 'right',
+    ...NewStyles.text3,
     minHeight: 200,
     borderWidth: 1,
     borderColor: themeColor3.bgColor(0.3),
@@ -226,7 +226,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     borderWidth: 2,
   },
   counterRow: {
-    flexDirection: 'row-reverse',
+    ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,

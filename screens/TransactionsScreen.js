@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
-
+import { createStyles } from '../styles/NewStyles';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '../helpers/Common';
@@ -14,7 +14,12 @@ import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, theme
 import { getTransactions } from '../services/WalletApi';
 
 export default function TransactionsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector((state) => state?.auth?.token);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -287,6 +292,7 @@ export default function TransactionsScreen() {
         transparent={true}
         animationType="slide"
         onRequestClose={() => setShowFilterModal(false)}
+        
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -434,7 +440,7 @@ export default function TransactionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   container: {
     padding: 20,
     flexGrow: 1,
@@ -466,7 +472,7 @@ const styles = StyleSheet.create({
     ...NewStyles.shadow,
   },
   transactionRow: {
-    ...NewStyles.rowWrapper,
+    ...NewStyles.row,
     marginBottom: 8,
     gap: 10,
   },
@@ -486,7 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: themeColor4.bgColor(1),
   },
   filterButton: {
-    flexDirection: 'row',
+     ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -504,10 +510,10 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontFamily: 'VazirBold',
-    textAlign: 'right',
+     ...NewStyles.text4,
   },
   activeFilterBadge: {
-    flexDirection: 'row',
+     ...NewStyles.row,
     alignItems: 'center',
     backgroundColor: themeColor0.bgColor(1),
     padding: 12,
@@ -520,7 +526,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontFamily: 'VazirLight',
-    textAlign: 'right',
+    ...NewStyles.text4,
   },
   clearFilterBtn: {
     padding: 4,
@@ -542,7 +548,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   modalHeader: {
-    flexDirection: 'row',
+     ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
@@ -554,7 +560,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'VazirBold',
     color: '#333',
-    textAlign: 'right',
+     ...NewStyles.text10,
   },
   dateInputContainer: {
     marginBottom: 20,
@@ -564,10 +570,10 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 8,
-    textAlign: 'right',
+     ...NewStyles.text10,
   },
   dateInput: {
-    flexDirection: 'row',
+     ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
@@ -585,7 +591,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#333',
-    textAlign: 'right',
+    ...NewStyles.text10,
   },
   dateTextSelected: {
     fontFamily: 'VazirBold',
@@ -601,7 +607,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   confirmDateBtn: {
-    flexDirection: 'row',
+   ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor0.bgColor(1),
@@ -614,13 +620,13 @@ const styles = StyleSheet.create({
     fontFamily: 'VazirBold',
   },
   modalButtons: {
-    flexDirection: 'row',
+  ...NewStyles.row,
     gap: 10,
     marginTop: 20,
   },
   modalBtn: {
     flex: 1,
-    flexDirection: 'row',
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 14,
@@ -637,6 +643,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontFamily: 'VazirBold',
-    textAlign: 'right',
+    ...NewStyles.text4,
   },
 });

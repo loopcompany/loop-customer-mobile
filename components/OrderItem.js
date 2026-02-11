@@ -1,10 +1,10 @@
 import { View, Text, Pressable, StyleSheet, Image, Linking } from 'react-native';
-import { useMemo, useState } from 'react';
+import { useMemo, useState} from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-
+import { createStyles } from '../styles/NewStyles';
 import NewStyles from '../styles/NewStyles';
 import { imageUri, uri } from '../services/URL';
 import { fetchOrders } from '../slices/ordersSlice';
@@ -15,10 +15,16 @@ import ConfirmationModal from './ConfirmationModal';
 import { fetchSteps } from '../slices/stepSlice';
 import { setCategory } from '../slices/categorySlice';
 import RateModal from './RateModal';
-
+import {langIsRTL} from'../helpers/Common';
 export default function OrderItem({ item, navigation }) {
 
-    const { t } = useTranslation();
+      const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const isRtl = langIsRTL(i18n.language)
     const dispatch = useDispatch();
     const token = useSelector((state) => state?.auth?.token);
     const user = useSelector((state) => state?.user?.data);
@@ -174,9 +180,9 @@ export default function OrderItem({ item, navigation }) {
             </View>}
 
             {item?.status == 1 && renderRow(t('Order Status'), item?.started_at ? t('In Progress') : item?.arrived_at ? t('Technician arrived at order location') : item?.set_off_at ? t('Technician is on the way') : t('Active'), NewStyles.text10, (!item?.started_at && !item?.arrived_at && !item?.set_off_at) ? NewStyles.text1 : NewStyles.text7)}
-            <View style={[NewStyles.row, { gap: 5, justifyContent: 'flex-end' }]}>
+            <View style={[NewStyles.row, { gap: 5 }]}>
                 <Text style={NewStyles.text3}>{t('View Details')}</Text>
-                <Ionicons name="chevron-back" size={16} color={themeColor3.bgColor(1)} />
+                <Ionicons name={isRtl ? 'chevron-back' : 'chevron-forward'} size={16} color={themeColor3.bgColor(1)} />
             </View>
             {buttonConfig && <PairButton {...buttonConfig} />}
             <RateModal rateModal={rateModal} setRateModal={setRateModal} orderId={item?.id} data={item?.user_rate} />
@@ -188,7 +194,7 @@ export default function OrderItem({ item, navigation }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     itemWrapper: {
         marginHorizontal: '5%',
         backgroundColor: themeColor5.bgColor(1),
