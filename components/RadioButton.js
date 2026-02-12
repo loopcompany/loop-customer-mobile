@@ -7,11 +7,12 @@ import { imageUri, uri } from '../services/URL';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../theme/Color';
 import { addStep, decrement, increment, updateRadioButton } from '../slices/stepSlice';
-import { formatPrice } from '../helpers/Common';
+import { formatPrice, langIsRTL } from '../helpers/Common';
 import SwitchButton from './SwitchButton';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useState } from 'react';
 import i18n from 'i18next';
+import i18next from 'i18next';
 export default function RadioButton({ step, data, setLoading }) {
 
     const dispatch = useDispatch();
@@ -63,8 +64,8 @@ export default function RadioButton({ step, data, setLoading }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <View style={{ flex: 1 }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
-                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? 'right' :'center' }]}>{data?.title}</Text>
+                    {data?.icon_name && <View style={{ flex: 1 , alignItems: langIsRTL(i18next.language) ? 'flex-start' : 'flex-end' }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
+                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? (langIsRTL(i18next.language) ? 'right' : 'left') :'center' }]}>{data?.title}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
