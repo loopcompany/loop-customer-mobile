@@ -9,31 +9,34 @@ var jalaali = require("jalaali-js");
 
 const { width: deviceWidth, height: deviceHeight } = Dimensions.get("window");
 
-const weekDaysFa = [
-  'یکشنبه',
-  'دوشنبه',
-  'سه‌شنبه',
-  'چهارشنبه',
-  'پنجشنبه',
-  'جمعه',
-  'شنبه',
+// Week day translation keys (index 0 = Sunday)
+const weekDaysKeys = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
 ];
 
-const persianMonths = [
+// Persian month translation keys (index 1 = Farvardin)
+const persianMonthsKeys = [
   '',
-  'فروردین',
-  'اردیبهشت',
-  'خرداد',
-  'تیر',
-  'مرداد',
-  'شهریور',
-  'مهر',
-  'آبان',
-  'آذر',
-  'دی',
-  'بهمن',
-  'اسفند',
+  'Farvardin',
+  'Ordibehesht',
+  'Khordad',
+  'Tir',
+  'Mordad',
+  'Shahrivar',
+  'Mehr',
+  'Aban',
+  'Azar',
+  'Dey',
+  'Bahman',
+  'Esfand',
 ];
+
 
 export const isLocalUri = (uri) => {
   if (!uri || typeof uri !== 'string') return false;
@@ -107,7 +110,7 @@ export function generateTimeSlots(startTime, endTime, intervalMinutes) {
 
     slots.push({
       id: id,
-      value: `${startTimeStr} الی ${endTimeStr}`,
+      value: `${startTimeStr} - ${endTimeStr}`,
       startTime: `${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}`,
       endTime: `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
     });
@@ -165,8 +168,8 @@ export const getNext20DaysJalaali = () => {
     date.setDate(date.getDate() + i);
     const dayOfWeek = date.getDay();
     const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-    const weekday = weekDaysFa[dayOfWeek];
-    const monthName = persianMonths[jDate.jm];
+    const weekday = i18n.t(weekDaysKeys[dayOfWeek]);
+    const monthName = i18n.t(persianMonthsKeys[jDate.jm]);
     const day = jDate.jd;
     const value = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
     days.push({
