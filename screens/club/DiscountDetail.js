@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, StyleSheet, RefreshControl, Platform } from 'react-native'
-import React, { useEffect, useState,useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,12 +16,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { createStyles } from '../../styles/NewStyles';
 export default function DiscountDetail({ route, navigation }) {
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const discountId = route?.params?.discountId;
     const dispatch = useDispatch();
 
@@ -34,7 +35,7 @@ export default function DiscountDetail({ route, navigation }) {
     const [data, setData] = useState({});
     const fetchData = async () => {
         try {
-            const response = await axios.post(`${uri}/discounts/detail`, { discountId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/discounts/detail`, { discountId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response.status == 200) {
                 setData(response?.data?.data);
             }
@@ -53,16 +54,16 @@ export default function DiscountDetail({ route, navigation }) {
         setLoading(true);
         try {
             const response = await axios.post(
-                `${uri}/discounts/claim`, 
-                { discountId }, 
-                { 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${token}` 
-                    } 
+                `${uri}/discounts/claim`,
+                { discountId },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
             );
-            
+
             if (response.status == 200) {
                 dispatch(fetchUser(token));
                 setCode(response?.data?.data?.code);
@@ -71,12 +72,12 @@ export default function DiscountDetail({ route, navigation }) {
         } catch (error) {
             // ✅ بهبود یافته: استخراج دقیق پیام خطا از سرور
             let errorMessage = t('An unexpected error occurred!');
-            
+
             if (error?.response) {
                 // سرور پاسخ داده (4xx یا 5xx)
                 const status = error.response.status;
                 const serverMessage = error.response.data?.message;
-                
+
                 // اگر سرور پیام خاصی فرستاده، از آن استفاده کن
                 if (serverMessage) {
                     errorMessage = serverMessage;
@@ -107,7 +108,7 @@ export default function DiscountDetail({ route, navigation }) {
                             break;
                     }
                 }
-                
+
                 console.log('❌ [DiscountDetail.getDiscount] خطا در دریافت تخفیف:', {
                     status,
                     serverMessage,
@@ -122,7 +123,7 @@ export default function DiscountDetail({ route, navigation }) {
                 // خطای دیگر (مثلاً خطای ساخت request)
                 console.log('❌ [DiscountDetail.getDiscount] خطای نامشخص:', error.message);
             }
-            
+
             showToastOrAlert(errorMessage);
         } finally {
             setLoading(false);
@@ -130,11 +131,11 @@ export default function DiscountDetail({ route, navigation }) {
     }
 
     return (
-        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+        <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Discount Details")} />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
                 <View style={Platform.OS === 'web' ? styles.imageContainer : {}}>
-                    <Image style={{ maxWidth: 600, height: 250, width: '100%',resizeMode:"contain" }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
+                    <Image style={{ maxWidth: 600, height: 250, width: '100%', resizeMode: "contain" }} source={{ uri: `${imageUri}/${data?.image_path}` }} />
                 </View>
                 <View style={[NewStyles.spacing, { gap: 10 }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
@@ -156,7 +157,7 @@ export default function DiscountDetail({ route, navigation }) {
                     <Text style={NewStyles.title}>{data?.gems} <Text style={NewStyles.title}>{t("Required Points")}</Text></Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                    <Button title={t('Claim Discount')} loading={loading} onPress={() => getDiscount()} textStyle={[NewStyles.title1, { fontSize: 14 }]}/>
+                    <Button title={t('Claim Discount')} loading={loading} onPress={() => getDiscount()} textStyle={[NewStyles.title1, { fontSize: 14 }]} />
                 </View>
             </View>
 

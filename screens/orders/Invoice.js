@@ -20,12 +20,12 @@ import { createStyles } from '../../styles/NewStyles';
 function Invoice({ route }) {
 
     const dispatch = useDispatch()
-      const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-//    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    //    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
@@ -36,10 +36,10 @@ function Invoice({ route }) {
     const [data, setData] = useState([]);
     const [loadingGateway, setLoadingGateway] = useState(false);
     const paymentSubscriptionRef = useRef(null);
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const fetchData = async () => {
         try {
-            const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response.status == 200) {
                 setData(response?.data)
             }
@@ -59,7 +59,8 @@ function Invoice({ route }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -201,7 +202,7 @@ function Invoice({ route }) {
                                 <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>
                             </View>
                         </View>
-  
+
                         {renderRow((Number(data?.is_fixed) == 1) ? t('Loop Fixed Amount') : t('Estimated cost by Loop'), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t('Toman') : t('Needs review'))}
                         {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t('Initial Calculated Cost'), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(data?.extra_price > 0) && renderRow(t('Extra parts cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}

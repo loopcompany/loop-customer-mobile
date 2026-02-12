@@ -153,6 +153,7 @@ function Details({ route, navigation }) {
         () => createStyles(i18n.language),
         [i18n.language]
     );
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
 
     const dispatch = useDispatch();
@@ -209,7 +210,8 @@ function Details({ route, navigation }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             );
@@ -226,7 +228,7 @@ function Details({ route, navigation }) {
 
     const fetchData = async () => {
         try {
-            const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response.status == 200) {
                 setData(response?.data)
                 setIsTechnicianVerified(response?.data?.is_technician_verified);
@@ -256,7 +258,8 @@ function Details({ route, navigation }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             );
@@ -305,7 +308,8 @@ function Details({ route, navigation }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             );
@@ -332,7 +336,8 @@ function Details({ route, navigation }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             );
@@ -395,7 +400,8 @@ function Details({ route, navigation }) {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             );
@@ -641,7 +647,7 @@ function Details({ route, navigation }) {
                             <Button style={{ backgroundColor: themeColor6.bgColor(1) }} title={t("Product successfully returned")} />
                         </View>
                     }
-                {user?.apple_check==0 &&    <AccordionHeader
+                    {user?.apple_check == 0 && <AccordionHeader
                         title={t("Parts / Costs")}
                         isActive={data?.status >= 1 && data?.technician && data?.extra_price > 0}
                         isOpen={showMorePrices}
@@ -659,7 +665,7 @@ function Details({ route, navigation }) {
                     }
 
                     {/* مرحله پرداخت هزینه */}
-                 {user?.apple_check==0 &&      <AccordionHeader
+                    {user?.apple_check == 0 && <AccordionHeader
                         title={t("Payment")}
                         isActive={data?.started_at}
                         isOpen={showPayment}
@@ -673,18 +679,18 @@ function Details({ route, navigation }) {
                     />}
                     {showPayment && data?.started_at && (
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
-                  {user?.apple_check==0 &&             <View style={styles.noticeBox}>
+                            {user?.apple_check == 0 && <View style={styles.noticeBox}>
                                 <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
                             </View>}
 
-                       {user?.apple_check==0 &&        <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                            {user?.apple_check == 0 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
                                     {formatPrice(totalDiscountedPrice)} {t("Tomans")}
                                 </Text>
                             </View>}
 
-                           {user?.apple_check==0 &&    <View style={NewStyles.rowWrapper}>
+                            {user?.apple_check == 0 && <View style={NewStyles.rowWrapper}>
                                 <Text style={NewStyles.text}>{t("Your wallet balance")}</Text>
                                 <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} {t("Tomans")}</Text>
                             </View>}
@@ -724,7 +730,7 @@ function Details({ route, navigation }) {
                                 </>
                             ) : (
                                 <View style={{ paddingTop: 10, alignItems: 'center', width: '100%' }}>
-                                  {user?.apple_check==0 &&     <Button
+                                    {user?.apple_check == 0 && <Button
                                         title={t("Paid")}
                                         style={{ backgroundColor: themeColor7.bgColor(1) }}
                                         textStyle={{ color: themeColor4.bgColor(1) }}

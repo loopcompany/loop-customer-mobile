@@ -1,5 +1,5 @@
 import { FlatList, View } from 'react-native';
-import React, { useEffect, useState,useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { uri } from '../../services/URL';
@@ -13,20 +13,20 @@ import BlankScreen from './../../components/BlankScreen';
 import { createStyles } from '../../styles/NewStyles';
 export default function UserDiscounts({ navigation }) {
 
-const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
     // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(true);
     const token = useSelector((state) => state?.auth?.token)
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const [data, setData] = useState([]);
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${uri}/user/discounts`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.get(`${uri}/user/discounts`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             setData(response?.data);
         } catch (error) {
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
@@ -41,15 +41,15 @@ const { t, i18n } = useTranslation();
     }, [refreshing]);
 
     return (
-        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+        <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Received Prizes")} />
             <FlatList
                 contentContainerStyle={[NewStyles.center, { gap: 10 }]}
                 showsVerticalScrollIndicator={false}
                 data={data}
-                ListEmptyComponent={()=>{
-                    return(
-                        <BlankScreen/>
+                ListEmptyComponent={() => {
+                    return (
+                        <BlankScreen />
                     )
                 }}
                 keyExtractor={(item) => item.id?.toString()}

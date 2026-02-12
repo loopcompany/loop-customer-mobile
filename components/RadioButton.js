@@ -11,18 +11,18 @@ import { formatPrice } from '../helpers/Common';
 import SwitchButton from './SwitchButton';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useState } from 'react';
-
+import i18n from 'i18next';
 export default function RadioButton({ step, data, setLoading }) {
 
     const dispatch = useDispatch();
     const category = useSelector(state => state.category?.data);
     const [show, setShow] = useState(false)
     const token = useSelector(state => state.auth?.token);
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const fetchConditionalSteps = async (id) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id }, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
+            const response = await axios.post(`${uri}/steps/fetch-conditional`, { categoryId: category?.id, fieldId: data?.id, fieldDetailId: id }, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Accept-Language': lang } })
 
             dispatch(addStep({ fieldId: data?.id, fieldDetailId: id, step, steps: response.data }))
         } catch (error) {

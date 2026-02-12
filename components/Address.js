@@ -1,5 +1,5 @@
 import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
-import { useState, useEffect,useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
@@ -17,12 +17,12 @@ import { handleError } from '../helpers/Common';
 import { createStyles } from '../styles/NewStyles';
 export default function Address({ step, data, navigation }) {
 
-      const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const dispatch = useDispatch();
     const [refreshing, setRefreshing] = useState(false);
     const [id, setId] = useState(null);
@@ -31,6 +31,7 @@ export default function Address({ step, data, navigation }) {
     const [deleteModal, setDeletModal] = useState(false);
     const token = useSelector(state => state.auth?.token);
     const [loading, setLoading] = useState(false);
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
 
     // Fetch addresses when component mounts
     useEffect(() => {
@@ -51,7 +52,7 @@ export default function Address({ step, data, navigation }) {
     const deleteAddress = async () => {
         setLoading(true);
         try {
-            const response = await axios.delete(`${uri}/addresses/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.delete(`${uri}/addresses/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response.status == 200) {
                 dispatch(fetchAddresses(token));
                 dispatch(setAddressId(null))
@@ -73,7 +74,7 @@ export default function Address({ step, data, navigation }) {
 
     return (
         <View style={NewStyles.seperator1}>
-            <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical:10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('AddNewAddress')}>
+            <Pressable style={[NewStyles.row, { backgroundColor: themeColor0.bgColor(1), paddingVertical: 10 }, NewStyles.center, NewStyles.border10]} onPress={() => navigation.navigate('AddNewAddress')}>
                 <Ionicons name="add" size={24} color={themeColor4.bgColor(1)} />
                 <Text style={NewStyles.title4}>{t("Add New Address")}</Text>
             </Pressable>
@@ -86,10 +87,10 @@ export default function Address({ step, data, navigation }) {
                 renderItem={({ item }) => {
                     return (
                         <Pressable onPress={() => {
-                                        dispatch(setAddressId(item?.id))
-                                        dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
-                                    }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && {backgroundColor:themeColor1.bgColor(1)}]}>
-                           
+                            dispatch(setAddressId(item?.id))
+                            dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
+                        }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && { backgroundColor: themeColor1.bgColor(1) }]}>
+
                             <View style={{ flex: 1 }}>
                                 {renderRow(`${item?.title}`, '')}
                                 {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }])}
@@ -117,7 +118,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         backgroundColor: themeColor4.bgColor(1)
     },
     itemWrapper: {
-        width:Platform.OS === 'web' ? '100%' : deviceWidth * 0.9,
+        width: Platform.OS === 'web' ? '100%' : deviceWidth * 0.9,
         backgroundColor: themeColor4.bgColor(1),
         paddingHorizontal: '5%',
         paddingVertical: 15,

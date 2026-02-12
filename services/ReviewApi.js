@@ -1,6 +1,7 @@
 // services/ReviewApi.js - Review API Service
 import axios from 'axios';
 import { uri } from './URL';
+import i18next from 'i18next';
 
 /**
  * ثبت نظر برای سفارش
@@ -23,7 +24,8 @@ export const submitReview = async (reviewData, token) => {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );
@@ -45,7 +47,8 @@ export const getTechnicianReviews = async (technicianId, perPage = 20) => {
       `${uri}/reviews/technician/${technicianId}?per_page=${perPage}`,
       {
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );
@@ -68,7 +71,8 @@ export const getMyReviews = async (token, perPage = 20) => {
       {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );
@@ -87,14 +91,14 @@ export const getMyReviews = async (token, perPage = 20) => {
 export const checkReviewForOrder = async (token, orderId) => {
   try {
     const response = await getMyReviews(token);
-    
+
     if (response?.success && response?.data?.reviews) {
       const existingReview = response.data.reviews.find(
         review => review.order_id == orderId
       );
       return existingReview || null;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error checking review for order:', error);

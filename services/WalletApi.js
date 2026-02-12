@@ -1,6 +1,7 @@
 // services/WalletApi.js - Wallet & Transactions API Service
 import axios from 'axios';
 import { uri } from './URL';
+import i18next from 'i18next';
 
 /**
  * دریافت لیست تراکنش‌های کاربر
@@ -28,7 +29,8 @@ export const getTransactions = async (token, params = {}) => {
     const response = await axios.get(url, {
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Accept-Language': i18next.language || 'en' // Default language header
       }
     });
     
@@ -55,7 +57,8 @@ export const chargeWallet = async (token, chargeData) => {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );
@@ -81,7 +84,8 @@ export const payOrderFromWallet = async (token, orderId) => {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );
@@ -104,7 +108,8 @@ export const getWalletBalance = async (token) => {
       {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       }
     );

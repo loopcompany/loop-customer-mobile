@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUser } from '../../slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
-
+import i18n from 'i18next';
 export default function GemTransactions() {
 
     const dispatch = useDispatch();
@@ -19,11 +19,11 @@ export default function GemTransactions() {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(true);
     const token = useSelector((state) => state?.auth?.token)
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const [data, setData] = useState([]);
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${uri}/user/gem-transactions`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.get(`${uri}/user/gem-transactions`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             setData(response?.data);
         } catch (error) {
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
@@ -39,7 +39,7 @@ export default function GemTransactions() {
     }, [refreshing]);
 
     return (
-        <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+        <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Lucky Wheel History")} />
             <FlatList
                 contentContainerStyle={[styles.contentContainerStyle, NewStyles.center]}
@@ -48,8 +48,8 @@ export default function GemTransactions() {
                 data={data}
                 keyExtractor={(item) => item?.id?.toString()}
                 ListEmptyComponent={() => (
-                    <View style={[NewStyles.center, { flex:1,paddingTop: 50 }]}>
-                        <Text  style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6, paddingHorizontal: 20,  }]}>
+                    <View style={[NewStyles.center, { flex: 1, paddingTop: 50 }]}>
+                        <Text style={[NewStyles.text10, { textAlign: 'center', opacity: 0.6, paddingHorizontal: 20, }]}>
                             {t("You have not spun the lucky wheel yet and have no points")}
                         </Text>
                     </View>

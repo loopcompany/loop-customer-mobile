@@ -49,15 +49,15 @@ function OrderMenuScreen({ navigation }) {
             }}
           />
         </View>
-        <View style={[styles.container, NewStyles.center]}>
-          <Menuitem
+        {<View style={[styles.container, NewStyles.center]}>
+          {false && <Menuitem
             style={{ width: "75%" }}
             title={t("Organization / Company")}
             onPress={() => {
               navigation.navigate("Grouping");
             }}
-          />
-        </View>
+          />}
+        </View>}
       </ScrollView>
     </ImageBackground>
   );
@@ -122,26 +122,26 @@ const styles = StyleSheet.create({
 // محافظت از صفحه منوی سفارشات - نقطه ورود به مدیریت سفارشات
 // نکته: OrderMenuScreen برای کاربران لاگین نکرده هم باید در دسترس باشد
 export default withOrganizationAccess(OrderMenuScreen, {
-    allowOrganizationAccess: true,
-    requireCompleteAccess: false, // کاربران لاگین نکرده هم می‌توانند ببینند
-    customAccessCheck: ({ hasCompleteAccess, isOrganizationUser, isAuthenticated }) => {
-      // اگر کاربر لاگین نکرده، اجازه دسترسی بده (بعداً در FolderScreen چک می‌شود)
-      if (!isAuthenticated) {
-        return { allowed: true };
-      }
-      
-      // اگر کاربر فردی است، دسترسی آزاد
-      if (!isOrganizationUser) {
-        return { allowed: true };
-      }
-      
-      // اگر کاربر سازمانی است، باید تایید کامل داشته باشد
-      return {
-        allowed: hasCompleteAccess,
-        title: t("Full verification required"),
-        message: t("To view the order menu, both your profile and your contract must be verified"),
-        showRetry: true
-      };
-    },
-    screenName: 'OrderMenuScreen'
+  allowOrganizationAccess: true,
+  requireCompleteAccess: false, // کاربران لاگین نکرده هم می‌توانند ببینند
+  customAccessCheck: ({ hasCompleteAccess, isOrganizationUser, isAuthenticated }) => {
+    // اگر کاربر لاگین نکرده، اجازه دسترسی بده (بعداً در FolderScreen چک می‌شود)
+    if (!isAuthenticated) {
+      return { allowed: true };
+    }
+
+    // اگر کاربر فردی است، دسترسی آزاد
+    if (!isOrganizationUser) {
+      return { allowed: true };
+    }
+
+    // اگر کاربر سازمانی است، باید تایید کامل داشته باشد
+    return {
+      allowed: hasCompleteAccess,
+      title: t("Full verification required"),
+      message: t("To view the order menu, both your profile and your contract must be verified"),
+      showRetry: true
+    };
+  },
+  screenName: 'OrderMenuScreen'
 });

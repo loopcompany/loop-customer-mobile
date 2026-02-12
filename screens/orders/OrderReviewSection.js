@@ -14,8 +14,7 @@ import Button from '../../components/Button'
 
 const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
   const user = useSelector((state) => state?.user);
-
-  console.log("USER CHANGED:", user);
+ 
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
@@ -27,7 +26,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
   const [loadingCancel, setLoadingCancel] = useState(false)
   const [acceptModal, setAcceptModal] = useState(false)
   const [cancelModal, setCancelModal] = useState(false)
-
+  const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
   // تایید سفارش
   const handleAcceptOrder = async () => {
     setLoadingAccept(true)
@@ -38,7 +37,8 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
         {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept-Language': lang
           }
         }
       )
@@ -66,7 +66,8 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
         {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept-Language': lang
           }
         }
       )

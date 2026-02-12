@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState,useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -13,18 +13,18 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) => {
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const token = useSelector((state) => state?.auth?.token)
     const [loading, setLoading] = useState(true)
     const [confirming, setConfirming] = useState(false)
     const [report, setReport] = useState(null)
     const [confirmModal, setConfirmModal] = useState(false)
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     useEffect(() => {
         if (orderId) {
             fetchReport()
@@ -39,7 +39,8 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -70,7 +71,8 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -314,12 +316,12 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                     </Text>
                 </View>
             ) : (
-                <View style={{ width: '100%', marginTop: 15, alignItems:'center' }}>
+                <View style={{ width: '100%', marginTop: 15, alignItems: 'center' }}>
                     <Button
                         title={t('Confirm delivery report')}
                         onPress={() => setConfirmModal(true)}
                         loading={confirming}
-                        textStyle={{color: themeColor4.bgColor(1)}}
+                        textStyle={{ color: themeColor4.bgColor(1) }}
                         style={{ backgroundColor: themeColor0.bgColor(1) }}
                     />
                     <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 8, color: themeColor0.bgColor(0.6) }]}>

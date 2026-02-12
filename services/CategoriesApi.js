@@ -2,6 +2,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from './URL';
+import i18next from 'i18next';
 
 const categoriesAPI = {
   getCategories: async () => {
@@ -11,6 +12,7 @@ const categoriesAPI = {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
       return response.data;
@@ -19,7 +21,7 @@ const categoriesAPI = {
       throw error;
     }
   },
-  
+
   getSubCategories: async (categoryId) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
@@ -27,6 +29,7 @@ const categoriesAPI = {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
       return response.data;

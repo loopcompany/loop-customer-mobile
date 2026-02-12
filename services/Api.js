@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
 import { handleError, showToastOrAlert } from '../helpers/Common';
+import i18next from 'i18next';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -9,6 +10,7 @@ const apiClient = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'Accept-Language': i18next.language || 'en', // Default language header
   },
 });
 

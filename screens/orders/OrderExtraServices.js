@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ActivityIndicator, FlatList } from 'react-native'
-import React, { useEffect, useState,useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -12,12 +12,13 @@ import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../../theme/
 import Button from '../../components/Button'
 
 const OrderExtraServices = ({ orderId, navigation }) => {
-      const { t, i18n } = useTranslation();
-      const NewStyles = useMemo(
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
-      );
-        const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const token = useSelector((state) => state?.auth?.token)
     const [loading, setLoading] = useState(true)
     const [extraServices, setExtraServices] = useState([])
@@ -37,7 +38,8 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -57,14 +59,14 @@ const OrderExtraServices = ({ orderId, navigation }) => {
     const renderExtraServiceItem = ({ item }) => (
         <View style={[styles.itemWrapper, NewStyles.border10]}>
             <View style={{}}>
-                <View style={[NewStyles.row, { gap: 5, flex: 1 ,}]}>
+                <View style={[NewStyles.row, { gap: 5, flex: 1, }]}>
                     <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
                     <View>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.title ?? item?.extra_service?.title}</Text>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.extra_service?.des}</Text>
                     </View>
                 </View>
-                <Text style={[NewStyles.title, { fontSize: 14, textAlign:'left' }]}>
+                <Text style={[NewStyles.title, { fontSize: 14, textAlign: 'left' }]}>
                     {formatPrice(item?.price)} {t('Toman')}
                 </Text>
             </View>
@@ -125,10 +127,10 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                     <Text style={[NewStyles.title, { color: themeColor0.bgColor(1) }]}>
                         {formatPrice(totalExtraPrice)} {t('Toman')}
                     </Text>
-            
+
                 </View>
-                <View style={{paddingHorizontal:'5%', width:'100%', alignItems:'center'}}>
-                    <Button title={t('Quote')} onPress={()=>{navigation.navigate('Invoice', { orderId: orderId })}} />
+                <View style={{ paddingHorizontal: '5%', width: '100%', alignItems: 'center' }}>
+                    <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
                 </View>
             </View>
         </View>

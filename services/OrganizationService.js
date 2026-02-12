@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { uri } from './URL';
+import i18next from 'i18next';
 
 /**
  * Service برای مدیریت API های کاربران سازمانی
  * مطابق با مستندات API در ORGANIZATION_ACCESS_CONTROL.md
  */
 class OrganizationService {
-  
+
   /**
    * دریافت وضعیت دسترسی کاربر سازمانی
    * API: GET /organization/profile/status
@@ -16,7 +17,8 @@ class OrganizationService {
       const response = await axios.get(`${uri}/organization/profile/status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
 
@@ -26,7 +28,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.getAccessStatus:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error),
@@ -44,7 +46,8 @@ class OrganizationService {
       const response = await axios.get(`${uri}/organization/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
 
@@ -54,7 +57,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.getProfile:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error)
@@ -72,7 +75,8 @@ class OrganizationService {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
 
@@ -83,7 +87,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.updateProfile:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error),
@@ -101,7 +105,8 @@ class OrganizationService {
       const response = await axios.get(`${uri}/organization/contracts`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
 
@@ -111,7 +116,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.getContracts:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error)
@@ -136,7 +141,8 @@ class OrganizationService {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         },
         onUploadProgress: (progressEvent) => {
           if (onProgress && progressEvent.total) {
@@ -154,7 +160,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.uploadContract:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error)
@@ -171,7 +177,8 @@ class OrganizationService {
       const response = await axios.get(`${uri}/organization/contract/template`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Accept-Language': i18next.language || 'en' // Default language header
         }
       });
 
@@ -181,7 +188,7 @@ class OrganizationService {
       };
     } catch (error) {
       console.error('OrganizationService.getContractTemplate:', error);
-      
+
       return {
         success: false,
         error: this._handleError(error)
@@ -197,7 +204,7 @@ class OrganizationService {
     if (error.response) {
       // خطای HTTP از سرور
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 401:
           return 'عدم احراز هویت - لطفا مجدداً وارد شوید';
@@ -231,31 +238,31 @@ class OrganizationService {
    */
   static validateContractFile(file) {
     const errors = [];
-    
+
     // بررسی وجود فایل
     if (!file || !file.uri) {
       errors.push('فایل انتخاب نشده است');
       return { isValid: false, errors };
     }
-    
+
     // بررسی نوع فایل
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png'
     ];
-    
+
     if (!allowedTypes.includes(file.mimeType)) {
       errors.push('فقط فایل‌های PDF و تصاویر (JPG, PNG) مجاز هستند');
     }
-    
+
     // بررسی حجم فایل (حداکثر 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       errors.push('حجم فایل نباید از 10 مگابایت بیشتر باشد');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -267,7 +274,7 @@ class OrganizationService {
    */
   static validateProfileData(data) {
     const errors = {};
-    
+
     // فیلدهای الزامی
     const requiredFields = {
       organization_name: 'نام سازمان',
@@ -279,28 +286,28 @@ class OrganizationService {
       national_id: 'شماره ملی مدیر',
       registration_number: 'شماره ثبت'
     };
-    
+
     for (const [field, label] of Object.entries(requiredFields)) {
       if (!data[field] || !data[field].toString().trim()) {
         errors[field] = `${label} الزامی است`;
       }
     }
-    
+
     // اعتبارسنجی ایمیل
     if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       errors.email = 'فرمت ایمیل صحیح نیست';
     }
-    
+
     // اعتبارسنجی شماره تلفن
     if (data.phone && !/^[0-9۰-۹\-\s\(\)]+$/.test(data.phone)) {
       errors.phone = 'فرمت شماره تلفن صحیح نیست';
     }
-    
+
     // اعتبارسنجی کد ملی (10 رقم)
     if (data.national_id && !/^[0-9۰-۹]{10}$/.test(data.national_id.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))) {
       errors.national_id = 'کد ملی باید 10 رقم باشد';
     }
-    
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors

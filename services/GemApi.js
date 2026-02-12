@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { uri } from './URL';
+import i18next from 'i18next';
 
 // دریافت لیست پاداش‌های گردونه شانس
 export const getGemActions = async (token) => {
@@ -8,6 +9,7 @@ export const getGemActions = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
+        'Accept-Language': i18next.language || 'en' // Default language header
       },
     });
     return response.data;
@@ -24,6 +26,7 @@ export const spinWheel = async (token) => {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        'Accept-Language': i18next.language || 'en' // Default language header
       },
     });
     return response.data;
@@ -40,6 +43,7 @@ export const getGemHistory = async (token, perPage = 20) => {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
+        'Accept-Language': i18next.language || 'en' // Default language header
       },
     });
     return response.data;
@@ -55,6 +59,7 @@ export const canPlayWheel = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
+        'Accept-Language': i18next.language || 'en' // Default language header
       },
     });
     return response.data;

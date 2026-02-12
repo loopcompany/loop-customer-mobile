@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleApiError, handleOrganizationApiError } from '../utils/apiErrorHandler';
+import i18next from 'i18next';
 
 /**
  * Navigation reference برای استفاده در interceptors
@@ -31,6 +32,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'Accept-Language': i18next.language || 'en' // Default language header
   },
 });
 
@@ -45,7 +47,7 @@ apiClient.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
+
       // لاگ کردن درخواست (فقط در محیط development)
       if (__DEV__) {
         console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
@@ -54,7 +56,7 @@ apiClient.interceptors.request.use(
           timeout: config.timeout
         });
       }
-      
+
       return config;
     } catch (error) {
       console.error('❌ Request interceptor error:', error);
@@ -95,13 +97,13 @@ apiClient.interceptors.response.use(
     // اگر navigation reference وجود داره، از error handler استفاده کن
     if (navigationRef?.current) {
       const navigation = navigationRef.current;
-      
+
       // برای API های مربوط به سازمان از specialized handler استفاده کن
       if (isOrganizationRelatedAPI(error.config?.url)) {
         const handled = handleOrganizationApiError(error, navigation, {
           showGenericErrorAlert: false, // در interceptor، alert نشون نمیدیم
         });
-        
+
         if (handled && error.response?.status === 403) {
           // اگر 403 بود و handle شد، error رو pass نکن تا component متوجه بشه
           return Promise.reject(error);
@@ -124,7 +126,7 @@ apiClient.interceptors.response.use(
  */
 const isOrganizationRelatedAPI = (url) => {
   if (!url) return false;
-  
+
   const organizationAPIs = [
     '/organization',
     '/orders',
@@ -133,7 +135,7 @@ const isOrganizationRelatedAPI = (url) => {
     '/payments',
     '/reviews'
   ];
-  
+
   return organizationAPIs.some(api => url.includes(api));
 };
 
@@ -147,30 +149,30 @@ const isOrganizationRelatedAPI = (url) => {
  */
 export const withRetry = async (apiCall, maxRetries = 3, retryDelay = 1000) => {
   let lastError;
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await apiCall();
     } catch (error) {
       lastError = error;
-      
+
       // اگر خطای 4xx باشه، retry نکن
       if (error.response?.status >= 400 && error.response?.status < 500) {
         throw error;
       }
-      
+
       // اگر آخرین تلاش بود، خطا رو بالا بفرست
       if (attempt === maxRetries - 1) {
         throw error;
       }
-      
+
       // منتظر بمان قبل از تلاش بعدی
       await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
-      
+
       console.log(`🔄 Retrying API call, attempt ${attempt + 2}/${maxRetries}`);
     }
   }
-  
+
   throw lastError;
 };
 
@@ -184,7 +186,7 @@ export const withRetry = async (apiCall, maxRetries = 3, retryDelay = 1000) => {
 export const withTimeout = (apiCall, timeoutMs = 10000) => {
   return Promise.race([
     apiCall(),
-    new Promise((_, reject) => 
+    new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
     )
   ]);
@@ -199,23 +201,23 @@ export const withCache = (cacheKey, apiCall, ttlMs = 5 * 60 * 1000) => {
   return async () => {
     const now = Date.now();
     const cached = responseCache.get(cacheKey);
-    
+
     // اگر cache معتبر است، آن را برگردان
     if (cached && (now - cached.timestamp) < ttlMs) {
       console.log(`📦 Using cached response for: ${cacheKey}`);
       return cached.data;
     }
-    
+
     // اگر نه، درخواست جدید بفرست
     try {
       const response = await apiCall();
-      
+
       // Response را cache کن
       responseCache.set(cacheKey, {
         data: response,
         timestamp: now
       });
-      
+
       console.log(`💾 Cached response for: ${cacheKey}`);
       return response;
     } catch (error) {

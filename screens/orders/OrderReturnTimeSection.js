@@ -13,7 +13,7 @@ import { formatDate, showToastOrAlert } from '../../helpers/Common'
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
 import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
-
+import i18n from 'i18next'
 const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
     const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
@@ -22,7 +22,7 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
     const [customText, setCustomText] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [confirmModal, setConfirmModal] = useState(false)
-
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     // گزینه‌های از پیش تعریف شده
     const options = [
         {
@@ -59,7 +59,8 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )

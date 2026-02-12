@@ -2,6 +2,7 @@ import axios from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { uri } from '../services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18next from 'i18next';
 
 export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => {
     const token = await AsyncStorage.getItem('userToken');
@@ -14,7 +15,8 @@ export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => 
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept-Language': i18next.language || 'en' // Default language header
                 } 
             }
         )

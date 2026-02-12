@@ -1,5 +1,5 @@
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, Modal, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
-import { useEffect, useState,useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -20,7 +20,7 @@ import WinnerModal from '../../components/WinnerModal';
 import { getGemActions, spinWheel, canPlayWheel } from '../../services/GemApi';
 import { showToastOrAlert } from '../../helpers/Common';
 import ScreenHeaders from '../../components/ScreenHeaders';
-import {langIsRTL} from'../../helpers/Common';
+import { langIsRTL } from '../../helpers/Common';
 export default function Club({ navigation }) {
 
   const { t, i18n } = useTranslation();
@@ -28,8 +28,9 @@ export default function Club({ navigation }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
+  const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
   const isRtl = langIsRTL(i18n.language)
-    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector(state => state.auth.token);
 
   const [refreshing, setRefreshing] = useState(true);
@@ -173,9 +174,9 @@ export default function Club({ navigation }) {
 
     try {
       const [response, response1, response2] = await Promise.all([
-        axios.get(`${uri}/discounts/offers`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
-        axios.get(`${uri}/discounts/categories`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
-        axios.get(`${uri}/discounts/list`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
+        axios.get(`${uri}/discounts/offers`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
+        axios.get(`${uri}/discounts/categories`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
+        axios.get(`${uri}/discounts/list`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
       ]);
       setOffers(response.data);
       const allCategory = { id: '0', title: t('All') };
@@ -249,7 +250,7 @@ export default function Club({ navigation }) {
         <View style={[NewStyles.strip, NewStyles.center, { backgroundColor: themeColor1.bgColor(1) }]}>
           <Text style={NewStyles.title}>{t('Promotional Plans')}</Text>
         </View>
-        <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex}   isRtl={isRtl} />
+        <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex} isRtl={isRtl} />
         <FlatList
           contentContainerStyle={NewStyles.center} scrollEnabled={false}
           showsVerticalScrollIndicator={false}

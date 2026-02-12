@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { uri } from '../services/URL';
+import i18next from 'i18next';
 
 // Async thunk for fetching orders
 export const fetchOrders = createAsyncThunk(
@@ -30,6 +31,7 @@ export const fetchOrders = createAsyncThunk(
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
+                    'Accept-Language': i18next.language || 'en' // Default language header
                 }
             });
 

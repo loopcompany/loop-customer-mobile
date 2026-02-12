@@ -1,5 +1,5 @@
 import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, ActivityIndicator, I18nManager, Image, SectionList, FlatList } from 'react-native';
-import React, { useState, useMemo} from 'react';
+import React, { useState, useMemo } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -19,14 +19,14 @@ import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 function Preview({ navigation }) {
-
     const dispatch = useDispatch();
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(false);
 
@@ -61,9 +61,9 @@ function Preview({ navigation }) {
      */
     const buildServiceSchedulePayload = () => {
         console.log('🔄 [Preview] شروع ساخت service_schedule payload');
-        
+
         // پیدا کردن مرحله service_schedule
-        const serviceScheduleStep = steps?.data?.find(stepArray => 
+        const serviceScheduleStep = steps?.data?.find(stepArray =>
             stepArray?.some(item => item?.type === 'service_schedule')
         );
 
@@ -73,7 +73,7 @@ function Preview({ navigation }) {
         }
 
         const serviceScheduleItem = serviceScheduleStep.find(item => item?.type === 'service_schedule');
-        
+
         if (!serviceScheduleItem?.field_details) {
             console.log('⚠️ [Preview] field_details در service_schedule یافت نشد');
             return null;
@@ -84,7 +84,7 @@ function Preview({ navigation }) {
         // پیدا کردن فیلد main_selection
         const mainField = serviceScheduleItem.field_details.find(f => f.id === 'main_selection');
         const selectedOption = mainField?.options?.find(opt => opt.value > 0);
-        
+
         if (!selectedOption) {
             console.log('❌ [Preview] خطا: هیچ گزینه‌ای در service_schedule انتخاب نشده است');
             console.log('⚠️ [Preview] این فیلد برای کاربران سازمانی اجباری است');
@@ -108,7 +108,7 @@ function Preview({ navigation }) {
 
         conditionalFields.forEach(field => {
             console.log(`🔍 [Preview] بررسی فیلد: ${field.id} (نوع: ${field.type})`);
-            
+
             if (field.type === 'radioButton' && field.options) {
                 const selectedOpt = field.options.find(opt => opt.value > 0);
                 if (selectedOpt) {
@@ -172,14 +172,14 @@ function Preview({ navigation }) {
         setLoading(true);
         try {
             console.log('📤 [Preview] شروع ثبت سفارش...');
-            
+
             // دریافت account_type کاربر
             const userProfile = await AsyncStorage.getItem('userProfile');
             const accountType = userProfile ? JSON.parse(userProfile).account_type : 'individual';
             console.log('👤 [Preview] نوع حساب کاربری:', accountType);
 
             // بررسی وجود مرحله service_schedule در steps
-            const hasServiceScheduleStep = steps?.data?.some(stepArray => 
+            const hasServiceScheduleStep = steps?.data?.some(stepArray =>
                 stepArray?.some(item => item?.type === 'service_schedule')
             );
             console.log('🔍 [Preview] آیا مرحله service_schedule وجود دارد؟', hasServiceScheduleStep);
@@ -210,7 +210,7 @@ function Preview({ navigation }) {
             if ((accountType === 'organization' || accountType === 'company') && hasServiceScheduleStep) {
                 console.log('🏢 [Preview] کاربر سازمانی است - ساخت service_schedule...');
                 const serviceSchedule = buildServiceSchedulePayload();
-                
+
                 if (serviceSchedule) {
                     payload.service_schedule = serviceSchedule;
                     console.log('✅ [Preview] service_schedule به payload اضافه شد');
@@ -233,18 +233,15 @@ function Preview({ navigation }) {
             console.log('📊 [Preview] Payload size:', JSON.stringify(payload).length, 'characters');
 
             // ✅ Route صحیح: POST /api/orders/ (با / در انتها)
-            const response = await axios.post(`${uri}/orders/submit`, payload, { 
-                headers: { 
-                    'Accept': 'application/json', 
+            const response = await axios.post(`${uri}/orders/submit`, payload, {
+                headers: {
+                    'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                } 
+                }
             });
 
-            // 📥 لاگ کردن پاسخ کامل از API
-            console.log('✅ [Preview] پاسخ سرور - Status:', response.status);
-            console.log('✅ [Preview] پاسخ سرور - Headers:', JSON.stringify(response.headers, null, 2));
-            console.log('✅ [Preview] پاسخ سرور - Data:', JSON.stringify(response.data, null, 2));
+            // 📥 لاگ کردن پاسخ کامل از API 
 
             if (response.status == 200 || response.status == 201) {
                 showToastOrAlert(response?.data?.message);
@@ -255,12 +252,7 @@ function Preview({ navigation }) {
                 navigation.replace('OrdersScreen');
             }
         } catch (error) {
-            console.error('❌ [Preview] خطا در ثبت سفارش:', error.message);
-            console.error('❌ [Preview] Error Status:', error.response?.status);
-            console.error('❌ [Preview] Error Headers:', JSON.stringify(error.response?.headers, null, 2));
-            console.error('❌ [Preview] Error Data:', JSON.stringify(error.response?.data, null, 2));
-            console.error('❌ [Preview] Full Error Object:', JSON.stringify(error, null, 2));
-            
+
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
             showToastOrAlert(message);
         } finally {
@@ -271,7 +263,7 @@ function Preview({ navigation }) {
     const checkDiscount = async () => {
         setPending(true);
         try {
-            const response = await axios.post(`${uri}/discounts/check`, { categoryId: category?.id, discountCode }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
+            const response = await axios.post(`${uri}/discounts/check`, { categoryId: category?.id, discountCode }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response?.status == 200) {
                 setDiscountPercent(response?.data?.discount_code_percent)
                 showToastOrAlert(response?.data?.message)
@@ -296,7 +288,7 @@ function Preview({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth:800 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={NewStyles.rowWrapper}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
@@ -386,7 +378,7 @@ function Preview({ navigation }) {
                                     <View>
                                         <View style={[NewStyles.row, { gap: 5, paddingHorizontal: '5%' }]}>
                                             <Ionicons name={item?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                                            <Text style={[NewStyles.title,{flex:1}]}>{item?.title}</Text>
+                                            <Text style={[NewStyles.title, { flex: 1 }]}>{item?.title}</Text>
                                         </View>
                                         <FlatList
                                             style={{ paddingHorizontal: '5%', padding: 20 }}
@@ -434,8 +426,8 @@ function Preview({ navigation }) {
                 {imagePath && <Image style={[{ height: 250, margin: '5%', resizeMode: 'contain' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
-                <View style={{ flex: 1, alignItems:'center' }}>
-                    <Button title={t('Final Order Submission')} textStyle={{color: themeColor4.bgColor(1)}} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Button title={t('Final Order Submission')} textStyle={{ color: themeColor4.bgColor(1) }} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>
             </View>
         </SafeAreaView>

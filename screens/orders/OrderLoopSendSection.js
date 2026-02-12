@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TextInput } from 'react-native'
-import React, { useState,useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -14,12 +14,13 @@ import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
     const user = useSelector((state) => state?.user);
-      const { t, i18n } = useTranslation();
-      const NewStyles = useMemo(
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
-      );
-        const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const token = useSelector((state) => state?.auth?.token)
     const [userDescription, setUserDescription] = useState('')
     const [accepting, setAccepting] = useState(false)
@@ -50,7 +51,8 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -80,7 +82,8 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 {
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
                     }
                 }
             )
@@ -139,7 +142,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 {/* هزینه تقریبی */}
                 {data?.loop_cost_estimate && (
                     <View style={{ gap: 5 }}>
-                            {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>
+                        {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.title}>{t('Estimated cost announced by Loop')}</Text>
                         </View>}
@@ -205,7 +208,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     </View>
 
                     {/* دکمه‌های تایید و رد */}
-                    <View style={[NewStyles.row, { gap: 10, maxWidth: 900, width: '100%', alignSelf:'center' }]}>
+                    <View style={[NewStyles.row, { gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
                                 title={t('Cancel Order')}
