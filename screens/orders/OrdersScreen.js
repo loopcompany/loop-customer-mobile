@@ -20,6 +20,7 @@ function OrdersScreen({ navigation }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
+  const user = useSelector(state => state.user?.data);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -118,7 +119,7 @@ function OrdersScreen({ navigation }) {
       />
 
       {/* دکمه فیلتر */}
-      <View style={styles.filterContainer}>
+      {user?.apple_check != 1 && <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[styles.filterButton, (fromDate || toDate || status !== null) && styles.filterButtonActive]}
           onPress={openFilterModal}
@@ -132,7 +133,7 @@ function OrdersScreen({ navigation }) {
             {t('Filter')}
           </Text>
         </TouchableOpacity>
-      </View>
+      </View>}
 
       {/* نمایش فیلتر فعال */}
       {(fromDate || toDate || status !== null) && (
@@ -163,7 +164,7 @@ function OrdersScreen({ navigation }) {
         }}
         renderItem={({ item }) => {
           return (
-            <OrderItem item={item} navigation={navigation} />
+            <OrderItem user={user} item={item} navigation={navigation} />
           )
         }}
       />
@@ -418,7 +419,7 @@ const styles = StyleSheet.create({
   activeFilterText: {
     fontSize: 13,
     flex: 1,
-   ...NewStyles.text10
+    ...NewStyles.text10
   },
   clearFilterBtn: {
     padding: 5,
@@ -446,7 +447,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-   ...NewStyles.text10
+    ...NewStyles.text10
   },
   dateInputContainer: {
     marginBottom: 20,
@@ -456,7 +457,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
-  ...NewStyles.text10
+    ...NewStyles.text10
   },
   dateInput: {
     ...NewStyles.row,
@@ -480,7 +481,7 @@ const styles = StyleSheet.create({
     color: themeColor0.bgColor(1),
   },
   statusContainer: {
-    
+
     marginBottom: 20,
   },
   statusButtons: {

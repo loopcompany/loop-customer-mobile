@@ -6,6 +6,7 @@ import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 import NewStyles from '../styles/NewStyles';
 import { themeColor1, themeColor10, themeColor4 } from '../theme/Color';
 import Button from './Button';
+import i18n from 'i18next'
 
 // Pre-calculate colors outside component to prevent re-renders
 const WRAPPER_BG_COLOR = themeColor10.bgColor(0.4);
@@ -36,7 +37,7 @@ const DatePickerModal = React.memo(function DatePickerModal({
 
     // محاسبه تاریخ جاری به صورت شمسی
     const currentDate = useMemo(() =>
-        getFormatedDate(new Date(date.getTime()), 'jYYYY/jMM/jDD'),
+        getFormatedDate(new Date(date.getTime()), i18n.language=='fa' ? 'jYYYY/jMM/jDD' : 'YYYY-MM-DD'),
         [date]);
 
     // اگر maximumDate پاس نشده، از تاریخ امروز استفاده کن
@@ -83,7 +84,7 @@ const DatePickerModal = React.memo(function DatePickerModal({
                             <View style={styles.calendarContainer}>
                                 <DatePicker
                                     mode='calendar'
-                                    isGregorian={false}
+                                    isGregorian={i18n.language!=='fa'}
                                     options={DATE_PICKER_OPTIONS}
                                     style={styles.calendar}
                                     selected={birthDate}

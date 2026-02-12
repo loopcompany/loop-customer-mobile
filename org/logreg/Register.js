@@ -35,7 +35,7 @@ const Register = ({ navigation }) => {
   const [organizationEmail, setOrganizationEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [city, setCity] = useState('تهران');
+  const [city, setCity] = useState('Los angeles');
   const [region, setRegion] = useState('');
   const [organizationAddress, setOrganizationAddress] = useState('');
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');

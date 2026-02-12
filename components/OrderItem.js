@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet, Image, Linking } from 'react-native';
-import { useMemo, useState} from 'react';
+import { useMemo, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,19 +15,18 @@ import ConfirmationModal from './ConfirmationModal';
 import { fetchSteps } from '../slices/stepSlice';
 import { setCategory } from '../slices/categorySlice';
 import RateModal from './RateModal';
-import {langIsRTL} from'../helpers/Common';
-export default function OrderItem({ item, navigation }) {
+import { langIsRTL } from '../helpers/Common';
+export default function OrderItem({ item, navigation, user }) {
 
-      const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const isRtl = langIsRTL(i18n.language)
     const dispatch = useDispatch();
     const token = useSelector((state) => state?.auth?.token);
-    const user = useSelector((state) => state?.user?.data);
     const [loading, setLoading] = useState(false);
     const [cancelModal, setCancelModal] = useState(false);
     const [startModal, setStartModal] = useState(false);
@@ -112,7 +111,7 @@ export default function OrderItem({ item, navigation }) {
             };
         }
 
-        if (status == 2) {
+        if (status == 2 && user?.apple_check != 1) {
             return {
                 text1: t('Invoice'),
                 onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
@@ -134,8 +133,9 @@ export default function OrderItem({ item, navigation }) {
                     dispatch(fetchSteps(item?.category_id))
                     dispatch(setCategory(item?.category))
                     navigation.navigate('Steps', {
-                            categoryId: item?.category_id,
-                            categoryTitle: item?.category?.title}
+                        categoryId: item?.category_id,
+                        categoryTitle: item?.category?.title
+                    }
                     );
                 },
                 onPress2: () => { },
@@ -160,11 +160,17 @@ export default function OrderItem({ item, navigation }) {
                 </View>
             }
             {renderRow(item?.category?.title, `${t('Order ID: ')}${item?.id}`, [NewStyles.text, { fontSize: 14 }], NewStyles.text)}
+            {
+                user?.apple_check != 1 &&
 
-            {Number(item?.is_fixed) == 0 ?
-                renderRow(item?.status == 0 ? t('Loop Base Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
-                :
-                renderRow(item?.status == 0 ? t('Loop Fixed Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                <>
+                    {Number(item?.is_fixed) == 0 ?
+                        renderRow(item?.status == 0 ? t('Loop Base Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                        :
+                        renderRow(item?.status == 0 ? t('Loop Fixed Amount') : t('Final Amount'), totalDiscountedPrice > 0 ? `${formatPrice(totalDiscountedPrice)}${t(' Toman')}` : t('Needs Review'), [NewStyles.title7, { fontSize: 14 }], [NewStyles.text7, { fontSize: 14 }])
+                    }
+
+                </>
             }
 
             {item?.status != 2 && renderRow(t('Technician Visit Time'), item?.is_urgent > 0 ? t('Urgent Request') : formatDate(item?.date) + t(' at ') + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
@@ -172,7 +178,7 @@ export default function OrderItem({ item, navigation }) {
             {item?.discount_price && renderRow(t('Your Final Order Discount'), formatPrice(item?.discount_price) + t(' Toman'), NewStyles.title, NewStyles.text10)}
             {totalPrice > totalDiscountedPrice && renderRow(t('Price Without Discount'), formatPrice(totalPrice) + t(' Toman'), NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
             {/* {item?.status == 2 && renderRow('وضعیت پرداخت', item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده', NewStyles.text, item?.payment_status > 0 ? NewStyles.text7 : NewStyles.text6)} */}
-            {item?.status == 2 && <View style={NewStyles.rowWrapper}>
+            {(item?.status == 2 && user?.apple_check != 1) && <View style={NewStyles.rowWrapper}>
                 <Text style={[NewStyles.title10]}>{t('Payment Status')}</Text>
                 <View style={[{ backgroundColor: item?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>
                     <Text style={NewStyles.text4}>{item?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>

@@ -13,6 +13,7 @@ import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
+    const user = useSelector((state) => state?.user);
       const { t, i18n } = useTranslation();
       const NewStyles = useMemo(
         () => createStyles(i18n.language),
@@ -138,10 +139,10 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 {/* هزینه تقریبی */}
                 {data?.loop_cost_estimate && (
                     <View style={{ gap: 5 }}>
-                        <View style={[NewStyles.row, { gap: 5 }]}>
+                            {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.title}>{t('Estimated cost announced by Loop')}</Text>
-                        </View>
+                        </View>}
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
                             <Text style={[NewStyles.text10, { flex: 1 }]}>

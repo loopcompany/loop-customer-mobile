@@ -238,7 +238,7 @@ const Privacy = ({ navigation }) => {
             </View>
             <View style={{ flex: 1 }}>
               <TextInput
-                value="تهران"
+                value="Los angeles"
                 placeholder="شهر :"
                 style={{
                   backgroundColor: '#f5f5f5',

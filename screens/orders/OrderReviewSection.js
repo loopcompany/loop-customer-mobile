@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Linking } from 'react-native'
-import React, { useState,useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -13,12 +13,15 @@ import ConfirmationModal from '../../components/ConfirmationModal'
 import Button from '../../components/Button'
 
 const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
+  const user = useSelector((state) => state?.user);
+
+  console.log("USER CHANGED:", user);
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector((state) => state?.auth?.token)
   const [loadingAccept, setLoadingAccept] = useState(false)
   const [loadingCancel, setLoadingCancel] = useState(false)
@@ -128,14 +131,15 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
-      <View style={[{ width: '100%', gap: 10, maxWidth: 900 }, NewStyles.row]}>
-        <View style={[{ flex: 1, }, NewStyles.center]}>
-          <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
-        </View>
-        <View style={[{ flex: 1 }, NewStyles.center]}>
-          <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
-        </View>
-      </View>
+      {user?.apple_check == 0
+        && <View style={[{ width: '100%', gap: 10, maxWidth: 900 }, NewStyles.row]}>
+          <View style={[{ flex: 1, }, NewStyles.center]}>
+            <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+          </View>
+          <View style={[{ flex: 1 }, NewStyles.center]}>
+            <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+          </View>
+        </View>}
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}
       {(data?.technician_des || data?.is_time_changed == 1) && (
         isLocked ? (
@@ -194,7 +198,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
 
 export default OrderReviewSection
 
-const createLocalStyles = (NewStyles) =>   StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   noticeBox: {
     backgroundColor: themeColor1.bgColor(1),
     padding: 10,

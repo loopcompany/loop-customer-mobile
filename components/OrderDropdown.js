@@ -8,7 +8,7 @@ import { createStyles } from '../styles/NewStyles';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor5 } from '../theme/Color';
 import { orderAPI } from '../services/Api';
-import { showToastOrAlert } from '../helpers/Common';
+import { formatDate, showToastOrAlert } from '../helpers/Common';
 
 export default function OrderDropdown({ value, onChange, placeholder }) {
   const { t, i18n } = useTranslation();
@@ -50,13 +50,7 @@ export default function OrderDropdown({ value, onChange, placeholder }) {
         }
     };
 
-    const formatDate = (dateString) => {
-        try {
-            return moment(dateString).format('jYYYY/jMM/jDD');
-        } catch {
-            return dateString;
-        }
-    };
+   
 
     const formatPrice = (price) => {
         if (!price || price === 0) return t('Not determined');

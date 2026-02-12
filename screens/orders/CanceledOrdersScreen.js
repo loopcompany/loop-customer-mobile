@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCallback, useEffect, useState,useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchOrders } from '../../slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
@@ -16,9 +16,10 @@ function CanceledOrdersScreen({ navigation }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
+  const user = useSelector(state => state.user?.data);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -43,12 +44,12 @@ function CanceledOrdersScreen({ navigation }) {
       <ScreenHeaders title={t('Canceled Orders')} />
 
       <FlatList
-        contentContainerStyle={{  paddingVertical: 20, gap: 15 }}
+        contentContainerStyle={{ paddingVertical: 20, gap: 15 }}
         data={orders?.filter(order => (order.status == 3 || order.status == 4 || order.status == 5 || order.status == 6))}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        ListHeaderComponentStyle={{paddingHorizontal: '5%',}}
+        ListHeaderComponentStyle={{ paddingHorizontal: '5%', }}
         ListHeaderComponent={() => {
           return (
             <View style={styles.header}>
@@ -58,7 +59,7 @@ function CanceledOrdersScreen({ navigation }) {
         }}
         renderItem={({ item }) => {
           return (
-            <OrderItem item={item} navigation={navigation} />
+            <OrderItem user={user} item={item} navigation={navigation} />
           )
         }}
       />
@@ -67,7 +68,7 @@ function CanceledOrdersScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#e0f0ff',
@@ -121,6 +122,6 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
 
 // محافظت از صفحه سفارشات لغو شده - بخشی از مدیریت سفارشات
 export default withOrganizationAccess(CanceledOrdersScreen, {
-    ...ACCESS_PRESETS.ORDER_RELATED,
-    screenName: 'CanceledOrdersScreen'
+  ...ACCESS_PRESETS.ORDER_RELATED,
+  screenName: 'CanceledOrdersScreen'
 });

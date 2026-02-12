@@ -19,7 +19,7 @@ export default function RateModal({ rateModal, setRateModal, orderId, data }) {
     const { t } = useTranslation();
     const dispatch = useDispatch()
 
-    const token = useSelector(state => state?.token?.token);
+    const token = useSelector(state => state?.auth?.token);
 
     const [rate, setRate] = useState(0);    
     const [comment, setComment] = useState(null);

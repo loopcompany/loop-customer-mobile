@@ -123,8 +123,8 @@ const App = () => {
   const navigationRef = useRef(null);
 
   const [loaded, error] = useFonts({
-    'VazirBold': require("./assets/fonts/Vazir-Bold-FD.ttf"),
-    'VazirLight': require("./assets/fonts/Vazir-Light-FD.ttf"),
+    'VazirBold': require("./assets/fonts/Vazirmatn-Bold.ttf"),
+    'VazirLight': require("./assets/fonts/Vazirmatn-Light.ttf"),
   });
 
   const [isReady, setIsReady] = useState(false);

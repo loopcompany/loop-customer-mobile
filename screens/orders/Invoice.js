@@ -201,7 +201,7 @@ function Invoice({ route }) {
                                 <Text style={NewStyles.text4}>{data?.payment_status > 0 ? t('Paid') : t('Unpaid')}</Text>
                             </View>
                         </View>
-
+  
                         {renderRow((Number(data?.is_fixed) == 1) ? t('Loop Fixed Amount') : t('Estimated cost by Loop'), data?.pakar_price > 0 ? `${formatPrice(data?.pakar_price)}` + ' ' + t('Toman') : t('Needs review'))}
                         {(data?.technician_price > 0 && Number(data?.is_fixed) == 0) && renderRow(t('Initial Calculated Cost'), data?.technician_price ? `${formatPrice(data?.technician_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(data?.extra_price > 0) && renderRow(t('Extra parts cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}

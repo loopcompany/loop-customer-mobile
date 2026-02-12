@@ -32,7 +32,7 @@ export const addressSlice = createSlice({
         lname: '',
         telephone: '',
         mobile: '',
-        city: 'تهران',
+        city: 'Los angeles',
         region: '',
         address: '',
         latitude: null,

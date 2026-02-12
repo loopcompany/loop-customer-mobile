@@ -641,7 +641,7 @@ function Details({ route, navigation }) {
                             <Button style={{ backgroundColor: themeColor6.bgColor(1) }} title={t("Product successfully returned")} />
                         </View>
                     }
-                    <AccordionHeader
+                {user?.apple_check==0 &&    <AccordionHeader
                         title={t("Parts / Costs")}
                         isActive={data?.status >= 1 && data?.technician && data?.extra_price > 0}
                         isOpen={showMorePrices}
@@ -652,14 +652,14 @@ function Details({ route, navigation }) {
                                 showToastOrAlert(t("No additional costs have been registered for this order."))
                             }
                         }}
-                    />
+                    />}
                     {
                         showMorePrices &&
                         <OrderExtraServices orderId={orderId} navigation={navigation} />
                     }
 
                     {/* مرحله پرداخت هزینه */}
-                    <AccordionHeader
+                 {user?.apple_check==0 &&      <AccordionHeader
                         title={t("Payment")}
                         isActive={data?.started_at}
                         isOpen={showPayment}
@@ -670,24 +670,24 @@ function Details({ route, navigation }) {
                                 showToastOrAlert(t("The order has not started yet."))
                             }
                         }}
-                    />
+                    />}
                     {showPayment && data?.started_at && (
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
-                            <View style={styles.noticeBox}>
+                  {user?.apple_check==0 &&             <View style={styles.noticeBox}>
                                 <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
-                            </View>
+                            </View>}
 
-                            <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                       {user?.apple_check==0 &&        <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
                                     {formatPrice(totalDiscountedPrice)} {t("Tomans")}
                                 </Text>
-                            </View>
+                            </View>}
 
-                            <View style={NewStyles.rowWrapper}>
+                           {user?.apple_check==0 &&    <View style={NewStyles.rowWrapper}>
                                 <Text style={NewStyles.text}>{t("Your wallet balance")}</Text>
                                 <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} {t("Tomans")}</Text>
-                            </View>
+                            </View>}
 
                             {data?.payment_status == 0 ? (
                                 <>
@@ -724,12 +724,12 @@ function Details({ route, navigation }) {
                                 </>
                             ) : (
                                 <View style={{ paddingTop: 10, alignItems: 'center', width: '100%' }}>
-                                    <Button
+                                  {user?.apple_check==0 &&     <Button
                                         title={t("Paid")}
                                         style={{ backgroundColor: themeColor7.bgColor(1) }}
                                         textStyle={{ color: themeColor4.bgColor(1) }}
                                         disabled={true}
-                                    />
+                                    />}
                                 </View>
                             )}
                         </View>

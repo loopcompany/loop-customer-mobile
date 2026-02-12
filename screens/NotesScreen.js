@@ -13,7 +13,7 @@ import ScreenHeaders from "../components/ScreenHeaders";
 import NewStyles from "../styles/NewStyles";
 import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../theme/Color";
 import { notesAPI } from "../services/Api";
-import { showToastOrAlert, showAlert } from "../helpers/Common";
+import { showToastOrAlert, showAlert, formatDate, formatDateTime } from "../helpers/Common";
 import Button from "../components/Button";
 import moment from "moment-jalaali";
 import { createStyles } from '../styles/NewStyles';
@@ -97,11 +97,7 @@ const { t, i18n } = useTranslation();
     navigation.navigate('AddEditNoteScreen');
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = moment(dateString);
-    return date.format('jYYYY/jMM/jDD - HH:mm');
-  };
+ 
   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const renderNoteCard = ({ item }) => {
     return (
@@ -110,7 +106,7 @@ const { t, i18n } = useTranslation();
           <View style={styles.dateContainer}>
             <Ionicons name="time-outline" size={14} color={themeColor3.bgColor(1)} />
             <Text style={[NewStyles.text10, { fontSize: 12, marginRight: 5 }]}>
-              {formatDate(item.created_at)}
+              {formatDateTime(item.created_at)}
             </Text>
           </View>
           <View style={styles.actionButtons}>

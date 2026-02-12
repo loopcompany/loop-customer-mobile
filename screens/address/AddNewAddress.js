@@ -33,7 +33,7 @@ export default function AddNewAddress({ navigation }) {
             dispatch(setLname(''));
             dispatch(setTelephone(''));
             dispatch(setMobile(''));
-            dispatch(setCity('تهران'));
+            dispatch(setCity('Los angeles'));
             dispatch(setRegion(''));
             dispatch(setAddress(''));
         }, [dispatch])

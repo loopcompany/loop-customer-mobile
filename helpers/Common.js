@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { toJalaali } from 'jalaali-js';
+import i18n from 'i18next';
 var jalaali = require("jalaali-js");
 
 const { width: deviceWidth, height: deviceHeight } = Dimensions.get("window");
@@ -381,8 +382,11 @@ export const formatJalaaliDate = (isoDate) => {
   return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
 };
 
-export const formatDate = (isoDate) => {
+export const formatDate = (isoDate, fa = i18n.language === 'fa') => {
   if (!isoDate) return '';
+  if (!fa) {
+    return isoDate.replace('T', ' ').split(' ')[0];
+  }
   const date = new Date(isoDate);
   if (isNaN(date.getTime())) return '';
   const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
@@ -426,11 +430,14 @@ export const getOrderStatusColor = (status) => {
   return colorMap[status] || '#9E9E9E';
 };
 
-  const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
-export const langIsRTL =(lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
+const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
+export const langIsRTL = (lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
 
-export const formatDateTime = (isoDate) => {
+export const formatDateTime = (isoDate, fa = i18n.language === 'fa') => {
   if (!isoDate) return '';
+  if (!fa) {
+    return isoDate.replace('T', ' ').split('.')[0];
+  }
   const date = new Date(isoDate);
   if (isNaN(date.getTime())) return '';
   const { jy, jm, jd } = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());

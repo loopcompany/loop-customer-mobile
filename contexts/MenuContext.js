@@ -22,17 +22,19 @@ import useLogout from '../hooks/useLogout';
 import { fetchContacts } from '../slices/contactSlice';
 import { fetchUser } from '../slices/userSlice';
 import { createStyles } from '../styles/NewStyles';
+import { mainUri } from '../services/URL';
 // Create Context
 const MenuContext = createContext();
 
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
-      const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const userData = useSelector((state) => state.user?.data);
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -43,6 +45,7 @@ export const MenuProvider = ({ children }) => {
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.user?.data);
     const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
+
 
     // صفحاتی که نباید Footer و Menu نمایش داده شود
     const screensWithoutMenu = [
@@ -102,42 +105,43 @@ export const MenuProvider = ({ children }) => {
     useEffect(() => {
         dispatch(fetchContacts());
     }, [])
-    useEffect(()=>{
-        if(!user && token){
+    useEffect(() => {
+        if (!user && token) {
             dispatch(fetchUser(token))
         }
-    },[token])
+    }, [token])
 
     // Generate menu items dynamically based on user type
     const menuItems = useMemo(() => {
         console.log('🔍 [MenuContext] Current userType:', userType);
 
         const baseMenuItems = [
+            { id: 24, title: t("Delete account"), screen: null, action: () => { Linking.openURL(`${mainUri}/delete-account-request`) } },
             { id: 23, title: t("Submit Order"), screen: "FolderScreen" },
-            { id: 22, title: t("Loop Wallet"), screen: "Increase" },
-            { id: 21, title: t("Privacy"), screen: "PrivacyScreen" },
+            { id: 22, title: t("Loop Wallet"), screen: "Increase", apple_check: userData?.apple_check },
+            { id: 21, title: t("Privacy"), screen: "PrivacyScreen", apple_check: userData?.apple_check },
             // برای سازمانی: قوانین سازمانی | برای عادی: قوانین عمومی
             {
                 id: 20,
                 title: userType === 'organization' ? t("Organization Terms and Conditions") : t("Terms / About Loop"),
-                screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen"
+                screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen", apple_check: userData?.apple_check
             },
-            { id: 19, title: t("FAQ"), screen: "LearnMoreScreen" },
+            { id: 19, title: t("FAQ"), screen: "LearnMoreScreen", apple_check: userData?.apple_check },
             { id: 18, title: t("Note"), screen: "NotesScreen" },
-            { id: 17, title: t("Warranty / Guarantee"), screen: "WarrantyScreen" },
+            { id: 17, title: t("Warranty / Guarantee"), screen: "WarrantyScreen", apple_check: userData?.apple_check },
             { id: 16, title: t("Feedback and Suggestions"), screen: "FeedbackSurveyScreen" },
-            { id: 15, title: t("Report/Track Violation"), screen: "ViolationReportScreen" },
-            { id: 14, title: t("Rate List"), screen: "RateCategory" },
-            { id: 13, title: t("Service / Product Faults"), screen: "ProductIssueScreen" },
-            { id: 12, title: t("Promotional Plans"), screen: "Club" },
+            { id: 15, title: t("Report/Track Violation"), screen: "ViolationReportScreen", apple_check: userData?.apple_check },
+            { id: 14, title: t("Rate List"), screen: "RateCategory", apple_check: userData?.apple_check },
+            { id: 13, title: t("Service / Product Faults"), screen: "ProductIssueScreen", apple_check: userData?.apple_check },
+            { id: 12, title: t("Promotional Plans"), screen: "Club", apple_check: userData?.apple_check },
             { id: 11, title: t("Think and Play"), screen: "GameMenu" },
-            { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen", },
+            { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen" },
             { id: 9, title: t("Selected Addresses"), screen: "AddressScreen" },
             { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true },
             { id: 7, title: t("User Account"), screen: "Profile" },
             { id: 6, title: t("Messages"), screen: "MessageScreen" },
-            { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen" },
-            { id: 4, title: t("Transactions"), screen: "TransactionsScreen" },
+            { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen", apple_check: userData?.apple_check },
+            { id: 4, title: t("Transactions"), screen: "TransactionsScreen", apple_check: userData?.apple_check },
             { id: 3, title: t("Orders"), screen: "OrdersScreen" },
         ];
 
@@ -150,7 +154,8 @@ export const MenuProvider = ({ children }) => {
             // Filter out organization-only items
             return baseMenuItems.filter(item => !item.organizationOnly);
         }
-    }, [userType]);
+    }, [userType, t, userData?.apple_check]);
+
 
     const openMenu = () => {
         setMenuVisible(true);
@@ -172,12 +177,26 @@ export const MenuProvider = ({ children }) => {
     const renderMenuItem = ({ item }) => (
         <TouchableOpacity
             style={styles.item}
-            onPress={() => navigateToScreen(item.screen)}
+            onPress={() => {
+                if (item?.screen) {
+
+                    navigateToScreen(item.screen)
+                } else if (item?.action) {
+                    item?.action()
+                }
+            }}
         >
             <Text style={[NewStyles.title10, { paddingVertical: 5 }]}>{item.title}</Text>
         </TouchableOpacity>
     );
+    //   const MenuItems = token ? menuItemsLoggedIn?.filter(item => !item.apple_check || item.apple_check != 1) : menuItemsLoggedOut;
+    const filteredMenuItems = useMemo(() => {
+        // اگر لاگین نیست، همون menuItems رو بده
+        if (!token) return menuItems;
 
+        // اگر apple_check == 1 بود، آیتم‌هایی که apple_check دارن رو حذف کن
+        return menuItems.filter(item => !(Number(item.apple_check) === 1));
+    }, [menuItems, token]);
     const contextValue = {
         menuVisible,
         openMenu,
@@ -185,6 +204,7 @@ export const MenuProvider = ({ children }) => {
         navigateToScreen,
         callSupport,
         menuItems,
+        menuItems: filteredMenuItems,
     };
 
     return (
@@ -220,11 +240,11 @@ export const MenuProvider = ({ children }) => {
                 >
                     <TouchableWithoutFeedback onPress={closeMenu}>
                         <View style={styles.coverlist2}>
-                            <View style={[styles.coverlist, {height: deviceHeight - insets.top - insets.bottom - 50}]}>
+                            <View style={[styles.coverlist, { height: deviceHeight - insets.top - insets.bottom - 50 }]}>
                                 <View style={{ backgroundColor: themeColor0.bgColor(1), }}>
                                     <FlatList
                                         inverted
-                                        data={menuItems}
+                                        data={filteredMenuItems}
                                         keyExtractor={(item) => item.id.toString()}
                                         renderItem={renderMenuItem}
                                         contentContainerStyle={styles.list}
@@ -265,7 +285,7 @@ export const useMenu = () => {
 };
 
 // Styles
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     coverlist: {
         width: '80%',
         backgroundColor: themeColor0.bgColor(0),
@@ -273,7 +293,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     },
     coverlist2: {
         flex: 1,
-        
+
     },
     footer: {
         backgroundColor: themeColor13.bgColor(1),

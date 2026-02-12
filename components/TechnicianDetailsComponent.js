@@ -31,7 +31,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
             <View style={NewStyles.center}>
                 {data?.technician?.profile_photo_path ? <Image source={{ uri: `${imageUri}/${data?.technician?.profile_photo_path}` }} style={[styles.profileImage, NewStyles.center, NewStyles.border100]} contentFit="cover" /> : <View style={[styles.profileImage, NewStyles.border100, NewStyles.center]}><Text style={styles.profileImageThumbnail}>{data?.technician?.name?.[0]}</Text></View>}
                 <Text style={NewStyles.title10}>{data?.technician?.name}</Text>
-                <Text style={NewStyles.text10}>{data?.technician?.technician_type}</Text>
+                <Text style={NewStyles.text10}>{t(data?.technician?.technician_type)}</Text>
             </View>
             <View style={[{ paddingHorizontal: '5%', paddingBottom: 10, gap: 10 }, NewStyles.rowWrapper]}>
                 <View style={[{ flex: 1 }, NewStyles.center]}>
