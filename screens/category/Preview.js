@@ -8,11 +8,11 @@ import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrg
 import { createStyles } from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
 import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
-import { useDispatch, useSelector } from 'react-redux';
 import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
 import Button from '../../components/Button';
 import { imageUri, uri } from '../../services/URL';
 import { fetchOrders } from '../../slices/orderSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { emptyCategory } from '../../slices/categorySlice';
 import ProgressBar from '../../components/ProgressBar';
 import { emptyAddress } from '../../slices/addressSlice';
@@ -20,6 +20,8 @@ import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
+        // const token = useSelector((state) => state?.auth?.token)
+        const user = useSelector((state) => state?.user?.data)
     const { t, i18n } = useTranslation();
     const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const NewStyles = useMemo(
@@ -291,10 +293,10 @@ function Preview({ navigation }) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={NewStyles.rowWrapper}>
-                        <View style={[NewStyles.row, { gap: 5 }]}>
+                     {user?.apple_check == 0 &&   <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={26} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.title}>{isFixed ? t('Loop Fixed Amount') : t('Loop Base Amount')}</Text>
-                        </View>
+                        </View>}
                         <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} >
                             <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.text}>{totalPrice > 0 ? `${formatPrice(totalPrice)}${t(' Toman')}` : t('Needs Review')}</Text>
@@ -304,7 +306,7 @@ function Preview({ navigation }) {
                         <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Dear user, your order information will be finalized after review by Loop technicians and specialized evaluations.')}</Text>
                     </View>
                 </View>
-                <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
+              {user?.apple_check == 0 &&  <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
                         <Ionicons name="gift-outline" size={26} color={themeColor0.bgColor(1)} />
                         <Text style={NewStyles.title}>{t('Discount Code')}</Text>
@@ -336,7 +338,7 @@ function Preview({ navigation }) {
                             {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
                         </Pressable>
                     </View>
-                </View>
+                </View>}
                 <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
                     <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                         <View style={[NewStyles.row, { gap: 5 }]}>

@@ -163,19 +163,31 @@ export function isMoreThan4HoursFromNow(dateString, timeString) {
 
 export const getNext20DaysJalaali = () => {
   const days = [];
+  const lang = (i18n.language || 'fa').toLowerCase();
+  const isFa = lang.startsWith('fa');
+  const locale = (i18n.language || 'en-US').replace('_', '-');
+
   for (let i = 0; i < 20; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
     const dayOfWeek = date.getDay();
-    const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
     const weekday = i18n.t(weekDaysKeys[dayOfWeek]);
-    const monthName = i18n.t(persianMonthsKeys[jDate.jm]);
-    const day = jDate.jd;
     const value = `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
+
+    let dateLabel = '';
+    if (isFa) {
+      const jDate = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      const monthName = i18n.t(persianMonthsKeys[jDate.jm]);
+      dateLabel = `${jDate.jd} ${monthName}`;
+    } else {
+      const monthName = date.toLocaleString(locale, { month: 'short' });
+      dateLabel = `${date.getDate()} ${monthName}`;
+    }
+
     days.push({
       id: i + 1,
       weekday: weekday,
-      date: `${day} ${monthName}`,
+      date: dateLabel,
       value: value,
     });
   }

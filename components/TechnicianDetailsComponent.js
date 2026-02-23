@@ -8,10 +8,12 @@ import { formatDate, showToastOrAlert } from '../helpers/Common'
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
-
+import { useDispatch, useSelector } from 'react-redux';
 const TechnicianDetailsComponent = ({ data, navigation }) => {
     const { t } = useTranslation();
     const [showQRModal, setShowQRModal] = useState(false);
+        const token = useSelector((state) => state?.auth?.token)
+    const user = useSelector((state) => state?.user?.data)
     const handleShare = async () => {
         const message = t('I am satisfied with the performance of {{name}}, Loop technician and I recommend you to use his services too! {{url}}', { name: data?.technician?.name, url: `${mainUri}/technician/${data?.technician?.id}` });
         try {
@@ -60,14 +62,14 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Message to technician')}</Text>
                     {(data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
                 </Pressable>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
+               {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Send to friends')}</Text>
-                </Pressable>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
+                </Pressable>}
+             {user?.apple_check == 0 &&   <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Scan QR code')}</Text>
-                </Pressable>
+                </Pressable>}
             </View>
 
             {/* QR Code Modal */}
