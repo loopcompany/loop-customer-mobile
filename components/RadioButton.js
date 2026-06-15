@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Pressable, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, Pressable, TouchableOpacity, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -64,8 +64,8 @@ export default function RadioButton({ step, data, setLoading }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <View style={{ flex: 1 , alignItems: langIsRTL(i18next.language) ? 'flex-start' : 'flex-end' }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
-                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? (langIsRTL(i18next.language) ? 'right' : 'left') :'center' }]}>{data?.title}</Text>
+                    {data?.icon_name && <View style={{ flex: 1, alignItems: langIsRTL(i18next.language) ? 'flex-start' : 'flex-end' }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
+                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? (langIsRTL(i18next.language) ? 'right' : 'left') : 'center' }]}>{data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -80,6 +80,7 @@ export default function RadioButton({ step, data, setLoading }) {
                 keyExtractor={(item) => item?.id?.toString()}
                 data={data?.field_details}
                 initialNumToRender={30}
+                contentContainerStyle={Platform.OS==='web' && {gap:20}}
                 renderItem={({ item }) => {
                     return (<View style={{ gap: 10 }}>
 
@@ -92,17 +93,19 @@ export default function RadioButton({ step, data, setLoading }) {
                             {
                                 item?.image_path &&
 
-                                <Image
-                                    source={{ uri: `${imageUri}/${item?.image_path}` }}
-                                    style={{ height: 50, width: 50 }}
-                                />
+                                <View style={[{ height: 60, width: 60, backgroundColor: themeColor4.bgColor(1), borderWidth:3, borderColor: themeColor1.bgColor(1) }, NewStyles.border100, NewStyles.center]}>
+                                    <Image
+                                        source={{ uri: `${imageUri}/${item?.image_path}` }}
+                                        style={[{ height: 50, width: 50, resizeMode: 'contain', backgroundColor: themeColor4.bgColor(1) }, NewStyles.border100]}
+                                    />
+                                </View>
                             }
                             <Text style={NewStyles.text10}>{item.title}</Text>
                         </TouchableOpacity>
 
 
                         {item.has_counter == 1 && item.value ? renderCounter(item) : renderPrice(item)}
-                        {item?.des ? <Text style={NewStyles.text}>{item?.des}</Text> : null}
+                        {item?.des ? <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{item?.des}</Text></View> : null}
                     </View>)
                 }
                 }

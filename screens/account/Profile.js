@@ -1,9 +1,9 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import Button from '../../components/Button';
@@ -20,13 +20,15 @@ import OrganizationProfile from './OrganizationProfile';
 import * as ImagePicker from 'expo-image-picker';
 import { imageUri } from '../../services/URL';
 import { createStyles } from '../../styles/NewStyles';
+import LocationPicker from '../../components/LocationPicker';
+import { fetchUser } from '../../slices/userSlice';
 export default function Profile() {
-      const { t, i18n } = useTranslation();
-      const NewStyles = useMemo(
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
-      );
-        const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles])
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles])
     const navigation = useNavigation();
     const { logoutWithConfirmation, logoutFromAllDevicesWithConfirmation, isLoggingOut } = useLogout();
     const [datePickerModal, setDatePickerModal] = useState(false);
@@ -35,7 +37,9 @@ export default function Profile() {
     const [pickedImageUri, setPickedImageUri] = useState(null);
     // Get user type from Redux
     const userTypeFromRedux = useSelector(state => state.auth.userType);
-    // Profile data states
+    const user = useSelector(state => state.user?.data)
+    const token = useSelector(state => state.auth?.token)
+    // Profile data states 
     const [profileData, setProfileData] = useState({
         name: '',
         last_name: '',
@@ -46,7 +50,7 @@ export default function Profile() {
         phone_number: '',
         postal_code: '',
         city: '',
-        region: '',
+        region_id: '',
         home_address: '',
         work_address: '',
         card_number: '',
@@ -64,6 +68,7 @@ export default function Profile() {
         newPassword: ''
     });
 
+    const dispatch = useDispatch()
     // UI states
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingPassword, setIsLoadingPassword] = useState(false);
@@ -72,69 +77,41 @@ export default function Profile() {
     const [captchaInput, setCaptchaInput] = useState('');
     const [autoLoginEnabled, setAutoLoginEnabled] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
-    const [birthDateChanged, setBirthDateChanged] = useState(false);
-
+    const [birthDateChanged, setBirthDateChanged] = useState(false); 
+    const [errorTxt, setErrorTxt] = useState({
+        name: '',
+        last_name: '',
+        email: '',
+        region_id: '',
+    })
     // Helper function to get full image URL
     const getImageUrl = (path) => {
         if (!path) {
-            console.log('🖼️ getImageUrl: No path provided');
             return null;
         }
 
         // اگر URI محلی است (file://, blob:, content://)
         if (path.startsWith('file://') || path.startsWith('blob:') || path.startsWith('content://')) {
-            console.log('🖼️ getImageUrl: Local URI:', path);
             return path;
         }
 
         // اگر URL کامل است (http, https)
         if (path.startsWith('http')) {
-            console.log('🖼️ getImageUrl: Full URL:', path);
             return path;
         }
 
         // اگر relative path است از سرور
         const fullUrl = `${imageUri}/${path}`;
-        console.log('🖼️ getImageUrl: Building URL from path:', path, '→', fullUrl);
         return fullUrl;
     };
 
     // Check user type on mount
     useEffect(() => {
-        checkUserType();
-    }, []);
-
-    // Check user type from AsyncStorage or Redux
-    const checkUserType = async () => {
-        try {
-            console.log('🔍 [Profile] شروع بررسی نوع کاربر...');
-
-            // First check Redux
-            console.log('📦 [Profile] بررسی Redux - userType:', userTypeFromRedux);
-            if (userTypeFromRedux) {
-                console.log('✅ [Profile] نوع کاربر از Redux:', userTypeFromRedux);
-                setUserType(userTypeFromRedux);
-                setCheckingUserType(false);
-                return;
-            }
-
-            // If not in Redux, check AsyncStorage
-            console.log('💾 [Profile] بررسی AsyncStorage...');
-            const accountType = await AsyncStorage.getItem('accountType');
-            console.log('💾 [Profile] accountType از AsyncStorage:', accountType);
-
-            const userToken = await AsyncStorage.getItem('userToken');
-            console.log('🔑 [Profile] userToken موجود:', userToken ? 'بله' : 'خیر');
-
-            setUserType(accountType);
-            setCheckingUserType(false);
-
-            console.log('✅ [Profile] نوع کاربر نهایی تنظیم شد:', accountType);
-        } catch (error) {
-            console.error('❌ [Profile] خطا در بررسی نوع کاربر:', error);
-            setCheckingUserType(false);
+        if (user?.account_type) {
+            setUserType(user?.account_type)
         }
-    };
+    }, [user?.account_type]);
+
 
     // Load profile data on component mount
     useEffect(() => {
@@ -231,7 +208,7 @@ export default function Profile() {
                     phone_number: user.phone_number || '',
                     postal_code: user.postal_code || '',
                     city: user.city || '',
-                    region: user.region || '',
+                    region_id: user.region_id || '',
                     home_address: user.home_address || '',
                     work_address: user.work_address || '',
                     card_number: user.card_number || '',
@@ -253,222 +230,257 @@ export default function Profile() {
             showToastOrAlert(t('Error loading profile information'));
         }
     };
+    const validateForm = () => {
+        const errors = {};
+
+        // Phone validation (11 digits starting with 09)
+        if (!profileData.name) {
+            errors.name = t("Please enter your name.");
+        }
+
+        // Password validation
+        if (!profileData.last_name) {
+            errors.last_name = t("Please enter your last name.");
+        }
+        if (!profileData.email) {
+            errors.email = t('Please enter your Email Address.');
+        }
+
+
+        if (!profileData.region_id) {
+            errors.region_id = t('Please select your region.');
+        }
+
+        return errors;
+    };
 
     // Update profile data
     const updateProfile = async () => {
-        try {
-            setIsLoading(true);
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            setErrorTxt(errors)
+            return;
+        } else {
 
-            // بررسی اینکه آیا عکس جدید انتخاب شده
-            const hasNewImage = isLocalUri(pickedImageUri);
+            try {
+                setIsLoading(true);
 
-            if (hasNewImage) {
-                // استفاده از FormData برای آپلود عکس
-                const formData = new FormData();
+                // بررسی اینکه آیا عکس جدید انتخاب شده
+                const hasNewImage = isLocalUri(pickedImageUri);
 
-                // Laravel نیاز به _method برای PUT با FormData دارد
-                formData.append('_method', 'PUT');
+                if (hasNewImage) {
+                    // استفاده از FormData برای آپلود عکس
+                    const formData = new FormData();
 
-                // اضافه کردن عکس با نام profile_image
-                if (Platform.OS === 'web') {
-                    // برای وب: تبدیل blob به File
-                    try {
-                        const response = await fetch(profileImage);
-                        const blob = await response.blob();
-                        const fileName = `profile_${Date.now()}.${blob.type.split('/')[1]}`;
-                        const file = new File([blob], fileName, { type: blob.type });
-                        formData.append("profile_photo_path", file);
-                        console.log('📷 Web: Image converted to File object');
-                    } catch (err) {
-                        console.error('❌ Error converting image:', err);
-                        showToastOrAlert(t('Error processing image'));
+                    // Laravel نیاز به _method برای PUT با FormData دارد
+                    formData.append('_method', 'PUT');
+
+                    // اضافه کردن عکس با نام profile_image
+                    if (Platform.OS === 'web') {
+                        // برای وب: تبدیل blob به File
+                        try {
+                            const response = await fetch(profileImage);
+                            const blob = await response.blob();
+                            const fileName = `profile_${Date.now()}.${blob.type.split('/')[1]}`;
+                            const file = new File([blob], fileName, { type: blob.type });
+                            formData.append("profile_photo_path", file);
+                            console.log('📷 Web: Image converted to File object');
+                        } catch (err) {
+                            console.error('❌ Error converting image:', err);
+                            showToastOrAlert(t('Error processing image'));
+                            return;
+                        }
+                    } else {
+                        // برای موبایل: از URI استفاده می‌کنیم
+                        let finalUri = profileImage;
+                        if (Platform.OS === "android" && !finalUri.startsWith("file://")) {
+                            finalUri = "file://" + finalUri;
+                        }
+
+                        const fileName = finalUri.split("/").pop();
+                        const ext = fileName.split('.').pop();
+                        const type = `image/${ext}`;
+
+                        formData.append("profile_photo_path", {
+                            uri: finalUri,
+                            name: fileName,
+                            type,
+                        });
+                        console.log('📱 Native: Image added to FormData');
+                    }
+
+                    // اضافه کردن همه فیلدهای پروفایل (سرور نیاز دارد حداقل یک فیلد داشته باشیم)
+                    let addedFields = 0;
+                    Object.keys(profileData).forEach(key => {
+                        if (key == 'region_id') {
+                            if (profileData[key]?.id) {
+                                formData.append('region_id', profileData[key]?.id);
+                                formData.append('region', profileData[key]?.code);
+                            }
+                        } else if (key !== 'phone') {
+                            const value = (profileData[key] || '').toString().trim();
+                            formData.append(key, value);
+                            if (value) addedFields++;
+                            console.log(`📝 Field ${key}: ${value || '(empty)'}`);
+                        }
+                    });
+                    // اضافه کردن تاریخ تولد (تبدیل - به /)
+                    
+                    if (birthDate && birthDate.trim() !== '') {
+                        // سرور انتظار فرمت 1370/05/15 دارد (با /)
+                        const formattedDate = birthDate.trim().replace(/-/g, '/');
+                        formData.append('birth_date', formattedDate);
+                        addedFields++;
+                        console.log(`📝 Field birth_date: ${formattedDate} (original: ${birthDate})`);
+                    }
+
+
+                    const response = await userAPI.updateProfile(formData);
+
+                    if (response.success) {
+                        showToastOrAlert(response.message);
+
+
+                        // بروزرسانی state محلی
+                        if (response.user) {
+                            const user = response.user;
+
+
+                            // بروزرسانی عکس پروفایل
+                            if (user.profile_photo_path) {
+                                setProfileImage(user.profile_photo_path);
+                                console.log('✅ Profile image updated to:', user.profile_photo_path);
+                            } else {
+                                console.log('⚠️ No profile_photo_path in response');
+                            }
+
+                            setProfileData(prev => ({
+                                ...prev,
+                                name: user.name || prev.name,
+                                last_name: user.last_name || prev.last_name,
+                                email: user.email || prev.email,
+                                melicode: user.melicode || prev.melicode,
+                                mobile_number: user.mobile_number || prev.mobile_number,
+                                phone_number: user.phone_number || prev.phone_number,
+                                postal_code: user.postal_code || prev.postal_code,
+                                city: user.city || prev.city,
+                                region_id: user.region_id || prev.region_id,
+                                home_address: user.home_address || prev.home_address,
+                                work_address: user.work_address || prev.work_address,
+                                card_number: user.card_number || prev.card_number,
+                                sheba_number: user.sheba_number || prev.sheba_number
+                            }));
+
+                            if (user.birth_date) {
+                                setBirthDate(user.birth_date);
+                            }
+                        }
+
+                        if (response.requires_verification) {
+                            showToastOrAlert('کد تایید به شماره جدید ارسال شد');
+                        }
+                    }
+                } else {
+                    // بدون عکس - فقط JSON
+                    const updateData = {};
+                    Object.keys(profileData).forEach(key => {
+                        if (key == 'region_id') {
+                            if (profileData[key]?.id) {
+                                updateData['region_id'] = profileData[key]?.id
+                                updateData['region'] = profileData[key]?.code
+                            }
+                        } else if (key !== 'phone' && profileData[key] && profileData[key].trim() !== '') {
+                            updateData[key] = profileData[key].trim();
+                        }
+                    });
+
+                    if (birthDateChanged && birthDate && birthDate.trim() !== '') {
+                        // سرور انتظار فرمت 1370/05/15 دارد (با /)
+                        updateData.birth_date = birthDate.trim().replace(/-/g, '/');
+                    }
+                    console.log('====================================');
+                    console.log("birthDate:", birthDate, birthDateChanged);
+                    console.log('====================================');
+
+                    if (Object.keys(updateData).length === 0) {
+                        showToastOrAlert(t('No information to update'));
                         return;
                     }
+
+
+                    const response = await userAPI.updateProfile(updateData);
+
+                    if (response.success) {
+                        showToastOrAlert(response.message);
+
+                        setBirthDateChanged(false);
+
+                        if (response.user) {
+                            const user = response.user;
+
+                            if (user.profile_photo_path) {
+                                setProfileImage(user.profile_photo_path);
+                            }
+
+                            setProfileData(prev => ({
+                                ...prev,
+                                name: user.name || prev.name,
+                                last_name: user.last_name || prev.last_name,
+                                email: user.email || prev.email,
+                                melicode: user.melicode || prev.melicode,
+                                mobile_number: user.mobile_number || prev.mobile_number,
+                                phone_number: user.phone_number || prev.phone_number,
+                                postal_code: user.postal_code || prev.postal_code,
+                                city: user.city || prev.city,
+                                region_id: user.region_id || prev.region_id,
+                                home_address: user.home_address || prev.home_address,
+                                work_address: user.work_address || prev.work_address,
+                                card_number: user.card_number || prev.card_number,
+                                sheba_number: user.sheba_number || prev.sheba_number
+                            }));
+
+                            if (user.birth_date) {
+                                setBirthDate(user.birth_date);
+                            }
+                        }
+
+                        if (response.requires_verification) {
+                            showToastOrAlert('کد تایید به شماره جدید ارسال شد');
+                        }
+                    }
+                }
+            } catch (error) {
+
+                if (error.message === 'Network Error' || !error.response) {
+                    showToastOrAlert(t('Error connecting to server. Please check your internet connection'));
+                } else if (error.response?.status === 401) {
+                    showToastOrAlert(t('Your session has expired. Please log in again'));
+                } else if (error.response?.status === 403) {
+                    showToastOrAlert(error.response.data.message || 'دسترسی شما محدود شده است');
+                } else if (error.response?.status === 422) {
+                    const errors = error.response.data.errors;
+                    if (errors && typeof errors === 'object') {
+                        const firstErrorKey = Object.keys(errors)[0];
+                        const firstError = errors[firstErrorKey][0];
+                        showToastOrAlert(firstError);
+                    } else {
+                        showToastOrAlert(error.response.data.message || t('Error validating information'));
+                    }
+                } else if (error.response?.status === 400) {
+                    showToastOrAlert(error.response.data.message || t('Error updating information'));
+                } else if (error.response?.status === 413) {
+                    showToastOrAlert(t('Image file size exceeds limit (max 5MB)'));
+                } else if (error.response?.status >= 500) {
+                    showToastOrAlert(t('Server error. Please try again later'));
                 } else {
-                    // برای موبایل: از URI استفاده می‌کنیم
-                    let finalUri = profileImage;
-                    if (Platform.OS === "android" && !finalUri.startsWith("file://")) {
-                        finalUri = "file://" + finalUri;
-                    }
-
-                    const fileName = finalUri.split("/").pop();
-                    const ext = fileName.split('.').pop();
-                    const type = `image/${ext}`;
-
-                    formData.append("profile_photo_path", {
-                        uri: finalUri,
-                        name: fileName,
-                        type,
-                    });
-                    console.log('📱 Native: Image added to FormData');
+                    showToastOrAlert(error.response?.data?.message || 'خطا در بروزرسانی اطلاعات');
                 }
-
-                // اضافه کردن همه فیلدهای پروفایل (سرور نیاز دارد حداقل یک فیلد داشته باشیم)
-                let addedFields = 0;
-                Object.keys(profileData).forEach(key => {
-                    if (key !== 'phone') {
-                        const value = (profileData[key] || '').toString().trim();
-                        formData.append(key, value);
-                        if (value) addedFields++;
-                        console.log(`📝 Field ${key}: ${value || '(empty)'}`);
-                    }
-                });
-
-                // اضافه کردن تاریخ تولد (تبدیل - به /)
-                if (birthDate && birthDate.trim() !== '') {
-                    // سرور انتظار فرمت 1370/05/15 دارد (با /)
-                    const formattedDate = birthDate.trim().replace(/-/g, '/');
-                    formData.append('birth_date', formattedDate);
-                    addedFields++;
-                    console.log(`📝 Field birth_date: ${formattedDate} (original: ${birthDate})`);
-                }
-
-                console.log(`📊 Total non-empty fields: ${addedFields}`);
-                console.log('📤 Sending FormData with image to server...');
-
-                const response = await userAPI.updateProfile(formData);
-
-                if (response.success) {
-                    showToastOrAlert(response.message);
-
-                    console.log('✅ Server response:', response);
-
-                    // بروزرسانی state محلی
-                    if (response.user) {
-                        const user = response.user;
-
-                        console.log('👤 User data from server:', user);
-                        console.log('📷 Profile photo path:', user.profile_photo_path);
-
-                        // بروزرسانی عکس پروفایل
-                        if (user.profile_photo_path) {
-                            setProfileImage(user.profile_photo_path);
-                            console.log('✅ Profile image updated to:', user.profile_photo_path);
-                        } else {
-                            console.log('⚠️ No profile_photo_path in response');
-                        }
-
-                        setProfileData(prev => ({
-                            ...prev,
-                            name: user.name || prev.name,
-                            last_name: user.last_name || prev.last_name,
-                            email: user.email || prev.email,
-                            melicode: user.melicode || prev.melicode,
-                            mobile_number: user.mobile_number || prev.mobile_number,
-                            phone_number: user.phone_number || prev.phone_number,
-                            postal_code: user.postal_code || prev.postal_code,
-                            city: user.city || prev.city,
-                            region: user.region || prev.region,
-                            home_address: user.home_address || prev.home_address,
-                            work_address: user.work_address || prev.work_address,
-                            card_number: user.card_number || prev.card_number,
-                            sheba_number: user.sheba_number || prev.sheba_number
-                        }));
-
-                        if (user.birth_date) {
-                            setBirthDate(user.birth_date);
-                        }
-                    }
-
-                    if (response.requires_verification) {
-                        showToastOrAlert('کد تایید به شماره جدید ارسال شد');
-                    }
-                }
-            } else {
-                // بدون عکس - فقط JSON
-                const updateData = {};
-                Object.keys(profileData).forEach(key => {
-                    if (key !== 'phone' && profileData[key] && profileData[key].trim() !== '') {
-                        updateData[key] = profileData[key].trim();
-                    }
-                });
-
-                if (birthDateChanged && birthDate && birthDate.trim() !== '') {
-                    // سرور انتظار فرمت 1370/05/15 دارد (با /)
-                    updateData.birth_date = birthDate.trim().replace(/-/g, '/');
-                }
-
-                if (Object.keys(updateData).length === 0) {
-                    showToastOrAlert(t('No information to update'));
-                    return;
-                }
-
-                console.log('📤 Sending JSON data to server:', updateData);
-
-                const response = await userAPI.updateProfile(updateData);
-
-                if (response.success) {
-                    showToastOrAlert(response.message);
-
-                    setBirthDateChanged(false);
-
-                    if (response.user) {
-                        const user = response.user;
-
-                        if (user.profile_photo_path) {
-                            setProfileImage(user.profile_photo_path);
-                        }
-
-                        setProfileData(prev => ({
-                            ...prev,
-                            name: user.name || prev.name,
-                            last_name: user.last_name || prev.last_name,
-                            email: user.email || prev.email,
-                            melicode: user.melicode || prev.melicode,
-                            mobile_number: user.mobile_number || prev.mobile_number,
-                            phone_number: user.phone_number || prev.phone_number,
-                            postal_code: user.postal_code || prev.postal_code,
-                            city: user.city || prev.city,
-                            region: user.region || prev.region,
-                            home_address: user.home_address || prev.home_address,
-                            work_address: user.work_address || prev.work_address,
-                            card_number: user.card_number || prev.card_number,
-                            sheba_number: user.sheba_number || prev.sheba_number
-                        }));
-
-                        if (user.birth_date) {
-                            setBirthDate(user.birth_date);
-                        }
-                    }
-
-                    if (response.requires_verification) {
-                        showToastOrAlert('کد تایید به شماره جدید ارسال شد');
-                    }
-                }
+            } finally {
+                setIsLoading(false);
+                dispatch(fetchUser(token))
             }
-        } catch (error) {
-            console.error('❌ Error updating profile:', error);
-            console.error('❌ Error response:', error.response);
-
-            if (error.message === 'Network Error' || !error.response) {
-                showToastOrAlert(t('Error connecting to server. Please check your internet connection'));
-            } else if (error.response?.status === 401) {
-                showToastOrAlert(t('Your session has expired. Please log in again'));
-            } else if (error.response?.status === 403) {
-                showToastOrAlert(error.response.data.message || 'دسترسی شما محدود شده است');
-            } else if (error.response?.status === 422) {
-                const errors = error.response.data.errors;
-                if (errors && typeof errors === 'object') {
-                    const firstErrorKey = Object.keys(errors)[0];
-                    const firstError = errors[firstErrorKey][0];
-                    showToastOrAlert(firstError);
-                } else {
-                    showToastOrAlert(error.response.data.message || t('Error validating information'));
-                }
-            } else if (error.response?.status === 400) {
-                showToastOrAlert(error.response.data.message || t('Error updating information'));
-            } else if (error.response?.status === 413) {
-                showToastOrAlert(t('Image file size exceeds limit (max 5MB)'));
-            } else if (error.response?.status >= 500) {
-                showToastOrAlert(t('Server error. Please try again later'));
-            } else {
-                showToastOrAlert(error.response?.data?.message || 'خطا در بروزرسانی اطلاعات');
-            }
-        } finally {
-            setIsLoading(false);
         }
     };
-
     // Change password
     const changePassword = async () => {
         try {
@@ -507,6 +519,7 @@ export default function Profile() {
                 generateCaptcha();
             }
         } catch (error) {
+            console.log(error)
 
             // Handle validation errors and show inline messages
             if (error.response?.status === 400) {
@@ -551,8 +564,8 @@ export default function Profile() {
     };
 
     // Show loading while checking user type
-    if (checkingUserType) {
-        console.log('⏳ [Profile] در حال بررسی نوع کاربر...');
+    if (!user?.account_type) {
+
         return (
             <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
                 <ActivityIndicator size="large" color={themeColor1.bgColor(1)} />
@@ -567,8 +580,6 @@ export default function Profile() {
         return <OrganizationProfile />;
     }
 
-    // Show individual user profile
-    console.log('👤 [Profile] نمایش پروفایل فردی - userType:', userType);
     return (
 
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
@@ -576,9 +587,6 @@ export default function Profile() {
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
                 <ScrollView contentContainerStyle={styles.container}>
 
-                    <View style={styles.header}>
-                        <Text style={[NewStyles.text10]}>{t('My Profile')}</Text>
-                    </View>
 
                     {/* Profile Image Section */}
                     <View style={styles.profileImageContainer}>
@@ -608,21 +616,27 @@ export default function Profile() {
                     <View style={{ gap: 10 }}>
                         <Text style={NewStyles.text10}>{t('First Name')}</Text>
                         <TextInput
-                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder={t('First Name *')}
+                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, errorTxt?.name && { borderColor: themeColor6.bgColor(1), borderWidth: 1, backgroundColor: themeColor6.bgColor(0.1) }]}
+                            placeholder={t('First Name')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, name: text }))}
                         />
+                        {errorTxt?.name &&
+                            <Text style={[NewStyles.text6, { fontSize: 12 }]}>{t(errorTxt?.name)}</Text>
+                        }
                         <Text style={NewStyles.text10}>{t('Last Name')}</Text>
 
                         <TextInput
-                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-                            placeholder={t('Last Name *')}
+                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, errorTxt?.last_name && { borderColor: themeColor6.bgColor(1), borderWidth: 1, backgroundColor: themeColor6.bgColor(0.1) }]}
+                            placeholder={t('Last Name')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             value={profileData.last_name}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, last_name: text }))}
                         />
+                        {errorTxt?.last_name &&
+                            <Text style={[NewStyles.text6, { fontSize: 12 }]}>{t(errorTxt?.last_name)}</Text>
+                        }
                         <Text style={NewStyles.text10}>{t('Mobile Number')}</Text>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
@@ -644,13 +658,16 @@ export default function Profile() {
 
                         <Text style={NewStyles.text10}>{t('Email Address')}</Text>
                         <TextInput
-                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
+                            style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, errorTxt?.email && { borderColor: themeColor6.bgColor(1), borderWidth: 1, backgroundColor: themeColor6.bgColor(0.1) }]}
                             placeholder={t('Email Address')}
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="email-address"
                             value={profileData.email}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, email: text }))}
                         />
+                        {errorTxt?.email &&
+                            <Text style={[NewStyles.text6, { fontSize: 12 }]}>{t(errorTxt?.email)}</Text>
+                        }
 
                         {/* شماره ثابت */}
                         <Text style={NewStyles.text10}>{t('Landline Number')}</Text>
@@ -689,31 +706,41 @@ export default function Profile() {
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, postal_code: text }))}
                         />
 
-                        {/* شهر و منطقه */}
+                        {/*منطقه */}
 
-                        <View style={styles.row}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={NewStyles.text10}>{t('City')}</Text>
-                                <TextInput
-                                    style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                    placeholder={t('City')}
-                                    placeholderTextColor={themeColor10.bgColor(0.6)}
-                                    value={profileData.city}
-                                    onChangeText={(text) => setProfileData(prev => ({ ...prev, city: text }))}
-                                />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={NewStyles.text10}>{t('District')}</Text>
-                                <TextInput
-                                    style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
-                                    placeholder={t('District')}
-                                    placeholderTextColor={themeColor10.bgColor(0.6)}
-                                    value={profileData.region}
-                                    keyboardType='number-pad'
-                                    onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
-                                />
-                            </View>
+                        {/* <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text10}>{t('District')}</Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { flex: 1 }]}
+                                placeholder={t('District')}
+                                placeholderTextColor={themeColor10.bgColor(0.6)}
+                                value={profileData.region}
+                                keyboardType='number-pad'
+                                onChangeText={(text) => setProfileData(prev => ({ ...prev, region: text }))}
+                            />
+                        </View> */}
+                        <View style={{ flex: 1 }}>
+                            <Text style={NewStyles.text10}>{t('District')}</Text>
+                            <LocationPicker
+                                selectedProvince={null}
+                                selectedCity={null}
+                                selectedRegion={profileData.region_id}
+                                onProvinceChange={(province) => {
+
+                                }}
+                                onCityChange={(city) => { }}
+                                onRegionChange={(region) => {
+                                    setProfileData(prev => ({ ...prev, region_id: region }))
+                                }}
+                                errors={{
+
+                                }}
+                                required={true}
+                            />
                         </View>
+                        {errorTxt?.region_id &&
+                            <Text style={[NewStyles.text6, { fontSize: 12 }]}>{t(errorTxt?.region_id)}</Text>
+                        }
 
                         {/* آدرس منزل */}
                         <Text style={NewStyles.text10}>{t('Home Address')}</Text>
@@ -879,14 +906,15 @@ export default function Profile() {
     );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     container: {
         padding: 20,
         backgroundColor: '#e0f0ff',
         alignItems: 'stretch',
         width: '100%',
         maxWidth: 800,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        paddingBottom: 100
     },
     header: {
         flexDirection: 'row-reverse',

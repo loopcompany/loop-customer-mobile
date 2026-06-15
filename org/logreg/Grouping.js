@@ -1,20 +1,22 @@
-import React, { useState,useMemo } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform, Linking } from "react-native";
 import { useTranslation } from "react-i18next";
 import Footer from "../../screens/Footer";
 import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
+import { themeColor0, themeColor1, themeColor3, themeColor4 } from "../../theme/Color";
 import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
 import { createStyles } from '../../styles/NewStyles';
+import TransparentButton from "../../components/TransparentButton";
+import { mainUri } from "../../services/URL";
 const Grouping = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [isOrganizationalGuideOpen, setIsOrganizationalGuideOpen] = useState(false);
   const handleOrganizationalLogin = () => {
     navigation.navigate("Login");
@@ -35,14 +37,14 @@ const Grouping = ({ navigation }) => {
       {/* Background with image */}
       <ImageBackground
         cachePolicy={"memory-disk"}
-        source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} 
+        source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")}
         style={[NewStyles.container, { backgroundColor: "#020305" }]}
         contentPosition={"center"}
         contentFit="cover"
       >
         {/* Top section with header text */}
         <Pressable
-        onPress={()=>{navigation.navigate('OrganizationTermsScreen')}}
+          onPress={() => { navigation.navigate('OrganizationTermsScreen') }}
           style={{
             alignItems: "center",
             paddingTop: 30,
@@ -117,7 +119,7 @@ const Grouping = ({ navigation }) => {
                   textAlign: "center",
                 }}
               >
-          
+
                 {t("Organization / Company")}
               </Text>
               {/* Arrow down */}
@@ -166,122 +168,16 @@ const Grouping = ({ navigation }) => {
                 {t("Login to account")}
               </Text>
             </TouchableOpacity>
+            <TransparentButton
+              onPress={() => { Linking.openURL(`${mainUri}/assets/guid/organ.pdf`) }}
+              customStyle={[{ borderColor: themeColor0.bgColor(1), borderWidth: 1, width: '70%', maxWidth: 400, backgroundColor: themeColor4.bgColor(0.5) }, NewStyles.border10]}
+              title={t("Organizational Application Guide")}
+              customTextStyle={NewStyles.title}
+            />
           </View>
 
-          {/* Company Section */}
-          <View
-            style={{
-              width: "100%",
-              alignItems: "center",
-            }}
-          >
-
-          </View>
         </View>
 
-        {/* Bottom yellow sections with arrows - positioned absolutely */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 20,
-            right: 0,
-            left: 0,
-          }}
-        >
-          {/* First yellow section - Accordion Guide */}
-          <View
-            style={{
-              width: "100%",
-              marginBottom: 10,
-            }}
-          >
-            {/* Header - clickable */}
-            <TouchableOpacity
-              onPress={() => setIsOrganizationalGuideOpen(!isOrganizationalGuideOpen)}
-              style={{
-                width: "100%",
-                backgroundColor: "#ffeb3b",
-                paddingVertical: 8,
-                ...NewStyles.rowWrapper,
-                // alignItems: "center",
-                paddingHorizontal: 10,
-              }}
-            >
-              {/* Dotted line */}
-              <View
-                style={{
-                  flex: 1,
-                  borderTopWidth: 2,
-                  borderTopColor: "#000",
-                  borderStyle: "dotted",
-                  marginRight: 10,
-                }}
-              />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: "VazirBold",
-                  color: "#000",
-                 ...NewStyles.text10
-                }}
-              >
-                {t("Organizational / Government panel guide")}
-              </Text>
-              {/* Red arrow pointing down or up based on state */}
-              <View
-                style={{
-                  marginLeft: 15,
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 8,
-                  borderRightWidth: 8,
-                  ...(isOrganizationalGuideOpen
-                    ? {
-                        borderBottomWidth: 12,
-                        borderLeftColor: "transparent",
-                        borderRightColor: "transparent",
-                        borderBottomColor: "#ff0000",
-                      }
-                    : {
-                        borderTopWidth: 12,
-                        borderLeftColor: "transparent",
-                        borderRightColor: "transparent",
-                        borderTopColor: "#ff0000",
-                      }),
-                }}
-              />
-            </TouchableOpacity>
-
-            {/* Content - collapsible */}
-            {isOrganizationalGuideOpen && (
-              <View
-                style={{
-                  width: "100%",
-                  backgroundColor: "rgba(255, 235, 59, 0.95)",
-                  paddingVertical: 12,
-                  paddingHorizontal: 15,
-                  borderBottomWidth: 2,
-                  borderBottomColor: "#000",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 11,
-                    fontFamily: "VazirBold",
-                    color: "#000",
-                    ...NewStyles.text10,
-                    lineHeight: 20,
-                  }}
-                >
-                  {t("Loop's organizational/company panel is for users with a large number of products/devices/computer parts, and registration in this panel speeds up services and reduces costs.")}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Second yellow section - Full width banner */}
-         
-        </View>
       </ImageBackground>
     </View>
   );

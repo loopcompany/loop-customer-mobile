@@ -6,24 +6,30 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import { themeColor0, themeColor10 } from "../theme/Color";
-import NewStyles from "../styles/NewStyles";
 import { imageUri } from "../services/URL";
+import { useTranslation } from "react-i18next";
+import { createStyles } from "../styles/NewStyles";
 
 export default function Folder({ onPress, title, style, loading, image }) {
-
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   return (
     <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style]} onPress={onPress}>
       <Image
         source={{ uri: `${imageUri}/${image}` }}
-        style={styles.folderIcon}
+        style={[styles.folderIcon]}
       />
       <Text style={NewStyles.title4}>{title}</Text>
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   button: {
     // backgroundColor: themeColor10.bgColor(0.2),
     // paddingHorizontal: 40,
@@ -32,11 +38,12 @@ const styles = StyleSheet.create({
     // height: 150,
     paddingVertical: 20,
     alignItems: "flex-end",
-    aspectRatio:1
+    aspectRatio: 1
   },
   folderIcon: {
     width: 70,
     height: 70,
     resizeMode: "contain",
+    borderRadius:20
   },
 });

@@ -111,7 +111,7 @@ const WinnerModal = ({ visible, onClose, prize, totalGems }) => {
 
                     {/* محتوای مدال */}
                     <View style={styles.content}>
-                        <Text style={styles.title}>{t('🎉 Congratulations! 🎉')}</Text>
+                        <Text style={styles.title}>🎉 {t('Congratulations!')} 🎉</Text>
 
                         <Text style={styles.subtitle}>{t('You won!')}</Text>
 

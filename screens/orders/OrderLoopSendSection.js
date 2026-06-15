@@ -1,19 +1,29 @@
 import { StyleSheet, Text, View, TextInput } from 'react-native'
-import React, { useState, useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState, useMemo, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
 import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatPrice, showToastOrAlert } from '../../helpers/Common'
+import { uri } from '../../services/URL' 
+import { formatPrice, handleError, showToastOrAlert } from '../../helpers/Common'
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color'
 import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
+import { useNavigation } from '@react-navigation/native'
+import { fetchOrders } from '../../slices/orderSlice'
+import { fetchUser } from '../../slices/userSlice'
+import * as Linking from "expo-linking";
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
-    const user = useSelector((state) => state?.user);
+
+    const dispatch = useDispatch()
+    const navigation = useNavigation()
+    const [loadingWallet, setLoadingWallet] = useState(false);
+    const [loadingGateway, setLoadingGateway] = useState(false);
+    const paymentSubscriptionRef = useRef(null);
+
+    const user = useSelector((state) => state?.user?.data);
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
@@ -107,6 +117,102 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
         </View>
     )
 
+    const walletPayment = async () => {
+        setLoadingWallet(true);
+        try {
+            const response = await axios.post(
+                `${uri}/wallet/pay-order`,
+                { orderId: orderId },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
+                    }
+                }
+            );
+
+            if (response.status == 200 || response.status == 201) {
+                showToastOrAlert(response?.data?.message || t("Payment completed successfully"));
+                dispatch(fetchOrders(token));
+                dispatch(fetchUser(token));
+                handleAccept()
+            }
+        } catch (error) {
+            console.log(error);
+            
+            handleError(error, t)
+        } finally {
+            setLoadingWallet(false);
+        }
+    };
+
+    const redirectUrl = Linking.createURL("/?");
+
+    const _addLinkingListener = () => {
+        // Remove existing listener if any
+        if (paymentSubscriptionRef.current) {
+            paymentSubscriptionRef.current.remove();
+        }
+
+        paymentSubscriptionRef.current = Linking.addEventListener("url", ({ url }) => {
+            const { queryParams } = Linking.parse(url);
+            if (queryParams?.status == 'OK') {
+                dispatch(fetchOrders(token));
+                dispatch(fetchUser(token));
+                showToastOrAlert(t("Payment completed successfully"));
+                if (onUpdate) onUpdate()
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
+            } else if (queryParams?.status == 'NOK') {
+                showToastOrAlert(t("The payment encountered an error."));
+                // Cleanup listener after handling
+                if (paymentSubscriptionRef.current) {
+                    paymentSubscriptionRef.current.remove();
+                    paymentSubscriptionRef.current = null;
+                }
+            }
+            setLoadingGateway(false);
+        });
+    };
+
+
+    const gatewayPayment = async () => {
+        setLoadingGateway(true);
+        try {
+            const response = await axios.post(
+                `${uri}/orders/gateway-payment`,
+                {
+                    order_id: orderId,
+                    linking_url: redirectUrl
+                },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
+                    }
+                }
+            );
+
+            if (response.status == 200 && response.data?.data?.payment_url) {
+                _addLinkingListener();
+                await Linking.openURL(response.data.data.payment_url);
+            } else {
+                showToastOrAlert(t("Error connecting to payment gateway"));
+                setLoadingGateway(false);
+            }
+        } catch (error) {
+            handleError(error, t)
+        } finally {
+            setLoadingGateway(false);
+        }
+    };
+
+
     return (
         <View style={[{ width: '90%', alignSelf: 'center', paddingBottom: 10 }, NewStyles.center]}>
             {/* توضیحات */}
@@ -142,7 +248,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                 {/* هزینه تقریبی */}
                 {data?.loop_cost_estimate && (
                     <View style={{ gap: 5 }}>
-                        {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>
+                        {user?.apple_check != 1 && <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name="cash-outline" size={20} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.title}>{t('Estimated cost announced by Loop')}</Text>
                         </View>}
@@ -150,6 +256,20 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
                             <Text style={[NewStyles.text10, { flex: 1 }]}>
                                 {formatPrice(data?.loop_cost_estimate)} {t('Toman')}
+                            </Text>
+                        </View>
+                    </View>
+                )}
+                {data?.prepayment && (
+                    <View style={{ gap: 5 }}>
+                        {user?.apple_check != 1 && <View style={[NewStyles.row, { gap: 5 }]}>
+                            <Ionicons name={"documents-outline"} size={20} color={themeColor0.bgColor(1)} />
+                            <Text style={NewStyles.title}>{t('Down payment amount')}</Text>
+                        </View>}
+                        <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
+                            <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
+                            <Text style={[NewStyles.text10, { flex: 1 }]}>
+                                {(formatPrice(((Number(data?.prepayment) * Number(data?.loop_cost_estimate)) / 100)))} {t('Toman')}
                             </Text>
                         </View>
                     </View>
@@ -183,6 +303,11 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     }]}>
                         {isAccepted ? t('Confirmed') : t('Rejected')}
                     </Text>
+                    {data?.prepayment_payment_status == 1 && <Text style={[NewStyles.title, {
+                        color: isAccepted ? themeColor7.bgColor(1) : themeColor6.bgColor(1)
+                    }]}>
+                        {t("Paid")}
+                    </Text>}
                     {data?.user_cancellation_reason && (
                         <>
                             <Text style={[NewStyles.text10, { marginTop: 10 }]}>{isAccepted ? t('Your description:') : t('Your reason:')}</Text>
@@ -214,24 +339,62 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                                 title={t('Cancel Order')}
                                 onPress={() => setRejectModal(true)}
                                 loading={rejecting}
-                                textStyle={{ color: themeColor4.bgColor(1) }}
+                                textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
                                 style={{ backgroundColor: themeColor6.bgColor(1) }}
                             />
                         </View>
-                        <View style={[{ flex: 1 }, NewStyles.center]}>
+                        {!data?.prepayment && <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Button
                                 title={t('I accept')}
                                 onPress={() => setAcceptModal(true)}
                                 loading={accepting}
-                                textStyle={{ color: themeColor4.bgColor(1) }}
+                                textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
                                 style={{ backgroundColor: themeColor7.bgColor(1) }}
                             />
-                        </View>
+                        </View>}
                     </View>
+                    {data?.prepayment &&
+                        <>
 
-                    <Text style={[NewStyles.text10, { textAlign: 'center', color: themeColor0.bgColor(0.6) }]}>
-                        {t('By confirming, you agree to dispatch the device to Loop')}
-                    </Text>
+                            <View style={[NewStyles.row, { gap: 10 }]}>
+                                <View style={[{ flex: 1 }, NewStyles.center]}>
+                                    <Button
+                                        title={t("Deduct cost from wallet")}
+                                        style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }}
+                                        textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                        loading={loadingWallet}
+                                        onPress={walletPayment}
+                                    />
+                                </View>
+                                <View style={[{ flex: 1 }, NewStyles.center]}>
+                                    <Button
+                                        title={t("Charge wallet")}
+                                        textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                        onPress={() => navigation.navigate('Increase')}
+                                        style={{ backgroundColor: themeColor7.bgColor(1) }}
+                                    />
+                                </View>
+                            </View>
+                            <View style={[{ paddingBottom: 10 }, NewStyles.center]}>
+                                {user?.apple_check != 1 &&
+                                    <View style={[NewStyles.rowWrapper, { width: '100%' }]}>
+                                        <Text style={NewStyles.text}>{t("Your wallet balance")}</Text>
+                                        <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} {t("Tomans")}</Text>
+                                    </View>
+                                }
+
+                                <Button
+                                    title={t("Online payment")}
+                                    style={{ paddingHorizontal: 0 }}
+                                    textStyle={{ fontSize: 12, color: themeColor4.bgColor(1) }}
+                                    loading={loadingGateway}
+                                    onPress={gatewayPayment}
+                                />
+                            </View>
+
+                        </>
+                    }
+
                 </View>
             ) : null}
 
@@ -283,9 +446,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 12,
         minHeight: 100,
-        fontSize: 14,
-        fontFamily: 'VazirLight',
-        color: themeColor0.bgColor(1),
-        textAlign: 'right',
+        ...NewStyles.text10,
+        color: themeColor0.bgColor(1), 
     },
 })

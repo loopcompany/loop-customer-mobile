@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -7,10 +7,9 @@ import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '../styles/NewStyles';
-import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '../helpers/Common';
-import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '../theme/Color';
 import { getTransactions } from '../services/WalletApi';
 
 export default function TransactionsScreen() {
@@ -19,7 +18,7 @@ export default function TransactionsScreen() {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector((state) => state?.auth?.token);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,9 +119,9 @@ export default function TransactionsScreen() {
       case '100':
         return themeColor7.bgColor(1); // موفق - سبز
       case '-1':
-        return themeColor6.bgColor(1); // ناموفق - قرمز
+        return themeColor11.bgColor(1); // ناموفق - قرمز
       case '0':
-        return themeColor11.bgColor(1); // در انتظار - آبی
+        return themeColor8.bgColor(1); // در انتظار - آبی
       default:
         return themeColor11.bgColor(1);
     }
@@ -181,110 +180,79 @@ export default function TransactionsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.container}
-        refreshControl={
-          <RefreshControl
-            colors={[themeColor0.bgColor(1)]}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
-      >
-        {/* نمایش فیلتر فعال */}
-        {(fromDate || toDate) && (
-          <View style={styles.activeFilterBadge}>
-            <Ionicons name="funnel" size={16} color="#fff" />
-            <Text style={styles.activeFilterText}>
-              {t("Active filter:")}
-              {fromDate && ` ${t("from")} ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
-              {toDate && ` ${t("to")} ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
-            </Text>
-            <TouchableOpacity onPress={clearFilter} style={styles.clearFilterBtn}>
-              <Ionicons name="close-circle" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        )}
 
-        {transactions.length == 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-              {t("No transactions found")}
-            </Text>
-          </View>
-        ) : (
-          <>
-            <Text style={styles.header}>{t("Transactions")}</Text>
-            <FlatList
-              data={transactions}
-              renderItem={({ item, index }) => (
-                <View
-                  key={item.id || index}
-                  style={[
-                    styles.transactionBox,
-                    { backgroundColor: getStatusColor(item.status) }
-                  ]}
-                >
-                  <View style={styles.transactionRow}>
-                    <Text style={[NewStyles.text4, { flex: 1 }]}>
-                      {formatDateTime(item.created_at)}
-                    </Text>
-                    <Text style={[NewStyles.text4, styles.statusBadge]}>
-                      {getStatusText(item.status)}
-                    </Text>
-                  </View>
+      {/* نمایش فیلتر فعال */}
+      {(fromDate || toDate) && (
+        <View style={styles.activeFilterBadge}>
+          <Ionicons name="funnel" size={16} color="#fff" />
+          <Text style={styles.activeFilterText}>
+            {t("Active filter:")}
+            {fromDate && ` ${t("from")} ${moment(fromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+            {toDate && ` ${t("to")} ${moment(toDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD')}`}
+          </Text>
+          <TouchableOpacity onPress={clearFilter} style={styles.clearFilterBtn}>
+            <Ionicons name="close-circle" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      )}
 
-                  <View style={styles.transactionRow}>
-                    <Text style={[NewStyles.text4]}>
-                      {t("Amount:")}
-                    </Text>
-                    <Text style={[NewStyles.title4]}>
-                      {formatPrice(item.price * 10)} {t("Rial")}
-                    </Text>
-                  </View>
-
-                  <View style={styles.transactionRow}>
-                    <Text style={[NewStyles.text4]}>
-                      {t("Type:")}
-                    </Text>
-                    <Text style={[NewStyles.text4]}>
-                      {getTypeText(item.type)}
-                    </Text>
-                  </View>
-
-                  {item.referenceId && (
-                    <View style={styles.transactionRow}>
-                      <Text style={[NewStyles.text4]}>
-                        {t("Tracking Number:")}
-                      </Text>
-                      <Text style={[NewStyles.text4]}>
-                        {item.referenceId}
-                      </Text>
-                    </View>
-                  )}
-
-                  {item.description && (
-                    <Text style={[NewStyles.text4]}>
-                      {item.description}
-                    </Text>
-                  )}
+      {transactions.length == 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
+            {t("No transactions found")}
+          </Text>
+        </View>
+      ) : (
+        <View style={{ flex: 1 }} >
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                colors={[themeColor0.bgColor(1)]}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+              />
+            }
+            contentContainerStyle={styles.container}
+            data={transactions}
+            renderItem={({ item, index }) => (
+              <View
+                key={item.id || index}
+                style={[
+                  styles.transactionBox,
+                  { backgroundColor: getStatusColor(item.status?.toString()) }
+                ]}
+              >
+                <View style={styles.transactionRow}>
+                  <Text style={[NewStyles.text4, { flex: 1 }]}>{formatDateTime(item.created_at)}</Text>
+                  <Text style={[NewStyles.text4, styles.statusBadge]}>{getStatusText(item.status?.toString())}</Text>
                 </View>
-              )}
-            /> 
 
-            {pagination && (
-              <View style={styles.paginationInfo}>
-                <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                  {t("Page")} {pagination.current_page} {t("of")} {pagination.last_page}
-                </Text>
-                <Text style={[NewStyles.text3, { textAlign: 'center', marginTop: 5 }]}>
-                  {t("Total:")} {pagination.total} {t("transaction")}
-                </Text>
+                <View style={styles.transactionRow}>
+                  <Text style={[NewStyles.text4]}>{t("Amount")}:</Text>
+                  <Text style={[NewStyles.title4]}>{formatPrice(item.price * 10)} {t("Rial")}</Text>
+                </View>
+
+                <View style={styles.transactionRow}>
+                  <Text style={[NewStyles.text4]}>{t("Type")}:</Text>
+                  <Text style={[NewStyles.text4]}>{getTypeText(item.type?.toString())}</Text>
+                </View>
+
+                {item.referenceId && (
+                  <View style={styles.transactionRow}>
+                    <Text style={[NewStyles.text4]}>{t("Tracking Number:")}</Text>
+                    <Text style={[NewStyles.text4]}>{item.referenceId}</Text>
+                  </View>
+                )}
+
+                {item.description && (
+                  <Text style={[NewStyles.text4]}>{item.description}</Text>
+                )}
               </View>
             )}
-          </>
-        )}
-      </ScrollView>
+          />
+        </View>
+      )}
 
       {/* Modal فیلتر */}
       <Modal
@@ -292,7 +260,7 @@ export default function TransactionsScreen() {
         transparent={true}
         animationType="slide"
         onRequestClose={() => setShowFilterModal(false)}
-        
+
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -440,10 +408,10 @@ export default function TransactionsScreen() {
   );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     padding: 20,
-    flexGrow: 1,
+    paddingBottom: 100
   },
   loadingContainer: {
     flex: 1,
@@ -464,6 +432,9 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     textAlign: 'center',
     borderRadius: 8,
     marginBottom: 15,
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: 10
   },
   transactionBox: {
     padding: 15,
@@ -492,7 +463,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     backgroundColor: themeColor4.bgColor(1),
   },
   filterButton: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -510,16 +481,19 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontFamily: 'VazirBold',
-     ...NewStyles.text4,
+    ...NewStyles.text4,
   },
   activeFilterBadge: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     backgroundColor: themeColor0.bgColor(1),
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
     gap: 8,
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: 10
   },
   activeFilterText: {
     flex: 1,
@@ -548,7 +522,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     paddingBottom: 20,
   },
   modalHeader: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
@@ -560,7 +534,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     fontSize: 18,
     fontFamily: 'VazirBold',
     color: '#333',
-     ...NewStyles.text10,
+    ...NewStyles.text10,
   },
   dateInputContainer: {
     marginBottom: 20,
@@ -570,10 +544,10 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 8,
-     ...NewStyles.text10,
+    ...NewStyles.text10,
   },
   dateInput: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
@@ -607,7 +581,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     alignSelf: 'center'
   },
   confirmDateBtn: {
-   ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor0.bgColor(1),
@@ -620,7 +594,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     fontFamily: 'VazirBold',
   },
   modalButtons: {
-  ...NewStyles.row,
+    ...NewStyles.row,
     gap: 10,
     marginTop: 20,
   },

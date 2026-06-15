@@ -6,7 +6,7 @@ const palate = [
   },
   {
     // 1 - yellow
-    color: "#ffd700ff",
+    color: "#ffd700",
     bgColor: (opacity) => `rgba(255, 215, 0, ${opacity})`,
   },
   {

@@ -363,7 +363,7 @@ export const educationRegistrationAPI = {
   // Create new education registration
   create: async (data) => {
     try {
-      const response = await apiClient.post('/education-registerations', data);
+      const response = await apiClient.post('/loop-learn-api-submit', data);
       return response.data;
     } catch (error) {
       throw error;

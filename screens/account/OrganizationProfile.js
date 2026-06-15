@@ -664,17 +664,9 @@ const OrganizationProfile = () => {
             </View>
           </View>
 
-          {/* شهر و منطقه */}
+          {/*منطقه */}
           <View style={styles.rowContainer}>
-            <View style={styles.halfField}>
-              <Text style={styles.label}>{t('City *')}</Text>
-              <TextInput
-                value={city}
-                onChangeText={setCity}
-                editable={isEditing}
-                style={[styles.input, !isEditing && styles.inputDisabled]}
-              />
-            </View>
+            
             <View style={styles.halfField}>
               <Text style={styles.label}>{t('Region *')}</Text>
               <TextInput

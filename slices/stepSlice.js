@@ -1,23 +1,21 @@
 import axios from 'axios';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { uri } from '../services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from 'i18next';
 
 export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => {
     const token = await AsyncStorage.getItem('userToken');
-    console.log('📋 [fetchSteps] شروع دریافت مراحل برای دسته‌بندی:', categoryId);
-    console.log('🔑 [fetchSteps] توکن:', token ? `${token.substring(0, 20)}...` : 'null');
     return await axios
-        .post(`${uri}/steps/fetch`, 
+        .post(`${uri}/steps/fetch`,
             { categoryId: categoryId },
-            { 
-                headers: { 
+            {
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Accept-Language': i18next.language || 'en' // Default language header
-                } 
+                }
             }
         )
         .then(response => {
@@ -46,24 +44,19 @@ const stepSlice = createSlice({
         unspecifiedCount: 0,
         des: '',
         imagePath: '',
+        files: [],
         extraData: [],
     },
     extraReducers: builder => {
-        builder.addCase(fetchSteps.pending, state => {
-            console.log('⏳ [stepSlice] در حال بارگذاری مراحل...');
+        builder.addCase(fetchSteps.pending, state => { 
             state.loading = true
         })
-        builder.addCase(fetchSteps.fulfilled, (state, action) => {
-            console.log('✅ [stepSlice] مراحل با موفقیت در state ذخیره شد');
-            console.log('📦 [stepSlice] تعداد مراحل ذخیره شده:', action.payload?.length);
-            console.log('📦 [stepSlice] داده‌های state.data:', JSON.stringify(action.payload, null, 2));
+        builder.addCase(fetchSteps.fulfilled, (state, action) => { 
             state.loading = false
             state.data = action.payload
             state.error = ''
         })
-        builder.addCase(fetchSteps.rejected, (state, action) => {
-            console.log('❌ [stepSlice] خطا در دریافت مراحل');
-            console.log('❌ [stepSlice] پیام خطا:', action.error.message);
+        builder.addCase(fetchSteps.rejected, (state, action) => { 
             state.loading = false
             state.data = []
             state.error = action.error.message
@@ -87,17 +80,17 @@ const stepSlice = createSlice({
         updateRadioButton: (state, action) => {
             const { fieldId, fieldDetailId, step } = action.payload;
             console.log('🔄 [stepSlice] updateRadioButton called:', { fieldId, fieldDetailId, step });
-            
+
             const newData = JSON.parse(JSON.stringify(state.data));
             console.log('📦 [stepSlice] Current step data:', newData[step]);
-            
+
             // پیدا کردن item اصلی (مثلاً service_schedule)
             const foundItem = newData[step].find(item => item.id == fieldId);
-            
+
             if (!foundItem) {
                 // اگر foundItem پیدا نشد، شاید fieldId یکی از field_details باشد
                 console.log('⚠️ [stepSlice] item با id', fieldId, 'پیدا نشد، جستجو در field_details...');
-                
+
                 for (const item of newData[step]) {
                     if (item.field_details) {
                         const foundField = item.field_details.find(f => f.id == fieldId);
@@ -119,28 +112,28 @@ const stepSlice = createSlice({
                         }
                     }
                 }
-                
+
                 console.log('❌ [stepSlice] fieldId پیدا نشد:', fieldId);
                 console.log('📋 [stepSlice] Available items:', newData[step].map(i => ({ id: i.id, type: i.type })));
                 return state;
             }
-            
+
             console.log('🔍 [stepSlice] foundItem:', foundItem.id, 'type:', foundItem.type);
-            
+
             // برای RadioButton معمولی
             if (foundItem.field_details && !foundItem.field_details.find(f => f.options)) {
                 console.log('📋 [stepSlice] به‌روزرسانی RadioButton معمولی');
                 foundItem.field_details.forEach(item => {
-                    if (item.id == fieldDetailId) { 
+                    if (item.id == fieldDetailId) {
                         item.value = 1;
                         console.log('✅ [stepSlice] Set value=1 for:', item.id);
-                    } else { 
+                    } else {
                         item.value = 0;
                         console.log('❌ [stepSlice] Set value=0 for:', item.id);
                     }
                 });
             }
-            
+
             return {
                 ...state,
                 data: newData,
@@ -278,29 +271,29 @@ const stepSlice = createSlice({
         updateServiceScheduleField: (state, action) => {
             const { step, fieldId, value } = action.payload;
             console.log('🔄 [stepSlice.updateServiceScheduleField] شروع:', { step, fieldId, value });
-            
+
             const newData = JSON.parse(JSON.stringify(state.data));
-            
+
             // پیدا کردن service_schedule item
             const serviceScheduleItem = newData[step]?.find(item => item.type === 'service_schedule');
-            
+
             if (!serviceScheduleItem) {
                 console.log('❌ [stepSlice.updateServiceScheduleField] service_schedule یافت نشد');
                 return state;
             }
-            
+
             // پیدا کردن فیلد مورد نظر در field_details
             const field = serviceScheduleItem.field_details?.find(f => f.id === fieldId);
-            
+
             if (!field) {
                 console.log('❌ [stepSlice.updateServiceScheduleField] فیلد یافت نشد:', fieldId);
                 return state;
             }
-            
+
             // آپدیت value
             field.value = value;
             console.log('✅ [stepSlice.updateServiceScheduleField] value آپدیت شد:', fieldId, '→', value);
-            
+
             return {
                 ...state,
                 data: newData,
@@ -321,13 +314,35 @@ const stepSlice = createSlice({
             };
         },
 
+        // setFile: (state, action) => {
+        //     state.imagePath = action.payload;
+        // },
         setFile: (state, action) => {
-            state.imagePath = action.payload;
+            const newFiles = Array.isArray(action.payload)
+                ? action.payload
+                : action.payload
+                    ? [action.payload]
+                    : [];
+
+            if (!Array.isArray(state.files)) {
+                state.files = [];
+            }
+
+            state.files = [
+                ...state.files,
+                ...newFiles,
+            ];
+        },
+        removeFile: (state, action) => {
+            state.files.splice(action.payload, 1);
+        },
+        clearFiles: (state) => {
+            state.files = [];
         },
 
-        removeFile: (state, action) => {
-            state.imagePath = '';
-        },
+        // removeFile: (state, action) => {
+        //     state.imagePath = '';
+        // },
 
         toggleUrgent: (state) => {
             state.isUrgent = state?.isUrgent == 0 ? 1 : 0;
@@ -395,6 +410,7 @@ const stepSlice = createSlice({
             state.addressId = null;
             state.des = '';
             state.imagePath = '';
+            state.files = [];
             state.date = null;
             state.time = null;
             state.femaleCount = 0;
@@ -403,23 +419,30 @@ const stepSlice = createSlice({
         },
     }
 });
+const selectStepData = (state) => state.step.data;
 
-export const selectTotalPrice = (state) => {
-    const data = state.step.data;
-    let total = 0;
-    data.forEach(step => {
-        step.forEach(field => {
-            if (field.field_details) {
-                field.field_details.forEach(detail => {
-                    const count = typeof detail.value === 'number' ? detail.value : detail.value ? 1 : 0;
-                    const price = detail.price || 0;
-                    total += count * price;
-                });
-            }
+export const selectTotalPrice = createSelector(
+    [selectStepData],
+    (data) => {
+        let total = 0;
+        let showPrice = true;
+        data.forEach(step => {
+            step.forEach(field => {
+                if (field.field_details) {
+                    field.field_details.forEach(detail => {
+                        const count = typeof detail.value === 'number' ? detail.value : detail.value ? 1 : 0;
+                        const price = detail.price || 0;
+                        if (field?.is_package == 0 && count * detail?.affect_on_price != 0) {
+                            showPrice = false;
+                        }
+                        total += count * price;
+                    });
+                }
+            });
         });
-    });
-    return total;
-};
+        return { total, showPrice };
+    }
+);
 
 export const {
     removeTime,
@@ -451,7 +474,8 @@ export const {
     addStep,
     emptySteps,
     disableDateAndTime,
-    updateServiceScheduleField
+    updateServiceScheduleField,
+    clearFiles,
 } = stepSlice.actions;
 
 export default stepSlice.reducer

@@ -47,7 +47,7 @@ export default function LearnMoreScreen() {
     }
   };
 
- 
+
   const renderFaqItem = ({ item }) => {
 
     return (
@@ -80,9 +80,10 @@ export default function LearnMoreScreen() {
 }
 
 const styles = StyleSheet.create({
- 
-  faqsContainer:{
-    paddingHorizontal:15,
-    paddingVertical:10
+
+  faqsContainer: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    paddingBottom: 100
   }
 });

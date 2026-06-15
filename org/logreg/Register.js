@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,14 +17,17 @@ import { jalaliToGregorian, showAlert } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/Button';
 import { createStyles } from '../../styles/NewStyles';
+import { Dropdown } from 'react-native-element-dropdown';
+
 const Register = ({ navigation }) => {
- const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   // Form states
+  const [accountType, setAccountType] = useState('g_organization');
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
   const [familyName, setFamilyName] = useState('');
@@ -35,7 +38,7 @@ const Register = ({ navigation }) => {
   const [organizationEmail, setOrganizationEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [city, setCity] = useState('Los angeles');
+  const [city, setCity] = useState('تهران');
   const [region, setRegion] = useState('');
   const [organizationAddress, setOrganizationAddress] = useState('');
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');
@@ -110,7 +113,7 @@ const Register = ({ navigation }) => {
 
     if (!mobileNumber) {
       newErrors.mobileNumber = t('Mobile number is required');
-    } else if (!validateMobile('0' + mobileNumber)) {
+    } else if (!validateMobile(mobileNumber)) {
       newErrors.mobileNumber = t('Mobile number must be 11 digits and start with 09');
     }
 
@@ -132,13 +135,7 @@ const Register = ({ navigation }) => {
       newErrors.password = t('Password must be at least 8 characters');
     }
 
-    // Location validation
-    if (!selectedProvince) {
-      newErrors.province = t('Province is required');
-    }
-    if (!selectedCity) {
-      newErrors.city = t('City is required');
-    }
+
     if (!selectedRegion) {
       newErrors.region = t('Region is required');
     }
@@ -220,14 +217,7 @@ const Register = ({ navigation }) => {
       // Convert Jalali date to Gregorian for API
       const gregorianDate = jalaliToGregorian(birthDate);
 
-      // Log for debugging
-      console.log('📤 Attempting registration...');
-      console.log('API URL:', `${uri}/organization/register`);
-      console.log('Data:', {
-        organization_name: organizationName,
-        manager_mobile: mobileNumber,
-        has_image: !!profileImage
-      });
+
 
       // Create FormData
       const formData = new FormData();
@@ -251,7 +241,8 @@ const Register = ({ navigation }) => {
       formData.append('organization_address', organizationAddress);
       formData.append('manager_full_name', familyName);
       formData.append('manager_national_code', nationalCode);
-      formData.append('manager_mobile', '0' + mobileNumber);
+      formData.append('account_type', accountType);
+      formData.append('manager_mobile', mobileNumber);
       formData.append('manager_birthdate', gregorianDate);  // Send Gregorian date to API
       formData.append('city', city);
       formData.append('region', region);
@@ -259,13 +250,6 @@ const Register = ({ navigation }) => {
       formData.append('password', password);
       formData.append('password_confirmation', password);
 
-      // Add location IDs
-      if (selectedProvince) {
-        formData.append('province_id', selectedProvince.id);
-      }
-      if (selectedCity) {
-        formData.append('city_id', selectedCity.id);
-      }
       if (selectedRegion) {
         formData.append('region_id', selectedRegion.id);
       }
@@ -306,17 +290,7 @@ const Register = ({ navigation }) => {
         );
       }
     } catch (error) {
-      console.error('❌ Registration error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        code: error.code,
-        hasResponse: !!error.response,
-        hasRequest: !!error.request,
-        config: error.config ? {
-          url: error.config.url,
-          method: error.config.method,
-        } : null
-      });
+
 
       if (error.response) {
         // Server responded with error (4xx, 5xx)
@@ -449,6 +423,38 @@ const Register = ({ navigation }) => {
             </TouchableOpacity>
 
             {/* نام سازمان */}
+            <View>
+              <Text style={NewStyles.text}>{t("Select organization type")} <Text style={NewStyles.title6}>*</Text></Text>
+              <Dropdown
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: '#ccc',
+                  fontSize: 14,
+                  height: 40
+                }}
+                itemTextStyle={NewStyles.text10}
+                placeholderStyle={[NewStyles.text3, { fontSize: 12 }]}
+                selectedTextStyle={[NewStyles.text10, { fontSize: 12 }]}
+                data={[
+                  { "label": t("Government organization"), "value": "g_organization" },
+                  { "label": t("Semi-governmental organization"), "value": "s_g_organization" },
+                  { "label": t("Private company"), "value": "company" },
+                ]}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={t('Select organization type')}
+
+                value={accountType}
+                onChange={item => {
+                  setAccountType(item?.value)
+                }}
+              />
+            </View>
             <View style={{ marginBottom: 8 }}>
               <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization name')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
@@ -464,9 +470,10 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationName ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                 ...NewStyles.text10,
+                  ...NewStyles.text10,
                   height: 40
                 }}
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationName && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -495,6 +502,7 @@ const Register = ({ navigation }) => {
                   ...NewStyles.text10,
                   height: 40
                 }}
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.familyName && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -522,9 +530,10 @@ const Register = ({ navigation }) => {
                   borderColor: errors.nationalCode ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-               ...NewStyles.text10,
+                  ...NewStyles.text10,
                   height: 40
                 }}
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.nationalCode && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -536,25 +545,14 @@ const Register = ({ navigation }) => {
             {/* شماره تلفن همراه مدیر */}
             <View style={{ marginBottom: 8 }}>
               <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Manager mobile number')} <Text style={NewStyles.title6}>*</Text></Text>
-              <View style={ { gap: 10,flexDirection:"row" }}>
-                           <View style={{
-                  backgroundColor: '#ffeb3b',
-                  borderRadius: 4,
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: 40,
-                  minWidth: 50
-                }}>
-                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>+98-</Text>
-                </View>
+              <View style={{ gap: 10, flexDirection: "row" }}>
+
                 <TextInput
                   value={mobileNumber}
                   onChangeText={setMobileNumber}
                   placeholder={t('Manager mobile number *')}
                   keyboardType="numeric"
-                  maxLength={10}
+                  maxLength={11}
                   style={{
                     backgroundColor: '#f5f5f5',
                     borderRadius: 8,
@@ -566,11 +564,13 @@ const Register = ({ navigation }) => {
                     fontSize: 14,
                     fontFamily: 'VazirLight',
                     ...NewStyles.text10,
-                    height: 40,
+
                     flex: 1
                   }}
+
+                  placeholderTextColor={themeColor3.bgColor(1)}
                 />
-     
+
               </View>
               {errors.mobileNumber && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -592,7 +592,7 @@ const Register = ({ navigation }) => {
                   paddingHorizontal: 12,
                   borderWidth: 1,
                   borderColor: errors.birthDate ? '#ff0000' : '#ccc',
-                  height: 40,
+
                   justifyContent: 'center'
                 }}
               >
@@ -633,6 +633,8 @@ const Register = ({ navigation }) => {
                   ...NewStyles.text10,
                   height: 40
                 }}
+
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationEmail && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -644,18 +646,18 @@ const Register = ({ navigation }) => {
             {/* شماره تلفن ثابت سازمان */}
             <View style={{ marginBottom: 8 }}>
               <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Organization landline number')} <Text style={NewStyles.title6}>*</Text></Text>
-              <View style={ { gap: 8 ,flexDirection:"row"}}>
-                               <View style={{
+              <View style={{ gap: 8, flexDirection: "row" }}>
+                <View style={{
                   backgroundColor: '#ffeb3b',
                   borderRadius: 4,
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: 40,
+
                   minWidth: 50
                 }}>
-                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold'  }}>021-</Text>
+                  <Text style={{ fontSize: 10, color: '#333', fontFamily: 'VazirBold' }}>021-</Text>
                 </View>
                 <View style={{ flex: 2 }}>
                   <TextInput
@@ -673,12 +675,13 @@ const Register = ({ navigation }) => {
                       borderColor: errors.organizationPhoneNumber ? '#ff0000' : '#ccc',
                       fontSize: 14,
                       fontFamily: 'VazirLight',
-                       ...NewStyles.text10,
+                      ...NewStyles.text10,
                       height: 40
                     }}
+                    placeholderTextColor={themeColor3.bgColor(1)}
                   />
                 </View>
- 
+
               </View>
               {errors.organizationPhoneNumber && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -708,10 +711,11 @@ const Register = ({ navigation }) => {
                     paddingLeft: 45,
                     fontSize: 12,
                     fontFamily: 'VazirLight',
-                     ...NewStyles.text10,
-                    height: 40,
+                    ...NewStyles.text10,
+
                     flex: 1
                   }}
+                  placeholderTextColor={themeColor3.bgColor(1)}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -734,7 +738,7 @@ const Register = ({ navigation }) => {
 
             {/* استان، شهر و منطقه با LocationPicker */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Province, city, and region')} <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Region')} <Text style={NewStyles.title6}>*</Text></Text>
               <LocationPicker
                 selectedProvince={selectedProvince}
                 selectedCity={selectedCity}
@@ -769,10 +773,11 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationAddress ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                   ...NewStyles.text10,
+                  ...NewStyles.text10,
                   height: 60,
                   textAlignVertical: 'top'
                 }}
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationAddress && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -800,9 +805,10 @@ const Register = ({ navigation }) => {
                   borderColor: errors.organizationPostalCode ? '#ff0000' : '#ccc',
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                   ...NewStyles.text10,
+                  ...NewStyles.text10,
                   height: 40
                 }}
+                placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationPostalCode && (
                 <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
@@ -867,6 +873,7 @@ const Register = ({ navigation }) => {
                       ...NewStyles.text10,
                       height: 36
                     }}
+                    placeholderTextColor={themeColor3.bgColor(1)}
                   />
                 </View>
               </View>

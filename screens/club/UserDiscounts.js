@@ -44,7 +44,7 @@ export default function UserDiscounts({ navigation }) {
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Received Prizes")} />
             <FlatList
-                contentContainerStyle={[NewStyles.center, { gap: 10 }]}
+                contentContainerStyle={[NewStyles.center, { gap: 10, paddingBottom: 100 }]}
                 showsVerticalScrollIndicator={false}
                 data={data}
                 ListEmptyComponent={() => {

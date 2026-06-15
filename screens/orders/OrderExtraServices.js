@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ActivityIndicator, FlatList } from 'react-native'
+import { StyleSheet, Text, View, ActivityIndicator, FlatList, Linking } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
@@ -8,7 +8,7 @@ import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../../theme/Color'
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
 import Button from '../../components/Button'
 
 const OrderExtraServices = ({ orderId, navigation }) => {
@@ -129,8 +129,13 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                     </Text>
 
                 </View>
-                <View style={{ paddingHorizontal: '5%', width: '100%', alignItems: 'center' }}>
-                    <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+                <View style={[{ width: '100%', gap: 5 , paddingHorizontal:'5%'}, NewStyles.row]}>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
+                    </View>
+                    <View style={[{ flex: 1 }, NewStyles.center]}>
+                        <Button title={t("Sales receipt")} style={{ backgroundColor: themeColor1.bgColor(1), paddingHorizontal:0 }} textStyle={{ color: themeColor10.bgColor(1), width:'100%' }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice?extra=yes`) }} />
+                    </View>
                 </View>
             </View>
         </View>

@@ -133,8 +133,7 @@ export const useOrganizationAccess = () => {
           'Accept': 'application/json'
         }
       });
-      
-      console.log('🌐 API /organization/profile/status response:', JSON.stringify(response.data, null, 2));
+       
       
       if (response.data.success) {
         console.log('📥 Dispatching setAccessStatus with data:', response.data.data);
@@ -145,8 +144,7 @@ export const useOrganizationAccess = () => {
       } else {
         throw new Error(response.data.message || t('Error fetching information'));
       }
-    } catch (error) {
-      console.error('Error fetching organization access status:', error);
+    } catch (error) { 
       
       if (error.response?.status === 401) {
         // Token منقضی شده

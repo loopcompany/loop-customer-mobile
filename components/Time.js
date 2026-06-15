@@ -1,12 +1,12 @@
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-
-import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
 import { selectTime, setGeneralData } from '../slices/stepSlice';
 import { generateTimeSlots } from '../helpers/Common';
+import { createStyles } from '../styles/NewStyles';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -23,6 +23,13 @@ export default function Time({ step, data }) {
 
     const slots = generateTimeSlots(startAt, endAt, duration);
     const [show, setShow] = useState(false)
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     return (
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
@@ -33,8 +40,8 @@ export default function Time({ step, data }) {
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
             {show && data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}>
-                    <Text style={NewStyles.text10}>{data?.des}</Text>
-                </View>}
+                <Text style={NewStyles.text10}>{data?.des}</Text>
+            </View>}
             {show && <FlatList
                 numColumns={3} columnWrapperStyle={styles.categoriesWrapper}
                 showsVerticalScrollIndicator={false}
@@ -53,9 +60,9 @@ export default function Time({ step, data }) {
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     categoriesWrapper: {
-        flexDirection: 'row-reverse',
+        ...NewStyles.row,
         justifyContent: 'flex-end',
         alignItems: 'center',
         marginTop: 10,

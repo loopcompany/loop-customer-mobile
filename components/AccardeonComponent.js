@@ -1,19 +1,18 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useMemo } from 'react'
-import { themeColor10, themeColor3, themeColor4 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor14, themeColor3, themeColor4, themeColor5 } from '../theme/Color';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
-import NewStyles from '../styles/NewStyles';
+import { useTranslation } from 'react-i18next'; 
 import { cleanText } from '../helpers/Common';
 import { createStyles } from '../styles/NewStyles';
-const AccardeonComponent = ({ item, expandedItems, setExpandedItems }) => {
+const AccardeonComponent = ({ item, expandedItems, setExpandedItems, needMap = false, customDescriptionStyle }) => {
   const isExpanded = expandedItems[item.id];
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const toggleExpanded = (id) => {
     setExpandedItems(prev => ({
       ...prev,
@@ -23,20 +22,34 @@ const AccardeonComponent = ({ item, expandedItems, setExpandedItems }) => {
   return (
     <View key={item.id} style={styles.termItem}>
       <TouchableOpacity
-        style={styles.termHeader}
+        style={[styles.termHeader, NewStyles.center, NewStyles.border10]}
         onPress={() => toggleExpanded(item.id)}
       >
-        <Ionicons
-          name={isExpanded ? "chevron-up" : "chevron-down"}
-          size={20}
-          color={themeColor10.bgColor(1)}
-        />
         <Text style={styles.termTitle}>{item.title}</Text>
+        <Ionicons
+          name={"chevron-down"}
+          size={20}
+          color={themeColor1.bgColor(1)}
+        />
       </TouchableOpacity>
 
-      {isExpanded && (
+      {(isExpanded) && (
         <View style={styles.termContent}>
-          <Text style={styles.termDescription}>{cleanText(item.description)}</Text>
+          {item.description &&
+            <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10 }}>
+              <Text style={[styles.termDescription,]}>{cleanText(item.description)}</Text>
+            </View>
+          }
+          {needMap &&
+            <View style={{ backgroundColor: themeColor4.bgColor(1), marginTop: 10, borderColor: themeColor14.bgColor(1), borderWidth: 3 }}>
+
+              {item?.warranties?.map((warranty, index) => (
+                <View key={warranty.id} style={[{ paddingVertical: 10 }, index < item?.warranties?.length - 1 ? { borderBottomColor: themeColor14.bgColor(1), borderBottomWidth: 3, } : null]}>
+                  <Text style={[NewStyles.title10, { textAlign: 'center' }]}>{warranty.title}</Text>
+                </View>
+              ))}
+            </View>
+          }
         </View>
       )}
     </View>
@@ -45,7 +58,7 @@ const AccardeonComponent = ({ item, expandedItems, setExpandedItems }) => {
 
 export default AccardeonComponent
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor4.bgColor(1),
@@ -55,36 +68,32 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     backgroundColor: themeColor4.bgColor(1),
     alignItems: 'center',
   },
-  
- 
+
+
   termItem: {
-    backgroundColor: themeColor4.bgColor(1),
+    backgroundColor: themeColor4.bgColor(0),
     borderRadius: 10,
     marginBottom: 10,
-    ...NewStyles.shadow,
+    gap: 10
   },
   termHeader: {
-    ...NewStyles.row,
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: themeColor3.bgColor(0.1),
-    backgroundColor: themeColor3.bgColor(0.05),
+    padding: 5, 
+    backgroundColor: themeColor0.bgColor(1),
   },
   termTitle: {
     flex: 1,
     fontSize: 16,
-    ...NewStyles.title10,
+    ...NewStyles.title4,
   },
   termContent: {
-    padding: 15,
-    backgroundColor: themeColor4.bgColor(1),
-    
-    borderBottomLeftRadius:10,
-    borderBottomRightRadius:10,
+    backgroundColor: themeColor4.bgColor(0),
+
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   termDescription: {
     fontSize: 14,
-    ...NewStyles.text3,
+    ...NewStyles.text10,
     marginBottom: 10,
   },
 

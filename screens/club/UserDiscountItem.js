@@ -29,7 +29,7 @@ export default function UserDiscountItem({ item, navigation }) {
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.club?.image_path}` }} blurRadius={1} />
                 <View style={styles.discountTextWrapper}>
                     <Text style={NewStyles.text10}>{item?.club?.title}</Text>
-                    {item?.count > 0 ? <Text style={NewStyles.text}>{item?.count} {t('more uses remaining')}</Text> : <Text style={NewStyles.text}>{t('Allowed uses ended')}</Text>}
+                    {item?.count > 0 ? <Text style={NewStyles.text}>{t("For {{num}} more uses", {num: item?.count})}</Text> : <Text style={NewStyles.text}>{t('Finished')}</Text>}
                 </View>
             </View>
             <Pressable style={[NewStyles.textInput, NewStyles.border10, NewStyles.row, { gap: 5 }]} onPress={copyToClipboard}>

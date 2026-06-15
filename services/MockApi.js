@@ -27,7 +27,7 @@ export const mockAPI = {
     user: {
       id: 1,
       name: 'کاربر تست',
-      mobile: '+989123456789',
+      mobile: '09123456789',
       email: 'test@example.com',
       national_id: '1234567890'
     }

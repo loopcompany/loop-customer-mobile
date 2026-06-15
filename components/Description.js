@@ -14,7 +14,7 @@ export default function Description({ data }) {
             <Filters data={data?.field_details} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
             {data?.field_details?.[activeIndex]?.field_charts?.length > 0 ?
                 <View style={NewStyles.seperator1}>
-                    {data?.field_details?.[activeIndex]?.des && <Text style={NewStyles.text3}>{data?.field_details?.[activeIndex]?.des}</Text>}
+                    {data?.field_details?.[activeIndex]?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text3}>{data?.field_details?.[activeIndex]?.des}</Text></View>}
                     <FlatList
                         style={{ gap: 50 }}
                         showsVerticalScrollIndicator={false}

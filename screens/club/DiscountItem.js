@@ -1,29 +1,29 @@
 import { View, Text, Pressable, Image, StyleSheet, Platform } from 'react-native';
-import React , { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '../../styles/NewStyles';
 import NewStyles, { deviceWidth } from '../../styles/NewStyles';
 import { imageUri } from '../../services/URL';
 import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
-import {langIsRTL} from'../../helpers/Common';
+import { langIsRTL } from '../../helpers/Common';
 export default function DiscountItem({ item, navigation }) {
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const isRtl = langIsRTL(i18n.language)
     return (
         <Pressable style={[styles.discountItem, NewStyles.shadow]} onPress={() => navigation.navigate('DiscountDetail', { discountId: item.id })}>
             <View style={[styles.discountWrapper, NewStyles.rowWrapper]}>
                 <Image style={[styles.discountImage, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.image_path}` }} blurRadius={1} />
-                <View style={styles.discountTextWrapper}> 
+                <View style={styles.discountTextWrapper}>
                     <Text style={NewStyles.text10}>{item?.title}</Text>
-                    <Text style={NewStyles.text}>{item?.gems} {t('points required')}</Text>
+                    <Text style={NewStyles.text}>{t('{{num}} points required', { num: item?.gems })}</Text>
                 </View>
-            </View> 
+            </View>
             <View style={NewStyles.rowWrapper}>
                 {/* <View style={[styles.punch, NewStyles.border100]} /> */}
                 <View style={styles.perforage} ellipsizeMode="clip" numberOfLines={1} />
@@ -33,7 +33,7 @@ export default function DiscountItem({ item, navigation }) {
                 <Text style={NewStyles.text3}>{item?.discount_percent} {t('percent discount')}</Text>
                 <View style={NewStyles.row}>
                     <Text style={NewStyles.text}>{t('More info')}</Text>
-                   <Ionicons
+                    <Ionicons
                         name={isRtl ? 'chevron-back' : 'chevron-forward'}
                         size={15}
                         color={themeColor0.bgColor(1)}
@@ -44,7 +44,7 @@ export default function DiscountItem({ item, navigation }) {
     )
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     discountItem: {
         backgroundColor: themeColor4.bgColor(1),
         width: deviceWidth * 0.9,
@@ -72,7 +72,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
         backgroundColor: themeColor5.bgColor(1),
     },
     perforage: {
-        marginTop:10,
+        marginTop: 10,
         alignSelf: 'center',
         width: '95%',
         borderBottomWidth: 1,

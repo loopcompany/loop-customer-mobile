@@ -101,6 +101,22 @@ import en from './assets/locales/en.json';
 import fa from './assets/locales/fa.json';
 const Stack = createNativeStackNavigator();
 I18nManager.forceRTL(false);
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      fa: { translation: fa },
+      en: { translation: en },
+    },
+    lng: "fa",
+    fallbackLng: "fa",
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
   duration: 2000,
@@ -113,8 +129,8 @@ i18n
       en: { translation: en },
       fa: { translation: fa },
     },
-    lng: "en",
-    fallbackLng: "en",
+    lng: "fa",
+    fallbackLng: "fa",
     interpolation: {
       escapeValue: false
     }
@@ -125,10 +141,11 @@ const App = () => {
   const [loaded, error] = useFonts({
     'VazirBold': require("./assets/fonts/Vazirmatn-Bold.ttf"),
     'VazirLight': require("./assets/fonts/Vazirmatn-Light.ttf"),
+    'VazirBoldFD': require("./assets/fonts/Vazir-Bold-FD.ttf"),
+    'VazirLightFD': require("./assets/fonts/Vazir-Light-FD.ttf"),
   });
 
   const [isReady, setIsReady] = useState(false);
-  const [backPressCount, setBackPressCount] = useState(0);
 
   useEffect(() => {
     setIsReady(true);

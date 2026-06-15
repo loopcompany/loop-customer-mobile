@@ -168,6 +168,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+    paddingBottom:100
   },
 
   input: {
@@ -190,6 +191,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
   buttonContainer: {
     gap: 10,
     paddingBottom: 20,
+    alignItems:'center'
   },
   registerButton: {
     backgroundColor: '#005b9f',

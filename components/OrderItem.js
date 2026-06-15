@@ -113,7 +113,7 @@ export default function OrderItem({ item, navigation, user }) {
 
         if (status == 2 && user?.apple_check != 1) {
             return {
-                text1: t('Invoice'),
+                text1: t('Order Invoice'),
                 onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
                 loading1: loading,
                 loading2: loading,
@@ -122,22 +122,10 @@ export default function OrderItem({ item, navigation, user }) {
         }
         if (status >= 3) {
             return {
-                text1: '',
+                text1: ((item?.status == 4 && item?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (item?.status == 3 && item?.arrived_at)) ? 'پیش رسید' : '',
                 text2: item?.status == 3 ? t('Canceled by You') : item?.status == 4 ? t('Canceled by Technician') : item?.status == 5 ? t('Canceled by Loop') : item?.status == 6 ? t('Canceled due to Order Time Expiry') : t('Canceled'),
-                onPress1: () => {
-                    // if (!user?.city_id) {
-                    //     showToastOrAlert('لطفا شهر خود را انتخاب نمایید.');
-                    //     return;
-                    // }
+                onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
 
-                    dispatch(fetchSteps(item?.category_id))
-                    dispatch(setCategory(item?.category))
-                    navigation.navigate('Steps', {
-                        categoryId: item?.category_id,
-                        categoryTitle: item?.category?.title
-                    }
-                    );
-                },
                 onPress2: () => { },
                 loading1: loading,
                 loading2: loading,
@@ -160,7 +148,7 @@ export default function OrderItem({ item, navigation, user }) {
                 </View>
             }
             {renderRow(item?.category?.title, `${t('Order ID: ')}${item?.id}`, [NewStyles.text, { fontSize: 14 }], NewStyles.text)}
-            {
+            {/* {
                 user?.apple_check != 1 &&
 
                 <>
@@ -171,13 +159,30 @@ export default function OrderItem({ item, navigation, user }) {
                     }
 
                 </>
-            }
+            } */}
 
             {item?.status != 2 && renderRow(t('Technician Visit Time'), item?.is_urgent > 0 ? t('Urgent Request') : formatDate(item?.date) + t(' at ') + item?.time?.split(':')?.slice(0, 2)?.join(':'), NewStyles.text10, item?.is_urgent > 0 && NewStyles.title6)}
 
-            {item?.discount_price && renderRow(t('Your Final Order Discount'), formatPrice(item?.discount_price) + t(' Toman'), NewStyles.title, NewStyles.text10)}
-            {totalPrice > totalDiscountedPrice && renderRow(t('Price Without Discount'), formatPrice(totalPrice) + t(' Toman'), NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
+            {/* {item?.discount_price && renderRow(t('Your Final Order Discount'), formatPrice(item?.discount_price) + t(' Toman'), NewStyles.title, NewStyles.text10)} */}
+            {/* {totalPrice > totalDiscountedPrice && renderRow(t('Price Without Discount'), formatPrice(totalPrice) + t(' Toman'), NewStyles.title, [NewStyles.text10, { textDecorationLine: 'line-through' }])} */}
             {/* {item?.status == 2 && renderRow('وضعیت پرداخت', item?.payment_status > 0 ? 'پرداخت شده' : 'پرداخت نشده', NewStyles.text, item?.payment_status > 0 ? NewStyles.text7 : NewStyles.text6)} */}
+            {item.status == 4 && <View style={styles.divider} />}
+            {item.status == 4 && <View style={styles.cardSection}>
+                <View style={[]}>
+                    <Text style={NewStyles.text10}>{t("Cancel reason")}: </Text>
+                    <View style={[styles.statusBadge]}>
+                        <Text style={NewStyles.text10}>{(item.technician_cancel_reason)}</Text>
+                    </View>
+                </View>
+            </View>}
+            {(item.status == 3 && item?.user_cancellation_reason && item?.user_cancellation_date) && <View style={styles.cardSection}>
+                <View style={[]}>
+                    <Text style={NewStyles.text10}>{t("Cancel reason")}: </Text>
+                    <View style={[styles.statusBadge]}>
+                        <Text style={NewStyles.text10}>{(item.user_cancellation_reason)}</Text>
+                    </View>
+                </View>
+            </View>}
             {(item?.status == 2 && user?.apple_check != 1) && <View style={NewStyles.rowWrapper}>
                 <Text style={[NewStyles.title10]}>{t('Payment Status')}</Text>
                 <View style={[{ backgroundColor: item?.payment_status > 0 ? themeColor7.bgColor(1) : themeColor6.bgColor(1), paddingHorizontal: 5, paddingVertical: 1 }, NewStyles.border10]}>

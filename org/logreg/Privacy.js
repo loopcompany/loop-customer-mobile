@@ -236,23 +236,7 @@ const Privacy = ({ navigation }) => {
                 }}
               />
             </View>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                value="Los angeles"
-                placeholder="شهر :"
-                style={{
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 15,
-                  borderWidth: 1,
-                  borderColor: '#ddd',
-                  fontSize: 14,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'center'
-                }}
-              />
-            </View>
+            
           </View>
 
           {/* Address */}

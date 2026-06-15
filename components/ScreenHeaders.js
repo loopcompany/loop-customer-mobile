@@ -38,7 +38,7 @@ const ScreenHeaders = ({
 
       {/* Center: Title */}
       <View style={styles.titleContainer}>
-        <Text style={[NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
+        <Text style={[NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit> {title} </Text>
       </View>
 
       {/* Left side: Back button (RTL) */}

@@ -251,7 +251,11 @@ export const handleError = (error, t) => {
       showToastOrAlert(`${t(message)}`);
     } else if (error?.response?.status == 401) {
       showToastOrAlert(`${t("Unauthorized access!")}`);
-    } else {
+    }
+    else if(error?.response?.status==402){
+      showToastOrAlert(`${t("Your wallet balance is not enough.")}`)
+    }
+    else {
       showToastOrAlert(`${t("An unexpected error occurred!")}`);
     }
   } catch (e) {
@@ -477,6 +481,15 @@ export const getPaymentStatusText = (status) => {
 export const getPaymentStatusColor = (status) => {
   return status === 0 ? '#F44336' : '#4CAF50';
 };
+
+export function convertToEnglish(str) {
+    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    
+    return str.toString()
+        .replace(/[۰-۹]/g, (char) => persianNumbers.indexOf(char))
+        .replace(/[٠-٩]/g, (char) => arabicNumbers.indexOf(char));
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

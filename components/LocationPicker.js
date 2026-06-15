@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { uri } from '../services/URL';
 import { showAlert } from '../helpers/Common';
 import NewStyles from '../styles/NewStyles';
 import { createStyles } from '../styles/NewStyles';
+import { themeColor10, themeColor3, themeColor4 } from '../theme/Color';
 
 /**
  * LocationPicker Component
@@ -38,45 +39,45 @@ const LocationPicker = ({
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
-  );
-    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  ); 
+  // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [regions, setRegions] = useState([]);
-  
+
   const [showProvinceModal, setShowProvinceModal] = useState(false);
   const [showCityModal, setShowCityModal] = useState(false);
   const [showRegionModal, setShowRegionModal] = useState(false);
-  
+
   const [loadingProvinces, setLoadingProvinces] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
   const [loadingRegions, setLoadingRegions] = useState(false);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
 
   // Load provinces on mount
-  useEffect(() => {
-    fetchProvinces();
-  }, []);
+  // useEffect(() => {
+  //   fetchProvinces();
+  // }, []);
 
   // Load cities when province changes
-  useEffect(() => {
-    if (selectedProvince?.id) {
-      fetchCities(selectedProvince.id);
-    } else {
-      setCities([]);
-      setRegions([]);
-    }
-  }, [selectedProvince?.id]);
+  // useEffect(() => {
+  //   if (selectedProvince?.id) {
+  //     fetchCities(selectedProvince.id);
+  //   } else {
+  //     setCities([]);
+  //     setRegions([]);
+  //   }
+  // }, [selectedProvince?.id]);
 
   // Load regions when city changes
   useEffect(() => {
-    if (selectedCity?.id) {
-      fetchRegions(selectedCity.id);
-    } else {
-      setRegions([]);
-    }
-  }, [selectedCity?.id]);
+    // if (selectedCity?.id) {
+    fetchRegions(1);
+    // } else {
+    //   setRegions([]);
+    // }
+  }, []);
 
   // Fetch all provinces
   const fetchProvinces = async () => {
@@ -89,7 +90,7 @@ const LocationPicker = ({
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await axios.get(`${uri}/locations/provinces`, { headers });
       if (response.data.success) {
         setProvinces(response.data.data);
@@ -117,7 +118,7 @@ const LocationPicker = ({
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await axios.get(`${uri}/locations/provinces/${provinceId}/cities`, { headers });
       if (response.data.success) {
         setCities(response.data.data.cities);
@@ -141,7 +142,7 @@ const LocationPicker = ({
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await axios.get(`${uri}/locations/cities/${cityId}/regions`, { headers });
       if (response.data.success) {
         setRegions(response.data.data.regions);
@@ -183,7 +184,7 @@ const LocationPicker = ({
   // Filter items based on search query
   const filterItems = (items) => {
     if (!searchQuery) return items;
-    return items.filter(item => 
+    return items.filter(item =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
@@ -194,39 +195,30 @@ const LocationPicker = ({
       <TouchableOpacity
         onPress={onPress}
         disabled={disabled}
-        style={{
-          backgroundColor: disabled ? '#e0e0e0' : '#f5f5f5',
+        style={[{
+          backgroundColor: disabled ? '#e0e0e0' : themeColor4.bgColor(0.7),
           borderRadius: 8,
-          // paddingVertical: 10,
+          paddingVertical: 12,
           paddingHorizontal: 12,
-          borderWidth: 1,
-          borderColor: error ? '#ff0000' : '#ccc',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: 40,
           opacity: disabled ? 0.6 : 1
-        }}
+        }, NewStyles.rowWrapper]}
       >
-        <Text style={{
+        <Text style={[NewStyles.text, {
           fontSize: 14,
-          fontFamily: 'VazirLight',
-          color: selectedItem ? '#000' : '#999',
+          color: selectedItem ? themeColor10.bgColor(1) : themeColor10.bgColor(0.6),
           textAlign: 'right',
           flex: 1
-        }}>
+        }]}>
           {selectedItem ? selectedItem.title : `${label}${required ? ' *' : ''}`}
         </Text>
-        <Ionicons name="chevron-down" size={20} color="#666" />
+        <Ionicons name="chevron-down" size={20} color={themeColor10.bgColor(0.6)} />
       </TouchableOpacity>
       {error && (
-        <Text style={{
-          color: '#ff0000',
+        <Text style={[NewStyles.text6, {
           fontSize: 12,
-          fontFamily: 'VazirLight',
           marginTop: 4,
           textAlign: 'right'
-        }}>
+        }]}>
           {error}
         </Text>
       )}
@@ -291,10 +283,10 @@ const LocationPicker = ({
                 borderWidth: 1,
                 borderColor: '#ccc',
                 fontSize: 14,
-                fontFamily: 'VazirLight',
                 ...NewStyles.text10,
-                
+
               }}
+              placeholderTextColor={themeColor3.bgColor(1)}
             />
           </View>
 
@@ -307,12 +299,11 @@ const LocationPicker = ({
             <ScrollView style={{ maxHeight: 400 }}>
               {filterItems(items).length === 0 ? (
                 <View style={{ padding: 40, alignItems: 'center' }}>
-                  <Text style={{
+                  <Text style={[NewStyles.text, {
                     fontSize: 14,
-                    fontFamily: 'VazirLight',
                     color: '#999',
                     textAlign: 'center'
-                  }}>
+                  }]}>
                     {t('No results found.')}
                   </Text>
                 </View>
@@ -328,12 +319,11 @@ const LocationPicker = ({
                       borderBottomColor: '#f0f0f0'
                     }}
                   >
-                    <Text style={{
+                    <Text style={[NewStyles.text, {
                       fontSize: 14,
-                      fontFamily: 'VazirLight',
                       color: '#333',
                       textAlign: 'right'
-                    }}>
+                    }]}>
                       {item.title}
                     </Text>
                   </TouchableOpacity>
@@ -349,37 +339,37 @@ const LocationPicker = ({
   return (
     <View>
       {/* Province Picker */}
-      {renderPickerButton(
+      {/* {renderPickerButton(
         t('Province'),
         selectedProvince,
         () => setShowProvinceModal(true),
         errors.province
-      )}
-      {renderModal(
+      )} */}
+      {/* {renderModal(
         showProvinceModal,
         () => { setShowProvinceModal(false); setSearchQuery(''); },
         provinces,
         handleProvinceSelect,
         loadingProvinces,
         t('Select province')
-      )}
+      )} */}
 
       {/* City Picker */}
-      {renderPickerButton(
+      {/* {renderPickerButton(
         t('City'),
         selectedCity,
         () => setShowCityModal(true),
         errors.city,
         !selectedProvince
-      )}
-      {renderModal(
+      )} */}
+      {/* {renderModal(
         showCityModal,
         () => { setShowCityModal(false); setSearchQuery(''); },
         cities,
         handleCitySelect,
         loadingCities,
         t('Select city')
-      )}
+      )} */}
 
       {/* Region Picker */}
       {renderPickerButton(
@@ -387,7 +377,7 @@ const LocationPicker = ({
         selectedRegion,
         () => setShowRegionModal(true),
         errors.region,
-        !selectedCity
+        false
       )}
       {renderModal(
         showRegionModal,

@@ -1,13 +1,17 @@
 import { View, Modal, StyleSheet, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
-import NewStyles, { deviceHeight } from '../styles/NewStyles';
+import { createStyles, deviceHeight } from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4 } from '../theme/Color';
+import { useMemo } from 'react';
 
 export default function ConfirmationModal({ title, message, action, confirmationModal, setConfirmationModal }) {
 
-    const { t } = useTranslation();
-
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     return (
         <Modal animationType='fade' transparent={true} visible={confirmationModal} onRequestClose={() => { setConfirmationModal(!confirmationModal) }}>
             {/* <TouchableWithoutFeedback onPress={() => { setConfirmationModal(false) }}> */}
@@ -30,7 +34,7 @@ export default function ConfirmationModal({ title, message, action, confirmation
     )
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: themeColor3.bgColor(0.5),

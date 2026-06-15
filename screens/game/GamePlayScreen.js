@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
+import  { createStyles } from '../../styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
 import {
   GAME_LEVELS,
@@ -21,7 +21,13 @@ import {
 } from './GameData';
 
 export default function GamePlayScreen({ route, navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+
   const { level = 'easy' } = route.params || {};
   const levelConfig = GAME_LEVELS[level.toUpperCase()];
 
@@ -157,7 +163,7 @@ export default function GamePlayScreen({ route, navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'additive' }}>
       <ScreenHeaders
         title={t("Question {{current}} of {{total}}", { current: currentQuestionIndex + 1, total: questions.length })}
       />
@@ -269,8 +275,7 @@ export default function GamePlayScreen({ route, navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor5.bgColor(1),

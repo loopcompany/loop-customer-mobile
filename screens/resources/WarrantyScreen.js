@@ -1,5 +1,5 @@
-import React, { useState, useEffect,useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -14,13 +14,14 @@ import { RefreshControl } from 'react-native';
 import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
 import { createStyles } from '../../styles/NewStyles';
+import { ImageBackground } from 'expo-image';
 export default function WarrantyScreen() {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const [warranties, setWarranties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -59,7 +60,7 @@ export default function WarrantyScreen() {
   const renderTermItem = ({ item }) => {
 
     return (
-      <AccardeonComponent item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
+      <AccardeonComponent needMap={true} item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
     );
   };
   if (isLoading) {
@@ -69,20 +70,20 @@ export default function WarrantyScreen() {
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ScreenHeaders title={t("Warranty / Guarantee")} />
-      <FlatList
-        data={warranties}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.warrantiesContainer}
-        renderItem={renderTermItem}
-        ListEmptyComponent={() => {
-          return (
-            <BlankScreen />
-          )
-        }}
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+        <ScreenHeaders title={t("Warranty / Guarantee")} />
+        <FlatList
+        style={{width:'100%'}}
+          data={warranties}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.warrantiesContainer}
+          renderItem={renderTermItem}
+           
 
-      />
+        />
+      </ImageBackground>
+
     </SafeAreaView>
   );
 }
@@ -90,5 +91,7 @@ export default function WarrantyScreen() {
 const createLocalStyles = (NewStyles) => StyleSheet.create({
   warrantiesContainer: {
     padding: 15,
+    paddingBottom:100,
+    width:'100%', 
   },
 });

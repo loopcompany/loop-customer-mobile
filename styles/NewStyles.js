@@ -103,7 +103,7 @@ export const createStyles = (lang) => {
         gap: 50,
         paddingHorizontal: '5%',
         backgroundColor: themeColor4.bgColor(0),
-
+        marginBottom: 60
       },
       categoriesWrapper: {
         justifyContent: "flex-start",
@@ -160,7 +160,7 @@ export const createStyles = (lang) => {
         backgroundColor: "#fff",
       },
       status: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         // backgroundColor: themeColor0.bgColor(1),
         color: themeColor3.bgColor(1),
         paddingHorizontal: 15,
@@ -192,7 +192,7 @@ export const createStyles = (lang) => {
       },
 
       row: {
-        flexDirection: langIsRTL(lang) ? "row" : "row",
+        flexDirection: langIsRTL(lang) ? "row-reverse" : "row",
         alignItems: "center",
       },
 
@@ -226,93 +226,93 @@ export const createStyles = (lang) => {
       },
 
       text: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor0.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text1: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor1.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text2: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor2.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text3: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor3.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text4: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor4.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text6: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor6.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text7: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor7.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       text10: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor10.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
       text11: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor11.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       title: {
         fontSize: 16,
-        fontFamily: "VazirBold",
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor0.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
       title1: {
         fontSize: 16,
-        fontFamily: "VazirBold",
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor1.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
       title3: {
         fontSize: 16,
-        fontFamily: "VazirBold",
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor3.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
 
       title4: {
-        fontSize: 15,
-        fontFamily: "VazirBold",
+        fontSize: 16,
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor4.bgColor(1),
         textAlign: "center",
       },
       title7: {
-        fontSize: 15,
-        fontFamily: "VazirBold",
+        fontSize: 16,
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor7.bgColor(1),
         textAlign: "center",
       },
 
       title10: {
         fontSize: 16,
-        fontFamily: "VazirBold",
+        fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor10.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
       },
@@ -324,7 +324,7 @@ export const createStyles = (lang) => {
         height: 200,
       },
       discountText: {
-        fontFamily: "VazirLight",
+        fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor3.bgColor(1),
         textDecorationLine: "line-through",
         textAlign: langIsRTL(lang) ? "right" : "left",

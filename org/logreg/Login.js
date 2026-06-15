@@ -1,4 +1,4 @@
-import React, { useState,useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -22,7 +22,7 @@ const Login = ({ navigation }) => {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const dispatch = useDispatch();
   const [organizationCode, setOrganizationCode] = useState('');
   const [password, setPassword] = useState('');
@@ -84,32 +84,23 @@ const Login = ({ navigation }) => {
       });
 
       if (response.data.status === 'success') {
-        console.log('✅ [Login] ورود موفق - شروع ذخیره‌سازی اطلاعات...');
-        console.log('🔑 [Login] توکن دریافتی:', response.data.data.token ? `${response.data.data.token.substring(0, 20)}...` : 'null');
 
         // Save token and user data
         if (rememberPassword) {
           await AsyncStorage.setItem('userToken', response.data.data.token);
-          console.log('💾 [Login] userToken ذخیره شد');
         }
         await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
-        console.log('💾 [Login] userData ذخیره شد');
 
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
-        console.log('💾 [Login] organizationData ذخیره شد');
 
         await AsyncStorage.setItem('accountType', 'organization');
-        console.log('💾 [Login] accountType ذخیره شد: organization');
 
         await AsyncStorage.setItem('organizationCode', organizationCode);
-        console.log('💾 [Login] organizationCode ذخیره شد');
 
         // Dispatch to Redux
         dispatch(setToken(response.data.data.token));
-        console.log('📦 [Login] توکن به Redux ارسال شد');
 
         dispatch(setUserType('organization'));
-        console.log('📦 [Login] userType به Redux ارسال شد: organization');
 
         dispatch(setOrganizationData(response.data.data.organization));
         console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
@@ -234,7 +225,7 @@ const Login = ({ navigation }) => {
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
             {/* کد سازمانی */}
             <View style={{ marginBottom: 8 }}>
-              <Text style={[NewStyles.title,NewStyles.row]}>{t('Organization code')} <Text style={NewStyles.title6}>*</Text></Text>
+              <Text style={[NewStyles.title, NewStyles.row]}>{t('Organization code')} <Text style={NewStyles.title6}>*</Text></Text>
               <TextInput
                 value={organizationCode}
                 onChangeText={setOrganizationCode}
@@ -252,7 +243,7 @@ const Login = ({ navigation }) => {
                   fontSize: 14,
                   fontFamily: 'VazirLight',
                   ...NewStyles.text10,
-                  height: 40
+                  height: 45
                 }}
               />
               {errors.organizationCode && (
@@ -282,8 +273,8 @@ const Login = ({ navigation }) => {
                   borderRadius: 8,
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-             ...NewStyles.text10,
-                  height: 40,
+                  ...NewStyles.text10,
+                  height: 45,
                   flex: 1
                 }}
               />
@@ -366,7 +357,7 @@ const Login = ({ navigation }) => {
                     flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: 36,
+                    height: 45,
                     flexDirection: 'row'
                   }}
                 >
@@ -401,7 +392,7 @@ const Login = ({ navigation }) => {
                       fontSize: 14,
                       fontFamily: 'VazirLight',
                       textAlign: 'center',
-                      height: 36
+                      height: 45
                     }}
                   />
                 </View>

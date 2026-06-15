@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, Text, FlatList, TextInput, StyleSheet, Pressable, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
@@ -30,6 +30,7 @@ export default function Input({ step, data }) {
                 showsVerticalScrollIndicator={false}
                 keyExtractor={(item) => item.id?.toString()}
                 data={data?.field_details}
+                contentContainerStyle={[Platform.OS==='web' &&{gap:20}]}
                 renderItem={({ item }) =>
                     <View style={{ gap: 10 }}>
                         <Text style={NewStyles.text}>{item?.title} {item?.is_required == 1 && <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View>}</Text>

@@ -6,8 +6,8 @@ import { useSelector } from 'react-redux';
 import moment from 'moment-jalaali';
 import { createStyles } from '../../styles/NewStyles';
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor5 } from '../../theme/Color';
-import { mainUri, uri } from '../../services/URL';
+import { themeColor0, themeColor1, themeColor4, themeColor5 } from '../../theme/Color';
+import { imageUri, mainUri, uri } from '../../services/URL';
 import OfferItem from './OfferItem';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -198,17 +198,17 @@ export default function Club({ navigation }) {
   if (loading) return <Loader />;
 
   return (
-    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={[NewStyles.container, {backgroundColor: themeColor4.bgColor(1)}]}>
       <ScreenHeaders title={t("Promotional Plans")} />
-      <ScrollView contentContainerStyle={{ gap: 20 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
+      <ScrollView contentContainerStyle={{ gap: 20, paddingBottom: 120 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
         <View style={[NewStyles.rowWrapper, { paddingHorizontal: '5%' }]}>
           <View style={NewStyles.rowWrapper}>
             <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('GemTransactions')}>
               <Text style={NewStyles.text}>{t('Your Wheel History')}</Text>
             </Pressable>
-            <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('UserDiscounts')}>
+            {/* <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton]} onPress={() => navigation.navigate('UserDiscounts')}>
               <Text style={NewStyles.text}>{t('Received Prizes')}</Text>
-            </Pressable >
+            </Pressable > */}
           </View>
         </View>
         {/* دکمه گردونه شانس */}
@@ -216,16 +216,16 @@ export default function Club({ navigation }) {
           style={[NewStyles.border10, NewStyles.spacing, {
             alignSelf: 'center',
             width: '90%',
-            backgroundColor: themeColor0.bgColor(0.1),
+            backgroundColor: themeColor4.bgColor(1),
             justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: themeColor0.bgColor(0.3),
-            borderStyle: 'dashed',
+            alignItems: 'center', 
           }]}
           onPress={handleOpenWheel}
         >
-          <Ionicons name="gift" size={50} color={themeColor1.bgColor(1)} />
+          <Image
+            source={{ uri: `${imageUri}/userfolder/gift.png` }}
+            style={{ height: 100, width: 100 }}
+          />
           <Text style={[NewStyles.title10, { marginTop: 10 }]}>{t('Lucky Wheel')}</Text>
           <Text style={[NewStyles.text10, { opacity: 0.7 }]}>{t('Spin to earn points!')}</Text>
           {userGems > 0 && (

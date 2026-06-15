@@ -1,5 +1,5 @@
 // AddressScreen.js
-import React, { useState, useEffect,useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   FlatList,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from 'react-i18next';
@@ -19,13 +20,14 @@ import { addressAPI } from "../../services/Api";
 import { showToastOrAlert, showAlert } from "../../helpers/Common";
 import Button from "../../components/Button";
 import { createStyles } from '../../styles/NewStyles';
+import ShowMapDetailComponent from "../../components/ShowMapDetailComponent";
 export default function AddressScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -84,7 +86,6 @@ export default function AddressScreen({ route, navigation }) {
                 fetchAddresses();
               }
             } catch (error) {
-              console.error('Error deleting address:', error);
               showToastOrAlert(t('Error deleting address'));
             }
           },
@@ -96,7 +97,7 @@ export default function AddressScreen({ route, navigation }) {
   const renderAddressCard = ({ item }) => {
     return (
       <View style={[styles.addressCard, NewStyles.border10]}>
-        <View style={styles.cardHeader}>
+        <View style={[NewStyles.rowWrapper, styles.cardHeader]}>
           <Text style={[NewStyles.title10, { fontSize: 16 }]}>
             {item.title || t('Untitled')}
           </Text>
@@ -108,51 +109,59 @@ export default function AddressScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.cardContent}>
-          {item.fname && item.lname && (
-            <View style={styles.infoRow}>
-              <Ionicons name="person-outline" size={16} color={themeColor3.bgColor(1)} />
-              <Text style={[NewStyles.text10, { marginRight: 8 }]}>
-                {item.fname} {item.lname}
-              </Text>
-            </View>
-          )}
+        <View style={[NewStyles.rowWrapper, Platform.OS != 'web' && { alignItems: 'flex-start' }]}>
+          <View style={styles.cardContent}>
+            {item.fname && item.lname && (
+              <View style={styles.infoRow}>
+                <Ionicons name="person-outline" size={16} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text10, { marginRight: 8 }]}>
+                  {item.fname} {item.lname}
+                </Text>
+              </View>
+            )}
 
-          {item.mobile && (
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={16} color={themeColor3.bgColor(1)} />
-              <Text style={[NewStyles.text10, { marginRight: 8 }]}>
-                {item.mobile}
-              </Text>
-            </View>
-          )}
+            {item.mobile && (
+              <View style={styles.infoRow}>
+                <Ionicons name="call-outline" size={16} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text10, { marginRight: 8 }]}>
+                  {item.mobile}
+                </Text>
+              </View>
+            )}
 
-          {item.telephone && (
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={16} color={themeColor3.bgColor(1)} />
-              <Text style={[NewStyles.text10, { marginRight: 8 }]}>
-                {item.telephone}
-              </Text>
-            </View>
-          )}
+            {item.telephone && (
+              <View style={styles.infoRow}>
+                <Ionicons name="call-outline" size={16} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text10, { marginRight: 8 }]}>
+                  {item.telephone}
+                </Text>
+              </View>
+            )}
 
-          {item.city && item.region && (
-            <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={16} color={themeColor3.bgColor(1)} />
-              <Text style={[NewStyles.text10, { marginRight: 8 }]}>
-                {item.city} - {item.region}
-              </Text>
-            </View>
-          )}
+            {item.city && item.region && (
+              <View style={styles.infoRow}>
+                <Ionicons name="location-outline" size={16} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text10, { marginRight: 8 }]}>
+                  {item.city} - {item.region}
+                </Text>
+              </View>
+            )}
 
-          {item.address && (
-            <View style={styles.infoRow}>
-              <Ionicons name="home-outline" size={16} color={themeColor3.bgColor(1)} />
-              <Text style={[NewStyles.text10, { marginRight: 8, flex: 1 }]}>
-                {item.address}
-              </Text>
-            </View>
-          )}
+            {item.address && (
+              <View style={styles.infoRow}>
+                <Ionicons name="home-outline" size={16} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text10, { marginRight: 8, flex: 1 }]}>
+                  {item.address}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={[{ height: 100, width: 100, overflow: 'hidden' }, NewStyles.border100]}>
+            <ShowMapDetailComponent
+              latitude={item?.latitude}
+              longitude={item?.longitude}
+            />
+          </View>
         </View>
       </View>
     );
@@ -209,7 +218,7 @@ export default function AddressScreen({ route, navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -232,9 +241,6 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     elevation: 3,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 12,
     paddingBottom: 10,
     borderBottomWidth: 1,
@@ -247,12 +253,12 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     gap: 8,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    ...NewStyles.row
   },
   footer: {
     padding: 15,
-    ...NewStyles.center
+    ...NewStyles.center,
+    paddingBottom: 50
 
   },
   addBtn: {

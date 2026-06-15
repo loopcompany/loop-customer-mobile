@@ -1,8 +1,11 @@
-import { StyleSheet, Image, Platform } from "react-native";
+import { StyleSheet, Image, Platform, Linking } from "react-native";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
+import TransparentButton from './../../components/TransparentButton';
+import { mainUri } from './../../services/URL';
+import { themeColor0, themeColor4 } from "../../theme/Color";
 
 export default function SignInLanding({ navigation }) {
   const { t } = useTranslation();
@@ -23,6 +26,12 @@ export default function SignInLanding({ navigation }) {
         onPress={() => {
           navigation.navigate("MainSignIn");
         }}
+      />
+      <TransparentButton
+        onPress={() => { Linking.openURL(`${mainUri}/assets/guid/tech.pdf`) }}
+        customStyle={[{ borderColor: themeColor0.bgColor(1), borderWidth: 1, width: '70%', maxWidth: 400, backgroundColor: themeColor4.bgColor(0.5) }, NewStyles.border10]}
+        title={t("User Application Guide")}
+        customTextStyle={NewStyles.title}
       />
 
     </ImageBackground>

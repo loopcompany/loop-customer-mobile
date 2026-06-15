@@ -54,25 +54,23 @@ export default function RateListScreen({ route }) {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t('Rate List')} />
-      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}>
 
-        <View style={[NewStyles.row, { flex: 1 }]}>
-          <View style={{ flex: 1 }}>
-            <View style={styles.titleContainer}>
-              <Text style={NewStyles.title4}>{params?.title}</Text>
-            </View>
-            <FlatList
-              scrollEnabled={false}
-              showsVerticalScrollIndicator={false}
-              data={rates}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={styles.container}
-            />
+      <View style={[NewStyles.row, { flex: 1 }]}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.titleContainer}>
+            <Text style={NewStyles.title4}>{params?.title}</Text>
           </View>
-
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={rates}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.container}
+          />
         </View>
-      </ScrollView>
+
+      </View>
 
     </SafeAreaView>
   );
@@ -81,6 +79,7 @@ export default function RateListScreen({ route }) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
+    paddingBottom: 100
   },
   title: {
     textAlign: 'center',

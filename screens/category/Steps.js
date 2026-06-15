@@ -16,7 +16,6 @@ import CheckBox from '../../components/CheckBox';
 import RadioButton from '../../components/RadioButton';
 import Counter from '../../components/Counter';
 import Note from '../../components/Note';
-import File from '../../components/File';
 import Address from '../../components/Address';
 import Time from '../../components/Time';
 import Date from '../../components/Date';
@@ -27,8 +26,7 @@ import Gender from '../../components/Gender';
 import ServiceSchedule from '../../components/ServiceSchedule';
 import { emptyAddress } from '../../slices/addressSlice';
 import StepsHeader from '../../components/StepsHeader';
-import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
-
+import FileStep from '../../components/File';
 function Steps({ navigation, route }) {
 
     const dispatch = useDispatch();
@@ -43,14 +41,9 @@ function Steps({ navigation, route }) {
 
     // بازیابی داده‌ها در صورت ریلود صفحه در وب
     useEffect(() => {
-        console.log('🎯 [Steps] کامپوننت Steps لود شد');
-        console.log('📋 [Steps] تعداد کل مراحل:', length);
-        console.log('📋 [Steps] مرحله فعلی:', step);
-        console.log('📦 [Steps] categoryId از route:', categoryId);
 
         // اگر در وب هستیم و داده‌ها خالی است (بعد از ریلود)، دوباره fetchSteps را صدا بزنیم
         if (Platform.OS === 'web' && (!steps?.data || steps.data.length === 0) && categoryId) {
-            console.log('🔄 [Steps] داده‌ها خالی است، دوباره fetchSteps صدا زده می‌شود...');
             dispatch(fetchSteps(categoryId));
         }
 
@@ -87,91 +80,60 @@ function Steps({ navigation, route }) {
 
             if (["date", "time", "address", "gender"].includes(item.type) && item.is_required == 1) {
                 const isValid = !!item.value;
-                console.log(`   ✓ type: ${item.type}, value: "${item.value}", valid: ${isValid ? '✅' : '❌'}`);
                 return isValid;
             }
             if (["checkbox", "radioButton", "counter"].includes(item.type) && item.is_required == 1) {
                 const hasValue = item.field_details.some(dataItem => dataItem.value > 0);
-                console.log(`   ✓ type: ${item.type}, has value: ${hasValue ? '✅' : '❌'}`);
-                if (!hasValue) {
-                    console.log(`   ⚠️ field_details:`, item.field_details.map(f => `${f.id}:${f.value}`).join(', '));
-                }
                 return hasValue;
             }
             if (item.type == "input") {
                 const hasEmptyRequired = item.field_details.some(dataItem => dataItem.is_required == 1 && dataItem.value == "");
-                console.log(`   ✓ type: input, valid: ${!hasEmptyRequired ? '✅' : '❌'}`);
                 return !hasEmptyRequired;
             }
             // Validation برای service_schedule (فقط برای کاربران سازمانی)
             if (item.type == "service_schedule" && item.is_required == 1) {
-                console.log('🔍 [Steps.validation] بررسی service_schedule...');
 
                 // پیدا کردن فیلد اصلی
                 const mainField = item.field_details?.find(f => f.id === 'main_selection');
                 const selectedOption = mainField?.options?.find(opt => opt.value > 0);
 
                 if (!selectedOption) {
-                    console.log('❌ [Steps.validation] service_schedule: انتخاب اصلی (long_term/short_term) نشده');
                     return false; // اگر انتخابی نشده
                 }
 
-                console.log('✅ [Steps.validation] service_schedule: نوع انتخاب شده:', selectedOption.id);
 
                 // بررسی فیلدهای شرطی
                 const conditionalFields = item.field_details?.filter(
                     f => f.conditional_on === selectedOption.id
                 );
 
-                console.log('📋 [Steps.validation] تعداد فیلدهای شرطی:', conditionalFields?.length);
 
                 // بررسی که همه فیلدهای شرطی اجباری پر شده باشند
                 const isValid = conditionalFields?.every(field => {
                     if (field.type === 'radioButton') {
                         const hasSelection = field.options?.some(opt => opt.value > 0);
-                        if (!hasSelection) {
-                            console.log(`❌ [Steps.validation] ${field.id} (radioButton): انتخاب نشده`);
-                        } else {
-                            console.log(`✅ [Steps.validation] ${field.id} (radioButton): انتخاب شده`);
-                        }
                         return hasSelection;
                     }
                     if (field.type === 'date') {
                         const hasValue = !!field.value;
-                        if (!hasValue) {
-                            console.log(`❌ [Steps.validation] ${field.id} (date): خالی است`);
-                        } else {
-                            console.log(`✅ [Steps.validation] ${field.id} (date): ${field.value}`);
-                        }
                         return hasValue; // تاریخ باید انتخاب شده باشد
                     }
                     if (field.type === 'time') {
                         const hasValue = !!field.value;
-                        if (!hasValue) {
-                            console.log(`❌ [Steps.validation] ${field.id} (time): خالی است`);
-                        } else {
-                            console.log(`✅ [Steps.validation] ${field.id} (time): ${field.value}`);
-                        }
+
                         return hasValue; // زمان باید انتخاب شده باشد
                     }
                     // file اختیاری است - نیازی به چک نیست
                     if (field.type === 'file') {
-                        console.log(`ℹ️ [Steps.validation] ${field.id} (file): اختیاری`);
                         return true;
                     }
                     return true;
                 });
 
-                if (!isValid) {
-                    console.log('❌ [Steps.validation] service_schedule ناقص است');
-                } else {
-                    console.log('✅ [Steps.validation] service_schedule کامل است');
-                }
 
                 return isValid;
             }
 
-            console.log(`   ✓ type: ${item.type}, no validation needed or not required`);
             return true;
         });
 
@@ -233,44 +195,65 @@ function Steps({ navigation, route }) {
                     }
                 }} showPre={true} />
                 {/* <ProgressBar step={step} /> */}
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
-                    <FlatList
-                        contentContainerStyle={styles.flatListContainer}
-                        showsVerticalScrollIndicator={false} scrollEnabled={false}
-                        data={steps?.data?.[step]}
-                        keyExtractor={(item) => item?.id?.toString()}
-                        renderItem={({ item }) => {
-                            console.log('🎯 [Steps.renderItem] رندر item:', item?.id, 'type:', item?.type);
-
-                            const isUrgentActive = steps?.isUrgent === 1;
-                            if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
-                                return null;
-                            }
-
-                            if (item?.type === 'service_schedule') {
-                                console.log('✅ [Steps.renderItem] service_schedule یافت شد! رندر ServiceSchedule...');
-                            }
-
-                            return (
-                                <View >
-                                    {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
-                                    {(item?.type == 'description') && <Description data={item} />}
-                                    {(item?.type == 'service_schedule') && <ServiceSchedule step={step} data={item} />}
-                                    {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
-                                    {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
-                                    {(item?.type == 'counter') && <Counter step={step} data={item} />}
-                                    {(item?.type == 'input') && <Input step={step} data={item} />}
-                                    {(item?.type == 'urgent') && <Urgent step={step} data={item} />}
-                                    {(item?.type == 'date') && <Date step={step} data={item} />}
-                                    {(item?.type == 'gender') && <Gender step={step} data={item} />}
-                                    {(item?.type == 'time') && <Time step={step} data={item} />}
-                                    {(item?.type == 'address') && <Address step={step} data={item} navigation={navigation} />}
-                                    {(item?.type == 'note') && <Note step={step} data={item} />}
-                                    {(item?.type == 'file') && <File step={step} data={item} />}
-                                </View>
-                            )
-                        }}
-                    />
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10, paddingBottom: 120 }}>
+                    {
+                        Platform.OS != 'web' ?
+                            <FlatList
+                                contentContainerStyle={styles.flatListContainer}
+                                showsVerticalScrollIndicator={false} scrollEnabled={false}
+                                data={steps?.data?.[step]}
+                                keyExtractor={(item) => item?.id?.toString()}
+                                renderItem={({ item }) => {
+                                    const isUrgentActive = steps?.isUrgent === 1;
+                                    if (isUrgentActive && (item.type === 'date' || item.type === 'time')) {
+                                        return null;
+                                    }
+                                    return (
+                                        <View >
+                                            {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
+                                            {(item?.type == 'description') && <Description data={item} />}
+                                            {(item?.type == 'service_schedule') && <ServiceSchedule step={step} data={item} />}
+                                            {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
+                                            {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
+                                            {(item?.type == 'counter') && <Counter step={step} data={item} />}
+                                            {(item?.type == 'input') && <Input step={step} data={item} />}
+                                            {(item?.type == 'urgent') && <Urgent step={step} data={item} />}
+                                            {(item?.type == 'date') && <Date step={step} data={item} />}
+                                            {(item?.type == 'gender') && <Gender step={step} data={item} />}
+                                            {(item?.type == 'time') && <Time step={step} data={item} />}
+                                            {(item?.type == 'address') && <Address step={step} data={item} navigation={navigation} />}
+                                            {(item?.type == 'note') && <Note step={step} data={item} />}
+                                            {(item?.type == 'file') && <FileStep step={step} data={item} />}
+                                        </View>
+                                    )
+                                }}
+                            />
+                            :
+                            <View style={[styles.flatListContainer,{flex:1}]}>
+                                {
+                                    steps?.data?.[step]?.map((item, index) => {
+                                        return (
+                                            <View key={index}>
+                                                {(item?.type == 'image') && <Image style={{ width: '100%', height: 250 }} source={{ uri: `${imageUri}/${item?.image_path}` }} />}
+                                                {(item?.type == 'description') && <Description data={item} />}
+                                                {(item?.type == 'service_schedule') && <ServiceSchedule step={step} data={item} />}
+                                                {(item?.type == 'checkbox') && <CheckBox step={step} data={item} />}
+                                                {(item?.type == 'radioButton') && <RadioButton step={step} data={item} setLoading={setLoading} />}
+                                                {(item?.type == 'counter') && <Counter step={step} data={item} />}
+                                                {(item?.type == 'input') && <Input step={step} data={item} />}
+                                                {(item?.type == 'urgent') && <Urgent step={step} data={item} />}
+                                                {(item?.type == 'date') && <Date step={step} data={item} />}
+                                                {(item?.type == 'gender') && <Gender step={step} data={item} />}
+                                                {(item?.type == 'time') && <Time step={step} data={item} />}
+                                                {(item?.type == 'address') && <Address step={step} data={item} navigation={navigation} />}
+                                                {(item?.type == 'note') && <Note step={step} data={item} />}
+                                                {(item?.type == 'file') && <FileStep step={step} data={item} />}
+                                            </View>
+                                        )
+                                    })
+                                }
+                            </View>
+                    }
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
@@ -280,7 +263,7 @@ function Steps({ navigation, route }) {
 const styles = StyleSheet.create({
     flatListContainer: {
         gap: 20,
-        paddingHorizontal: Platform.OS === 'web' ? '20%' : 0
+        paddingHorizontal:  0
     },
 
     separator: {
@@ -290,7 +273,4 @@ const styles = StyleSheet.create({
 })
 
 // محافظت از صفحه مراحل ثبت سفارش - قلب فرآیند سفارش‌دهی
-export default withOrganizationAccess(Steps, {
-    ...ACCESS_PRESETS.ORDER_RELATED,
-    screenName: 'Steps'
-});
+export default Steps;

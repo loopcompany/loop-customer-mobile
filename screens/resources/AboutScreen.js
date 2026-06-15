@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
 import { themeColor0, themeColor1, themeColor4, themeColor10 } from '../../theme/Color';
@@ -13,14 +12,20 @@ import BlankScreen from '../../components/BlankScreen';
 import { RefreshControl } from 'react-native';
 import Loader from '../../components/Loader';
 import AccardeonComponent from '../../components/AccardeonComponent';
+import { createStyles } from '../../styles/NewStyles';
 
 export default function AboutScreen() {
-  const { t } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
 
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   useEffect(() => {
     loadTerms();
   }, [isRefreshing]);
@@ -47,7 +52,7 @@ export default function AboutScreen() {
     }
   };
 
-  
+
   const renderTermItem = ({ item }) => {
     return (
       <AccardeonComponent item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
@@ -78,8 +83,9 @@ export default function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   termsContainer: {
     padding: 15,
+    paddingBottom: 100
   },
 });

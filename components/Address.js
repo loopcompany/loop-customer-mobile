@@ -15,6 +15,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { fetchAddresses } from '../slices/addressSlice';
 import { handleError } from '../helpers/Common';
 import { createStyles } from '../styles/NewStyles';
+import ShowMapDetailComponent from './ShowMapDetailComponent';
 export default function Address({ step, data, navigation }) {
 
     const { t, i18n } = useTranslation();
@@ -81,6 +82,7 @@ export default function Address({ step, data, navigation }) {
             <FlatList
                 style={{ gap: 15 }}
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={[Platform.OS === 'web' && { gap: 10 }]}
                 refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={handleRefresh} />}
                 data={addresses}
                 keyExtractor={(item) => item?.id?.toString()}
@@ -90,9 +92,14 @@ export default function Address({ step, data, navigation }) {
                             dispatch(setAddressId(item?.id))
                             dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
                         }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && { backgroundColor: themeColor1.bgColor(1) }]}>
-
+                            <View style={[{ height: 100, width: 100, overflow: 'hidden' }, NewStyles.border100]}>
+                                <ShowMapDetailComponent
+                                    latitude={item?.latitude}
+                                    longitude={item?.longitude}
+                                />
+                            </View>
                             <View style={{ flex: 1 }}>
-                                {renderRow(`${item?.title}`, '')}
+                                {renderRow(``, `${item?.title}`, [NewStyles.title, { flex: 1 }])}
                                 {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }])}
                             </View>
                             <Pressable style={styles.searchBarIcons} onPress={() => { setId(item?.id); setDeletModal(true); }}>

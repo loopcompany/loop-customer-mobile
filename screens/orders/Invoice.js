@@ -1,23 +1,22 @@
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';
 import * as Linking from "expo-linking";
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
 import { formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import Button from '../../components/Button';
-import { uri } from '../../services/URL';
+import { imageUri, uri } from '../../services/URL';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 
 import Loader from '../../components/Loader';
-import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { createStyles } from '../../styles/NewStyles';
-function Invoice({ route }) {
+function Invoice({ route, navigation }) {
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
@@ -81,7 +80,10 @@ function Invoice({ route }) {
 
     const totalDiscountedPrice = useMemo(() => {
         const basePrice = Number(data?.technician_price ?? data?.pakar_price);
+
+
         return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price);
+
     }, [data]);
 
     const totalPrice = useMemo(() => {
@@ -184,13 +186,16 @@ function Invoice({ route }) {
     return (
         <View style={NewStyles.container}>
             <ScreenHeaders title={t('Order Invoice')} />
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 10 }} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 10, paddingBottom: 100 }} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
                 <View style={{ backgroundColor: themeColor4.bgColor(1), ...NewStyles.border10, paddingBottom: 10 }}>
                     <View style={[NewStyles.seperator, { gap: 10, padding: '5%', borderBottomWidth: 0 }]}>
-                        <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
+                        <View style={[{ width: '100%', padding: '5%', }, NewStyles.border10, NewStyles.center]}>
                             <View style={[NewStyles.row, { gap: 5 }]}>
-                                <Ionicons name="newspaper-outline" size={24} color={themeColor0.bgColor(1)} />
-                                <Text style={NewStyles.title}>{t('Order ID')}: {data?.id}</Text>
+                                <Image
+                                source={{uri:`${imageUri}/userfolder/reciept.png`}}
+                                style={{height:40, width: 40,}}
+                                />
+                                <Text style={NewStyles.title}>{t('Order Invoice')}: {data?.id}</Text>
                             </View>
                             <Text style={NewStyles.text3}>{data?.category?.title}</Text>
                         </View>
@@ -208,7 +213,11 @@ function Invoice({ route }) {
                         {(data?.extra_price > 0) && renderRow(t('Extra parts cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(data?.discount_price > 0) && renderRow(t('Your discount amount'), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(totalPrice > totalDiscountedPrice > 0) && renderRow(t('Final amount without discount'), `${formatPrice(totalPrice)}` + ' ' + t('Toman'), NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable amount'), formatPrice(totalDiscountedPrice) + ' ' + t('Toman'))}
+                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable amount'), formatPrice(totalDiscountedPrice > 800000 ? totalDiscountedPrice : (totalDiscountedPrice + 200000)) + ' ' + t('Toman'))}
+                        {
+                            ((data?.status > 0 && data?.technician_price && totalDiscountedPrice < 800000) || (data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at)) &&
+                            renderRow(t('Travel and tuition fees'), formatPrice('200000') + ' ' + t('Toman'))
+                        }
                         {renderRow(`${t('Your wallet balance')}:`, formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
 
                         {/* Extra Services Display */}
@@ -245,14 +254,27 @@ function Invoice({ route }) {
                         )}
 
                     </View>
+                    <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
+                        <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)")}</Text>
+                    </View>
                     <Text style={NewStyles.title7}>{t('Thank you for your trust:')}</Text>
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
+                    <View style={{ paddingHorizontal: '5%', alignItems: 'center' }}>
+                        <TouchableOpacity style={{ padding: 10 }} onPress={()=>{
+                            navigation.navigate("FolderScreen")
+                        }}>
+                            <Text style={NewStyles.title}> {t("Reorder")} </Text>
+                        </TouchableOpacity>
+                        <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+                    </View>
+
                 </View>
             </ScrollView>
 
-            {data?.started_at && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
+            {(data?.started_at || ((data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at))) && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
                 {data?.payment_status > 0 ?
                     <View style={[{ flex: 1 }, NewStyles.center]}>
+
                         <Button title={t('Paid')} backgroundColor={themeColor7.bgColor(1)} />
                     </View>
                     :
@@ -261,7 +283,7 @@ function Invoice({ route }) {
                             <Button title={t('Wallet payment')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0, backgroundColor: themeColor7.bgColor(1) }} loading={loading1} onPress={() => walletPayment()} />
                         </View>
                         <View style={[{ flex: 1 }, NewStyles.center]}>
-                            <Button title={t('Gateway payment')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loading2} onPress={() => gatewayPayment()} />
+                            <Button title={t('Gateway payment')} textStyle={[{ fontSize: 14, color: themeColor4.bgColor(1) },]} style={{ paddingHorizontal: 0 }} loading={loadingGateway} onPress={() => gatewayPayment()} />
                         </View>
                     </>
                 }
@@ -272,7 +294,4 @@ function Invoice({ route }) {
 }
 
 // محافظت از صفحه فاکتور سفارش - نیاز به تایید کامل
-export default withOrganizationAccess(Invoice, {
-    ...ACCESS_PRESETS.ORDER_RELATED,
-    screenName: 'Invoice'
-});
+export default Invoice;

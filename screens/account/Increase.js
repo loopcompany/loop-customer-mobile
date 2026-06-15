@@ -139,7 +139,7 @@ const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
                         ]}
                     >
                         <Ionicons name={'cash-outline'} size={20} color={themeColor0.bgColor(1)} />
-                        <TextInput style={[styles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]} keyboardType='number-pad' placeholder={t('Amount in Tomans')} placeholderTextColor={themeColor3.bgColor(1)} maxLength={10} value={amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} onChangeText={(text) => { setAmount(text?.replace(/,/g, "")) }} />
+                        <TextInput style={[styles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1, height:'100%' }]} keyboardType='number-pad' placeholder={t('Amount in Tomans')} placeholderTextColor={themeColor3.bgColor(1)} maxLength={10} value={amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} onChangeText={(text) => { setAmount(text?.replace(/,/g, "")) }} />
                     </View>
                     <View
                         style={[

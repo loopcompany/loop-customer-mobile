@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   Platform,
   Linking,
+  TextInput,
+  RefreshControl,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
@@ -23,40 +26,83 @@ import { createStyles } from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import NewStyles from '../../styles/NewStyles';
-import { showAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4 } from '../../theme/Color';
-import { uri } from '../../services/URL';
+import { handleError, showAlert, showToastOrAlert } from '../../helpers/Common';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
+import { imageUri, uri } from '../../services/URL';
+import Button from './../../components/Button';
 
 const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
   const reduxContractStatus = useSelector(state => state.organization.contractStatus);
-  const { refetch } = useOrganizationAccess(); // برای رفرش کردن وضعیت کامل (پروفایل + قرارداد)
+  const { refetch } = useOrganizationAccess();
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-   const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
 
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingContract, setLoadingContract] = useState(true);
   const [uploadingContract, setUploadingContract] = useState(false);
+  const token = useSelector((state) => state?.auth?.token);
 
-  // Contract data from admin
+
   const [adminContract, setAdminContract] = useState(null);
+  const [information, setInformation] = useState('');
 
-  // User uploaded contract
+
   const [uploadedContract, setUploadedContract] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Helper function برای تبدیل تاریخ میلادی به شمسی
+  const submitRequest = () => {
+    axios.get(`${uri}/contracts/submit-contract-request`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      }
+    })
+      .then((res) => {
+        showToastOrAlert(res?.data?.message)
+      })
+      .catch((err) => {
+
+        handleError(err, t)
+      })
+      .finally(() => {
+        setSending(false)
+        loadContractData();
+      })
+  }
+  const submitInformationForRequest = () => {
+    axios.post(`${uri}/contracts/submit-information-for-request`, { information: information }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      }
+    })
+      .then((res) => {
+        showToastOrAlert(res?.data?.message)
+      })
+      .catch((err) => {
+
+        handleError(err, t)
+      })
+      .finally(() => {
+        setSending(false)
+        loadContractData();
+      })
+  }
+
   const toJalaliDate = (dateString) => {
     try {
       if (!dateString) return '';
 
       const date = new Date(dateString);
 
-      // بررسی اعتبار تاریخ
+
       if (isNaN(date.getTime())) {
         console.warn('Invalid date string:', dateString);
         return dateString;
@@ -64,18 +110,17 @@ const OrganizationContract = ({ navigation }) => {
 
       const jalaaliDate = jalaali.toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
 
-      // فرمت: ۱۴۰۳/۰۸/۲۱ (اعداد فارسی)
+
       const year = jalaaliDate.jy.toString();
       const month = jalaaliDate.jm.toString().padStart(2, '0');
       const day = jalaaliDate.jd.toString().padStart(2, '0');
 
-      // تبدیل اعداد انگلیسی به فارسی
+
       const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
       const jalaliDateStr = `${year}/${month}/${day}`;
 
       return jalaliDateStr.replace(/[0-9]/g, (digit) => persianNumbers[parseInt(digit)]);
     } catch (error) {
-      console.error('Error converting date to Jalaali:', error);
       return dateString;
     }
   };
@@ -87,15 +132,7 @@ const OrganizationContract = ({ navigation }) => {
   // بارگذاری اطلاعات قرارداد از سرور
   const loadContractData = async () => {
     try {
-      console.log('🔄 loadContractData called');
       setLoadingContract(true);
-      const token = await AsyncStorage.getItem('userToken');
-
-      if (!token) {
-        showAlert(t('Error'), t('Please log in first.'));
-        navigation.navigate('Login');
-        return;
-      }
 
       // دریافت آخرین قرارداد عمومی
       const latestContractResponse = await axios.get(`${uri}/contracts/latest`, {
@@ -105,91 +142,39 @@ const OrganizationContract = ({ navigation }) => {
         }
       });
 
-      console.log('📄 Admin contract response:', latestContractResponse.data);
 
       if (latestContractResponse.data.success) {
         const contract = latestContractResponse.data.data;
         setAdminContract({
           id: contract.id,
+          status: contract.status,
+          need_docs: contract.need_docs,
+          reject_reason: contract.reject_reason,
+          reject_contract_reason: contract.reject_contract_reason,
+          file_url: contract.contract_file_path,
           title: contract.title,
-          description: contract.description,
-          file_url: contract.pdf_url,
-          file_name: contract.title + '.pdf',
-          uploaded_at: toJalaliDate(contract.created_at),
+          signed_contract_file_path: contract.signed_contract_file_path,
+          status_label: contract.status_label,
+          file_name: t("Contract file"),
+          uploaded_by_admin_at: toJalaliDate(contract.uploaded_by_admin_at),
+          uploaded_at: toJalaliDate(contract.uploaded_at),
         });
-      }
+        setInformation(contract?.information)
 
-      // دریافت لیست قراردادهای سازمان
-      const orgContractsResponse = await axios.get(`${uri}/organization/contracts`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        }
-      });
-
-      console.log('📋 Organization contracts response:', orgContractsResponse.data);
-
-      if (orgContractsResponse.data.success && orgContractsResponse.data.data.length > 0) {
-        // آخرین قرارداد آپلود شده
-        const latestUpload = orgContractsResponse.data.data[0];
-        console.log('📤 Latest uploaded contract:', latestUpload);
-
-        const uploadedData = {
-          id: latestUpload.id,
-          file_url: latestUpload.contract_url,
-          file_name: t('Signed contract'),
-          uploaded_at: toJalaliDate(latestUpload.uploaded_at),
-          status: latestUpload.status,
-          status_label: latestUpload.status_label,
-          rejection_reason: latestUpload.rejection_reason,
-          reviewed_at: latestUpload.reviewed_at ? toJalaliDate(latestUpload.reviewed_at) : null,
-          can_edit: latestUpload.can_edit,
-        };
-
-        console.log('✅ Setting uploadedContract:', uploadedData);
-        console.log('📅 Date conversion test:', {
-          original_uploaded_at: latestUpload.uploaded_at,
-          converted_uploaded_at: uploadedData.uploaded_at,
-          original_reviewed_at: latestUpload.reviewed_at,
-          converted_reviewed_at: uploadedData.reviewed_at
-        });
-        setUploadedContract(uploadedData);
-
-        // 🔥 آپدیت Redux state با وضعیت واقعی قرارداد از API
-        if (latestUpload.status) {
-          dispatch(updateContractStatus(latestUpload.status));
-          console.log('✅ Redux contractStatus updated from API to:', latestUpload.status);
-        }
-      } else {
-        console.log('⚠️ No uploaded contracts found');
-        setUploadedContract(null);
-
-        // اگه قراردادی نداریم، وضعیت رو 'not_uploaded' بزاریم
-        dispatch(updateContractStatus('not_uploaded'));
-        console.log('✅ Redux contractStatus updated to: not_uploaded');
       }
 
     } catch (error) {
-      console.error('❌ Error loading contract:', error);
-      console.error('Error response:', error.response?.data);
-
       if (error.response?.status === 403) {
-        showAlert(t('Error'), t('Only organization users can view contracts.'));
-        if (Platform.OS == 'web') {
-          window.history.back()
-        } else {
-          navigation.goBack()
-        }
       } else if (error.response?.status === 404) {
         // هیچ قراردادی یافت نشد - این عادی است
-        console.log('⚠️ 404 - No contracts found (normal)');
+
         setAdminContract(null);
       } else {
         showAlert(t('Error'), error.response?.data?.message || t('Error loading contract information.'));
       }
     } finally {
       setLoadingContract(false);
-      console.log('✅ loadContractData finished');
+      setRefreshing(false);
     }
   };
 
@@ -201,81 +186,53 @@ const OrganizationContract = ({ navigation }) => {
         return;
       }
 
-      const supported = await Linking.canOpenURL(adminContract.file_url);
+      const supported = await Linking.canOpenURL(`${imageUri}/${adminContract.file_url}`);
 
       if (supported) {
-        await Linking.openURL(adminContract.file_url);
+        await Linking.openURL(`${imageUri}/${adminContract.file_url}`);
       } else {
         showAlert(t('Error'), t('Unable to open the link.'));
       }
     } catch (error) {
-      console.error('Error downloading contract:', error);
       showAlert(t('Error'), t('Error downloading contract.'));
     }
   };
 
   // انتخاب فایل قرارداد امضا شده
   const handlePickDocument = async () => {
-    console.log('🔵 handlePickDocument called!');
-    console.log('🔍 Current state:', {
-      loading,
-      uploadingContract,
-      uploadedContract: uploadedContract ? {
-        status: uploadedContract.status,
-        filename: uploadedContract.filename
-      } : null,
-      selectedFile: selectedFile ? {
-        name: selectedFile.name,
-        size: selectedFile.size
-      } : null
-    });
+
 
     try {
       // بررسی امکان آپلود
       if (uploadedContract && uploadedContract.status === 'approved') {
-        console.log('⚠️ Upload blocked - contract already approved');
         showAlert(t('Attention'), t('You already have an approved contract and re-upload is not allowed.'));
         return;
       }
 
-      console.log('🟢 Opening DocumentPicker...');
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf'],
         copyToCacheDirectory: true,
       });
 
-      console.log('📁 DocumentPicker result:', JSON.stringify(result, null, 2));
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
 
-        console.log('📄 File selected:', {
-          name: file.name,
-          size: file.size,
-          mimeType: file.mimeType,
-          uri: file.uri,
-          hasFileObject: !!file.file
-        });
 
         // Check file size (max 500MB according to API docs)
         if (file.size > 500 * 1024 * 1024) {
-          console.log('❌ File too large:', file.size);
           showAlert(t('Error'), t('File size must not exceed 500 MB.'));
           return;
         }
 
         // Check file type
         if (file.mimeType !== 'application/pdf') {
-          console.log('❌ Invalid mimeType:', file.mimeType);
           showAlert(t('Error'), t('Only PDF files are allowed.'));
           return;
         }
 
-        console.log('✅ Validation passed, setting selectedFile');
-
         // 🌐 در وب، باید File object واقعی رو هم ذخیره کنیم
         if (Platform.OS === 'web' && file.file) {
-          console.log('📁 Web: Storing File object');
           setSelectedFile({
             ...file,
             file: file.file // File object واقعی برای آپلود
@@ -286,46 +243,23 @@ const OrganizationContract = ({ navigation }) => {
 
         showAlert(t('Success'), t('File {{name}} selected', { name: file.name }));
       } else {
-        console.log('⚠️ File selection canceled or no file');
-        console.log('Result details:', {
-          canceled: result.canceled,
-          hasAssets: !!result.assets,
-          assetsLength: result.assets?.length
-        });
       }
     } catch (error) {
-      console.error('❌ Error picking document:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
+
       showAlert(t('Error'), `${t('Error selecting file')}: ${error.message}`);
     }
   };
 
   // آپلود قرارداد امضا شده
   const handleUploadContract = async () => {
-    console.log('🔵 handleUploadContract called!');
-    console.log('🔍 Upload state check:', {
-      selectedFile: selectedFile ? {
-        name: selectedFile.name,
-        size: selectedFile.size,
-        mimeType: selectedFile.mimeType,
-        uri: selectedFile.uri
-      } : null,
-      uploadingContract,
-      loading
-    });
 
     try {
       if (!selectedFile) {
-        console.log('❌ No file selected');
         showAlert(t('Error'), t('Please select a signed contract file first.'));
         return;
       }
 
       setUploadingContract(true);
-      const token = await AsyncStorage.getItem('userToken');
 
       if (!token) {
         console.log('❌ No token found');
@@ -334,47 +268,34 @@ const OrganizationContract = ({ navigation }) => {
         return;
       }
 
-      console.log('🔑 Token found, preparing FormData...');
       const formData = new FormData();
 
       // 🌐 Platform-specific file handling
       if (Platform.OS === 'web') {
-        // در وب، selectedFile.file یک File object واقعی است
-        console.log('📁 Web: Appending File object directly');
+        // در وب، selectedFile.file یک File object واقعی است 
 
         // بررسی وجود file object
         if (selectedFile.file) {
           formData.append('contract_file', selectedFile.file, selectedFile.name);
-          console.log('✅ File appended:', {
-            name: selectedFile.name,
-            size: selectedFile.size,
-            type: selectedFile.mimeType
-          });
         } else if (selectedFile.uri) {
-          // fallback: اگر file object نداریم، از uri استفاده می‌کنیم (fetch blob)
-          console.log('⚠️ No file object, fetching blob from URI...');
+          // fallback: اگر file object نداریم، از uri استفاده می‌کنیم (fetch blob) 
           const response = await fetch(selectedFile.uri);
           const blob = await response.blob();
           formData.append('contract_file', blob, selectedFile.name || 'contract.pdf');
-          console.log('✅ Blob appended from URI');
         } else {
           throw new Error(t('Invalid file.'));
         }
       } else {
-        // در React Native، از uri استفاده می‌کنیم
-        console.log('� Mobile: Using URI-based file data');
+        // در React Native، از uri استفاده می‌کنیم 
         const fileData = {
           uri: selectedFile.uri,
           type: 'application/pdf',
           name: selectedFile.name || 'contract.pdf',
         };
         formData.append('contract_file', fileData);
-        console.log('✅ File data appended:', fileData);
       }
 
       const uploadUrl = `${uri}/organization/contracts/upload`;
-      console.log('🌐 Upload URL:', uploadUrl);
-      console.log('🔄 Starting upload...');
 
       // 🌐 Headers - در وب نباید Content-Type دستی تنظیم بشه
       const headers = {
@@ -387,24 +308,17 @@ const OrganizationContract = ({ navigation }) => {
         headers['Content-Type'] = 'multipart/form-data';
       }
 
-      console.log('📤 Request headers:', headers);
 
       const response = await axios.post(uploadUrl, formData, {
         headers,
         timeout: 30000, // 30 second timeout
       });
 
-      console.log('✅ Upload request completed!');
-
-      console.log('📤 Upload API Response:', JSON.stringify(response.data, null, 2));
 
       if (response.data.success) {
-        console.log('✅ Upload successful!');
-        console.log('Response data:', response.data);
 
         // 🔥 آپدیت Redux state - قرارداد الان pending هست
         dispatch(updateContractStatus('pending'));
-        console.log('✅ Redux contractStatus updated to: pending');
 
         // بررسی اینکه واقعاً آپدیت شد یا نه
         setTimeout(() => {
@@ -421,16 +335,12 @@ const OrganizationContract = ({ navigation }) => {
                 console.log('🔄 Clearing selectedFile and reloading data...');
                 setSelectedFile(null);
 
-                // صبر می‌کنیم تا سرور قرارداد رو ثبت کنه
-                console.log('⏳ Waiting 1 second before reloading...');
+                // صبر می‌کنیم تا سرور قرارداد رو ثبت کنه 
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                console.log('🔄 Now calling loadContractData...');
                 await loadContractData(); // Reload data
 
-                console.log('🔄 Now calling refetch to update profileStatus + contractStatus...');
-                await refetch(); // 🔥 آپدیت کامل وضعیت از API (هم پروفایل هم قرارداد)
-                console.log('✅ Full status refreshed from API');
+                await refetch(); // 🔥 آپدیت کامل وضعیت از API (هم پروفایل هم قرارداد) 
               }
             }
           ]
@@ -438,44 +348,25 @@ const OrganizationContract = ({ navigation }) => {
       }
 
     } catch (error) {
-      console.error('❌ Upload Error Details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          headers: error.config?.headers
-        }
-      });
 
       if (error.response?.status === 400) {
-        console.log('❌ 400 Bad Request');
         showAlert(t('Error'), error.response.data.message || t('You already have an approved contract and re-upload is not allowed.'));
       } else if (error.response?.status === 422) {
-        console.log('❌ 422 Validation Error');
         // Validation errors
         const errors = error.response.data.errors;
         const errorMessages = Object.values(errors).flat().join('\n');
         showAlert(t('Validation error'), errorMessages);
       } else if (error.response?.status === 404) {
-        console.log('❌ 404 Not Found');
         showAlert(t('Error'), t('Organization information not found.'));
       } else if (error.response?.status === 401) {
-        console.log('❌ 401 Unauthorized');
         showAlert(t('Error'), t('Authentication failed. Please log in again.'));
       } else if (error.response?.status === 413) {
-        console.log('❌ 413 File Too Large');
         showAlert(t('Error'), t('File size exceeds the allowed limit.'));
       } else if (error.code === 'ECONNABORTED') {
-        console.log('❌ Request Timeout');
         showAlert(t('Error'), t('Request timed out. Please try again.'));
       } else if (error.message.includes('Network Error')) {
-        console.log('❌ Network Error');
         showAlert(t('Error'), t('Error connecting to server. Please check your internet connection'));
       } else {
-        console.log('❌ Other Error');
         showAlert(t('Error'), error.response?.data?.message || error.message || t('Error uploading contract'));
       }
     } finally {
@@ -498,199 +389,258 @@ const OrganizationContract = ({ navigation }) => {
     );
   }
 
-  console.log('🎨 Rendering - uploadedContract:', uploadedContract ? 'EXISTS' : 'NULL');
-  console.log('🎨 uploadedContract details:', uploadedContract);
 
   return (
     <View style={styles.container}>
       <CustomStatusBar />
       <ScreenHeaders title={t('Organization contract')} />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* توضیحات */}
-        <View style={styles.infoBox}>
-          <Ionicons name="information-circle-outline" size={24} color={themeColor1.bgColor(1)} />
-          <Text style={styles.infoText}>
-            {t('In this section, you can view and download the organizational cooperation contract and then upload the signed contract.')}
-          </Text>
-        </View>
-
-        {/* قرارداد ادمین */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="document-text-outline" size={24} color={themeColor1.bgColor(1)} />
-            <Text style={styles.sectionTitle}>{t('Cooperation contract')}</Text>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={'padding'}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              loadContractData()
+            }}
+          />}
+        >
+          {/* توضیحات */}
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={24} color={themeColor0.bgColor(1)} />
+            <Text style={styles.infoText}>
+              {t('In this section, you can view and download the organizational cooperation contract and then upload the signed contract.')}
+            </Text>
           </View>
 
-          {adminContract ? (
-            <View style={styles.contractCard}>
-              <View style={styles.contractInfo}>
+          {/* قرارداد ادمین */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="document-text-outline" size={24} color={themeColor1.bgColor(1)} />
+              <Text style={styles.sectionTitle}>{t('Cooperation contract')}</Text>
+            </View>
+
+            {adminContract?.file_url ? (
+              <View style={styles.contractCard}>
+                <View style={styles.contractInfo}>
                   <Ionicons name="document" size={40} color={themeColor1.bgColor(1)} />
                   <View style={styles.contractDetails}>
+                    {adminContract.title &&<Text style={styles.contractFileName}>{adminContract.title}</Text>}
                     <Text style={styles.contractFileName}>{adminContract.file_name}</Text>
-                    <Text style={styles.contractDate}>{t('Upload date:')} {adminContract.uploaded_at}</Text>
                   </View>
                 </View>
 
-              <View style={styles.contractActions}>
-                <TouchableOpacity
-                  style={styles.downloadBtn}
-                  onPress={handleDownloadAdminContract}
-                >
-                  <Ionicons name="download-outline" size={20} color="#fff" />
-                  <Text style={styles.downloadBtnText}>{t('Download and view')}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.emptyCard}>
-              <Ionicons name="document-outline" size={60} color="#ccc" />
-              <Text style={styles.emptyText}>{t('The contract has not been uploaded yet.')}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* آپلود قرارداد امضا شده */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="cloud-upload-outline" size={24} color={themeColor4.bgColor(1)} />
-            <Text style={styles.sectionTitle}>{t('Upload signed contract')}</Text>
-          </View>
-
-          {/* فایل انتخاب شده */}
-          {selectedFile && (
-            <View style={styles.selectedFileCard}>
-              <View style={styles.fileInfo}>
-                <Ionicons name="document-attach" size={30} color={themeColor4.bgColor(1)} />
-                <View style={styles.fileDetails}>
-                  <Text style={styles.fileName}>{selectedFile.name}</Text>
-                  <Text style={styles.fileSize}>
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </Text>
+                <View style={styles.contractActions}>
+                  <TouchableOpacity
+                    style={styles.downloadBtn}
+                    onPress={handleDownloadAdminContract}
+                  >
+                    <Ionicons name="download-outline" size={20} color="#fff" />
+                    <Text style={styles.downloadBtnText}>{t('Download and view')}</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-              <TouchableOpacity onPress={handleRemoveSelectedFile}>
-                <Ionicons name="close-circle" size={24} color="#ff0000" />
-              </TouchableOpacity>
-            </View>
-          )}
+            ) : (
+              <View style={[styles.emptyCard, (adminContract?.status == '2' || adminContract?.status == '4') && { backgroundColor: themeColor6.bgColor(0.2), borderColor: themeColor6.bgColor(1), borderWidth: 1 }]}>
+                {/* <Ionicons name="document-outline" size={60} color="#ccc" /> */}
+                {/* <Text style={styles.emptyText}>{t('The contract has not been uploaded yet.')}</Text> */}
+                {!adminContract &&
+                  <>
+                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
+                      {t("To enter into an organizational contract with the Loop platform, first submit a request.")}
+                    </Text>
+                    <Button
+                      title={t("Submit request")}
+                      loading={sending}
+                      onPress={() => {
+                        setSending(true);
+                        submitRequest()
+                      }}
+                    />
+                  </>}
+                {
+                  adminContract?.status == '0' && <>
+                    <Text style={NewStyles.text10}>{t("Your contract request has been registered and is being reviewed.")}</Text>
+                  </>
+                }
+                {
+                  (adminContract?.status == '1' && adminContract?.need_docs) && <>
+                    <Text style={NewStyles.text10}>{t("Your contract request has been approved.Please submit the requested information to prepare the contract file.")}</Text>
+                    <Text style={NewStyles.text10}>{adminContract?.need_docs}</Text>
+                    <TextInput
+                      value={information}
+                      style={[NewStyles.textInput, NewStyles.text10, { minHeight: 80, marginTop: 10 }, NewStyles.border10]}
+                      multiline={true}
+                      textAlignVertical='top'
+                      verticalAlign='top'
+                      placeholderTextColor={themeColor3.bgColor(1)}
+                      placeholder={t('Information requested')}
+                      onChangeText={(text) => {
+                        setInformation(text)
+                      }}
+                    />
+                    <Button
+                      loading={sending}
+                      onPress={() => {
+                        if (information) {
 
-          {/* دکمه‌های عملیات */}
-          <View style={styles.uploadActions}>
-            <TouchableOpacity
-              style={styles.selectFileBtn}
-              onPress={handlePickDocument}
-              disabled={uploadingContract}
-            >
-              <Ionicons name="folder-open-outline" size={20} color={themeColor1.bgColor(1)} />
-              <Text style={styles.selectFileBtnText}>
-                {selectedFile ? t('Change file') : t('Select file')}
-              </Text>
-            </TouchableOpacity>
+                          setSending(true)
+                          submitInformationForRequest()
+                        } else {
+                          showToastOrAlert(t('Please enter the requested information first.'))
+                        }
+                      }}
+                      title={t("Send information")}
+                    />
+                  </>
+                }
+                {
+                  (adminContract?.status == '2' || adminContract?.status == '4') &&
+                  <>
 
-            {selectedFile && (
-              <TouchableOpacity
-                style={styles.uploadBtn}
-                onPress={handleUploadContract}
-                disabled={uploadingContract}
-              >
-                {uploadingContract ? (
-                  <ActivityIndicator size="small" color="#000000ff" />
-                ) : (
-                  <Ionicons name="cloud-upload" size={20} color="#000000ff" />
-                )}
-                <Text style={styles.uploadBtnText}>
-                  {uploadingContract ? t('Uploading...') : t('Upload contract')}
-                </Text>
-              </TouchableOpacity>
+                    <Text style={[NewStyles.title6, { textAlign: 'center' }]}>{adminContract?.status == '2' ? t('Your request was rejected for the following reason:') : t('The contract was rejected for the following reason:')}</Text>
+                    <Text style={NewStyles.text6}>{adminContract?.status == '2' ? adminContract?.reject_reason : adminContract?.reject_contract_reason}</Text>
+                  </>
+                }
+              </View>
             )}
           </View>
 
-          {/* قرارداد آپلود شده قبلی */}
-          {uploadedContract && (
-            <View style={styles.uploadedSection}>
-              <Text style={styles.uploadedLabel}>{t('Uploaded contract:')}</Text>
-              <View style={[
-                styles.uploadedCard,
-                uploadedContract.status === 'approved' && styles.uploadedCardApproved,
-                uploadedContract.status === 'rejected' && styles.uploadedCardRejected,
-              ]}>
-                <View style={styles.uploadedInfo}>
-                  <Ionicons
-                    name={
-                      uploadedContract.status === 'approved' ? 'checkmark-circle' :
-                        uploadedContract.status === 'rejected' ? 'close-circle' :
-                          'time-outline'
-                    }
-                    size={30}
-                    color={
-                      uploadedContract.status === 'approved' ? '#4caf50' :
-                        uploadedContract.status === 'rejected' ? '#f44336' :
-                          '#ff9800'
-                    }
-                  />
-                  <View style={styles.uploadedDetails}>
-                    <Text style={styles.uploadedFileName}>{uploadedContract.file_name}</Text>
-                    <Text style={styles.uploadedDate}>
-                      {t('Upload date:')} {uploadedContract.uploaded_at}
-                    </Text>
-                    {uploadedContract.reviewed_at && (
-                      <Text style={styles.uploadedDate}>
-                        {t('Review date:')} {uploadedContract.reviewed_at}
-                      </Text>
-                    )}
-                    <Text style={[
-                      styles.uploadedStatus,
-                      uploadedContract.status === 'approved' && styles.statusApproved,
-                      uploadedContract.status === 'rejected' && styles.statusRejected,
-                      uploadedContract.status === 'pending' && styles.statusPending,
-                    ]}>
-                      {t('Status:')} {uploadedContract.status_label}
-                    </Text>
+          {/* آپلود قرارداد امضا شده */}
+          <View style={styles.section}>
+            {(!adminContract?.signed_contract_file_path && adminContract?.file_url && adminContract?.status == '1') && <View style={styles.sectionHeader}>
+              <Ionicons name="cloud-upload-outline" size={24} color={themeColor4.bgColor(1)} />
+              <Text style={styles.sectionTitle}>{t('Upload signed contract')}</Text>
+            </View>}
 
-                    {/* نمایش دلیل رد */}
-                    {uploadedContract.status === 'rejected' && uploadedContract.rejection_reason && (
-                      <View style={styles.rejectionBox}>
-                        <Text style={styles.rejectionTitle}>{t('Rejection reason')}</Text>
-                        <Text style={styles.rejectionText}>{uploadedContract.rejection_reason}</Text>
-                      </View>
-                    )}
-
-                    {/* دکمه دانلود قرارداد آپلود شده */}
-                    <TouchableOpacity
-                      style={styles.viewUploadedBtn}
-                      onPress={() => Linking.openURL(uploadedContract.file_url)}
-                    >
-                      <Ionicons name="eye-outline" size={18} color={themeColor1.bgColor(1)} />
-                      <Text style={styles.viewUploadedBtnText}>{t('View uploaded file')}</Text>
-                    </TouchableOpacity>
+            {/* فایل انتخاب شده */}
+            {selectedFile && (
+              <View style={styles.selectedFileCard}>
+                <View style={styles.fileInfo}>
+                  <Ionicons name="document-attach" size={30} color={themeColor4.bgColor(1)} />
+                  <View style={styles.fileDetails}>
+                    <Text style={styles.fileName}>{selectedFile.name}</Text>
+                    <Text style={styles.fileSize}>
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </Text>
                   </View>
                 </View>
+                <TouchableOpacity onPress={handleRemoveSelectedFile}>
+                  <Ionicons name="close-circle" size={24} color="#ff0000" />
+                </TouchableOpacity>
               </View>
-            </View>
-          )}
+            )}
 
-          {/* راهنمایی */}
-          <View style={styles.helpBox}>
-            <Text style={styles.helpTitle}>{t('Guide:')}</Text>
-            <Text style={styles.helpText}>{t('- First, download and read the cooperation contract')}</Text>
-            <Text style={styles.helpText}>{t('- Sign the contract (digitally or by scan)')}</Text>
-            <Text style={styles.helpText}>{t('- Upload the signed file')}</Text>
-            <Text style={styles.helpText}>{t('- Allowed format: PDF only')}</Text>
-            <Text style={styles.helpText}>{t('- Maximum file size: 500 MB')}</Text>
-            <Text style={styles.helpText}>{t('- If rejected, you can upload again')}</Text>
+            {/* دکمه‌های عملیات */}
+            {(!adminContract?.signed_contract_file_path && adminContract?.file_url && adminContract?.status == '1') && <View style={styles.uploadActions}>
+              <TouchableOpacity
+                style={styles.selectFileBtn}
+                onPress={handlePickDocument}
+                disabled={uploadingContract}
+              >
+                <Ionicons name="folder-open-outline" size={20} color={themeColor1.bgColor(1)} />
+                <Text style={styles.selectFileBtnText}>
+                  {selectedFile ? t('Change file') : t('Select file')}
+                </Text>
+              </TouchableOpacity>
+
+
+              {
+                selectedFile &&
+                <View style={{ flex: 1 }}>
+                  <Button
+                    onPress={handleUploadContract}
+                    loading={uploadingContract}
+                    title={uploadingContract ? t('Uploading...') : t('Send')}
+                  />
+                </View>
+              }
+            </View>}
+
+            {/* قرارداد آپلود شده قبلی */}
+            {adminContract?.signed_contract_file_path && (
+              <View style={styles.uploadedSection}>
+                <Text style={styles.uploadedLabel}>{t('Uploaded contract:')}</Text>
+                <View style={[
+                  styles.uploadedCard,
+                  (adminContract.status == '3' || adminContract.status == '1') && styles.uploadedCardApproved,
+                  (adminContract.status == '2' || adminContract.status == '4') && styles.uploadedCardRejected,
+                ]}>
+                  <View style={styles.uploadedInfo}>
+                    <Ionicons
+                      name={
+                        (adminContract.status == '3' || adminContract.status == '1') ? 'checkmark-circle' :
+                          (adminContract.status == '2' || adminContract.status == '4') ? 'close-circle' :
+                            'time-outline'
+                      }
+                      size={30}
+                      color={
+                        (adminContract.status == '3' || adminContract.status == '1') ? '#4caf50' :
+                          (adminContract.status == '2' || adminContract.status == '4') ? '#f44336' :
+                            '#ff9800'
+                      }
+                    />
+                    <View style={styles.uploadedDetails}>
+                      <Text style={styles.uploadedFileName}>{adminContract.file_name}</Text>
+                      <Text style={styles.uploadedDate}>
+                        {t('Upload date:')} {adminContract.uploaded_at}
+                      </Text>
+                      {adminContract.reviewed_at && (
+                        <Text style={styles.uploadedDate}>
+                          {t('Review date')}: {adminContract.reviewed_at}
+                        </Text>
+                      )}
+                      <Text style={[
+                        styles.uploadedStatus,
+                        (adminContract.status == '3' || adminContract.status == '1') && styles.statusApproved,
+                        (adminContract.status == '2' || adminContract.status == '4') && styles.statusRejected,
+                        adminContract.status == '0' && styles.statusPending,
+                      ]}>
+                        {t('Status')}: {adminContract.status_label}
+                      </Text>
+
+                      {/* نمایش دلیل رد */}
+                      {adminContract.status === '2' && adminContract.reject_reason && (
+                        <View style={styles.rejectionBox}>
+                          <Text style={styles.rejectionTitle}>{t('Rejection reason')}</Text>
+                          <Text style={styles.rejectionText}>{adminContract.reject_reason}</Text>
+                        </View>
+                      )}
+
+                      {/* دکمه دانلود قرارداد آپلود شده */}
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.viewUploadedBtn}
+                    onPress={() => Linking.openURL(`${imageUri}/${adminContract.signed_contract_file_path}`)}
+                  >
+                    <Ionicons name="eye-outline" size={18} color={themeColor1.bgColor(1)} />
+                    <Text style={styles.viewUploadedBtnText}>{t('View uploaded file')}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* راهنمایی */}
+            <View style={styles.helpBox}>
+              <Text style={styles.helpTitle}>{t('Guide:')}</Text>
+              <Text style={styles.helpText}>{t('- First, download and read the cooperation contract')}</Text>
+              <Text style={styles.helpText}>{t('- Sign the contract (digitally or by scan)')}</Text>
+              <Text style={styles.helpText}>{t('- Upload the signed file')}</Text>
+              <Text style={styles.helpText}>{t('- Allowed format: PDF only')}</Text>
+              <Text style={styles.helpText}>{t('- Maximum file size: 500 MB')}</Text>
+              <Text style={styles.helpText}>{t('- If rejected, you can upload again')}</Text>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
 
-const createLocalStyles = (NewStyles) =>StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -707,7 +657,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     paddingBottom: 100,
   },
   loadingText: {
-     ...NewStyles.text10,
+    ...NewStyles.text10,
     marginTop: 10,
     fontSize: 14,
     fontFamily: 'VazirLight',
@@ -717,21 +667,17 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
 
   // Info Box
   infoBox: {
- ...NewStyles.row,
-    backgroundColor: '#e3f2fd',
+    ...NewStyles.row,
+    backgroundColor: themeColor1.bgColor(1),
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
-    borderRightWidth: 4,
-    borderRightColor: themeColor1.bgColor(1),
   },
   infoText: {
     flex: 1,
     marginRight: 10,
     fontSize: 14,
-    fontFamily: 'VazirLight',
-    color: '#333',
- ...NewStyles.text10,
+    ...NewStyles.text10,
     lineHeight: 22,
     writingDirection: 'rtl',
   },
@@ -741,7 +687,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     marginBottom: 25,
   },
   sectionHeader: {
- ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -750,7 +696,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginRight: 8,
- ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
 
@@ -766,7 +712,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     shadowRadius: 4,
   },
   contractInfo: {
- ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -779,21 +725,19 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 5,
- ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   contractDate: {
     fontSize: 13,
-    fontFamily: 'VazirLight',
-    color: '#666',
- ...NewStyles.row,
-    writingDirection: 'rtl',
+    ...NewStyles.text10,
+    ...NewStyles.row,
   },
   contractActions: {
     marginTop: 10,
   },
   downloadBtn: {
- ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor1.bgColor(1),
@@ -811,26 +755,23 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
 
   // Empty Card
   emptyCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: themeColor1.bgColor(1),
     borderRadius: 10,
-    padding: 40,
+    padding: 10,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderStyle: 'dashed',
   },
   emptyText: {
     marginTop: 15,
     fontSize: 14,
     fontFamily: 'VazirLight',
     color: '#999',
- ...NewStyles.text3,
+    ...NewStyles.text3,
     writingDirection: 'rtl',
   },
 
   // Selected File Card
   selectedFileCard: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
@@ -842,7 +783,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     borderColor: themeColor4.bgColor(1),
   },
   fileInfo: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     flex: 1,
   },
@@ -855,32 +796,31 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 4,
-     ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   fileSize: {
     fontSize: 12,
     fontFamily: 'VazirLight',
     color: '#666',
-     ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
 
   // Upload Actions
   uploadActions: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     gap: 10,
     marginBottom: 15,
   },
   selectFileBtn: {
     flex: 1,
-   ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+    height: 50,
     borderWidth: 2,
     borderColor: themeColor1.bgColor(1),
   },
@@ -893,7 +833,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
   },
   uploadBtn: {
     flex: 1,
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: themeColor4.bgColor(1),
@@ -922,7 +862,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 10,
-   ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   uploadedCard: {
@@ -941,7 +881,7 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     borderRightColor: '#f44336',
   },
   uploadedInfo: {
-     ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'flex-start',
   },
   uploadedDetails: {
@@ -953,16 +893,13 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#333',
     marginBottom: 4,
-     ...NewStyles.text10,
+    ...NewStyles.text10,
     writingDirection: 'rtl',
   },
   uploadedDate: {
     fontSize: 12,
-    fontFamily: 'VazirLight',
-    color: '#666',
     marginBottom: 4,
     ...NewStyles.text10,
-    writingDirection: 'rtl',
   },
   uploadedStatus: {
     fontSize: 13,

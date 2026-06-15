@@ -1,5 +1,5 @@
 // ProductIssueScreen.js
-import React, { useState,useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -33,7 +33,7 @@ export default function ProductIssueScreen({ navigation }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const [form, setForm] = useState({
     name: '',
     orderDate: '',
@@ -170,32 +170,32 @@ export default function ProductIssueScreen({ navigation }) {
     <SafeAreaView edges={{ top: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t('Service / Product Fault')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
-        <ScrollView contentContainerStyle={[NewStyles.wrapper]}>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Product / Service Name')}<Text style={NewStyles.title6}>*</Text></Text>
+        <ScrollView contentContainerStyle={[NewStyles.wrapper, { paddingBottom: 100 }]}>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Product / Service Name')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput placeholder={t('Product / Service Name')} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Order Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
               {form.orderDate || t('Order Registration Date')}
             </Text>
           </TouchableOpacity>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Delivery / Completion Date')}</Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Delivery / Completion Date')}</Text>
 
           <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
             <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
               {form.completeDate || t('Delivery / Completion Date')}
             </Text>
           </TouchableOpacity>
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Order Number')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <OrderDropdown
             value={selectedOrder?.value}
             onChange={handleOrderSelect}
             placeholder={t('Select Order Number')}
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Technician Code')}</Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Technician Code')}</Text>
 
           <TextInput
             placeholder={t('Technician Code')}
@@ -204,7 +204,7 @@ export default function ProductIssueScreen({ navigation }) {
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Paid Amount')}</Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Paid Amount')}</Text>
 
           <TextInput
             placeholder={t('Paid Amount')}
@@ -214,7 +214,7 @@ export default function ProductIssueScreen({ navigation }) {
             placeholderTextColor="#999"
             keyboardType="numeric"
           />
-          <Text style={[NewStyles.text, {fontFamily:'VazirBold'}]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
             placeholder={t('Description')}

@@ -10,6 +10,7 @@ import { showAlert } from '../../helpers/Common';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import NewStyles from '../../styles/NewStyles';
+import MarkerIcon from '../../assets/svg/MarkerIcon';
 import { themeColor0, themeColor4 } from '../../theme/Color';
 import Button from '../../components/Button';
 import { fetchAddresses, setLatitude, setLongitude } from '../../slices/addressSlice';
@@ -18,7 +19,7 @@ import { uri } from '../../services/URL';
 import axios from 'axios';
 import { showToastOrAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
-import NeshanMap from './NeshanMap';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // محاسبه فاصله بین دو نقطه با استفاده از Haversine formula
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -152,12 +153,98 @@ export default function Map({ route, navigation }) {
 
         }
     }
-
+    const insets = useSafeAreaInsets()
     return (
         <View style={NewStyles.container}>
-            <NeshanMap
-                submitAddress={submitAddress}
-            />
+
+            <MapView
+                style={{ flex: 1 }}
+                initialRegion={{
+                    latitude: parseFloat(radii?.latitude) || 35.6892,
+                    longitude: parseFloat(radii?.longitude) || 51.3890,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01
+                }}
+                region={region}
+                onRegionChangeComplete={(coordinates) => {
+                    setRegion(null);
+
+                    // بررسی اینکه آیا نقطه داخل دایره است یا نه
+                    if (radii && radii.latitude && radii.longitude && radii.radius) {
+                        const distance = calculateDistance(
+                            parseFloat(radii.latitude),
+                            parseFloat(radii.longitude),
+                            coordinates?.latitude,
+                            coordinates?.longitude
+                        );
+
+                        if (distance > parseFloat(radii.radius)) {
+                            showToastOrAlert(t('Please select a location within the specified area!'));
+                            return;
+                        }
+                    }
+
+                    dispatch(setLatitude(coordinates?.latitude))
+                    dispatch(setLongitude(coordinates?.longitude))
+                }}
+                mapType='standard'
+                neshanApiKey={'web.1152adf3d8884734af16cc9e8f83e649'}
+            >
+                {radii && radii.latitude && radii.longitude && radii.radius ? (
+                    <Circle
+                        center={{
+                            latitude: parseFloat(radii.latitude),
+                            longitude: parseFloat(radii.longitude)
+                        }}
+                        radius={parseFloat(radii.radius)}
+                        fillColor="rgba(52, 152, 219, 0.2)"
+                        strokeColor="rgba(52, 152, 219, 0.8)"
+                        strokeWidth={2}
+                    />
+                ) : (
+                    // Test circle - برای تست کردن که Circle component کار می‌کند
+                    <Circle
+                        center={{
+                            latitude: 35.6892, // تهران
+                            longitude: 51.3890
+                        }}
+                        radius={1000} // 1 کیلومتر
+                        fillColor="rgba(255, 0, 0, 0.2)"
+                        strokeColor="rgba(255, 0, 0, 0.8)"
+                        strokeWidth={2}
+                    />
+                )}
+            </MapView>
+            <View
+                style={{
+                    left: "50%",
+                    marginLeft: -30,
+                    marginTop: -60,
+                    position: "absolute",
+                    top: "50%",
+                }}
+            >
+                <MarkerIcon />
+            </View>
+            <View style={{ position: 'absolute', backgroundColor: 'transparent', width: '100%', bottom: insets?.bottom+90, paddingHorizontal: '5%', alignItems: Platform.OS === 'web' ? 'center' : 'flex-end' }}>
+                <Pressable style={[styles.locateBtn, NewStyles.center, NewStyles.shadow, NewStyles.border100]} onPress={() => { getLocation() }}>
+                    <Ionicons name="locate" size={24} color={themeColor0.bgColor(1)} />
+                </Pressable>
+                <Button
+                    title={t('Confirm')}
+                    loading={loading}
+                    disabled={!isLocationValid()}
+                    onPress={() => {
+                        if (!isLocationValid()) {
+                            showToastOrAlert(t('Please find your desired location correctly on the map.'))
+                            return;
+                        } else {
+
+                            submitAddress()
+                        }
+                    }}
+                />
+            </View>
         </View>
     )
 }

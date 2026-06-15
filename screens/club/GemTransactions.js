@@ -67,6 +67,7 @@ export default function GemTransactions() {
 const styles = StyleSheet.create({
     contentContainerStyle: {
         gap: 10,
-        paddingVertical: '5%'
+        paddingVertical: '5%',
+        paddingBottom: 100
     },
 })

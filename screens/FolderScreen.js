@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from "react-native";
 import Folder from "../components/Folder";
-import NewStyles from "../styles/NewStyles";
 import CustomStatusBar from "./../components/CustomStatusBar";
 import { handleError, showToastOrAlert } from "./../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,16 +18,21 @@ import { fetchSteps } from "../slices/stepSlice";
 import { setCategory } from "../slices/categorySlice";
 import Loader from "../components/Loader";
 import { ImageBackground } from "expo-image";
-import { withOrganizationAccess, ACCESS_PRESETS } from "../components/withOrganizationAccess";
+import { useTranslation } from "react-i18next";
+import { createStyles } from "../styles/NewStyles";
 
 function FolderScreen({ navigation }) {
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
-  const dispatch = useDispatch();
-  const user = useSelector(state => state?.user);
-  console.log(user);
-
+  const dispatch = useDispatch(); 
+  const user = useSelector(state => state?.user?.data);
   const loadCategories = async () => {
     try {
       const res = await categoriesAPI.getCategories();
@@ -146,12 +150,11 @@ function FolderScreen({ navigation }) {
                     title={item?.title}
                     image={item?.image_path}
                     onPress={async () => {
+                      if (!user?.code) {
+                        showToastOrAlert(t("To place an order, first complete your information in the account section."))
+                        return
+                      }
                       if (item?.has_subcategory === 1) {
-                        // اگر دارای زیر دسته است، به SubCategories برو
-                        console.log(
-                          "📂 [FolderScreen] باز کردن زیر دسته:",
-                          item.title
-                        );
                         navigation.push("SubCategories", {
                           categoryId: item.id,
                           categoryTitle: item.title,
@@ -159,10 +162,7 @@ function FolderScreen({ navigation }) {
                       } else {
                         try {
                           const result = await dispatch(fetchSteps(item.id));
-                          console.log(
-                            "🎯 [FolderScreen] نتیجه dispatch:",
-                            result
-                          );
+                           
                           dispatch(setCategory(item));
                           navigation.navigate("Steps", {
                             categoryId: item.id,
@@ -187,7 +187,7 @@ function FolderScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) =>StyleSheet.create({
   container: {
     flex: 1,
     resizeMode: "cover",
@@ -291,7 +291,4 @@ const styles = StyleSheet.create({
 });
 
 // محافظت از صفحه اصلی انتخاب دسته‌بندی - نقطه شروع ثبت سفارش
-export default withOrganizationAccess(FolderScreen, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'FolderScreen'
-});
+export default FolderScreen

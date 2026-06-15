@@ -200,6 +200,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     listContainer: {
         padding: 15,
         flexGrow: 1,
+        paddingBottom:120
     },
     reportCard: {
         backgroundColor: '#fff',
@@ -220,8 +221,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     },
     reportSubject: {
         ...NewStyles.title10,
-        flex: 1,
-        color: themeColor1.bgColor(1),
+        flex: 1, 
     },
     reportDate: {
         ...NewStyles.text10,

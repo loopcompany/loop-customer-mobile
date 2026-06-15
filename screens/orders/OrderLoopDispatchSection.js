@@ -272,6 +272,18 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
                         </View>
                     </View>
                 )}
+                {report?.product_password && (
+                    <View style={{ gap: 5, marginTop: 5 }}>
+                        <View style={[NewStyles.row, { gap: 5 }]}>
+                            <Ionicons name={"lock-closed"} size={20} color={themeColor0.bgColor(1)} />
+                            <Text style={NewStyles.title}>{t('Product password')}</Text>
+                        </View>
+                        <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
+                            <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
+                            <Text style={[NewStyles.text10, { flex: 1 }]}>{report?.product_password}</Text>
+                        </View>
+                    </View>
+                )}
 
                 {/* مدت زمان تقریبی */}
                 {report?.duration && renderRow(

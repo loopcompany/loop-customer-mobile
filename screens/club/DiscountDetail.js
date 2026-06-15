@@ -170,6 +170,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     contentContainerStyle: {
         gap: 10,
         paddingTop: 10,
+        paddingBottom:120
         // paddingVertical: '5%'
     },
     imageContainer: {

@@ -1,18 +1,25 @@
 import { Image, Linking, StyleSheet, Text, View, Modal, TouchableOpacity, Share } from 'react-native'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6 } from '../theme/Color'
-import NewStyles from '../styles/NewStyles'
 import { imageUri, mainUri } from '../services/URL'
 import { formatDate, showToastOrAlert } from '../helpers/Common'
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useDispatch, useSelector } from 'react-redux';
+import { createStyles } from '../styles/NewStyles'
 const TechnicianDetailsComponent = ({ data, navigation }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+
     const [showQRModal, setShowQRModal] = useState(false);
-        const token = useSelector((state) => state?.auth?.token)
+    const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
     const handleShare = async () => {
         const message = t('I am satisfied with the performance of {{name}}, Loop technician and I recommend you to use his services too! {{url}}', { name: data?.technician?.name, url: `${mainUri}/technician/${data?.technician?.id}` });
@@ -48,12 +55,12 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
             </View>
             <View style={[{ paddingHorizontal: '10%' }]}>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => {
-                    if(data?.status==0 || data?.status==1){
-                         Linking.openURL(`tel:${data?.technician?.phone}`)
-                    }else{
+                    if (data?.status == 0 || data?.status == 1) {
+                        Linking.openURL(`tel:${data?.technician?.phone}`)
+                    } else {
                         showToastOrAlert(t('Due to order cancellation or completion, contacting the technician is not possible.'))
                     }
-                 }}>
+                }}>
                     <Ionicons name="call-outline" size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Call technician')}</Text>
                 </Pressable>
@@ -62,11 +69,11 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Message to technician')}</Text>
                     {(data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
                 </Pressable>
-               {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
+                {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Send to friends')}</Text>
                 </Pressable>}
-             {user?.apple_check == 0 &&   <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
+                {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Scan QR code')}</Text>
                 </Pressable>}
@@ -116,7 +123,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
 export default TechnicianDetailsComponent
 
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     profileImage: {
         height: 60,
         aspectRatio: 1,

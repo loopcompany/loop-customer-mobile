@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, FlatList, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, FlatList, Modal, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
-import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 
 import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -15,11 +14,13 @@ import { fetchOrders } from '../../slices/ordersSlice';
 import { themeColor0 } from '../../theme/Color';
 import OrderItem from '../../components/OrderItem';
 import BlankScreen from '../../components/BlankScreen';
+import Loader from './../../components/Loader';
 
 function OrdersScreen({ navigation }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
+  const orderLoader = useSelector(state => state.orders?.loading);
   const user = useSelector(state => state.user?.data);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -105,6 +106,26 @@ function OrdersScreen({ navigation }) {
       default: return t('All');
     }
   };
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'FolderScreen' }],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => subscription.remove(); // ✅ درست
+    }, [])
+  );
+  if (orderLoader && !refreshing) {
+    return (
+      <Loader />
+    )
+  }
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
@@ -153,7 +174,7 @@ function OrdersScreen({ navigation }) {
       <FlatList
         data={orders}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingVertical: 20, gap: 15 }}
+        contentContainerStyle={{ paddingVertical: 20, gap: 15, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -538,7 +559,4 @@ const styles = StyleSheet.create({
 });
 
 // محافظت از صفحه لیست سفارشات - نیاز به تایید کامل
-export default withOrganizationAccess(OrdersScreen, {
-  ...ACCESS_PRESETS.ORDER_RELATED,
-  screenName: 'OrdersScreen'
-});
+export default OrdersScreen;

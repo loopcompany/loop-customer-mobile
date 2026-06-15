@@ -7,7 +7,7 @@ export default function MessagesList({ messeges, onRefresh, refreshing }) {
         <FlatList
             contentContainerStyle={styles.contentContainerStyle}
             showsVerticalScrollIndicator={false}
-            inverted={Platform.OS !='web'}
+            inverted={true}
             refreshControl={<RefreshControl colors={[themeColor1.bgColor(1)]} refreshing={refreshing} onRefresh={onRefresh} />}
             data={messeges}
             keyExtractor={(item) => item?.id?.toString()}

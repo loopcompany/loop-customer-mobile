@@ -1,4 +1,4 @@
-import React, { useState, useReducer ,useMemo} from "react";
+import React, { useState, useReducer, useMemo } from "react";
 import {
     View,
     Text,
@@ -25,7 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from '../../styles/NewStyles';
-import {langIsRTL} from'../../helpers/Common';
+import { langIsRTL } from '../../helpers/Common';
 const initialState = {
     melicode: '',
     phone: '',
@@ -73,13 +73,13 @@ const formReducer = (state, action) => {
 export default function MainSignIn({ navigation }) {
     const [state, dispatch] = useReducer(formReducer, initialState);
     const inviteLetter = 'L'; // Static invite letter
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
-     const isRtl = langIsRTL(i18n.language)
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const isRtl = langIsRTL(i18n.language)
     // Form validation
     const validateForm = () => {
         const errors = {};
@@ -107,15 +107,15 @@ export default function MainSignIn({ navigation }) {
         }
 
         // Location validation
-        if (!state.province) {
-            errors.province = t("Province is required");
-        }
-        if (!state.city) {
-            errors.city = t("City is required");
-        }
-        if (!state.region) {
-            errors.region = t("Region is required");
-        }
+        // if (!state.province) {
+        //     errors.province = t("Province is required");
+        // }
+        // if (!state.city) {
+        //     errors.city = t("City is required");
+        // }
+        // if (!state.region) {
+        //     errors.region = t("Region is required");
+        // }
 
         // Captcha validation
         if (!state.captchaInput) {
@@ -208,7 +208,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Melicode (National ID) */}
                         <View style={styles.inputContainer}>
-                            <View style={{   alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
+                            <View style={{ alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("National ID")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -235,7 +235,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Phone Number */}
                         <View style={styles.inputContainer}>
-                            <View style={{  alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
+                            <View style={{ alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("Mobile number")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -271,7 +271,7 @@ export default function MainSignIn({ navigation }) {
 
                         {/* Email */}
                         <View style={styles.inputContainer}>
-                            <View style={{  alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
+                            <View style={{ alignItems: isRtl ? 'flex-end' : 'flex-start', width: '100%' }}>
                                 <Text style={NewStyles.title4}>{t("Email address")} <Text style={NewStyles.title6}>*</Text></Text>
                                 <TextInput
                                     style={[
@@ -297,7 +297,7 @@ export default function MainSignIn({ navigation }) {
                         </View>
 
                         {/* Location Picker - Province, City, Region */}
-                        <View style={styles.inputContainer}>
+                        {/* <View style={styles.inputContainer}>
                             <LocationPicker
                                 selectedProvince={state.province}
                                 selectedCity={state.city}
@@ -312,7 +312,7 @@ export default function MainSignIn({ navigation }) {
                                 }}
                                 required={true}
                             />
-                        </View>
+                        </View> */}
 
                         {/* Captcha */}
                         <View style={styles.inputContainer}>
@@ -383,7 +383,7 @@ export default function MainSignIn({ navigation }) {
     );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",

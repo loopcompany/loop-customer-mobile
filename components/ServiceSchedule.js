@@ -16,16 +16,11 @@ export default function ServiceSchedule({ step, data }) {
 
     // لاگ کردن Redux state برای این step
     const stepsState = useSelector(state => state.step);
-    
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🎯 [ServiceSchedule] کامپوننت لود شد - Step:', step);
-    console.log('🔄 [ServiceSchedule] Redux State این step:', JSON.stringify(stepsState?.data?.[step], null, 2));
-    console.log('📦 [ServiceSchedule] داده ورودی data:', JSON.stringify(data, null, 2));
+     
 
     // پیدا کردن فیلد اصلی (main_selection)
     const mainField = data?.field_details?.find(f => f.id === 'main_selection');
-    
-    console.log('🔍 [ServiceSchedule] mainField:', mainField ? 'یافت شد' : 'یافت نشد');
+     
     if (mainField) {
         console.log('📋 [ServiceSchedule] mainField options:');
         mainField.options?.forEach(opt => {
@@ -58,8 +53,7 @@ export default function ServiceSchedule({ step, data }) {
         data?.field_details?.forEach(f => {
             console.log(`   - ${f.id}: conditional_on="${f.conditional_on}"`);
         });
-    }
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    } 
 
     if (!data) {
         console.log('❌ [ServiceSchedule] data وجود ندارد');
@@ -164,8 +158,7 @@ export default function ServiceSchedule({ step, data }) {
                         {selectedMain === 'short_term' ? 'تنظیمات کوتاه مدت' : 'تنظیمات بلند مدت'}
                     </Text>
                     
-                    {conditionalFields.map(field => {
-                        console.log('🔄 [ServiceSchedule] رندر فیلد شرطی:', field.id, 'نوع:', field.type);
+                    {conditionalFields.map(field => { 
                         
                         // RadioButton type
                         if (field.type === 'radioButton' && field.options) {
@@ -202,8 +195,7 @@ export default function ServiceSchedule({ step, data }) {
                         }
                         
                         // Date type
-                        if (field.type === 'date') {
-                            console.log('📅 [ServiceSchedule] رندر Date:', field.id);
+                        if (field.type === 'date') { 
                             return (
                                 <View key={field.id}>
                                     <Date step={step} data={field} isServiceSchedule={true} />
@@ -212,8 +204,7 @@ export default function ServiceSchedule({ step, data }) {
                         }
                         
                         // Time type
-                        if (field.type === 'time') {
-                            console.log('⏰ [ServiceSchedule] رندر Time:', field.id);
+                        if (field.type === 'time') { 
                             return (
                                 <View key={field.id}>
                                     <Time step={step} data={field} />
@@ -222,8 +213,7 @@ export default function ServiceSchedule({ step, data }) {
                         }
                         
                         // File type
-                        if (field.type === 'file') {
-                            console.log('📎 [ServiceSchedule] رندر File:', field.id);
+                        if (field.type === 'file') { 
                             return (
                                 <View key={field.id}>
                                     <File step={step} data={field} />

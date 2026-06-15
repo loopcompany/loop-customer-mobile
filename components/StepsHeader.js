@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
     iconContainer: {
-        width: 50,
+        // width: 50,
         height: 50,
         justifyContent: "center",
         alignItems: "center",
-        ...NewStyles.row
+        ...NewStyles.row,
     },
     arrow: {
         width: 50,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
 import { getResultMessage } from './GameData';
 import Button from '../../components/Button';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { createStyles } from '../../styles/NewStyles';
 
 export default function GameResultScreen({ route, navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+
   const {
     score = 0,
     correctAnswers = 0,
@@ -75,7 +82,7 @@ export default function GameResultScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
       <ScreenHeaders
         title={t("Game Result")}
         onBackPress={handleBackToMenu}
@@ -184,8 +191,8 @@ export default function GameResultScreen({ route, navigation }) {
             {score >= 80
               ? t("You are very smart! Keep going!")
               : score >= 50
-              ? t("You will do better next time! Practice!")
-              : t("No problem! Playing is great!")}
+                ? t("You will do better next time! Practice!")
+                : t("No problem! Playing is great!")}
           </Text>
         </View>
 
@@ -199,7 +206,7 @@ export default function GameResultScreen({ route, navigation }) {
             style={styles.secondaryButton}
             onPress={handleBackToMenu}
           >
-            <Text style={[NewStyles.title10, styles.secondaryButtonText]}>
+            <Text style={[NewStyles.title]}>
               {t("Back to menu")}
             </Text>
           </TouchableOpacity>
@@ -215,11 +222,11 @@ export default function GameResultScreen({ route, navigation }) {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor5.bgColor(1),
@@ -307,18 +314,20 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     gap: 12,
     marginBottom: 20,
+    ...NewStyles.center
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: themeColor1.bgColor(1),
+    borderColor: themeColor0.bgColor(1),
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
+    width: '100%',
+    maxWidth: 400
   },
   secondaryButtonText: {
-    fontSize: 16,
-    color: themeColor1.bgColor(1),
+    fontSize: 16, 
   },
   tipCard: {
     flexDirection: 'row-reverse',

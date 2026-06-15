@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, KeyboardAvoidingView, TextInput } from 'react-native'
+import { View, Text, Image, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, KeyboardAvoidingView, TextInput, FlatList } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { imageUri, uri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles'
-import { formatDate, formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
+import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '../../helpers/Common';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
 import Loader from '../../components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
@@ -19,7 +19,6 @@ import Button from '../../components/Button';
 import OrderExtraServices from './OrderExtraServices';
 import OrderReviewSection from './OrderReviewSection';
 import OrderReviewRatingSection from './OrderReviewRatingSection';
-import { withOrganizationAccess, ACCESS_PRESETS } from '../../components/withOrganizationAccess';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
@@ -27,9 +26,12 @@ import AccordionHeader from '../../components/AccordionHeader';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 import { createStyles } from '../../styles/NewStyles';
+import ShowMapDetailComponent from '../../components/ShowMapDetailComponent';
 
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
-
+    let is_package = 0
+    const { i18n } = useTranslation()
+    console.log(data?.user_address);
 
     return (
 
@@ -96,18 +98,21 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                 showsVerticalScrollIndicator={false}
                 sections={data?.order_details || []}
                 keyExtractor={(item, index) => item?.id + index}
-                renderSectionHeader={({ section }) => (
-                    <View style={[NewStyles.row, { gap: 5 }]}>
-                        <Ionicons name={section?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                        <Text style={[NewStyles.title, { flex: 1 }]}>{section?.title}</Text>
-                    </View>
-                )}
+                renderSectionHeader={({ section }) => {
+                    is_package = section?.is_package;
+                    return (
+                        <View style={[NewStyles.row, { gap: 5 }]}>
+                            <Ionicons name={section?.icon_name} size={24} color={themeColor0.bgColor(1)} />
+                            <Text style={[NewStyles.title, { flex: 1 }]}>{section?.title}</Text>
+                        </View>
+                    )
+                }}
                 SectionSeparatorComponent={() => <View style={{ paddingVertical: 5 }} />}
                 renderItem={({ item }) => (
-                    <View style={[styles.itemWrapper, NewStyles.border10]}>
-                        <View style={NewStyles.rowWrapper}>
+                    <View style={[styles.itemWrapper, NewStyles.border10, is_package == 1 && styles.package]}>
+                        <View style={[is_package == 0 && NewStyles.rowWrapper]}>
                             <View style={[NewStyles.rowWrapper, { justifyContent: 'flex-end', flex: 2, gap: 5 }]}>
-                                <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
+                                {is_package == 0 && <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />}
                                 {item?.type == 'input' ? <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.field_detail?.second_title}</Text> : <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.field_detail?.title}</Text>}
                             </View>
                             {(item?.field_detail?.has_counter >= 1 && item?.type != 'input') && <Text style={[NewStyles.text10, { flex: 1, textAlign: 'auto' }]}>{item?.value}</Text>}
@@ -141,6 +146,31 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
             {data?.image_path &&
                 <Image style={[{ height: 250, margin: '5%', maxWidth: 400, resizeMode: 'contain', width: '90%', alignSelf: 'center' }, NewStyles.border10]} source={{ uri: `${imageUri}/${data?.image_path}` }} />
             }
+            {data?.order_galleries?.length > 0 && <View>
+                <FlatList
+                    data={data?.order_galleries}
+                    inverted={langIsRTL(i18n?.language)}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: '5%', gap: 10, paddingVertical: 10 }}
+                    renderItem={({ item }) => {
+                        return (
+                            <TouchableOpacity style={{}} onPress={() => {
+                                Linking.openURL(`${imageUri}/${item?.image_path}`)
+                            }}>
+                                <Image source={{ uri: `${imageUri}/${item?.image_path}` }} style={[{ height: 120, width: 120, }, NewStyles.border10]} />
+                            </TouchableOpacity>
+                        )
+                    }}
+                />
+            </View>}
+            <View style={{width:'100%', height:250, paddingHorizontal:'5%'}}>
+                <ShowMapDetailComponent
+                    latitude={data?.user_address?.latitude}
+                    longitude={data?.user_address?.longitude}
+                />
+            </View>
+
         </View>
     )
 }
@@ -167,6 +197,7 @@ function Details({ route, navigation }) {
     const [showTechnician, setShowTechnician] = useState(false);
     const [showProcess, setShowProcess] = useState(false);
     const [showLoopDispatch, setShowLoopDispatch] = useState(false);
+    const [showDoneInPlace, setShowDoneInPlace] = useState(false);
     const [hasReport, setHasReport] = useState(false);
     const [showLoopSend, setShowLoopSend] = useState(false);
     const [showReturnTime, setShowReturnTime] = useState(false);
@@ -176,10 +207,13 @@ function Details({ route, navigation }) {
     const [loadingWallet, setLoadingWallet] = useState(false);
     const [loadingGateway, setLoadingGateway] = useState(false);
     const [showReceive, setShowReceive] = useState(false);
+    const [showShipment, setShowShipment] = useState(false);
     const [selectedReceiveOption, setSelectedReceiveOption] = useState(null);
     const [showCustomReceive, setShowCustomReceive] = useState(false);
     const [customReceiveText, setCustomReceiveText] = useState('');
+    const [userInPlaceDescription, setUserInPlaceDescription] = useState('');
     const [submittingReceive, setSubmittingReceive] = useState(false);
+    const [submittingInPlace, setSubmittingInPlace] = useState(false);
     const [showReviewRating, setShowReviewRating] = useState(false);
     const [isTechnicianVerified, setIsTechnicianVerified] = useState(0);
     const [verifying, setVerifying] = useState(false);
@@ -326,6 +360,35 @@ function Details({ route, navigation }) {
             setSubmittingReceive(false);
         }
     };
+    const handleSubmitInPlace = async () => {
+
+        setSubmittingInPlace(true);
+        try {
+            const response = await axios.post(
+                `${uri}/orders/${orderId}/in-place-description`,
+                { user_in_place_description: userInPlaceDescription },
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'Accept-Language': lang
+                    }
+                }
+            );
+
+            if (response.status == 200) {
+                showToastOrAlert(response?.data?.message || t("Final description successfully submitted"));
+                // بروزرسانی داده‌ها
+                setRefreshing(true);
+            }
+        } catch (error) {
+            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
+            showToastOrAlert(message);
+        } finally {
+            setSubmittingInPlace(false);
+            dispatch(fetchOrders(token));
+        }
+    };
 
     const walletPayment = async () => {
         setLoadingWallet(true);
@@ -431,7 +494,14 @@ function Details({ route, navigation }) {
 
     const totalDiscountedPrice = useMemo(() => {
         const basePrice = Number(data?.technician_price ?? data?.pakar_price);
-        return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price);
+        if (data?.prepayment && data?.prepayment_payment_status == 1) {
+
+            const prepaid = Number(data?.loop_cost_estimate) * Number(data?.prepayment) / 100;
+            return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price) - prepaid;
+        } else {
+
+            return Number(basePrice) + Number(data?.extra_price) - Number(data?.discount_price);
+        }
     }, [data]);
 
     const totalPrice = useMemo(() => {
@@ -454,7 +524,7 @@ function Details({ route, navigation }) {
             <ScreenHeaders title={t("Current order")} />
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
 
-                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, (data?.technician && data?.status == 1) && { paddingBottom: 80 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
+                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, { paddingBottom: 100 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
 
                     <AccordionHeader
                         title={t("Order details")}
@@ -583,6 +653,40 @@ function Details({ route, navigation }) {
                     }
 
                     {/* مشخصات / اطلاعات محصول */}
+                    {data?.done_in_place && data?.admin_in_place_description && <AccordionHeader
+                        title={t("Done at your place")}
+                        isActive={true}
+                        isOpen={showDoneInPlace}
+                        onPress={() => {
+
+                            setShowDoneInPlace(!showDoneInPlace)
+                        }}
+                    />}
+                    {
+                        (data?.done_in_place && data?.admin_in_place_description && showDoneInPlace) &&
+                        <View style={styles.contentSection}>
+                            <View style={[styles.infoCard, { backgroundColor: themeColor1.bgColor(1) }]}>
+                                <View style={[NewStyles.row, { gap: 10, alignItems: 'center' }]}>
+                                    <Ionicons name="checkmark-circle" size={24} color={themeColor0.bgColor(1)} />
+                                    <Text style={[NewStyles.text10]}>
+                                        {data?.admin_in_place_description}
+                                    </Text>
+                                </View>
+                                <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5 }]}>
+                                    {t("Done at:")} {formatDateTime(data.done_in_place)}
+                                </Text>
+                            </View>
+                            <View>
+                                <Text style={NewStyles.text}>{t("Description")}:</Text>
+                                <TextInput style={[styles.textInput, NewStyles.border10]} placeholder={t("Enter your description...")} value={userInPlaceDescription} onChangeText={setUserInPlaceDescription} multiline editable={!data?.user_in_place_description} numberOfLines={3} textAlignVertical={'top'} maxLength={191} />
+                                {!data?.user_in_place_description && <Button
+                                    title={t("Confirm")}
+                                    loading={submittingInPlace}
+                                    onPress={handleSubmitInPlace}
+                                />}
+                            </View>
+                        </View>
+                    }
                     <AccordionHeader
                         title={t("Specifications / Product information")}
                         isActive={hasReport}
@@ -667,17 +771,17 @@ function Details({ route, navigation }) {
                     {/* مرحله پرداخت هزینه */}
                     {user?.apple_check == 0 && <AccordionHeader
                         title={t("Payment")}
-                        isActive={data?.started_at}
+                        isActive={(data?.started_at || data?.status == 2)}
                         isOpen={showPayment}
                         onPress={() => {
-                            if (data?.started_at) {
+                            if (data?.started_at || data?.status == 2) {
                                 setShowPayment(!showPayment)
                             } else {
-                                showToastOrAlert(t("The order has not started yet."))
+                                showToastOrAlert(t("You do not currently have access to this section."))
                             }
                         }}
                     />}
-                    {showPayment && data?.started_at && (
+                    {showPayment && (data?.started_at || data?.status == 2) && (
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                             {user?.apple_check == 0 && <View style={styles.noticeBox}>
                                 <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
@@ -686,7 +790,13 @@ function Details({ route, navigation }) {
                             {user?.apple_check == 0 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
-                                    {formatPrice(totalDiscountedPrice)} {t("Tomans")}
+                                    {formatPrice(totalDiscountedPrice < 800000 ? totalDiscountedPrice + 200000 : totalDiscountedPrice)} {t("Tomans")}
+                                </Text>
+                            </View>}
+                            {user?.apple_check == 0 && totalDiscountedPrice < 800000 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                                <Text style={[NewStyles.title]}>{t("Travel and tuition fees")}</Text>
+                                <Text style={[NewStyles.title]}>
+                                    {formatPrice(200000)} {t("Tomans")}
                                 </Text>
                             </View>}
 
@@ -740,7 +850,31 @@ function Details({ route, navigation }) {
                             )}
                         </View>
                     )}
+                    <AccordionHeader
+                        title={t("Product dispatch status to the user's location")}
+                        isActive={data?.payment_status == 1  && data?.shipment_status}
+                        isOpen={showShipment}
+                        onPress={() => {
+                            if (data?.payment_status == 1 && data?.shipment_status) {
 
+                                setShowShipment(!showShipment)
+                            } else {
+                                showToastOrAlert(t('The product dispatch status is not specified.'))
+                            }
+                        }}
+                    />
+                    {
+                        showShipment &&
+                        <View style={{ paddingHorizontal: '5%', gap: 12, marginBottom: 12 }}>
+                            <View style={[styles.itemContainer]}>
+                                <Text style={NewStyles.text10}>{data?.shipment_status}</Text>
+                            </View>
+                            {data?.shipment_status_descriptions && <View style={[styles.itemContainer]}>
+                                <Text style={NewStyles.title10}>{t('Loop description')}:</Text>
+                                <Text style={NewStyles.text10}>{data?.shipment_status_descriptions}</Text>
+                            </View>}
+                        </View>
+                    }
                     {/* مرحله دریافت سفارش - فعال بعد از پرداخت */}
                     <AccordionHeader
                         title={t("Receive product / order")}
@@ -805,7 +939,7 @@ function Details({ route, navigation }) {
                     {/* مرحله ثبت نظر - فعال بعد از تکمیل سفارش (status=2 و finished_at) */}
                     <AccordionHeader
                         title={t("Submit review")}
-                        isActive={data?.status == 2 && data?.finished_at}
+                        isActive={(data?.status == 2 && data?.finished_at && data?.payment_status == 1) || data?.shipment_status}
                         isOpen={showReviewRating}
                         onPress={() => {
                             if (data?.status == 2 && data?.finished_at) {
@@ -815,7 +949,7 @@ function Details({ route, navigation }) {
                             }
                         }}
                     />
-                    {showReviewRating && data?.status == 2 && data?.finished_at && (
+                    {showReviewRating && ((data?.status == 2 && data?.finished_at && data?.payment_status == 1) || data?.shipment_status) && (
                         <OrderReviewRatingSection
                             orderId={orderId}
                             technicianId={data?.technician?.id}
@@ -836,6 +970,30 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         paddingHorizontal: '5%',
         minHeight: 50,
         gap: 10
+    },
+    infoCard: {
+        backgroundColor: themeColor5.bgColor(1),
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        paddingHorizontal: 30
+    },
+    contentSection: {
+        // marginHorizontal: 15,
+        marginBottom: 15,
+        borderRadius: 10,
+        padding: 15,
+        gap: 15,
+        width: '100%',
+        alignSelf: 'center',
+        maxWidth: 800,
+    },
+    package: {
+        backgroundColor: themeColor1.bgColor(1),
+        padding: 15,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: themeColor10.bgColor(1)
     },
     locateBtn: {
         gap: 10,
@@ -889,12 +1047,14 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         marginTop: 8,
         minHeight: 80,
         fontSize: 14,
-        fontFamily: 'VazirLight',
+        ...NewStyles.text10
+    },
+    itemContainer: {
+        backgroundColor: themeColor4.bgColor(1),
+        padding: 10,
+        ...NewStyles.border10
     }
 })
 
 // محافظت از صفحه جزئیات سفارش - نیاز به تایید کامل
-export default withOrganizationAccess(Details, {
-    ...ACCESS_PRESETS.ORDER_RELATED,
-    screenName: 'Details'
-});
+export default Details;

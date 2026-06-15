@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { notesAPI } from "../../services/Api";
 import { showToastOrAlert, showAlert } from "../../helpers/Common";
 import Button from "../../components/Button";
 import { createStyles } from '../../styles/NewStyles';
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function AddEditNoteScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -85,98 +86,101 @@ export default function AddEditNoteScreen({ route, navigation }) {
       setLoading(false);
     }
   };
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   return (
-    <KeyboardAvoidingView
-      style={NewStyles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScreenHeaders
-        title={isEditMode ? t('Edit Note') : t('Add Note')}
-      />
+    <SafeAreaView style={NewStyles.container} edges={{top:'off', bottom:'additive'}}>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={NewStyles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
-          {/* Info Box */}
-          <View style={styles.infoBox}>
-            <Text style={[NewStyles.text10, { fontSize: 13, lineHeight: 22 }]}>
-              {t('Write your personal notes here. You can record reminders, to-do lists, important information, and anything else you need.')}
-            </Text>
-          </View>
-
-          {/* Note Input */}
-          <View style={styles.inputContainer}>
-            <View style={styles.labelRow}>
-              <Text style={[NewStyles.title10, { fontSize: 14 }]}>
-                {t('Note Text')}
-                <Text style={styles.required}> *</Text>
-              </Text>
-            </View>
-
-            <TextInput
-              style={[
-                styles.textArea,
-                NewStyles.border10,
-                charCount > MAX_CHARS && styles.textAreaError
-              ]}
-              placeholder={t('Write your note here...')}
-              placeholderTextColor={themeColor3.bgColor(0.5)}
-              value={noteText}
-              onChangeText={setNoteText}
-              multiline
-              textAlignVertical="top"
-              maxLength={MAX_CHARS + 100} // Allow typing to show error
-            />
-
-            {/* Character Counter */}
-            <View style={styles.counterRow}>
-              <Text
-                style={[
-                  styles.counterText,
-                  charCount > MAX_CHARS && styles.counterError
-                ]}
-              >
-                {charCount} / {MAX_CHARS}
-              </Text>
-              {charCount > MAX_CHARS && (
-                <Text style={styles.errorText}>
-                  {t('Character count exceeds limit')}
-                </Text>
-              )}
-            </View>
-          </View>
-
-          {/* Tips Box */}
-          <View style={styles.tipsBox}>
-            <Text style={[NewStyles.title10, { fontSize: 13, marginBottom: 8 }]}>
-              {t('💡 Useful tips:')}
-            </Text>
-            <Text style={[NewStyles.text10, { fontSize: 12, lineHeight: 20 }]}>
-              {t('• Use new lines to create lists\n• You can use emojis 😊\n• Write important notes with clear titles\n• Maximum {{count}} characters allowed', { count: MAX_CHARS.toLocaleString('fa-IR') })}
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Save Button */}
-      <View style={styles.footer}>
-        <Button
-          title={isEditMode ? t('Save Changes') : t('Save Note')}
-          onPress={handleSave}
-
-          loading={loading}
-          disabled={loading || !noteText.trim() || charCount > MAX_CHARS}
+        <ScreenHeaders
+          title={isEditMode ? t('Edit Note') : t('Add Note')}
         />
-      </View>
-    </KeyboardAvoidingView>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            {/* Info Box */}
+            <View style={styles.infoBox}>
+              <Text style={[NewStyles.text10, { fontSize: 13, lineHeight: 22 }]}>
+                {t('Write your personal notes here. You can record reminders, to-do lists, important information, and anything else you need.')}
+              </Text>
+            </View>
+
+            {/* Note Input */}
+            <View style={styles.inputContainer}>
+              <View style={styles.labelRow}>
+                <Text style={[NewStyles.title10, { fontSize: 14 }]}>
+                  {t('Note Text')}
+                  <Text style={styles.required}> *</Text>
+                </Text>
+              </View>
+
+              <TextInput
+                style={[
+                  styles.textArea,
+                  NewStyles.border10,
+                  charCount > MAX_CHARS && styles.textAreaError
+                ]}
+                placeholder={t('Write your note here...')}
+                placeholderTextColor={themeColor3.bgColor(0.5)}
+                value={noteText}
+                onChangeText={setNoteText}
+                multiline
+                textAlignVertical="top"
+                maxLength={MAX_CHARS + 100} // Allow typing to show error
+              />
+
+              {/* Character Counter */}
+              <View style={styles.counterRow}>
+                <Text
+                  style={[
+                    styles.counterText,
+                    charCount > MAX_CHARS && styles.counterError
+                  ]}
+                >
+                  {charCount} / {MAX_CHARS}
+                </Text>
+                {charCount > MAX_CHARS && (
+                  <Text style={styles.errorText}>
+                    {t('Character count exceeds limit')}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Tips Box */}
+            <View style={styles.tipsBox}>
+              <Text style={[NewStyles.title10, { fontSize: 13, marginBottom: 8 }]}>
+                {t('💡 Useful tips:')}
+              </Text>
+              <Text style={[NewStyles.text10, { fontSize: 12, lineHeight: 20 }]}>
+                {t('• Use new lines to create lists\n• You can use emojis 😊\n• Write important notes with clear titles\n• Maximum {{count}} characters allowed', { count: MAX_CHARS.toLocaleString('fa-IR') })}
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Save Button */}
+        <View style={styles.footer}>
+          <Button
+            title={isEditMode ? t('Save Changes') : t('Save Note')}
+            onPress={handleSave}
+
+            loading={loading}
+            disabled={loading || !noteText.trim() || charCount > MAX_CHARS}
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor0.bgColor(1),

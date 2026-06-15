@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -8,8 +8,12 @@ import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import NewStyles from '../../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CodeField, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
+import { Cursor } from 'react-native-confirmation-code-field';
+import { themeColor0, themeColor3, themeColor4 } from '../../theme/Color';
 
 const OTPVerification = ({ route, navigation }) => {
+
   const { phone, organizationCode, userId, organizationId } = route.params;
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -17,7 +21,11 @@ const OTPVerification = ({ route, navigation }) => {
   const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(120); // 2 minutes
   const inputRefs = useRef([]);
-
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value:code,
+    setValue: setCode,
+  });
+  const ref = useBlurOnFulfill({ code, cellCount: 6 });
   useEffect(() => {
     // Start countdown timer
     const interval = setInterval(() => {
@@ -54,7 +62,7 @@ const OTPVerification = ({ route, navigation }) => {
   };
 
   const handleVerify = async () => {
-    const verificationCode = code.join('');
+    const verificationCode = code;
 
     if (verificationCode.length !== 6) {
       showAlert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
@@ -65,7 +73,7 @@ const OTPVerification = ({ route, navigation }) => {
 
     try {
       const response = await axios.post(`${uri}/organization/verify-phone`, {
-        phone: '0'+phone,
+        phone: phone,
         code: verificationCode,
       });
 
@@ -162,7 +170,7 @@ const OTPVerification = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView edges={{top:'off', bottom:'off'}} style={NewStyles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
 
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: '#d1e9ff' }}
@@ -170,7 +178,7 @@ const OTPVerification = ({ route, navigation }) => {
       >
         <CustomStatusBar />
         <ScreenHeaders
-          title="تایید شماره موبایل" 
+          title="تایید شماره موبایل"
         />
 
         <ScrollView
@@ -248,29 +256,38 @@ const OTPVerification = ({ route, navigation }) => {
               marginBottom: 30,
               gap: 10
             }}>
-              {[0, 1, 2, 3, 4, 5].map((index) => (
-                <TextInput
-                  key={index}
-                  ref={(ref) => (inputRefs.current[index] = ref)}
-                  value={code[index]}
-                  onChangeText={(text) => handleCodeChange(text, index)}
-                  onKeyPress={(e) => handleKeyPress(e, index)}
-                  keyboardType="number-pad"
-                  maxLength={1}
-                  style={{
-                    width: 45,
-                    height: 55,
-                    backgroundColor: '#fff',
-                    borderRadius: 10,
-                    borderWidth: 2,
-                    borderColor: code[index] ? '#1976d2' : '#ccc',
-                    fontSize: 22,
-                    fontFamily: 'VazirBold',
-                    textAlign: 'center',
-                    elevation: 2,
-                  }}
-                />
-              ))}
+               
+
+              <CodeField
+                ref={ref}
+                {...props}
+                value={code}
+                onChangeText={(text) => {
+                  setCode(text);
+                }}
+                cellCount={6}
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete={Platform.select({
+                  android: "sms-otp",
+                  default: "one-time-code",
+                })}
+                renderCell={({ index, symbol, isFocused }) => (
+                  <Text
+                    key={index}
+                    style={[
+                      styles.codeCell,
+                      isFocused && styles.codeCellFocused,
+                      NewStyles.border10
+                    ]}
+                    onLayout={getCellOnLayoutHandler(index)}
+                  >
+                    {symbol || (isFocused ? <Cursor /> : null)}
+                  </Text>
+                )}
+              />
+
+
             </View>
 
             {/* Timer */}
@@ -289,15 +306,15 @@ const OTPVerification = ({ route, navigation }) => {
             {/* Verify Button */}
             <TouchableOpacity
               onPress={handleVerify}
-              disabled={loading || code.join('').length !== 6}
+              disabled={loading}
               style={{
-                backgroundColor: loading || code.join('').length !== 6 ? '#90caf9' : '#1976d2',
+                backgroundColor: loading ? '#90caf9' : '#1976d2',
                 borderRadius: 10,
                 paddingVertical: 15,
                 marginBottom: 15,
                 alignItems: 'center',
                 elevation: 3,
-                opacity: loading || code.join('').length !== 6 ? 0.7 : 1
+                opacity: loading ? 0.7 : 1
               }}
             >
               {loading ? (
@@ -347,3 +364,19 @@ const OTPVerification = ({ route, navigation }) => {
 };
 
 export default OTPVerification;
+const styles = StyleSheet.create({
+  codeCell: {
+    width: 45,
+    height: 50,
+    backgroundColor: themeColor4.bgColor(0.7),
+    fontSize: 20,
+    color: themeColor0.bgColor(1),
+    fontFamily: 'VazirBold',
+    textAlign: 'center',
+    lineHeight: 50,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+})

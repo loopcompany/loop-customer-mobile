@@ -22,7 +22,7 @@ export default function Gender({ step, data }) {
                 <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                 <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>{t('Required')}</Text></View>}</Text>
             </View>
-            {data?.des && <Text style={NewStyles.text3}>{data?.des}</Text>}
+            {data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{data?.des}</Text></View>}
             
             <Pressable
                 onPress={() => {

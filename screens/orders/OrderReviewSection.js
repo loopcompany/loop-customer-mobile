@@ -132,7 +132,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
           data?.is_urgent > 0 && NewStyles.title6
         )}
       </View>
-      {user?.apple_check == 0
+      {user?.data?.apple_check == 0
         && <View style={[{ width: '100%', gap: 10, maxWidth: 900 }, NewStyles.row]}>
           <View style={[{ flex: 1, }, NewStyles.center]}>
             <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
