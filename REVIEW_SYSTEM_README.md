@@ -308,7 +308,7 @@ const [submitLoading, setSubmitLoading] = useState(false);
 
 ```javascript
 // در OrderReviewRatingSection.js
-console.log('Order Status:', orderStatus);
+console.log('Order Status', orderStatus);
 console.log('Finished At:', finishedAt);
 console.log('Is Enabled:', isEnabled);
 console.log('Submitting review:', reviewPayload);

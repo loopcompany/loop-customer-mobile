@@ -27,9 +27,11 @@ import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import NewStyles from '../../styles/NewStyles';
 import { handleError, showAlert, showToastOrAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor11, themeColor12, themeColor13, themeColor14, themeColor2, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
 import { imageUri, uri } from '../../services/URL';
 import Button from './../../components/Button';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -47,11 +49,60 @@ const OrganizationContract = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingContract, setLoadingContract] = useState(true);
   const [uploadingContract, setUploadingContract] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [deletingGalleryId, setDeletingGalleryId] = useState(null);
+
   const token = useSelector((state) => state?.auth?.token);
+  const handleDeleteGalleryItem = async (galleryId) => {
+    try {
+      setDeletingGalleryId(galleryId);
+
+      const res = await axios.post(
+        `${uri}/contracts/delete-gallery`,
+        {
+          gallery_id: galleryId,
+          contract_request_id: adminContract?.id
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      showToastOrAlert(res?.data?.message || t('File deleted successfully.'));
+
+      setGallery((prev) => prev.filter((item) => item.id !== galleryId));
+    } catch (err) {
+      console.log('====================================');
+      console.log(err);
+      console.log('====================================');
+      handleError(err, t);
+    } finally {
+      setDeletingGalleryId(null);
+    }
+  };
 
 
+  const handlePickInformationFiles = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+        multiple: true,
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        setSelectedFiles(prev => [...prev, ...result.assets]);
+      }
+    } catch (error) {
+      showAlert(t('Error'), error.message);
+    }
+  };
   const [adminContract, setAdminContract] = useState(null);
   const [information, setInformation] = useState('');
+  const [gallery, setGallery] = useState([]);
 
 
   const [uploadedContract, setUploadedContract] = useState(null);
@@ -76,25 +127,53 @@ const OrganizationContract = ({ navigation }) => {
         loadContractData();
       })
   }
-  const submitInformationForRequest = () => {
-    axios.post(`${uri}/contracts/submit-information-for-request`, { information: information }, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      }
-    })
-      .then((res) => {
-        showToastOrAlert(res?.data?.message)
-      })
-      .catch((err) => {
+  const submitInformationForRequest = async () => {
+    try {
+      setSending(true);
 
-        handleError(err, t)
-      })
-      .finally(() => {
-        setSending(false)
-        loadContractData();
-      })
-  }
+      const formData = new FormData();
+
+      formData.append('information', information);
+
+      // اضافه کردن فایل‌ها
+      selectedFiles.forEach((file, index) => {
+        if (Platform.OS === 'web') {
+          formData.append('files[]', file.file || file, file.name);
+        } else {
+          formData.append('files[]', {
+            uri: file.uri,
+            type: file.mimeType || 'application/octet-stream',
+            name: file.name || `file_${index}`,
+          });
+        }
+      });
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      };
+
+      if (Platform.OS !== 'web') {
+        headers['Content-Type'] = 'multipart/form-data';
+      }
+
+      const res = await axios.post(
+        `${uri}/contracts/submit-information-for-request`,
+        formData,
+        { headers }
+      );
+
+      showToastOrAlert(res?.data?.message);
+      setSelectedFiles([]);
+      setInformation('');
+      loadContractData();
+
+    } catch (err) {
+      handleError(err, t);
+    } finally {
+      setSending(false);
+    }
+  };
 
   const toJalaliDate = (dateString) => {
     try {
@@ -160,6 +239,7 @@ const OrganizationContract = ({ navigation }) => {
           uploaded_at: toJalaliDate(contract.uploaded_at),
         });
         setInformation(contract?.information)
+        setGallery(contract?.gallery || [])
 
       }
 
@@ -391,9 +471,9 @@ const OrganizationContract = ({ navigation }) => {
 
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
       <CustomStatusBar />
-      <ScreenHeaders title={t('Organization contract')} />
+      <ScreenHeaders title={t("Government/organization")} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={'padding'}>
         <ScrollView
           style={styles.scrollView}
@@ -407,59 +487,56 @@ const OrganizationContract = ({ navigation }) => {
             }}
           />}
         >
-          {/* توضیحات */}
-          <View style={styles.infoBox}>
-            <Ionicons name="information-circle-outline" size={24} color={themeColor0.bgColor(1)} />
-            <Text style={styles.infoText}>
-              {t('In this section, you can view and download the organizational cooperation contract and then upload the signed contract.')}
-            </Text>
-          </View>
+          <View style={[{ width: '100%', backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, marginBottom: 10 }, NewStyles.border10, NewStyles.center]}>
+            <Text style={NewStyles.title4}>{t("Organization contract")}</Text>
 
-          {/* قرارداد ادمین */}
+            <Ionicons
+              name={"chevron-down"}
+              size={24}
+              color={themeColor1.bgColor(1)}
+            />
+          </View>
+          <TouchableOpacity style={[{ width: '95%', alignSelf: 'center', backgroundColor: themeColor4.bgColor(1) }, NewStyles.border10]} onPress={() => {
+            navigation.navigate("OrganizationTermsScreen")
+          }}>
+            <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ paddingVertical: 10, width: '100%' }, NewStyles.border10, NewStyles.center]}>
+              <Text style={[NewStyles.title10, { fontSize: 13, textAlign: 'center' }]}>{t("Terms and Conditions of the Organizational/Corporate Agreement")}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="document-text-outline" size={24} color={themeColor1.bgColor(1)} />
-              <Text style={styles.sectionTitle}>{t('Cooperation contract')}</Text>
-            </View>
+
 
             {adminContract?.file_url ? (
-              <View style={styles.contractCard}>
-                <View style={styles.contractInfo}>
-                  <Ionicons name="document" size={40} color={themeColor1.bgColor(1)} />
-                  <View style={styles.contractDetails}>
-                    {adminContract.title &&<Text style={styles.contractFileName}>{adminContract.title}</Text>}
-                    <Text style={styles.contractFileName}>{adminContract.file_name}</Text>
-                  </View>
-                </View>
 
-                <View style={styles.contractActions}>
-                  <TouchableOpacity
-                    style={styles.downloadBtn}
-                    onPress={handleDownloadAdminContract}
-                  >
-                    <Ionicons name="download-outline" size={20} color="#fff" />
-                    <Text style={styles.downloadBtnText}>{t('Download and view')}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <TouchableOpacity
+                style={[styles.downloadBtn, NewStyles.border10]}
+                onPress={handleDownloadAdminContract}
+              >
+                <LinearGradient style={[{
+                  width: '100%', paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  borderWidth: 1, borderColor: '#a0c1e9', borderBottomWidth: 3, borderBottomColor: '#a0c1e9',
+                }, NewStyles.border10]} colors={[themeColor4.bgColor(1), '#bbcee5']}>
+
+                  <Text style={[NewStyles.title10, { textAlign: 'center' }]}>{t('Preview of the contract')}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             ) : (
               <View style={[styles.emptyCard, (adminContract?.status == '2' || adminContract?.status == '4') && { backgroundColor: themeColor6.bgColor(0.2), borderColor: themeColor6.bgColor(1), borderWidth: 1 }]}>
                 {/* <Ionicons name="document-outline" size={60} color="#ccc" /> */}
                 {/* <Text style={styles.emptyText}>{t('The contract has not been uploaded yet.')}</Text> */}
                 {!adminContract &&
-                  <>
-                    <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
-                      {t("To enter into an organizational contract with the Loop platform, first submit a request.")}
-                    </Text>
-                    <Button
-                      title={t("Submit request")}
-                      loading={sending}
-                      onPress={() => {
-                        setSending(true);
-                        submitRequest()
-                      }}
-                    />
-                  </>}
+
+                  <TouchableOpacity style={[{ width: '95%', alignSelf: 'center', backgroundColor: themeColor4.bgColor(1) }, NewStyles.border10]} onPress={() => {
+                    setSending(true);
+                    submitRequest()
+                  }}>
+                    <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ paddingVertical: 10, width: '100%' }, NewStyles.border10, NewStyles.center]}>
+                      {sending ? <ActivityIndicator size={'small'} color={themeColor10.bgColor(1)} /> : <Text style={[NewStyles.title10, { fontSize: 13, textAlign: 'center' }]}>{t("Sample contract")}</Text>}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                }
                 {
                   adminContract?.status == '0' && <>
                     <Text style={NewStyles.text10}>{t("Your contract request has been registered and is being reviewed.")}</Text>
@@ -467,8 +544,7 @@ const OrganizationContract = ({ navigation }) => {
                 }
                 {
                   (adminContract?.status == '1' && adminContract?.need_docs) && <>
-                    <Text style={NewStyles.text10}>{t("Your contract request has been approved.Please submit the requested information to prepare the contract file.")}</Text>
-                    <Text style={NewStyles.text10}>{adminContract?.need_docs}</Text>
+                    <Text style={[NewStyles.title10, { textAlign: 'center', fontSize: 12 }]}>{adminContract?.need_docs}</Text>
                     <TextInput
                       value={information}
                       style={[NewStyles.textInput, NewStyles.text10, { minHeight: 80, marginTop: 10 }, NewStyles.border10]}
@@ -481,19 +557,121 @@ const OrganizationContract = ({ navigation }) => {
                         setInformation(text)
                       }}
                     />
-                    <Button
-                      loading={sending}
-                      onPress={() => {
-                        if (information) {
+                    <TouchableOpacity style={[{ width: '100%', alignSelf: 'center', backgroundColor: themeColor4.bgColor(1), marginTop: 10 }, NewStyles.border10]} onPress={() => {
+                      handlePickInformationFiles()
+                    }}>
+                      <LinearGradient colors={[themeColor4.bgColor(1), themeColor4.bgColor(1)]} style={[{ paddingVertical: 10, width: '100%', gap: 5 }, NewStyles.border10, NewStyles.center, NewStyles.row]}>
+                        <Ionicons
+                          name={'cloud-upload'}
+                          size={20}
+                          color={themeColor10.bgColor(1)}
+                        />
+                        {<Text style={[NewStyles.title10, { fontSize: 12, textAlign: 'center' }]}>{t("Upload comprehensive information/requests/edit contract")}</Text>}
+                      </LinearGradient>
+                    </TouchableOpacity>
 
-                          setSending(true)
-                          submitInformationForRequest()
-                        } else {
-                          showToastOrAlert(t('Please enter the requested information first.'))
-                        }
-                      }}
-                      title={t("Send information")}
-                    />
+
+
+
+                    {selectedFiles.length > 0 && (
+                      <View style={{ marginTop: 10 }}>
+                        {selectedFiles.map((file, index) => (
+                          <View key={index} style={styles.selectedFileCard}>
+                            <Text style={styles.fileName}>{file.name}</Text>
+                            <TouchableOpacity
+                              onPress={() => {
+                                setSelectedFiles(prev =>
+                                  prev.filter((_, i) => i !== index)
+                                );
+                              }}
+                            >
+                              <Ionicons name="close-circle" size={22} color="red" />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    <TouchableOpacity disabled={sending} style={[{ width: '95%', alignSelf: 'center', backgroundColor: themeColor4.bgColor(1), marginTop: 10 }, NewStyles.border10]} onPress={() => {
+                      if (information) {
+
+                        setSending(true)
+                        submitInformationForRequest()
+                      } else {
+                        showToastOrAlert(t('Please enter the requested information first.'))
+                      }
+                    }}>
+                      <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ paddingVertical: 10, width: '100%' }, NewStyles.border10, NewStyles.center]}>
+                        {sending ? <ActivityIndicator size={'small'} color={themeColor10.bgColor(1)} /> : <Text style={[NewStyles.title10, { fontSize: 13, textAlign: 'center' }]}>{t("Completion of information / issuance of a specific contract")}</Text>}
+                      </LinearGradient>
+                    </TouchableOpacity>
+
+                    {gallery?.length > 0 && (
+                      <View style={styles.gallerySection}>
+                        <Text style={NewStyles.title}>{t('Uploaded attachments')}</Text>
+
+                        {gallery.map((item) => {
+                          const fileUrl = `${imageUri}/${item.file_path}`;
+                          const fileName = item.file_path?.split('/').pop() || t('File');
+
+                          return (
+                            <View key={item.id} style={styles.galleryItemCard}>
+                              <View style={styles.galleryItemInfo}>
+                                <Ionicons
+                                  name={
+                                    item.file_path?.toLowerCase().endsWith('.pdf')
+                                      ? 'document-text-outline'
+                                      : 'image-outline'
+                                  }
+                                  size={24}
+                                  color={themeColor0.bgColor(1)}
+                                />
+
+                                <View style={styles.galleryItemTextWrap}>
+                                  <Text numberOfLines={1} style={styles.galleryItemName}>
+                                    {fileName}
+                                  </Text>
+                                </View>
+                              </View>
+
+                              <View style={styles.galleryItemActions}>
+                                <TouchableOpacity
+                                  style={styles.galleryActionBtn}
+                                  onPress={() => Linking.openURL(fileUrl)}
+                                >
+                                  <Ionicons name="eye-outline" size={18} color={themeColor0.bgColor(1)} />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={[styles.galleryActionBtn, styles.galleryDeleteBtn]}
+                                  disabled={deletingGalleryId === item.id}
+                                  onPress={() => {
+                                    showAlert(
+                                      t('Delete file'),
+                                      t('Are you sure you want to delete this file?'),
+                                      [
+                                        { text: t('Cancel'), style: 'cancel' },
+                                        {
+                                          text: t('Delete'),
+                                          style: 'destructive',
+                                          onPress: () => handleDeleteGalleryItem(item.id),
+                                        },
+                                      ]
+                                    );
+                                  }}
+                                >
+                                  {deletingGalleryId === item.id ? (
+                                    <ActivityIndicator size="small" color="#f44336" />
+                                  ) : (
+                                    <Ionicons name="trash-outline" size={18} color="#f44336" />
+                                  )}
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
                   </>
                 }
                 {
@@ -510,14 +688,11 @@ const OrganizationContract = ({ navigation }) => {
 
           {/* آپلود قرارداد امضا شده */}
           <View style={styles.section}>
-            {(!adminContract?.signed_contract_file_path && adminContract?.file_url && adminContract?.status == '1') && <View style={styles.sectionHeader}>
-              <Ionicons name="cloud-upload-outline" size={24} color={themeColor4.bgColor(1)} />
-              <Text style={styles.sectionTitle}>{t('Upload signed contract')}</Text>
-            </View>}
+
 
             {/* فایل انتخاب شده */}
             {selectedFile && (
-              <View style={styles.selectedFileCard}>
+              <View style={[styles.selectedFileCard, { width: '95%', alignSelf: 'center' }]}>
                 <View style={styles.fileInfo}>
                   <Ionicons name="document-attach" size={30} color={themeColor4.bgColor(1)} />
                   <View style={styles.fileDetails}>
@@ -534,30 +709,37 @@ const OrganizationContract = ({ navigation }) => {
             )}
 
             {/* دکمه‌های عملیات */}
-            {(!adminContract?.signed_contract_file_path && adminContract?.file_url && adminContract?.status == '1') && <View style={styles.uploadActions}>
-              <TouchableOpacity
-                style={styles.selectFileBtn}
-                onPress={handlePickDocument}
-                disabled={uploadingContract}
-              >
-                <Ionicons name="folder-open-outline" size={20} color={themeColor1.bgColor(1)} />
-                <Text style={styles.selectFileBtnText}>
-                  {selectedFile ? t('Change file') : t('Select file')}
-                </Text>
-              </TouchableOpacity>
+            {(!adminContract?.sgned_contract_file_path && adminContract?.file_url && adminContract?.status == '1') &&
+              <View  >
+                <TouchableOpacity
+                  style={[styles.downloadBtn, NewStyles.border10]}
+                  onPress={handlePickDocument}
+                  disabled={uploadingContract}
+                >
+                  <LinearGradient style={[{
+                    width: '100%', paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderWidth: 1, borderColor: '#a0c1e9', borderBottomWidth: 3, borderBottomColor: '#a0c1e9',
+                  }, NewStyles.border10]} colors={[themeColor4.bgColor(1), '#bbcee5']}>
+                    <Text style={[NewStyles.title10, { textAlign: 'center' }]}>
+                      {selectedFile ? t('Change file') : t('Upload the signed contract')}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
 
 
-              {
-                selectedFile &&
-                <View style={{ flex: 1 }}>
-                  <Button
-                    onPress={handleUploadContract}
-                    loading={uploadingContract}
-                    title={uploadingContract ? t('Uploading...') : t('Send')}
-                  />
-                </View>
-              }
-            </View>}
+
+                {
+                  selectedFile &&
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      onPress={handleUploadContract}
+                      loading={uploadingContract}
+                      title={uploadingContract ? t('Uploading...') : t('Send')}
+                    />
+                  </View>
+                }
+              </View>}
 
             {/* قرارداد آپلود شده قبلی */}
             {adminContract?.signed_contract_file_path && (
@@ -569,19 +751,7 @@ const OrganizationContract = ({ navigation }) => {
                   (adminContract.status == '2' || adminContract.status == '4') && styles.uploadedCardRejected,
                 ]}>
                   <View style={styles.uploadedInfo}>
-                    <Ionicons
-                      name={
-                        (adminContract.status == '3' || adminContract.status == '1') ? 'checkmark-circle' :
-                          (adminContract.status == '2' || adminContract.status == '4') ? 'close-circle' :
-                            'time-outline'
-                      }
-                      size={30}
-                      color={
-                        (adminContract.status == '3' || adminContract.status == '1') ? '#4caf50' :
-                          (adminContract.status == '2' || adminContract.status == '4') ? '#f44336' :
-                            '#ff9800'
-                      }
-                    />
+
                     <View style={styles.uploadedDetails}>
                       <Text style={styles.uploadedFileName}>{adminContract.file_name}</Text>
                       <Text style={styles.uploadedDate}>
@@ -612,31 +782,32 @@ const OrganizationContract = ({ navigation }) => {
                       {/* دکمه دانلود قرارداد آپلود شده */}
                     </View>
                   </View>
+                   
+
                   <TouchableOpacity
-                    style={styles.viewUploadedBtn}
+                    style={[styles.downloadBtn, NewStyles.border10]}
                     onPress={() => Linking.openURL(`${imageUri}/${adminContract.signed_contract_file_path}`)}
                   >
-                    <Ionicons name="eye-outline" size={18} color={themeColor1.bgColor(1)} />
-                    <Text style={styles.viewUploadedBtnText}>{t('View uploaded file')}</Text>
+                    <LinearGradient style={[{
+                      width: '100%', paddingVertical: 12,
+                      paddingHorizontal: 20,
+                      borderWidth: 1, borderColor: '#a0c1e9', borderBottomWidth: 3, borderBottomColor: '#a0c1e9',
+                    }, NewStyles.border10]} colors={[themeColor4.bgColor(1), '#bbcee5']}>
+                      <Text style={[NewStyles.title10, { textAlign: 'center' }]}>
+                        {t('View uploaded file')}
+                      </Text>
+                    </LinearGradient>
                   </TouchableOpacity>
+
+
                 </View>
               </View>
             )}
 
-            {/* راهنمایی */}
-            <View style={styles.helpBox}>
-              <Text style={styles.helpTitle}>{t('Guide:')}</Text>
-              <Text style={styles.helpText}>{t('- First, download and read the cooperation contract')}</Text>
-              <Text style={styles.helpText}>{t('- Sign the contract (digitally or by scan)')}</Text>
-              <Text style={styles.helpText}>{t('- Upload the signed file')}</Text>
-              <Text style={styles.helpText}>{t('- Allowed format: PDF only')}</Text>
-              <Text style={styles.helpText}>{t('- Maximum file size: 500 MB')}</Text>
-              <Text style={styles.helpText}>{t('- If rejected, you can upload again')}</Text>
-            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -740,25 +911,22 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     ...NewStyles.row,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: themeColor1.bgColor(1),
+    backgroundColor: themeColor4.bgColor(1),
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    width: '95%',
+    alignSelf: 'center',
+    marginTop: 10
+
   },
-  downloadBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontFamily: 'VazirBold',
-    marginRight: 8,
-    writingDirection: 'rtl',
-  },
+
+
 
   // Empty Card
   emptyCard: {
-    backgroundColor: themeColor1.bgColor(1),
     borderRadius: 10,
-    padding: 10,
     alignItems: 'center',
+    width: '100%',
+    paddingVertical: 10
   },
   emptyText: {
     marginTop: 15,
@@ -866,18 +1034,16 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     writingDirection: 'rtl',
   },
   uploadedCard: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: themeColor4.bgColor(1),
     borderRadius: 10,
     padding: 15,
     borderRightWidth: 4,
     borderRightColor: '#ff9800',
   },
   uploadedCardApproved: {
-    backgroundColor: '#e8f5e9',
     borderRightColor: '#4caf50',
   },
   uploadedCardRejected: {
-    backgroundColor: '#ffebee',
     borderRightColor: '#f44336',
   },
   uploadedInfo: {
@@ -937,12 +1103,8 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     writingDirection: 'rtl',
   },
   rejectionText: {
-    fontSize: 13,
-    fontFamily: 'VazirLight',
-    color: '#666',
-    ...NewStyles.text10,
+    ...NewStyles.text3,
     lineHeight: 20,
-    writingDirection: 'rtl',
   },
 
   // View Uploaded Button
@@ -959,39 +1121,88 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     borderColor: themeColor1.bgColor(1),
   },
   viewUploadedBtnText: {
-    color: themeColor1.bgColor(1),
-    fontSize: 14,
-    fontFamily: 'VazirBold',
+    ...NewStyles.text,
     marginRight: 8,
-    writingDirection: 'rtl',
   },
 
   // Help Box
   helpBox: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: themeColor4.bgColor(1),
     borderRadius: 10,
     padding: 15,
     marginTop: 15,
     borderRightWidth: 4,
-    borderRightColor: '#ff9800',
+    borderRightColor: themeColor11.bgColor(1),
   },
   helpTitle: {
-    fontSize: 15,
-    fontFamily: 'VazirBold',
-    color: '#333',
+    ...NewStyles.title3,
     marginBottom: 10,
     ...NewStyles.text10,
-    writingDirection: 'rtl',
   },
   helpText: {
+    ...NewStyles.text3,
     fontSize: 13,
-    fontFamily: 'VazirLight',
-    color: '#666',
     marginBottom: 6,
     ...NewStyles.text10,
     lineHeight: 20,
-    writingDirection: 'rtl',
   },
+  gallerySection: {
+    marginTop: 15,
+    width: '100%',
+  },
+
+  galleryTitle: {
+    ...NewStyles.title3,
+    marginBottom: 10,
+    ...NewStyles.text10,
+  },
+
+  galleryItemCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+    ...NewStyles.rowWrapper,
+  },
+
+  galleryItemInfo: {
+    flex: 1,
+    ...NewStyles.row,
+  },
+
+  galleryItemTextWrap: {
+    flex: 1,
+    marginRight: 10,
+  },
+
+  galleryItemName: {
+    ...NewStyles.text3,
+    fontSize: 13,
+  },
+
+  galleryItemActions: {
+    ...NewStyles.row,
+    gap: 8,
+    marginLeft: 10,
+  },
+
+  galleryActionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: themeColor0.bgColor(0.3),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+
+  galleryDeleteBtn: {
+    borderColor: themeColor6.bgColor(1),
+  },
+
 });
 
 export default OrganizationContract;

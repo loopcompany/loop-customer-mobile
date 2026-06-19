@@ -91,7 +91,7 @@ export default function Address({ step, data, navigation }) {
                         <Pressable onPress={() => {
                             dispatch(setAddressId(item?.id))
                             dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }))
-                        }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && { backgroundColor: themeColor1.bgColor(1) }]}>
+                        }} style={[styles.itemWrapper, NewStyles.border10, NewStyles.row, NewStyles.shadow, addressId == item?.id && { backgroundColor: themeColor0.bgColor(1) }]}>
                             <View style={[{ height: 100, width: 100, overflow: 'hidden' }, NewStyles.border100]}>
                                 <ShowMapDetailComponent
                                     latitude={item?.latitude}
@@ -99,8 +99,8 @@ export default function Address({ step, data, navigation }) {
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-                                {renderRow(``, `${item?.title}`, [NewStyles.title, { flex: 1 }])}
-                                {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }])}
+                                {renderRow(``, `${item?.title}`, [NewStyles.title, { flex: 1 }, addressId == item?.id && {color: themeColor4.bgColor(1)}])}
+                                {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }, addressId == item?.id && NewStyles.text4])}
                             </View>
                             <Pressable style={styles.searchBarIcons} onPress={() => { setId(item?.id); setDeletModal(true); }}>
                                 <Ionicons name="trash" size={20} color={themeColor6.bgColor(1)} />

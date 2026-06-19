@@ -575,7 +575,7 @@ export default function Profile() {
     }
 
     // Show OrganizationProfile for organization users
-    if (userType === 'organization') {
+    if (userType !== 'individual') {
         console.log('🏢 [Profile] نمایش پروفایل سازمانی');
         return <OrganizationProfile />;
     }

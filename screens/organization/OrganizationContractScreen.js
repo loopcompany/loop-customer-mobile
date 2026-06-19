@@ -211,7 +211,7 @@ const OrganizationContractScreen = () => {
 
         showAlert('موفقیت', 'قرارداد شما با موفقیت آپلود شد و در انتظار تایید است', [
           {
-            text: 'باشه',
+            text: t("Ok"),
             onPress: () => fetchContract() // بارگذاری مجدد اطلاعات
           }
         ]);

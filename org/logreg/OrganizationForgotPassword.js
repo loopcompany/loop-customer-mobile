@@ -195,7 +195,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   setErrors({ ...errors, organizationCode: null });
                 }
               }}
-              placeholder={t('Organization code * (6 digits)')}
+              placeholder={t('Organization code *')}
               keyboardType="number-pad"
               maxLength={6}
               style={{

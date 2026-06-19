@@ -52,8 +52,6 @@ const Login = ({ navigation }) => {
     const newErrors = {};
     if (!organizationCode) {
       newErrors.organizationCode = t('Organization code is required');
-    } else if (organizationCode.length !== 6) {
-      newErrors.organizationCode = t('Organization code must be 6 digits');
     }
 
     if (!password) {
@@ -222,6 +220,11 @@ const Login = ({ navigation }) => {
           </View>
 
           {/* Form Container */}
+
+          <View style={[{ width: '90%', alignSelf: 'center', padding: 10, backgroundColor: themeColor1.bgColor(1), marginBottom: 12 }, NewStyles.border10]}>
+            <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("To find out and send and receive the contract, refer to the application menu or the contract start field section.")}</Text>
+          </View>
+
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
             {/* کد سازمانی */}
             <View style={{ marginBottom: 8 }}>
@@ -229,10 +232,9 @@ const Login = ({ navigation }) => {
               <TextInput
                 value={organizationCode}
                 onChangeText={setOrganizationCode}
-                placeholder={t('Organization code * (6 digits)')}
+                placeholder={t('Organization code *')}
                 placeholderTextColor="#999"
                 keyboardType="numeric"
-                maxLength={6}
                 style={{
                   backgroundColor: '#f5f5f5',
                   borderRadius: 8,

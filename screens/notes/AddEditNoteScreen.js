@@ -261,7 +261,8 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: themeColor3.bgColor(0.2),
     width: '100%',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingBottom:40
   },
 });
 

@@ -31,6 +31,11 @@ const Register = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
   const [familyName, setFamilyName] = useState('');
+
+  const [agentName, setAgentName] = useState('');
+  const [agentPhone, setAgentPhone] = useState('');
+  const [history, setHistory] = useState('');
+
   const [nationalCode, setNationalCode] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [organizationPhoneNumber, setOrganizationPhoneNumber] = useState('');
@@ -103,6 +108,20 @@ const Register = ({ navigation }) => {
 
     if (!familyName || familyName.length < 2) {
       newErrors.familyName = t('Manager full name must be at least 2 characters');
+    }
+
+    if (!agentName || agentName.length < 2) {
+      newErrors.agentName = t('Agent name must be at least 2 characters');
+    }
+
+    if (!agentPhone) {
+      newErrors.agentPhone = t('Agent phone number is required');
+    } else if (!validateMobile(agentPhone)) {
+      newErrors.agentPhone = t('Agent phone number must be 11 digits and start with 09');
+    }
+
+    if (!history || history.length < 2) {
+      newErrors.history = t('Records must be at least 2 characters');
     }
 
     if (!nationalCode) {
@@ -236,6 +255,9 @@ const Register = ({ navigation }) => {
 
       // Add all form fields
       formData.append('organization_name', organizationName);
+      formData.append('agent_name', agentName);
+      formData.append('agent_phone', agentPhone);
+      formData.append('history', history);
       formData.append('organization_email', organizationEmail);
       formData.append('organization_phone', '021' + organizationPhoneNumber);
       formData.append('organization_address', organizationAddress);
@@ -476,7 +498,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationName && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.organizationName}
                 </Text>
               )}
@@ -505,7 +527,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.familyName && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.familyName}
                 </Text>
               )}
@@ -536,7 +558,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.nationalCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.nationalCode}
                 </Text>
               )}
@@ -573,7 +595,7 @@ const Register = ({ navigation }) => {
 
               </View>
               {errors.mobileNumber && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.mobileNumber}
                 </Text>
               )}
@@ -606,8 +628,88 @@ const Register = ({ navigation }) => {
                 </Text>
               </TouchableOpacity>
               {errors.birthDate && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.birthDate}
+                </Text>
+              )}
+            </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t("Name of the CEO's representative")} <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={agentName}
+                onChangeText={setAgentName}
+                placeholder={t("Name of the CEO's representative")}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.agentName ? '#ff0000' : '#ccc',
+                  fontSize: 14, 
+                  ...NewStyles.text10,
+                  height: 40
+                }}
+                placeholderTextColor={themeColor3.bgColor(1)}
+              />
+              {errors.agentName && (
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                  {errors.agentName}
+                </Text>
+              )}
+            </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t("CEO Representative Phone")} <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={agentPhone}
+                onChangeText={setAgentPhone}
+                placeholder={t("CEO Representative Phone")}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.agentPhone ? '#ff0000' : '#ccc',
+                  fontSize: 14, 
+                  ...NewStyles.text10,
+                  height: 40
+                }}
+                keyboardType='phone-pad'
+                maxLength={11}
+                placeholderTextColor={themeColor3.bgColor(1)}
+              />
+              {errors.agentPhone && (
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                  {errors.agentPhone}
+                </Text>
+              )}
+            </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t("Records")} <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={history}
+                onChangeText={setHistory}
+                placeholder={t("Records")}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.history ? '#ff0000' : '#ccc',
+                  fontSize: 14, 
+                  ...NewStyles.text10,
+                  height: 40
+                }}
+                placeholderTextColor={themeColor3.bgColor(1)}
+              />
+              {errors.history && (
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                  {errors.history}
                 </Text>
               )}
             </View>
@@ -637,7 +739,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationEmail && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.organizationEmail}
                 </Text>
               )}
@@ -684,7 +786,7 @@ const Register = ({ navigation }) => {
 
               </View>
               {errors.organizationPhoneNumber && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.organizationPhoneNumber}
                 </Text>
               )}
@@ -730,7 +832,7 @@ const Register = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               {errors.password && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.password}
                 </Text>
               )}
@@ -780,7 +882,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationAddress && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.organizationAddress}
                 </Text>
               )}
@@ -811,7 +913,7 @@ const Register = ({ navigation }) => {
                 placeholderTextColor={themeColor3.bgColor(1)}
               />
               {errors.organizationPostalCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.organizationPostalCode}
                 </Text>
               )}
@@ -878,7 +980,7 @@ const Register = ({ navigation }) => {
                 </View>
               </View>
               {errors.securityCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.securityCode}
                 </Text>
               )}

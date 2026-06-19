@@ -350,8 +350,7 @@ export default function LoginScreen({ navigation }) {
               style={[
                 NewStyles.textInput,
                 NewStyles.text10,
-                NewStyles.border10,
-                { textAlign: 'right' },
+                NewStyles.border10, 
                 state.errors.phone && styles.inputError
               ]}
               placeholder={t('Username (09XXXXXXXXX)')}
@@ -377,7 +376,7 @@ export default function LoginScreen({ navigation }) {
                   NewStyles.textInput,
                   NewStyles.border10,
                   NewStyles.text10,
-                  { textAlign: 'right', paddingLeft: 45 },
+                  {  paddingLeft: 45 },
                   state.errors.password && styles.inputError
                 ]}
                 placeholder={t('Password (at least 6 characters)')}

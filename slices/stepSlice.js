@@ -101,8 +101,7 @@ const stepSlice = createSlice({
                                     opt.value = 1;
                                     console.log('✅ [stepSlice] Set value=1 for option:', opt.id);
                                 } else {
-                                    opt.value = 0;
-                                    console.log('❌ [stepSlice] Set value=0 for option:', opt.id);
+                                    opt.value = 0; 
                                 }
                             });
                             return {
@@ -112,9 +111,7 @@ const stepSlice = createSlice({
                         }
                     }
                 }
-
-                console.log('❌ [stepSlice] fieldId پیدا نشد:', fieldId);
-                console.log('📋 [stepSlice] Available items:', newData[step].map(i => ({ id: i.id, type: i.type })));
+ 
                 return state;
             }
 
@@ -128,8 +125,7 @@ const stepSlice = createSlice({
                         item.value = 1;
                         console.log('✅ [stepSlice] Set value=1 for:', item.id);
                     } else {
-                        item.value = 0;
-                        console.log('❌ [stepSlice] Set value=0 for:', item.id);
+                        item.value = 0; 
                     }
                 });
             }
@@ -277,16 +273,14 @@ const stepSlice = createSlice({
             // پیدا کردن service_schedule item
             const serviceScheduleItem = newData[step]?.find(item => item.type === 'service_schedule');
 
-            if (!serviceScheduleItem) {
-                console.log('❌ [stepSlice.updateServiceScheduleField] service_schedule یافت نشد');
+            if (!serviceScheduleItem) { 
                 return state;
             }
 
             // پیدا کردن فیلد مورد نظر در field_details
             const field = serviceScheduleItem.field_details?.find(f => f.id === fieldId);
 
-            if (!field) {
-                console.log('❌ [stepSlice.updateServiceScheduleField] فیلد یافت نشد:', fieldId);
+            if (!field) { 
                 return state;
             }
 

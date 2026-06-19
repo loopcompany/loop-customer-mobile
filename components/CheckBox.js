@@ -48,7 +48,7 @@ console.log(data?.field_details?.length);
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
                     {data?.icon_name && <View style={{ flex: 1 }}><Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} /></View>}
-                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? 'right' : 'center' }]}>{data?.title}</Text>
+                    <Text style={[NewStyles.title4, { flex: 1, textAlign: data?.icon_name ? 'right' : 'center' }]}>{data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -66,7 +66,7 @@ console.log(data?.field_details?.length);
 
                         <TouchableOpacity onPress={() => {
                             dispatch(updateCheckbox({ fieldId: data?.id, fieldDetailId: item.id, step }))
-                        }} style={[{ backgroundColor: themeColor4.bgColor(1), padding: 10, ...NewStyles.border5, ...NewStyles.row, gap: 10  }, item?.value > 0 && { backgroundColor: themeColor0.bgColor(0.2) }]}>
+                        }} style={[{ backgroundColor: themeColor4.bgColor(1), padding: 10, ...NewStyles.border5, ...NewStyles.row, gap: 10  }, item?.value > 0 && { backgroundColor: themeColor0.bgColor(1) }]}>
                             {
                                 item?.image_path &&
 
@@ -77,7 +77,7 @@ console.log(data?.field_details?.length);
                                     />
                                 </View>
                             }
-                            <Text style={NewStyles.text10}>{item.title}</Text>
+                            <Text style={[NewStyles.text10, item?.value > 0 && NewStyles.text4]}>{item.title}</Text>
                         </TouchableOpacity>
                         {item?.value &&
                             item.has_counter == 1 ? renderCounter(item) : renderPrice(item)}

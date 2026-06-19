@@ -18,9 +18,10 @@ export default function Folder({ onPress, title, style, loading, image }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]); 
+  
   return (
-    <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style]} onPress={onPress}>
+    <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style, {justifyContent:'flex-start'}]} onPress={onPress}>
       <Image
         source={{ uri: `${imageUri}/${image}` }}
         style={[styles.folderIcon]}
@@ -30,15 +31,11 @@ export default function Folder({ onPress, title, style, loading, image }) {
   );
 }
 const createLocalStyles = (NewStyles) => StyleSheet.create({
-  button: {
-    // backgroundColor: themeColor10.bgColor(0.2),
-    // paddingHorizontal: 40,
-    marginVertical: 10,
+  button: { 
+    marginTop: 10,
     width: 100,
-    // height: 150,
-    paddingVertical: 20,
-    alignItems: "flex-end",
-    aspectRatio: 1
+    height: 120, 
+    alignItems: "flex-end", 
   },
   folderIcon: {
     width: 70,

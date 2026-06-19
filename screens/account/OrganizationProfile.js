@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,8 +25,9 @@ import DatePickerModal from '../../components/DatePickerModal';
 import { showAlert } from '../../helpers/Common';
 
 import useLogout from '../../hooks/useLogout';
-import { uri } from '../../services/URL';
+import { imageUri, uri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles';
+import { useSelector } from 'react-redux';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '../../helpers/Common';
 
@@ -38,10 +39,15 @@ const OrganizationProfile = () => {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   // Form states - مطابق با فیلدهای ثبت‌نام
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
+
+  const [agentName, setAgentName] = useState('');
+  const [agentPhone, setAgentPhone] = useState('');
+  const [history, setHistory] = useState('');
+
   const [familyName, setFamilyName] = useState('');
   const [nationalCode, setNationalCode] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
@@ -52,7 +58,7 @@ const OrganizationProfile = () => {
   const [region, setRegion] = useState('');
   const [organizationAddress, setOrganizationAddress] = useState('');
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');
-
+  const token = useSelector(state => state.auth?.token)
   // Password change states
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -75,18 +81,15 @@ const OrganizationProfile = () => {
   // بارگذاری اطلاعات پروفایل
   const loadOrganizationProfile = async () => {
     try {
-      console.log('🔄 [OrganizationProfile] شروع بارگذاری پروفایل...');
       setLoadingProfile(true);
       const token = await AsyncStorage.getItem('userToken');
 
       if (!token) {
-        console.log('❌ [OrganizationProfile] توکن یافت نشد');
         showAlert(t('Error'), t('Please log in first.'));
         navigation.navigate('Login');
         return;
       }
 
-      console.log('📡 [OrganizationProfile] ارسال درخواست به:', `${uri}/organization/profile`);
 
       const response = await axios.get(`${uri}/organization/profile`, {
         headers: {
@@ -95,144 +98,68 @@ const OrganizationProfile = () => {
         }
       });
 
-      console.log('✅ [OrganizationProfile] پاسخ دریافت شد:', response.data);
-      console.log('📊 [OrganizationProfile] وضعیت پاسخ:', response.data.status);
 
       if (response.data.status === 'success') {
         const data = response.data.data;
-        console.log('📦 [OrganizationProfile] داده‌های دریافتی کامل:', JSON.stringify(data, null, 2));
 
         setOrganizationName(data.organization_name || '');
+        setAgentName(data.agent_name || '');
+        setAgentPhone(data.agent_phone || '');
+        setHistory(data.history || '');
         setFamilyName(data.manager_full_name || '');
         setNationalCode(data.manager_national_code || '');
 
-        // اگر شماره موبایل null بود، از AsyncStorage بخوان
         if (data.manager_mobile) {
           setMobileNumber(data.manager_mobile);
-          console.log('📱 [OrganizationProfile] شماره موبایل از API:', data.manager_mobile);
         } else {
-          console.log('⚠️ [OrganizationProfile] manager_mobile null است، خواندن از AsyncStorage...');
 
-          // ابتدا از organizationData بخوان
           const orgData = await AsyncStorage.getItem('organizationData');
           if (orgData) {
             const savedData = JSON.parse(orgData);
-            console.log('📦 [OrganizationProfile] organizationData:', savedData);
             if (savedData.manager_mobile) {
               setMobileNumber(savedData.manager_mobile);
-              console.log('📱 [OrganizationProfile] شماره موبایل از organizationData:', savedData.manager_mobile);
             }
           }
 
-          // اگر نبود، از userData بخوان
-          if (!mobileNumber) {
-            const userData = await AsyncStorage.getItem('userData');
-            if (userData) {
-              const user = JSON.parse(userData);
-              console.log('📦 [OrganizationProfile] userData:', user);
-              if (user.phone || user.mobile) {
-                const phone = user.phone || user.mobile;
-                setMobileNumber(phone);
-                console.log('📱 [OrganizationProfile] شماره موبایل از userData:', phone);
-              }
-            }
-          }
+
         }
 
         setOrganizationPhoneNumber(data.organization_phone || '');
         setBirthDate(data.manager_birthdate || '');
         setOrganizationEmail(data.organization_email || '');
         setCity(data.city || '');
-        setRegion(data.region || '');
+        setRegion(data.region_id || '');
         setOrganizationAddress(data.organization_address || '');
         setOrganizationPostalCode(data.postal_code || '');
 
-        console.log('🏢 [OrganizationProfile] نام سازمان set شد:', data.organization_name);
-        console.log('👤 [OrganizationProfile] نام مدیر set شد:', data.manager_full_name);
-        console.log('📱 [OrganizationProfile] شماره موبایل نهایی:', data.manager_mobile || 'از AsyncStorage');
-
         if (data.profile_image) {
-          console.log('🖼️ [OrganizationProfile] ===== بررسی تصویر پروفایل =====');
-          console.log('🖼️ [OrganizationProfile] مقدار خام از سرور:', data.profile_image);
 
           // بررسی: آیا URL کامل است؟
           const isFullUrl = data.profile_image.startsWith('http');
-          console.log('🖼️ [OrganizationProfile] آیا URL کامل است?:', isFullUrl);
 
-          const imageUrl = isFullUrl ? data.profile_image : `${uri}/storage/${data.profile_image}`;
-          console.log('🖼️ [OrganizationProfile] URL نهایی:', imageUrl);
+          const imageUrl = isFullUrl ? data.profile_image : `${imageUri}/${data.profile_image}`;
           setProfileImage({ uri: imageUrl, uploaded: true });
         } else {
-          console.log('⚠️ [OrganizationProfile] تصویر پروفایل موجود نیست');
         }
 
-        console.log('✅ [OrganizationProfile] تمام داده‌ها با موفقیت set شدند');
       } else {
-        console.log('⚠️ [OrganizationProfile] وضعیت پاسخ success نیست:', response.data);
       }
     } catch (error) {
-      console.error('❌ [OrganizationProfile] خطا در بارگذاری پروفایل:', error);
-      console.error('❌ [OrganizationProfile] جزئیات خطا:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
 
-      // Fallback: تلاش برای بارگذاری از AsyncStorage
-      console.log('🔄 [OrganizationProfile] تلاش برای بارگذاری از AsyncStorage...');
-      try {
-        const organizationData = await AsyncStorage.getItem('organizationData');
-        if (organizationData) {
-          const data = JSON.parse(organizationData);
-          console.log('📦 [OrganizationProfile] داده‌های AsyncStorage:', data);
-
-          setOrganizationName(data.organization_name || '');
-          setFamilyName(data.manager_full_name || '');
-          setNationalCode(data.manager_national_code || '');
-          setMobileNumber(data.manager_mobile || '');
-          setOrganizationPhoneNumber(data.organization_phone || '');
-          setBirthDate(data.manager_birthdate || '');
-          setOrganizationEmail(data.organization_email || '');
-          setCity(data.city || '');
-          setRegion(data.region || '');
-          setOrganizationAddress(data.organization_address || '');
-          setOrganizationPostalCode(data.postal_code || '');
-
-          if (data.profile_image) {
-            const isFullUrl = data.profile_image.startsWith('http');
-            const imageUrl = isFullUrl ? data.profile_image : `${uri}/storage/${data.profile_image}`;
-            setProfileImage({ uri: imageUrl, uploaded: true });
-          }
-
-          console.log('✅ [OrganizationProfile] داده‌ها از AsyncStorage بارگذاری شد');
-        } else {
-          console.log('⚠️ [OrganizationProfile] داده‌ای در AsyncStorage یافت نشد');
-          showAlert(t('Error'), error.response?.data?.message || t('Error loading information. Please log in again.'));
-        }
-      } catch (storageError) {
-        console.error('❌ [OrganizationProfile] خطا در خواندن از AsyncStorage:', storageError);
-        showAlert(t('Error'), t('Error loading information.'));
-      }
     } finally {
       setLoadingProfile(false);
-      console.log('🏁 [OrganizationProfile] پایان بارگذاری پروفایل');
     }
   };
 
   // انتخاب تصویر پروفایل
   const pickImage = async () => {
     try {
-      console.log('📸 [OrganizationProfile] ===== شروع انتخاب تصویر =====');
-
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.granted === false) {
-        console.log('❌ [OrganizationProfile] دسترسی رد شد');
         showAlert(t('Error'), t('Gallery access is required.'));
         return;
       }
-
-      console.log('✅ [OrganizationProfile] دسترسی تأیید شد');
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'Images',
@@ -241,24 +168,14 @@ const OrganizationProfile = () => {
         quality: 0.8,
       });
 
-      console.log('📸 [OrganizationProfile] نتیجه:', JSON.stringify(result, null, 2));
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
-        console.log('✅ [OrganizationProfile] تصویر انتخاب شد:');
-        console.log('  - URI:', selectedImage.uri);
-        console.log('  - Width:', selectedImage.width);
-        console.log('  - Height:', selectedImage.height);
 
         setProfileImage(selectedImage);
-        console.log('✅ [OrganizationProfile] تصویر set شد');
       } else {
-        console.log('❌ [OrganizationProfile] انتخاب لغو شد');
       }
-
-      console.log('📸 [OrganizationProfile] ===== پایان انتخاب =====');
     } catch (error) {
-      console.error('❌ [OrganizationProfile] خطا:', error);
       showAlert(t('Error'), t('Error selecting image'));
     }
   };
@@ -266,7 +183,6 @@ const OrganizationProfile = () => {
   // به‌روزرسانی پروفایل
   const handleUpdateProfile = async () => {
     try {
-      console.log('🔄 [OrganizationProfile] شروع به‌روزرسانی پروفایل...');
       setLoading(true);
       setErrors({});
 
@@ -278,9 +194,6 @@ const OrganizationProfile = () => {
 
       // بررسی آیا عکس جدید داریم
       const hasNewImage = profileImage && profileImage.uri && !profileImage.uri.startsWith('http');
-
-      console.log('📝 [OrganizationProfile] آماده‌سازی داده‌ها...');
-      console.log('🖼️ [OrganizationProfile] عکس جدید:', hasNewImage ? 'بله' : 'خیر');
 
       let requestData;
       let requestHeaders = {
@@ -303,6 +216,9 @@ const OrganizationProfile = () => {
         });
 
         formData.append('organization_name', organizationName);
+        formData.append('agent_name', agentName);
+        formData.append('agent_phone', agentPhone);
+        formData.append('history', history);
         formData.append('organization_email', organizationEmail);
         formData.append('organization_phone', organizationPhoneNumber);
         formData.append('organization_address', organizationAddress);
@@ -319,11 +235,12 @@ const OrganizationProfile = () => {
 
         requestData = formData;
         requestHeaders['Content-Type'] = 'multipart/form-data';
-      } else {
-        // اگر عکس نداریم، از JSON استفاده کن
-        console.log('� [OrganizationProfile] استفاده از JSON (بدون عکس)');
+      } else { 
         const jsonData = {
           organization_name: organizationName,
+          agent_name: agentName,
+          agent_phone: agentPhone,
+          history: history,
           organization_email: organizationEmail,
           organization_phone: organizationPhoneNumber,
           organization_address: organizationAddress,
@@ -343,18 +260,7 @@ const OrganizationProfile = () => {
         requestHeaders['Content-Type'] = 'application/json';
       }
 
-      console.log('📡 [OrganizationProfile] ارسال درخواست به:', `${uri}/organization/update-profile`);
-      console.log('📡 [OrganizationProfile] استفاده از متد: POST');
-      console.log('📡 [OrganizationProfile] Content-Type:', requestHeaders['Content-Type']);
-      console.log('📦 [OrganizationProfile] داده‌های ارسالی:', {
-        organization_name: organizationName,
-        organization_email: organizationEmail,
-        organization_phone: organizationPhoneNumber,
-        manager_full_name: familyName,
-        city: city,
-        region: region,
-        postal_code: organizationPostalCode,
-      });
+
 
       // همیشه از POST استفاده کن
       const response = await axios.post(
@@ -366,44 +272,26 @@ const OrganizationProfile = () => {
         }
       );
 
-      console.log('✅ [OrganizationProfile] پاسخ دریافت شد:', response.data);
-      console.log('📦 [OrganizationProfile] response.data کامل:', JSON.stringify(response.data, null, 2));
 
       if (response.data.status === 'success') {
         const responseData = response.data.data;
 
-        console.log('🔍 [OrganizationProfile] ===== بررسی پاسخ =====');
-        console.log('  - نام سازمان ارسالی:', organizationName);
-        console.log('  - نام سازمان برگشتی:', responseData?.organization_name);
 
         // بررسی تصویر در پاسخ
         if (responseData?.profile_image) {
-          console.log('🖼️ [OrganizationProfile] ===== تصویر جدید در پاسخ =====');
-          console.log('🖼️ [OrganizationProfile] profile_image:', responseData.profile_image);
 
           const isFullUrl = responseData.profile_image.startsWith('http');
           const newImageUrl = isFullUrl ? responseData.profile_image : `${uri}/storage/${responseData.profile_image}`;
 
-          console.log('🖼️ [OrganizationProfile] URL نهایی:', newImageUrl);
           setProfileImage({ uri: newImageUrl, uploaded: true });
         }
 
         showAlert(t('Success'), t('Profile updated successfully.'));
         setIsEditing(false);
-
-        console.log('🔄 [OrganizationProfile] بارگذاری مجدد اطلاعات...');
         // بارگذاری مجدد اطلاعات
         await loadOrganizationProfile();
-        console.log('✅ [OrganizationProfile] بارگذاری مجدد کامل شد');
       }
     } catch (error) {
-      console.error('❌ [OrganizationProfile] خطا در به‌روزرسانی:', error);
-      console.error('❌ [OrganizationProfile] جزئیات خطا:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-
       // چک کردن خطاهای مختلف
       if (error.response?.status === 405) {
         const errorMessage = error.response?.data?.message || '';
@@ -464,9 +352,7 @@ const OrganizationProfile = () => {
       }
 
       setLoading(true);
-      const token = await AsyncStorage.getItem('userToken');
 
-      console.log('🔑 [OrganizationProfile] توکن برای تغییر رمز:', token ? `${token.substring(0, 20)}...` : 'null');
 
       if (!token) {
         showAlert(t('Error'), t('Please log in first.'));
@@ -533,7 +419,7 @@ const OrganizationProfile = () => {
       />
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingTop: 10 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -636,6 +522,36 @@ const OrganizationProfile = () => {
             </TouchableOpacity>
           </View>
 
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t("Name of the CEO's representative")}</Text>
+            <TextInput
+              value={agentName}
+              onChangeText={setAgentName}
+              editable={isEditing}
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t("CEO Representative Phone")}</Text>
+            <TextInput
+              value={agentPhone}
+              onChangeText={setAgentPhone}
+              editable={isEditing}
+              keyboardType={'phone-pad'}
+              maxLength={11}
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t("Records")}</Text>
+            <TextInput
+              value={history}
+              onChangeText={setHistory}
+              editable={isEditing}
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+
           {/* ایمیل سازمان */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>{t('Organization email *')}</Text>
@@ -666,7 +582,7 @@ const OrganizationProfile = () => {
 
           {/*منطقه */}
           <View style={styles.rowContainer}>
-            
+
             <View style={styles.halfField}>
               <Text style={styles.label}>{t('Region *')}</Text>
               <TextInput
@@ -840,7 +756,7 @@ const OrganizationProfile = () => {
   );
 };
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   headerContainer: {
     width: '90%',
     alignSelf: 'center',
@@ -860,7 +776,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     fontFamily: 'VazirBold',
   },
   editButton: {
-   ...NewStyles.row,
+    ...NewStyles.row,
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 12,
@@ -924,7 +840,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     borderColor: '#ccc',
     fontSize: 14,
     fontFamily: 'VazirLight',
-     ...NewStyles.text10,
+    ...NewStyles.text10,
     minHeight: 40,
   },
   inputDisabled: {

@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { createStyles } from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { getNext20DaysJalaali } from '../helpers/Common';
+import { getNext20DaysJalaali, langIsRTL } from '../helpers/Common';
 import { selectDate, setGeneralData, updateServiceScheduleField } from '../slices/stepSlice';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,7 +51,7 @@ export default function Date({ step, data, isServiceSchedule }) {
                 </Text>
                 <FlatList
                     contentContainerStyle={{ gap: 10, paddingHorizontal: 5 }}
-                    horizontal inverted showsHorizontalScrollIndicator={false}
+                    horizontal inverted={langIsRTL(lang)} showsHorizontalScrollIndicator={false}
                     keyExtractor={(item) => item.id?.toString()}
                     data={days}
                     renderItem={({ item }) => {

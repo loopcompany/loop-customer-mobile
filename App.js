@@ -109,8 +109,8 @@ i18n
       fa: { translation: fa },
       en: { translation: en },
     },
-    lng: "fa",
-    fallbackLng: "fa",
+    lng: "en",
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false
     }
@@ -129,8 +129,8 @@ i18n
       en: { translation: en },
       fa: { translation: fa },
     },
-    lng: "fa",
-    fallbackLng: "fa",
+    lng: "en",
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false
     }

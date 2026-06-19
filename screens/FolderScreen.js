@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import Folder from "../components/Folder";
 import CustomStatusBar from "./../components/CustomStatusBar";
@@ -20,6 +21,8 @@ import Loader from "../components/Loader";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from "../styles/NewStyles";
+import { imageUri } from "../services/URL";
+import { Text } from "react-native";
 
 function FolderScreen({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -31,7 +34,7 @@ function FolderScreen({ navigation }) {
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const user = useSelector(state => state?.user?.data);
   const loadCategories = async () => {
     try {
@@ -86,62 +89,17 @@ function FolderScreen({ navigation }) {
 
           </ScrollView>
         </View>
-        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          {/* لوگو بالا */}
-          {/* <FlatList
-
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-              />
-            }
-            style={{ width: '100%', }}
-            data={folders}
-            numColumns={2}
-            columnWrapperStyle={{ backgroundColor: 'red', flexWrap: 'wrap', }}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            renderItem={({ item }) => {
-              return (
-                <Folder
-                  title={item?.title}
-                  image={item?.image_path}
-                  onPress={async () => {
-                    if (item?.has_subcategory === 1) {
-                      // اگر دارای زیر دسته است، به SubCategories برو
-                      console.log(
-                        "📂 [FolderScreen] باز کردن زیر دسته:",
-                        item.title
-                      );
-                      navigation.push("SubCategories", {
-                        categoryId: item.id,
-                        categoryTitle: item.title,
-                      });
-                    } else {
-                      try {
-                        const result = await dispatch(fetchSteps(item.id));
-                        console.log(
-                          "🎯 [FolderScreen] نتیجه dispatch:",
-                          result
-                        );
-                        dispatch(setCategory(item));
-                        navigation.navigate("Steps", {
-                          categoryId: item.id,
-                          categoryTitle: item.title,
-                        });
-                      } catch (error) {
-                        console.log(
-                          "❌ [FolderScreen] خطا در dispatch fetchSteps:",
-                          error
-                        );
-                      }
-                    }
-                  }}
-                />
-              );
-            }}
-            keyExtractor={(item) => item?.id?.toString()}
-          /> */}
+        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap', gap:10 , paddingHorizontal:10,}}>
+         
+          <TouchableOpacity style={[styles.button, NewStyles.center, {justifyContent:'flex-start'}]} onPress={()=>{
+            navigation.navigate("Profile")
+          }} >
+            <Image
+              source={{ uri: `${imageUri}/userfolder/Profile.png` }}
+              style={[styles.folderIcon]}
+            />
+            <Text style={NewStyles.title4}>{("User Account")}</Text>
+          </TouchableOpacity>
           {
             folders.map((item) => {
               return (
@@ -150,6 +108,10 @@ function FolderScreen({ navigation }) {
                     title={item?.title}
                     image={item?.image_path}
                     onPress={async () => {
+                      if(item?.id=='trash'){
+                        showToastOrAlert(t("(Coming soon)"))
+                        return
+                      }
                       if (!user?.code) {
                         showToastOrAlert(t("To place an order, first complete your information in the account section."))
                         return
@@ -162,7 +124,7 @@ function FolderScreen({ navigation }) {
                       } else {
                         try {
                           const result = await dispatch(fetchSteps(item.id));
-                           
+
                           dispatch(setCategory(item));
                           navigation.navigate("Steps", {
                             categoryId: item.id,
@@ -187,11 +149,21 @@ function FolderScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) =>StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   container: {
     flex: 1,
     resizeMode: "cover",
     paddingTop: 60,
+  },
+  button: {
+    // backgroundColor: themeColor10.bgColor(0.2),
+    // paddingHorizontal: 40,
+    marginTop: 10,
+    width: 100,
+    height: 120,
+    // paddingVertical: 20,
+    alignItems: "flex-end",
+    // aspectRatio: 1, 
   },
   logoWrapper: {
     alignItems: "center",
@@ -223,9 +195,10 @@ const createLocalStyles = (NewStyles) =>StyleSheet.create({
     width: "50%",
   },
   folderIcon: {
-    width: 30,
-    height: 30,
+    width: 70,
+    height: 70,
     resizeMode: "contain",
+    borderRadius: 20
   },
   folderText: {
     marginTop: 6,

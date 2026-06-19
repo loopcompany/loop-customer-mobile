@@ -295,7 +295,7 @@ const AccessRestrictedScreen = ({
           <Text style={styles.helpText}>
             {t('If you have questions or issues, you can contact support.')}
           </Text>
-          <TouchableOpacity style={styles.helpButton} onPress={() => { Linking.openURL(contacts?.data?.link) }}>
+          <TouchableOpacity style={styles.helpButton} onPress={() => { Linking.openURL(contacts?.data?.contact?.link) }}>
             <Icon name="support-agent" size={20} color={themeColor0.color} />
             <Text style={styles.helpButtonText}>{t('Contact support')}</Text>
           </TouchableOpacity>

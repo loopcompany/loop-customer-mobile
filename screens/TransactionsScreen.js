@@ -230,7 +230,7 @@ export default function TransactionsScreen() {
 
                 <View style={styles.transactionRow}>
                   <Text style={[NewStyles.text4]}>{t("Amount")}:</Text>
-                  <Text style={[NewStyles.title4]}>{formatPrice(item.price * 10)} {t("Rial")}</Text>
+                  <Text style={[NewStyles.title4]}>{formatPrice(item.price)} {t("T")}</Text>
                 </View>
 
                 <View style={styles.transactionRow}>

@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor1, themeColor10, themeColor4 } from '../theme/Color';
+import { themeColor1, themeColor10, themeColor4, themeColor6 } from '../theme/Color';
 import Button from './Button';
 import i18n from 'i18next'
+import { Ionicons } from '@expo/vector-icons';
 
 // Pre-calculate colors outside component to prevent re-renders
 const WRAPPER_BG_COLOR = themeColor10.bgColor(0.4);
@@ -86,6 +87,13 @@ const DatePickerModal = React.memo(function DatePickerModal({
             <View style={[styles.wrapper, NewStyles.center]}>
                 <TouchableWithoutFeedback onPress={() => { }}>
                     <View style={styles.modalView}>
+                        <TouchableOpacity style={[{ height: 40, width: 40, backgroundColor: themeColor6.bgColor(0.2), marginBottom: 20, alignSelf:'flex-end' }, NewStyles.border10, NewStyles.center]} onPress={()=>{setDatePickerModal(false);}}>
+                            <Ionicons
+                                name={'close'}
+                                size={20}
+                                color={themeColor6.bgColor(1)}
+                            />
+                        </TouchableOpacity>
                         <View style={styles.calendarContainer}>
                             <DatePicker
                                 mode='calendar'

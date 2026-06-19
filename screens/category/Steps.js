@@ -34,7 +34,9 @@ function Steps({ navigation, route }) {
     const steps = useSelector(state => state.step);
     const length = steps?.data?.length;
     const [loading, setLoading] = useState(false);
-
+    const selectedDate = useSelector(state => state?.step?.date)
+    const selectedTime = useSelector(state => state?.step?.time)
+    const [timeValidationError, setTimeValidationError] = useState(false);
     // دریافت categoryId از route params
     const categoryId = route?.params?.categoryId;
     const categoryTitle = route?.params?.categoryTitle;
@@ -101,37 +103,56 @@ function Steps({ navigation, route }) {
                     return false; // اگر انتخابی نشده
                 }
 
-
                 // بررسی فیلدهای شرطی
                 const conditionalFields = item.field_details?.filter(
                     f => f.conditional_on === selectedOption.id
                 );
 
-
                 // بررسی که همه فیلدهای شرطی اجباری پر شده باشند
                 const isValid = conditionalFields?.every(field => {
                     if (field.type === 'radioButton') {
-                        const hasSelection = field.options?.some(opt => opt.value > 0);
-                        return hasSelection;
+                        return field.options?.some(opt => opt.value > 0);
                     }
-                    if (field.type === 'date') {
-                        const hasValue = !!field.value;
-                        return hasValue; // تاریخ باید انتخاب شده باشد
+                    if (field.type === 'date' || field.type === 'time') {
+                        return !!field.value;
                     }
-                    if (field.type === 'time') {
-                        const hasValue = !!field.value;
-
-                        return hasValue; // زمان باید انتخاب شده باشد
-                    }
-                    // file اختیاری است - نیازی به چک نیست
                     if (field.type === 'file') {
                         return true;
                     }
                     return true;
                 });
 
+                // اگر فیلدها کامل پر نشده‌اند، نیازی به بررسی 4 ساعت نیست
+                if (!isValid) return false;
 
-                return isValid;
+                // --- اضافه شدن بررسی 4 ساعت ---
+                const dateField = conditionalFields?.find(f => f.type === 'date');
+                const timeField = conditionalFields?.find(f =>
+                    f.type === 'radioButton' &&
+                    f.options?.some(opt => opt.hasOwnProperty('start_time'))
+                ); 
+                if (dateField && timeField) {
+                    const selectedDate = dateField.value;
+                    const selectedTimeOption = timeField.options?.find(opt => opt.value > 0);
+
+                    if (selectedDate && selectedTimeOption && selectedTimeOption.start_time) {
+                        const selectedTime = selectedTimeOption.start_time;
+
+
+                        // بررسی شرط 4 ساعت
+                        const isTimeValid = isMoreThan4HoursFromNow(selectedDate, selectedTime);
+                        if (!isTimeValid) {
+                            showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+                            setTimeValidationError(true);
+                            return false;
+                        } else {
+                            setTimeValidationError(false)
+                        }
+                    }
+                }
+                // --------------------------------
+
+                return true;
             }
 
             return true;
@@ -147,9 +168,13 @@ function Steps({ navigation, route }) {
             return;
         }
 
+
         if (!required(step)) {
             const message = 'لطفا فیلدهای الزامی را تکمیل نمایید.';
-            showToastOrAlert(message);
+            if (timeValidationError) {
+
+                showToastOrAlert(message);
+            }
             return;
         }
         if (step < length - 1) {
@@ -159,12 +184,11 @@ function Steps({ navigation, route }) {
         }
     }
 
-    const selectedDate = useSelector(state => state?.step?.date)
-    const selectedTime = useSelector(state => state?.step?.time)
-    const [timeValidationError, setTimeValidationError] = useState(false);
+
 
     useEffect(() => {
         if (selectedDate && selectedTime) {
+
             const result = isMoreThan4HoursFromNow(selectedDate, selectedTime);
             if (!result) {
                 dispatch(removeTime());
@@ -229,7 +253,7 @@ function Steps({ navigation, route }) {
                                 }}
                             />
                             :
-                            <View style={[styles.flatListContainer,{flex:1}]}>
+                            <View style={[styles.flatListContainer, { flex: 1 }]}>
                                 {
                                     steps?.data?.[step]?.map((item, index) => {
                                         return (
@@ -263,7 +287,7 @@ function Steps({ navigation, route }) {
 const styles = StyleSheet.create({
     flatListContainer: {
         gap: 20,
-        paddingHorizontal:  0
+        paddingHorizontal: 0
     },
 
     separator: {

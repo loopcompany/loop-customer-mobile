@@ -38,7 +38,7 @@ export default function MessageScreen({ navigation }) {
   const [sending, setSending] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const contact = useSelector(state => state.contacts?.data?.data);
+  const contact = useSelector(state => state.contacts?.data?.data?.contact);
 
   // دریافت لیست پیام‌ها
   const fetchMessages = async () => {

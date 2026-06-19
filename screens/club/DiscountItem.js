@@ -61,6 +61,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         width: '100%',
         paddingHorizontal: 15,
         paddingTop: 10,
+        gap:10
     },
     discountTextWrapper: {
         flex: 1,

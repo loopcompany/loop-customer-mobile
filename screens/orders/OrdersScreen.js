@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, FlatList, Modal, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,21 +8,27 @@ import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
 
-import NewStyles from '../../styles/NewStyles';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { fetchOrders } from '../../slices/ordersSlice';
 import { themeColor0 } from '../../theme/Color';
 import OrderItem from '../../components/OrderItem';
 import BlankScreen from '../../components/BlankScreen';
 import Loader from './../../components/Loader';
+import { createStyles } from '../../styles/NewStyles';
+import Button from '../../components/Button';
 
 function OrdersScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
   const orderLoader = useSelector(state => state.orders?.loading);
   const user = useSelector(state => state.user?.data);
-
+  const [showStatusOptions, setShowStatusOptions] = useState(false);
+  const NewStyles = useMemo(
+    () => createStyles(i18n.language),
+    [i18n.language]
+  );
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const [refreshing, setRefreshing] = useState(false);
 
   // فیلتر تاریخ و وضعیت
@@ -210,6 +216,34 @@ function OrdersScreen({ navigation }) {
               nestedScrollEnabled={true}
               contentContainerStyle={styles.modalScrollContent}
             >
+              {/* انتخاب وضعیت */}
+              <View style={styles.statusContainer}>
+
+                <Button
+                  title={t('Order Status')}
+                  onPress={() => {
+                    setShowStatusOptions(pre => !pre)
+                  }}
+                />
+                {showStatusOptions && <View style={styles.statusButtons}>
+                  {[null, 0, 1, 2, 3].map((statusValue) => (
+                    <TouchableOpacity
+                      key={statusValue}
+                      style={[
+                        styles.statusBtn,
+                        tempStatus === statusValue && styles.statusBtnActive
+                      ]}
+                      onPress={() => setTempStatus(statusValue)}
+                    >
+                      <Text style={[
+                        styles.statusBtnText,
+                        tempStatus === statusValue && styles.statusBtnTextActive
+                      ]}> {getStatusText(statusValue)} </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>}
+              </View>
+
               {/* از تاریخ */}
               <View style={[styles.dateInputContainer, NewStyles.center]}>
                 <View style={{ width: '100%' }}>
@@ -324,27 +358,7 @@ function OrdersScreen({ navigation }) {
                 </View>
               </View>
 
-              {/* انتخاب وضعیت */}
-              <View style={styles.statusContainer}>
-                <Text style={[NewStyles.text10, { marginBottom: 10 }]}>{t('Order Status:')}</Text>
-                <View style={styles.statusButtons}>
-                  {[null, 0, 1, 2, 3].map((statusValue) => (
-                    <TouchableOpacity
-                      key={statusValue}
-                      style={[
-                        styles.statusBtn,
-                        tempStatus === statusValue && styles.statusBtnActive
-                      ]}
-                      onPress={() => setTempStatus(statusValue)}
-                    >
-                      <Text style={[
-                        styles.statusBtnText,
-                        tempStatus === statusValue && styles.statusBtnTextActive
-                      ]}> {getStatusText(statusValue)} </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+
 
               {/* دکمه‌ها */}
               <View style={styles.modalButtons}>
@@ -372,7 +386,7 @@ function OrdersScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createLocalStyles = (NewStyles) => StyleSheet.create({
   filterContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,

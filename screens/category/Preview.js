@@ -17,6 +17,7 @@ import ProgressBar from '../../components/ProgressBar';
 import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenHeaders from '../../components/ScreenHeaders';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
     // const token = useSelector((state) => state?.auth?.token)
@@ -270,8 +271,11 @@ function Preview({ navigation }) {
     if (loading) { return (<Loader />) };
 
     return (
-        <SafeAreaView edges={{ top: 'additive' }} style={NewStyles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800 }}>
+        <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
+            <ScreenHeaders
+            title={t("Preview")}
+            />
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800, marginTop: 20 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={NewStyles.rowWrapper}>
                         {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>

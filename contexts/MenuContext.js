@@ -271,32 +271,32 @@ export const MenuProvider = ({ children }) => {
         const baseMenuItems = [
             // { id: 24, title: t("Delete Account"), screen: null, action: () => { Linking.openURL(`${mainUri}/delete-account-request`) } },
             // { id: 23, title: t("Submit order"), screen: "FolderScreen" },
-            { id: 22, title: t("Loop Wallet"), screen: "Increase", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/Increase.png` },
-            { id: 21, title: t("Privacy"), screen: "PrivacyScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/PrivacyScreen.png` },
+            { id: 22, title: t("Loop Wallet"), screen: "Increase", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/Increase.png` },
+            { id: 21, title: t("Privacy"), screen: "PrivacyScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/PrivacyScreen.png` },
             {
                 id: 20,
                 title: userType === 'organization' ? t("Organization Terms and Conditions") : t("Terms / About Loop"),
-                screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/AboutScreen.png` 
+                screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/AboutScreen.png`
             },
-            { id: 19, title: t("FAQ"), screen: "LearnMoreScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/LearnMoreScreen.png` },
-            { id: 18, title: t("Note"), screen: "NotesScreen", image:`${imageUri}/userfolder/NotesScreen.png` },
-            { id: 17, title: t("Warranty / Guarantee"), screen: "WarrantyScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/WarrantyScreen.png` },
-            { id: 16, title: t("Feedback and Suggestions"), screen: "FeedbackSurveyScreen", image:`${imageUri}/userfolder/FeedbackSurveyScreen.png` },
-            { id: 15, title: t("Report/Track Violation"), screen: "ViolationReportScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/ViolationReportScreen.png` },
-            { id: 14, title: t("Rate List"), screen: "RateCategory", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/RateCategory.png` },
-            { id: 13, title: t("Service / Product Faults"), screen: "ProductIssueScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/ProductIssueScreen.png` },
-            { id: 23, title: t("Promotional codes"), screen: "UserDiscounts", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/Club.png` },
-            { id: 12, title: t("Lucky Wheel"), screen: "Club", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/gift.png` },
+            { id: 19, title: t("FAQ"), screen: "LearnMoreScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/LearnMoreScreen.png` },
+            { id: 18, title: t("Note"), screen: "NotesScreen", image: `${imageUri}/userfolder/NotesScreen.png` },
+            { id: 17, title: t("Warranty / Guarantee"), screen: "WarrantyScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/WarrantyScreen.png` },
+            { id: 16, title: t("Feedback and Suggestions"), screen: "FeedbackSurveyScreen", image: `${imageUri}/userfolder/FeedbackSurveyScreen.png` },
+            { id: 15, title: t("Report/Track Violation"), screen: "ViolationReportScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/ViolationReportScreen.png` },
+            { id: 14, title: t("Rate List"), screen: "RateCategory", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/RateCategory.png` },
+            { id: 13, title: t("Service / Product Faults"), screen: "ProductIssueScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/ProductIssueScreen.png` },
+            { id: 23, title: t("Promotional codes"), screen: "UserDiscounts", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/Club.png` },
+            // { id: 12, title: t("Lucky Wheel"), screen: "Club", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/gift.png` },
             // { id: 11, title: t("Think and Play"), screen: "GameMenu" },
-            { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen", image:`${imageUri}/userfolder/TrainingRegistrationScreen.png` },
-            { id: 9, title: t("Selected Addresses"), screen: "AddressScreen", image:`${imageUri}/userfolder/AddressScreen.png` },
-            { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true, image:`${imageUri}/userfolder/OrganizationContract.png` },
-            { id: 7, title: t("User Account"), screen: "Profile", image:`${imageUri}/userfolder/Profile.png` },
-            { id: 6, title: t("Messages"), screen: "MessageScreen", image:`${imageUri}/userfolder/MessageScreen.png` },
-            { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/CanceledOrdersScreen.png`  },
-            { id: 4, title: t("Transactions"), screen: "TransactionsScreen", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/TransactionsScreen.png` },
-            { id: 3, title: t("Orders"), screen: "OrdersScreen" , image:`${imageUri}/userfolder/Orders.png`},
-        ]; 
+            { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen", image: `${imageUri}/userfolder/TrainingRegistrationScreen.png` },
+            { id: 9, title: t("Selected Addresses"), screen: "AddressScreen", image: `${imageUri}/userfolder/AddressScreen.png` },
+            { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true, image: `${imageUri}/userfolder/OrganizationContract.png` },
+            // { id: 7, title: t("User Account"), screen: "Profile", image:`${imageUri}/userfolder/Profile.png` },
+            { id: 6, title: t("Messages"), screen: "MessageScreen", image: `${imageUri}/userfolder/MessageScreen.png` },
+            { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/CanceledOrdersScreen.png` },
+            { id: 4, title: t("Transactions"), screen: "TransactionsScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/TransactionsScreen.png` },
+            { id: 3, title: t("Orders"), screen: "OrdersScreen", image: `${imageUri}/userfolder/Orders.png` },
+        ];
 
         if (userType === 'organization') {
             console.log('✅ [MenuContext] Showing organization menu items');
@@ -339,12 +339,12 @@ export const MenuProvider = ({ children }) => {
             }}
         >
             <Image
-            source={{uri:`${item?.image}`}}
-            style={[{height:50, width:50}]}
+                source={{ uri: `${item?.image}` }}
+                style={[{ height: 50, width: 50 }]}
 
-            
+
             />
-            <Text style={[NewStyles.text10, {  }]}>
+            <Text style={[NewStyles.text10, {}]}>
                 {item.title}
             </Text>
         </TouchableOpacity>
@@ -385,7 +385,7 @@ export const MenuProvider = ({ children }) => {
                 dispatch(setLanguage(language));
                 i18n.changeLanguage(language);
             } else {
-                i18n.changeLanguage('fa');
+                i18n.changeLanguage('en');
             }
         } catch (error) {
             console.error('Error loading language', error);
@@ -397,7 +397,7 @@ export const MenuProvider = ({ children }) => {
                 {children}
 
                 {shouldShowMenu && (
-                    <View style={[styles.footer, NewStyles.rowWrapper, { bottom: insets?.bottom }]}>
+                    <View style={[styles.footer, NewStyles.rowWrapper, { bottom: insets?.bottom, flexDirection: 'row' }]}>
                         <AnimatedFooterLogoButton
                             onPress={openMenu}
                             logoStyle={styles.footerLogo}
@@ -444,11 +444,15 @@ export const MenuProvider = ({ children }) => {
                     animationType="fade"
                 >
 
-                    <View style={{ flex: 1, alignSelf: langIsRTL(i18n.language) ? 'flex-end' : 'flex-start' }}>
+                    <View style={{ flex: 1, alignSelf: 'flex-start' }}>
                         <FlatList
                             ListFooterComponent={() => {
                                 return (
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
+                                        {
+                                            userData?.account_type != 'indiviual' &&
+                                            <Text style={[NewStyles.title, {marginBottom:10}]}>{userData?.organization_name}</Text>
+                                        }
                                         <View style={[{ paddingVertical: 10, width: '90%', backgroundColor: themeColor8.bgColor(0.2), }, NewStyles.center, NewStyles.border10]}>
                                             <Text style={NewStyles.title}>{t("Your Points:")} {userData?.user_gems ?? '0'}</Text>
                                         </View>
@@ -532,7 +536,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         paddingVertical: 2,
         paddingHorizontal: 20,
         width: "100%",
-        gap:5
+        gap: 5
     },
     logoutContainer: {
         padding: 10,

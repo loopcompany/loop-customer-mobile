@@ -137,7 +137,7 @@ const OrganizationProfileScreen = () => {
 
       showAlert('موفقیت', result.message || 'اطلاعات شما با موفقیت ذخیره شد', [
         {
-          text: 'باشه',
+          text: t("Ok"),
           onPress: () => {
             if (Platform.OS == 'web') {
               window.history.back()
