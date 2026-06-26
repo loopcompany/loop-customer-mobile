@@ -1,8 +1,8 @@
-# 🎯 خلاصه برای تیم Backend - قراردادنامه سازمانی
+# 🎯 خلاصه برای تیم Backend - توافق نامه سازمانی
 
 ## نیازمندی‌های API
 
-### 1. Endpoint: دریافت اطلاعات قرارداد
+### 1. Endpoint: دریافت اطلاعات توافق نامه
 ```
 GET /organization/contract
 ```
@@ -15,7 +15,7 @@ GET /organization/contract
     "admin_contract": {
       "id": 1,
       "file_url": "https://example.com/storage/contracts/contract.pdf",
-      "file_name": "قرارداد_همکاری_سازمانی.pdf",
+      "file_name": "توافق نامه_همکاری_سازمانی.pdf",
       "file_size": 2048576,
       "mime_type": "application/pdf",
       "uploaded_at": "1403/08/17"
@@ -23,7 +23,7 @@ GET /organization/contract
     "user_contract": {
       "id": 5,
       "file_url": "https://example.com/storage/user_contracts/signed.pdf",
-      "file_name": "قرارداد_امضا_شده.pdf",
+      "file_name": "توافق نامه_امضا_شده.pdf",
       "file_size": 3145728,
       "mime_type": "application/pdf",
       "uploaded_at": "1403/08/18",
@@ -36,7 +36,7 @@ GET /organization/contract
 }
 ```
 
-### 2. Endpoint: آپلود قرارداد
+### 2. Endpoint: آپلود توافق نامه
 ```
 POST /organization/contract/upload
 Content-Type: multipart/form-data
@@ -54,7 +54,7 @@ FormData:
 ```json
 {
   "status": "success",
-  "message": "قرارداد با موفقیت آپلود شد",
+  "message": "توافق نامه با موفقیت آپلود شد",
   "data": {
     "contract": {
       "id": 5,
@@ -66,7 +66,7 @@ FormData:
 }
 ```
 
-## وضعیت‌های قرارداد (Contract Status)
+## وضعیت‌های توافق نامه (Contract Status)
 
 | Status | Label | توضیح |
 |--------|-------|-------|

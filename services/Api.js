@@ -101,11 +101,12 @@ export const authAPI = {
   },
 
   // Logout user
-  logout: async (token) => {
+  logout: async (token, lang) => {
     try {
       const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, {}, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept-Language': lang || 'en'
         }
       });
       return response.data;

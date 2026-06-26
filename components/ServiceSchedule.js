@@ -77,7 +77,7 @@ export default function ServiceSchedule({ step, data }) {
             >
                 <View style={[NewStyles.row, { gap: 10 }]}>
                     {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    <Text style={NewStyles.title4}>{data?.title} <Text style={NewStyles.title6}>*</Text></Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>

@@ -5,7 +5,7 @@ import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
 import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL'
+import { mainUri, uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatDate, showToastOrAlert } from '../../helpers/Common'
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color'
@@ -138,7 +138,7 @@ const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
             <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
           </View>
           <View style={[{ flex: 1 }, NewStyles.center]}>
-            <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+            <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${mainUri}/reciept/${orderId}`) }} />
           </View>
         </View>}
       {/* دکمه‌های عملیات - فقط در صورت وجود توضیحات کارشناس */}

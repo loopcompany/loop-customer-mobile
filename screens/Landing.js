@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform, } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform, SafeAreaView, } from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '../slices/authSlice';
@@ -9,19 +9,34 @@ import CustomStatusBar from '../components/CustomStatusBar';
 import { themeColor0, themeColor10 } from '../theme/Color';
 import { fetchAddresses } from '../slices/addressSlice';
 import { ImageBackground } from 'expo-image';
-import NewStyles from '../styles/NewStyles';
+import NewStyles, { deviceHeight, deviceWidth } from '../styles/NewStyles';
 import { fetchRadii } from '../slices/radiusSlice';
 import i18n from 'i18next';
 import { setLanguage } from '../slices/languageSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchPdfDocs } from '../slices/pdfDocumentSlice';
+import { fetchMinPrice } from '../slices/minPriceSlice';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEvent } from 'expo';
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
   const [checking, setChecking] = useState(true);
+  const player = useVideoPlayer(require('../assets/video/InShot_20260626_171217014.mp4'), player => {
+    console.log("player ready");
+    if(Platform.OS==='web'){
+
+      player.muted = true;
+    }
+    player.play();
+  });
   // Check authentication on component mount
   useEffect(() => {
-    checkAuthenticationStatus();
+
     dispatch(fetchRadii())
+    dispatch(fetchPdfDocs())
+    dispatch(fetchMinPrice())
 
   }, []);
 
@@ -66,46 +81,45 @@ export default function Landing({ navigation }) {
 
   // Navigate to Welcome screen (auth flow)
   const navigateToWelcome = () => {
-    setTimeout(() => {
-      setChecking(false);
-      navigation.replace('Welcome');
-    }, 1000); // Small delay for better UX
+    setChecking(false);
+    navigation.replace('Welcome');
   };
 
   // Navigate to main app (FolderScreen)
   const navigateToMainApp = () => {
-    setTimeout(() => {
-      setChecking(false);
-      navigation.replace('FolderScreen');
-    }, 1000);
+    setChecking(false);
+    navigation.replace('FolderScreen');
   };
 
-  return (
-    <ImageBackground source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit="contain" cachePolicy={'memory-disk'} >
-      <CustomStatusBar />
-      <View style={styles.container}>
-        {/* Loading Section */}
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color={themeColor0.bgColor(1)}
-            style={styles.spinner}
-          />
-          <Text style={styles.loadingText}>
-            در حال بررسی وضعیت ورود...
-          </Text>
-          <Text style={styles.subText}>
-            لطفاً چند لحظه صبر کنید
-          </Text>
-        </View>
 
-        {/* App Info */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.appName}>لوپ</Text>
-          <Text style={styles.appTagline}>پلتفرم خدمات فنی</Text>
-        </View>
-      </View>
-    </ImageBackground>
+  useEffect(() => {
+    const subscription = player.addListener('playToEnd', () => {
+      // ۲. بعد از اتمام ویدیو به صفحه بعد بروید
+      // navigation.replace('Welcome');
+      checkAuthenticationStatus();
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [player]);
+  const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing }); 
+  useEffect(() => {
+    if (Platform.OS === 'web' && !isPlaying && player) {
+      player.play();
+      
+
+    }
+  }, [player, isPlaying])
+
+  return (
+    <SafeAreaView style={NewStyles.container}>
+      <CustomStatusBar />
+      <LinearGradient colors={['#1c2833', '#0b0d11', '#0b0d11']} style={{ flex: 1 }}>
+
+        <VideoView style={{ flex: 1 }} nativeControls={false} player={player} contentFit='contain' allowsFullscreen allowsPictureInPicture />
+      </LinearGradient>
+    </SafeAreaView >
   );
 }
 

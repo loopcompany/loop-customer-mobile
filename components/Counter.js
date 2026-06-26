@@ -86,10 +86,11 @@ const PackageCountdown = memo(function PackageCountdown({
     const { t } = useTranslation()
 
     if (!nowServer || !endAt) return null;
+    if (countdown.isFinished) return null;
     return (
         <ImageBackground source={require('../assets/images/backtimer.png')} style={styles.timerContainer}>
             {countdown.isFinished ? (
-                <Text style={NewStyles.title10}>زمان این پکیج تمام شده</Text>
+                <Text style={[NewStyles.title1,]}>زمان این پکیج تمام شده</Text>
             ) : (
                 <>
 
@@ -177,7 +178,7 @@ export default function Counter({ step, data }) {
                         return (
                             <View style={[{ width: '100%', backgroundColor: themeColor10.bgColor(1) }, NewStyles.border10]}>
 
-                                <Image source={{ uri: `${imageUri}/${item?.image_path}` }} style={[{ width: '100%', aspectRatio: 0.67 }, NewStyles.border10]} resizeMode='contain' />
+                                {item?.image_path && <Image source={{ uri: `${imageUri}/${item?.image_path}` }} style={[{ width: '100%', aspectRatio: 0.67 }, NewStyles.border10]} resizeMode='contain' />}
                                 {item?.now_server && item?.end_at ? (
                                     <PackageCountdown
                                         nowServer={item.now_server}

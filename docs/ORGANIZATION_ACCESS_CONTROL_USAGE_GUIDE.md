@@ -2,13 +2,13 @@
 
 ## 📖 مقدمه
 
-سیستم کنترل دسترسی کاربران سازمانی امکان محدود کردن دسترسی کاربران سازمانی تا زمان تایید اطلاعات پروفایل و قرارداد آن‌ها توسط ادمین را فراهم می‌کند.
+سیستم کنترل دسترسی کاربران سازمانی امکان محدود کردن دسترسی کاربران سازمانی تا زمان تایید اطلاعات پروفایل و توافق نامه آن‌ها توسط ادمین را فراهم می‌کند.
 
 ## 🎯 هدف
 
-کاربران سازمانی تا زمانی که هم پروفایل و هم قرارداد آن‌ها تایید نشده، فقط به صفحات محدودی دسترسی دارند:
+کاربران سازمانی تا زمانی که هم پروفایل و هم توافق نامه آن‌ها تایید نشده، فقط به صفحات محدودی دسترسی دارند:
 - صفحه ویرایش پروفایل سازمانی
-- صفحه مدیریت قرارداد
+- صفحه مدیریت توافق نامه
 - صفحات اکانت عمومی
 
 ## 🏗️ معماری سیستم
@@ -47,7 +47,7 @@ function MyComponent() {
 - **canAccessScreen(screenName)**: چک دسترسی به صفحه خاص
 - **canPlaceOrder()**: امکان ثبت سفارش
 - **profileStatus**: وضعیت پروفایل ('pending', 'approved', 'rejected')
-- **contractStatus**: وضعیت قرارداد ('not_uploaded', 'pending', 'approved', 'rejected')
+- **contractStatus**: وضعیت توافق نامه ('not_uploaded', 'pending', 'approved', 'rejected')
 
 ### 2. HOC: `withOrganizationAccess`
 
@@ -91,7 +91,7 @@ const options = {
   type="access_denied"
   title="دسترسی محدود"
   message="شما مجوز دسترسی به این بخش را ندارید"
-  nextSteps={['تکمیل پروفایل', 'آپلود قرارداد']}
+  nextSteps={['تکمیل پروفایل', 'آپلود توافق نامه']}
   profileStatus="pending"
   contractStatus="rejected"
   onRetry={() => refetch()}
@@ -228,7 +228,7 @@ navigation.navigate('OrganizationProfile');
 - ✅ نمایش وضعیت تایید
 - ✅ مدیریت خطاها
 
-### 2. صفحه مدیریت قرارداد
+### 2. صفحه مدیریت توافق نامه
 
 مسیر: `screens/organization/OrganizationContractScreen.js`
 
@@ -238,10 +238,10 @@ navigation.navigate('OrganizationContract');
 ```
 
 ویژگی‌ها:
-- ✅ دانلود فایل نمونه قرارداد
-- ✅ آپلود قرارداد (PDF, تصاویر)
+- ✅ دانلود فایل نمونه توافق نامه
+- ✅ آپلود توافق نامه (PDF, تصاویر)
 - ✅ نمایش وضعیت بررسی
-- ✅ مشاهده قرارداد آپلود شده
+- ✅ مشاهده توافق نامه آپلود شده
 
 ## 🔧 API Integration
 
@@ -260,7 +260,7 @@ GET /organization/profile/status
     "has_complete_access": true|false,
     "blocked_message": "پیام محدودیت",
     "profile_rejection_reason": "دلیل رد پروفایل",
-    "contract_rejection_reason": "دلیل رد قرارداد"
+    "contract_rejection_reason": "دلیل رد توافق نامه"
   }
 }
 ```
@@ -280,17 +280,17 @@ PUT /organization/profile
 }
 ```
 
-### مدیریت قرارداد
+### مدیریت توافق نامه
 
 ```javascript
-// دریافت اطلاعات قرارداد
+// دریافت اطلاعات توافق نامه
 GET /organization/contract
 
-// آپلود قرارداد
+// آپلود توافق نامه
 POST /organization/contract
 // FormData با فایل
 
-// دانلود نمونه قرارداد
+// دانلود نمونه توافق نامه
 GET /organization/contract/template
 ```
 

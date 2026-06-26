@@ -385,7 +385,7 @@ export const MenuProvider = ({ children }) => {
                 dispatch(setLanguage(language));
                 i18n.changeLanguage(language);
             } else {
-                i18n.changeLanguage('en');
+                i18n.changeLanguage('fa');
             }
         } catch (error) {
             console.error('Error loading language', error);
@@ -451,7 +451,7 @@ export const MenuProvider = ({ children }) => {
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
                                         {
                                             userData?.account_type != 'indiviual' &&
-                                            <Text style={[NewStyles.title, {marginBottom:10}]}>{userData?.organization_name}</Text>
+                                            <Text style={[NewStyles.title, { marginBottom: 10 }]}>{userData?.organization_name}</Text>
                                         }
                                         <View style={[{ paddingVertical: 10, width: '90%', backgroundColor: themeColor8.bgColor(0.2), }, NewStyles.center, NewStyles.border10]}>
                                             <Text style={NewStyles.title}>{t("Your Points:")} {userData?.user_gems ?? '0'}</Text>
@@ -511,11 +511,13 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
 
 
     footer: {
-        backgroundColor: themeColor12.bgColor(0.2),
+        backgroundColor: 'rgba(100, 180, 240, 0.4)',
         width: "100%",
         paddingHorizontal: 15,
         position: 'absolute',
-        bottom: 0
+        bottom: 0,
+        borderTopWidth: 1.5,
+        borderTopColor: 'rgba(255, 255, 255, 0.5)', 
     },
     footerLogo: {
         width: 50,

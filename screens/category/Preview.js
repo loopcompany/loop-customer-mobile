@@ -267,13 +267,13 @@ function Preview({ navigation }) {
     const serviceTime =
         organTime?.short_term?.time ||
         organTime?.long_term?.time;
-
+    const minPrice = useSelector(state => state.minPrice?.data)
     if (loading) { return (<Loader />) };
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={NewStyles.container}>
             <ScreenHeaders
-            title={t("Preview")}
+                title={t("Preview")}
             />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800, marginTop: 20 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
@@ -467,7 +467,7 @@ function Preview({ navigation }) {
                 </View>}
                 {imagePath && <Image style={[{ height: 250, margin: '5%', resizeMode: 'contain' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
                 <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                    <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)")}</Text>
+                    <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
                 </View>
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>

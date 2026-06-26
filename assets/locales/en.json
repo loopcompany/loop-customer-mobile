@@ -1424,7 +1424,7 @@
   "Product password": "Product password",
   "To place an order, first complete your information in the account section.": "To place an order, first complete your information in the account section.",
   "Message to Loop technician": "Message to Loop technician",
-  "Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)": "Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)",
+  "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)": "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)",
   "Auto-login enabled": "Auto-login enabled",
   "Auto-login disabled": "Auto-login disabled",
   "Please enter your name.": "Please enter your name.",
@@ -1535,5 +1535,16 @@
   "Day": "Day",
   "Houre": "Houre",
   "Minute": "Minute",
-  "Second": "Second"
+  "Second": "Second",
+  "PDF of organizational terms and conditions": "PDF of organizational terms and conditions",
+  "Brand": "Brand",
+  "Model": "Model",
+  "Warranty": "Warranty",
+  "Test Duration": "Test Duration",
+  "barcode": "barcode",
+  "number": "number",
+  "Unit price": "Unit price",
+  "Total Price": "Total Price",
+  "National Identifier": "National Identifier",
+  "National Identifier is required": "National Identifier is required"
 }

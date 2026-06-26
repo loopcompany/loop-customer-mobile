@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from './Api';
+import i18next from 'i18next';
 
 // Token Management Service
 export class TokenManager {
@@ -260,7 +261,7 @@ export class TokenManager {
       console.log('🚪 Logging out from current device...');
       
       // Call logout API
-      const response = await authAPI.logout(token);
+      const response = await authAPI.logout(token, i18next.language || 'en');
       
       // Always clear local data regardless of API response
       await this.clearAuthData();

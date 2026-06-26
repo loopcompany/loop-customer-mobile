@@ -31,7 +31,7 @@ import ShowMapDetailComponent from '../../components/ShowMapDetailComponent';
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
     let is_package = 0
     const { i18n } = useTranslation()
-    console.log(data?.user_address);
+
 
     return (
 
@@ -132,16 +132,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                     <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.des}</Text>
                 </View>
             </View>}
-            {data?.technician_des && <View style={[{ paddingHorizontal: '5%', gap: 10 }]}>
-                <View style={[NewStyles.row, { gap: 5 }]}>
-                    <Ionicons name={'create-outline'} size={24} color={themeColor0.bgColor(1)} />
-                    <Text style={NewStyles.title}>{t("Technician description")}</Text>
-                </View>
-                <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
-                    <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
-                    <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.technician_des}</Text>
-                </View>
-            </View>}
+
 
             {data?.image_path &&
                 <Image style={[{ height: 250, margin: '5%', maxWidth: 400, resizeMode: 'contain', width: '90%', alignSelf: 'center' }, NewStyles.border10]} source={{ uri: `${imageUri}/${data?.image_path}` }} />
@@ -164,7 +155,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                     }}
                 />
             </View>}
-            <View style={{width:'100%', height:250, paddingHorizontal:'5%'}}>
+            <View style={{ width: '100%', height: 250, paddingHorizontal: '5%' }}>
                 <ShowMapDetailComponent
                     latitude={data?.user_address?.latitude}
                     longitude={data?.user_address?.longitude}
@@ -516,6 +507,7 @@ function Details({ route, navigation }) {
             <Text style={[NewStyles.text10, textStyle2]}>{text2}</Text>
         </View>
     ), []);
+    const minPrice = useSelector(state => state.minPrice?.data)
     if (data.length <= 0) { return <Loader /> }
 
 
@@ -537,10 +529,10 @@ function Details({ route, navigation }) {
                     {/* مرحله بررسی / جایگزین / */}
                     <AccordionHeader
                         title={t("Review / Replacement / Receipt")}
-                        isActive={(data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
+                        isActive={(data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date}
                         isOpen={showReview}
                         onPress={() => {
-                            if ((data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) {
+                            if ((data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) {
                                 setShowReview(!showReview)
                             } else if (data?.status == 3) {
                                 showToastOrAlert(t("You have canceled the order"))
@@ -550,7 +542,7 @@ function Details({ route, navigation }) {
                             }
                         }}
                     />
-                    {showReview && ((data?.technician && data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) && (
+                    {showReview && ((data?.status != 3 && data?.status != 5 && data?.status != 6) || data?.user_cancellation_date) && (
                         <OrderReviewSection
                             data={data}
                             navigation={navigation}
@@ -561,7 +553,7 @@ function Details({ route, navigation }) {
 
                     <AccordionHeader
                         title={t("Technician information")}
-                        isActive={data?.technician}
+                        isActive={(data?.technician)}
                         isOpen={showTechnician}
                         onPress={() => {
                             if (data?.technician) {
@@ -710,17 +702,17 @@ function Details({ route, navigation }) {
                     {/* اعزام به لوپ / هزینه ها / مدت زمان */}
                     <AccordionHeader
                         title={t("Send to Loop / Costs / Duration")}
-                        isActive={data?.send_to_loop}
+                        isActive={(data?.send_to_loop || (data?.loop_cost_estimate && data?.duration))}
                         isOpen={showLoopSend}
                         onPress={() => {
-                            if (data?.send_to_loop) {
+                            if ((data?.send_to_loop || (data?.loop_cost_estimate && data?.duration))) {
                                 setShowLoopSend(!showLoopSend)
                             } else {
                                 showToastOrAlert(t("The request to send to Loop has not been registered yet."))
                             }
                         }}
                     />
-                    {showLoopSend && data?.send_to_loop && (
+                    {showLoopSend && (data?.send_to_loop || (data?.loop_cost_estimate && data?.duration)) && (
                         <OrderLoopSendSection
                             data={data}
                             orderId={orderId}
@@ -768,20 +760,20 @@ function Details({ route, navigation }) {
                         <OrderExtraServices orderId={orderId} navigation={navigation} />
                     }
 
-                    {/* مرحله پرداخت هزینه */}
+                    {/* مرحله پرداخت هزینه */} 
                     {user?.apple_check == 0 && <AccordionHeader
                         title={t("Payment")}
-                        isActive={(data?.started_at || data?.status == 2)}
+                        isActive={(data?.started_at || data?.status == 2 || (data?.done_in_place && data?.technician_price > 0))}
                         isOpen={showPayment}
                         onPress={() => {
-                            if (data?.started_at || data?.status == 2) {
+                            if (data?.started_at || data?.status == 2 || (data?.done_in_place && data?.technician_price > 0)) {
                                 setShowPayment(!showPayment)
                             } else {
                                 showToastOrAlert(t("You do not currently have access to this section."))
                             }
                         }}
                     />}
-                    {showPayment && (data?.started_at || data?.status == 2) && (
+                    {showPayment && (data?.started_at || data?.status == 2 || (data?.done_in_place && data?.technician_price > 0)) && (
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                             {user?.apple_check == 0 && <View style={styles.noticeBox}>
                                 <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
@@ -790,10 +782,10 @@ function Details({ route, navigation }) {
                             {user?.apple_check == 0 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
-                                    {formatPrice(totalDiscountedPrice < 800000 ? totalDiscountedPrice + 200000 : totalDiscountedPrice)} {t("Tomans")}
+                                    {formatPrice(totalDiscountedPrice < Number(minPrice?.price) ? totalDiscountedPrice + 200000 : totalDiscountedPrice)} {t("Tomans")}
                                 </Text>
                             </View>}
-                            {user?.apple_check == 0 && totalDiscountedPrice < 800000 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                            {user?.apple_check == 0 && totalDiscountedPrice < Number(minPrice?.price) && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Travel and tuition fees")}</Text>
                                 <Text style={[NewStyles.title]}>
                                     {formatPrice(200000)} {t("Tomans")}
@@ -852,7 +844,7 @@ function Details({ route, navigation }) {
                     )}
                     <AccordionHeader
                         title={t("Product dispatch status to the user's location")}
-                        isActive={data?.payment_status == 1  && data?.shipment_status}
+                        isActive={data?.payment_status == 1 && data?.shipment_status}
                         isOpen={showShipment}
                         onPress={() => {
                             if (data?.payment_status == 1 && data?.shipment_status) {

@@ -208,12 +208,12 @@ const OrganizationContract = ({ navigation }) => {
     loadContractData();
   }, []);
 
-  // بارگذاری اطلاعات قرارداد از سرور
+  // بارگذاری اطلاعات توافق نامه از سرور
   const loadContractData = async () => {
     try {
       setLoadingContract(true);
 
-      // دریافت آخرین قرارداد عمومی
+      // دریافت آخرین توافق نامه عمومی
       const latestContractResponse = await axios.get(`${uri}/contracts/latest`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -246,7 +246,7 @@ const OrganizationContract = ({ navigation }) => {
     } catch (error) {
       if (error.response?.status === 403) {
       } else if (error.response?.status === 404) {
-        // هیچ قراردادی یافت نشد - این عادی است
+        // هیچ توافق نامهی یافت نشد - این عادی است
 
         setAdminContract(null);
       } else {
@@ -258,7 +258,7 @@ const OrganizationContract = ({ navigation }) => {
     }
   };
 
-  // دانلود قرارداد ادمین
+  // دانلود توافق نامه ادمین
   const handleDownloadAdminContract = async () => {
     try {
       if (!adminContract || !adminContract.file_url) {
@@ -278,7 +278,7 @@ const OrganizationContract = ({ navigation }) => {
     }
   };
 
-  // انتخاب فایل قرارداد امضا شده
+  // انتخاب فایل توافق نامه امضا شده
   const handlePickDocument = async () => {
 
 
@@ -330,7 +330,7 @@ const OrganizationContract = ({ navigation }) => {
     }
   };
 
-  // آپلود قرارداد امضا شده
+  // آپلود توافق نامه امضا شده
   const handleUploadContract = async () => {
 
     try {
@@ -397,7 +397,7 @@ const OrganizationContract = ({ navigation }) => {
 
       if (response.data.success) {
 
-        // 🔥 آپدیت Redux state - قرارداد الان pending هست
+        // 🔥 آپدیت Redux state - توافق نامه الان pending هست
         dispatch(updateContractStatus('pending'));
 
         // بررسی اینکه واقعاً آپدیت شد یا نه
@@ -415,12 +415,12 @@ const OrganizationContract = ({ navigation }) => {
                 console.log('🔄 Clearing selectedFile and reloading data...');
                 setSelectedFile(null);
 
-                // صبر می‌کنیم تا سرور قرارداد رو ثبت کنه 
+                // صبر می‌کنیم تا سرور توافق نامه رو ثبت کنه 
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 await loadContractData(); // Reload data
 
-                await refetch(); // 🔥 آپدیت کامل وضعیت از API (هم پروفایل هم قرارداد) 
+                await refetch(); // 🔥 آپدیت کامل وضعیت از API (هم پروفایل هم توافق نامه) 
               }
             }
           ]
@@ -686,7 +686,7 @@ const OrganizationContract = ({ navigation }) => {
             )}
           </View>
 
-          {/* آپلود قرارداد امضا شده */}
+          {/* آپلود توافق نامه امضا شده */}
           <View style={styles.section}>
 
 
@@ -741,7 +741,7 @@ const OrganizationContract = ({ navigation }) => {
                 }
               </View>}
 
-            {/* قرارداد آپلود شده قبلی */}
+            {/* توافق نامه آپلود شده قبلی */}
             {adminContract?.signed_contract_file_path && (
               <View style={styles.uploadedSection}>
                 <Text style={styles.uploadedLabel}>{t('Uploaded contract:')}</Text>
@@ -779,7 +779,7 @@ const OrganizationContract = ({ navigation }) => {
                         </View>
                       )}
 
-                      {/* دکمه دانلود قرارداد آپلود شده */}
+                      {/* دکمه دانلود توافق نامه آپلود شده */}
                     </View>
                   </View>
                    

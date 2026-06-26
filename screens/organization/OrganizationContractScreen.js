@@ -26,7 +26,7 @@ import { NewStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL';
 
 /**
- * صفحه مدیریت قرارداد کاربران سازمانی
+ * صفحه مدیریت توافق نامه کاربران سازمانی
  */
 const OrganizationContractScreen = () => {
   const navigation = useNavigation();
@@ -40,7 +40,7 @@ const OrganizationContractScreen = () => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   /**
-   * دریافت اطلاعات قرارداد از سرور
+   * دریافت اطلاعات توافق نامه از سرور
    */
   const fetchContract = async () => {
     try {
@@ -66,10 +66,10 @@ const OrganizationContractScreen = () => {
       if (error.response?.status === 401) {
         showAlert('خطا', 'لطفا مجدداً وارد شوید');
       } else if (error.response?.status === 404) {
-        // هنوز قراردادی آپلود نشده
+        // هنوز توافق نامهی آپلود نشده
         setContractStatus('not_uploaded');
       } else {
-        showAlert('خطا', 'خطا در دریافت اطلاعات قرارداد');
+        showAlert('خطا', 'خطا در دریافت اطلاعات توافق نامه');
       }
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ const OrganizationContractScreen = () => {
   };
 
   /**
-   * دانلود فایل قرارداد نمونه
+   * دانلود فایل توافق نامه نمونه
    */
   const downloadTemplate = async () => {
     try {
@@ -112,7 +112,7 @@ const OrganizationContractScreen = () => {
   };
 
   /**
-   * انتخاب فایل قرارداد
+   * انتخاب فایل توافق نامه
    */
   const selectFile = async () => {
     console.log('🔵 selectFile function called!'); // چک می‌کنیم تابع اصلاً صدا زده میشه یا نه
@@ -177,11 +177,11 @@ const OrganizationContractScreen = () => {
   };
 
   /**
-   * آپلود قرارداد
+   * آپلود توافق نامه
    */
   const uploadContract = async () => {
     if (!selectedFile) {
-      showAlert('خطا', 'لطفا ابتدا فایل قرارداد را انتخاب کنید');
+      showAlert('خطا', 'لطفا ابتدا فایل توافق نامه را انتخاب کنید');
       return;
     }
 
@@ -209,14 +209,14 @@ const OrganizationContractScreen = () => {
         setContractStatus('pending');
         setSelectedFile(null);
 
-        showAlert('موفقیت', 'قرارداد شما با موفقیت آپلود شد و در انتظار تایید است', [
+        showAlert('موفقیت', 'توافق نامه شما با موفقیت آپلود شد و در انتظار تایید است', [
           {
             text: t("Ok"),
             onPress: () => fetchContract() // بارگذاری مجدد اطلاعات
           }
         ]);
       } else {
-        showAlert('خطا', response.data.message || 'خطا در آپلود قرارداد');
+        showAlert('خطا', response.data.message || 'خطا در آپلود توافق نامه');
       }
     } catch (error) {
       console.error('Error uploading contract:', error);
@@ -228,7 +228,7 @@ const OrganizationContractScreen = () => {
       } else if (error.response?.status === 401) {
         showAlert('خطا', 'لطفا مجدداً وارد شوید');
       } else {
-        showAlert('خطا', 'خطا در آپلود قرارداد. لطفا اتصال اینترنت خود را بررسی کنید');
+        showAlert('خطا', 'خطا در آپلود توافق نامه. لطفا اتصال اینترنت خود را بررسی کنید');
       }
     } finally {
       setUploading(false);
@@ -236,11 +236,11 @@ const OrganizationContractScreen = () => {
   };
 
   /**
-   * مشاهده قرارداد آپلود شده
+   * مشاهده توافق نامه آپلود شده
    */
   const viewContract = async () => {
     if (!contractData?.file_url) {
-      showAlert('خطا', 'فایل قرارداد موجود نیست');
+      showAlert('خطا', 'فایل توافق نامه موجود نیست');
       return;
     }
 
@@ -308,7 +308,7 @@ const OrganizationContractScreen = () => {
     <View style={styles.container}>
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} barStyle="dark-content" />
       <ScreenHeaders
-        title="مدیریت قرارداد"
+        title="مدیریت توافق نامه"
       />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -318,7 +318,7 @@ const OrganizationContractScreen = () => {
           <View style={styles.statusHeader}>
             <Icon name={getStatusIcon()} size={32} color={getStatusColor()} />
             <View style={styles.statusInfo}>
-              <Text style={styles.statusTitle}>وضعیت قرارداد</Text>
+              <Text style={styles.statusTitle}>وضعیت توافق نامه</Text>
               <Text style={[styles.statusText, { color: getStatusColor() }]}>
                 {getStatusText()}
               </Text>
@@ -341,20 +341,20 @@ const OrganizationContractScreen = () => {
           )}
         </View>
 
-        {/* راهنمای قرارداد */}
+        {/* راهنمای توافق نامه */}
         <View style={styles.guideContainer}>
-          <Text style={styles.guideTitle}>راهنمای آپلود قرارداد</Text>
+          <Text style={styles.guideTitle}>راهنمای آپلود توافق نامه</Text>
           <View style={styles.guideSteps}>
             <View style={styles.guideStep}>
               <Icon name="download" size={20} color={themeColor0.color} />
               <Text style={styles.guideStepText}>
-                1. فایل نمونه قرارداد را دانلود کنید
+                1. فایل نمونه توافق نامه را دانلود کنید
               </Text>
             </View>
             <View style={styles.guideStep}>
               <Icon name="edit" size={20} color={themeColor0.color} />
               <Text style={styles.guideStepText}>
-                2. قرارداد را تکمیل و امضا کنید
+                2. توافق نامه را تکمیل و امضا کنید
               </Text>
             </View>
             <View style={styles.guideStep}>
@@ -374,7 +374,7 @@ const OrganizationContractScreen = () => {
 
         {/* دکمه دانلود فایل نمونه */}
         <Button
-          title={downloadingTemplate ? 'در حال دانلود...' : 'دانلود فایل نمونه قرارداد'}
+          title={downloadingTemplate ? 'در حال دانلود...' : 'دانلود فایل نمونه توافق نامه'}
           onPress={downloadTemplate}
           loading={downloadingTemplate}
           disabled={downloadingTemplate}
@@ -388,7 +388,7 @@ const OrganizationContractScreen = () => {
         {(contractStatus === 'not_uploaded' || contractStatus === 'rejected' || contractStatus === null) && (
           <>
             <View style={styles.uploadContainer}>
-              <Text style={styles.uploadTitle}>آپلود قرارداد</Text>
+              <Text style={styles.uploadTitle}>آپلود توافق نامه</Text>
 
               {selectedFile ? (
                 <View style={styles.selectedFileContainer}>
@@ -406,7 +406,7 @@ const OrganizationContractScreen = () => {
               ) : (
                 <TouchableOpacity style={styles.selectFileButton} onPress={selectFile}>
                   <Icon name="folder-open" size={40} color={themeColor0.color} />
-                  <Text style={styles.selectFileText}>انتخاب فایل قرارداد</Text>
+                  <Text style={styles.selectFileText}>انتخاب فایل توافق نامه</Text>
                   <Text style={styles.selectFileHint}>
                     فرمت‌های مجاز: PDF, JPG, PNG (حداکثر 10MB)
                   </Text>
@@ -418,7 +418,7 @@ const OrganizationContractScreen = () => {
             <Button
               title={
                 uploading ? 'در حال آپلود...' :
-                  selectedFile ? 'آپلود قرارداد' :
+                  selectedFile ? 'آپلود توافق نامه' :
                     'ابتدا فایل را انتخاب کنید'
               }
               onPress={uploadContract}
@@ -431,10 +431,10 @@ const OrganizationContractScreen = () => {
           </>
         )}
 
-        {/* مشاهده قرارداد آپلود شده */}
+        {/* مشاهده توافق نامه آپلود شده */}
         {contractData && contractData.file_url && (
           <Button
-            title="مشاهده قرارداد آپلود شده"
+            title="مشاهده توافق نامه آپلود شده"
             onPress={viewContract}
             backgroundColor={themeColor1.bgColor(1)}
             textColor={themeColor4.bgColor(1)}
@@ -447,10 +447,10 @@ const OrganizationContractScreen = () => {
         <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>نکات مهم:</Text>
           <Text style={styles.infoText}>
-            • قرارداد باید به صورت کامل تکمیل و امضا شده باشد{'\n'}
+            • توافق نامه باید به صورت کامل تکمیل و امضا شده باشد{'\n'}
             • کیفیت تصویر باید واضح و خوانا باشد{'\n'}
             • حجم فایل نباید از 10 مگابایت بیشتر باشد{'\n'}
-            • پس از آپلود، قرارداد توسط تیم بررسی می‌شود{'\n'}
+            • پس از آپلود، توافق نامه توسط تیم بررسی می‌شود{'\n'}
             • در صورت رد، می‌توانید مجدداً آپلود کنید
           </Text>
         </View>

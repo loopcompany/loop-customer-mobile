@@ -5,7 +5,7 @@ import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
 import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL'
+import { mainUri, uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '../../helpers/Common'
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
@@ -60,15 +60,29 @@ const OrderExtraServices = ({ orderId, navigation }) => {
         <View style={[styles.itemWrapper, NewStyles.border10]}>
             <View style={{}}>
                 <View style={[NewStyles.row, { gap: 5, flex: 1, }]}>
-                    <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />
                     <View>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.title ?? item?.extra_service?.title}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("Brand")}: {item?.brand ?? item?.extra_service?.brand}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("Model")}: {item?.model ?? item?.extra_service?.model}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("Warranty")}: {item?.warranty ?? item?.extra_service?.warranty}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("Test Duration")}: {item?.test_duration ?? item?.extra_service?.test_duration}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("barcode")}: {item?.barcode ?? item?.extra_service?.barcode}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{t("number")}: {item?.number ?? item?.extra_service?.number}</Text>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.extra_service?.des}</Text>
                     </View>
                 </View>
-                <Text style={[NewStyles.title, { fontSize: 14, textAlign: 'left' }]}>
-                    {formatPrice(item?.price)} {t('Toman')}
-                </Text>
+                <View style={NewStyles.rowWrapper}>
+                    <Text style={NewStyles.text10}>{t("Unit price")}</Text>
+                    <Text style={[NewStyles.title, { fontSize: 14, textAlign: 'left' }]}>
+                        {formatPrice(item?.unit_price)} {t('Toman')}
+                    </Text>
+                </View>
+                <View style={NewStyles.rowWrapper}>
+                    <Text style={NewStyles.text10}>{t("Total Price")}</Text>
+                    <Text style={[NewStyles.title, { fontSize: 14, textAlign: 'left' }]}>
+                        {formatPrice(item?.price)} {t('Toman')}
+                    </Text>
+                </View>
             </View>
             {item?.extra_service?.description && (
                 <Text style={[NewStyles.text10, { color: themeColor0.bgColor(0.6), paddingRight: 15 }]}>
@@ -129,12 +143,12 @@ const OrderExtraServices = ({ orderId, navigation }) => {
                     </Text>
 
                 </View>
-                <View style={[{ width: '100%', gap: 5 , paddingHorizontal:'5%'}, NewStyles.row]}>
+                <View style={[{ width: '100%', gap: 5, paddingHorizontal: '5%' }, NewStyles.row]}>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <Button title={t('Quote')} onPress={() => { navigation.navigate('Invoice', { orderId: orderId }) }} />
                     </View>
                     <View style={[{ flex: 1 }, NewStyles.center]}>
-                        <Button title={t("Sales receipt")} style={{ backgroundColor: themeColor1.bgColor(1), paddingHorizontal:0 }} textStyle={{ color: themeColor10.bgColor(1), width:'100%' }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice?extra=yes`) }} />
+                        <Button title={t("Sales receipt")} style={{ backgroundColor: themeColor1.bgColor(1), paddingHorizontal: 0 }} textStyle={{ color: themeColor10.bgColor(1), width: '100%' }} onPress={() => { Linking.openURL(`${mainUri}/reciept/${orderId}`) }} />
                     </View>
                 </View>
             </View>

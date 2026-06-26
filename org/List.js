@@ -14,7 +14,7 @@ const List = ({ navigation }) => {
   };
 
   const menuItems = [
-    { id: 1, title: 'قرارداد نامه', screen: 'ContractScreen' },
+    { id: 1, title: 'توافق نامه', screen: 'ContractScreen' },
     { id: 2, title: 'انتخاب جامع', screen: 'ComprehensiveSelectionScreen' },
     { id: 3, title: 'تامین قطعات / کالا', screen: 'HardwareSelectionScreen' },
     { id: 4, title: 'رزرو / مراجعه تکنسین', screen: 'TechnicianVisitScreen' },

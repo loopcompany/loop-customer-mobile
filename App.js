@@ -1,104 +1,99 @@
-import { StyleSheet, Text, View, Platform, BackHandler, Alert } from "react-native";
-import React, { useState, useRef, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as Linking from 'expo-linking';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setNavigationRef } from "./services/axiosConfig";
-import FolderScreen from "./screens/FolderScreen";
-import SubCategories from "./screens/category/SubCategories";
-import SignInLanding from "./screens/auth/SignInLanding";
-import LoginScreen from "./screens/auth/LoginScreen";
-import Welcome from "./screens/Welcome";
-import ResetPasswordScreen from "./screens/auth/ResetPasswordScreen";
-import GuideScreen from "./screens/GuideScreen";
-import OrderMenuScreen from "./screens/orders/OrderMenuScreen";
-import HardwareIssueScreen from "./screens/HardwareIssueScreen";
-import WindowsInstallScreen from "./screens/WindowsInstallScreen";
-import SoftwareInstallScreen from "./screens/SoftwareInstallScreen";
-import OrderTrackingScreen from "./screens/orders/OrderTrackingScreen";
-import OrderSummaryScreen from "./screens/orders/OrderSummaryScreen";
-import PartsSupplyScreen from "./screens/PartsSupplyScreen";
-import TechnicianBookingScreen from "./screens/TechnicianBookingScreen";
-import DeviceModelInfoScreen from "./screens/DeviceModelInfoScreen";
-import DeviceOrderSummary from "./screens/orders/DeviceOrderSummary";
-import Footer from "./screens/Footer";
-import AddressScreen from "./screens/account/AddressScreen";
-import MapPickerScreen from "./screens/MapPickerScreen";
-import PrivacyScreen from "./screens/resources/PrivacyScreen";
-import LearnMoreScreen from "./screens/resources/LearnMoreScreen";
-import AboutScreen from "./screens/resources/AboutScreen";
-import TransactionsScreen from "./screens/TransactionsScreen";
-import MessageScreen from "./screens/MessageScreen";
-import OrdersScreen from "./screens/orders/OrdersScreen";
-import CanceledOrdersScreen from "./screens/orders/CanceledOrdersScreen";
-import ViolationReportScreen from "./screens/contact/ViolationReportScreen";
-import ViolationReportsListScreen from "./screens/ViolationReportsListScreen";
-import FeedbackSurveyScreen from "./screens/contact/FeedbackSurveyScreen";
-import Fekrobekr from "./screens/Fekrobekr";
-import RateListScreen from "./screens/RateListScreen";
-import ProductIssueScreen from "./screens/ProductIssueScreen";
-import TrainingRegistrationScreen from "./screens/TrainingRegistrationScreen";
-import IncentivePlansScreen from "./screens/IncentivePlansScreen";
-import { Provider } from "react-redux";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { I18nManager } from "react-native";
-import store from "./store";
+import i18n from 'i18next';
+import { useEffect, useRef, useState } from "react";
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+import { Alert, BackHandler, I18nManager, Platform, StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from "react-redux";
+import en from './assets/locales/en.json';
+import fa from './assets/locales/fa.json';
+import AccessRestrictedScreen from "./components/AccessRestrictedScreen";
+import AuthInitializer from "./components/AuthInitializer";
+import ScreenHeaders from "./components/ScreenHeaders";
 import { MenuProvider } from "./contexts/MenuContext";
-import DiscountCodeScreen from "./org/DiscountCodeScreen";
-import TechnicianVisitScreen from "./org/TechnicianVisitScreen";
-import ContractScreen from "./org/ContractScreen";
-import HardwareSelectionScreen from "./org/HardwareSelectionScreen";
 import ComprehensiveSelectionScreen from "./org/ComprehensiveSelectionScreen";
+import ContractScreen from "./org/ContractScreen";
+import DiscountCodeScreen from "./org/DiscountCodeScreen";
+import HardwareSelectionScreen from "./org/HardwareSelectionScreen";
+import List from "./org/List";
+import Grouping from "./org/logreg/Grouping";
 import Login from "./org/logreg/Login";
-import Register from "./org/logreg/Register";
-import OTPVerification from "./org/logreg/OTPVerification";
-import TestConnection from "./org/logreg/TestConnection";
+import Method from "./org/logreg/Method";
 import OrganizationForgotPassword from "./org/logreg/OrganizationForgotPassword";
 import OrganizationResetPassword from "./org/logreg/OrganizationResetPassword";
-import OrganizationContract from "./screens/organization/OrganizationContract";
-import Grouping from "./org/logreg/Grouping";
-import Method from "./org/logreg/Method";
+import OTPVerification from "./org/logreg/OTPVerification";
 import OrgPrivacy from "./org/logreg/Privacy";
-import List from "./org/List";
-import MainSignIn from "./screens/auth/MainSignIn";
-import RegistrationVerificationScreen from "./screens/auth/RegistrationVerificationScreen";
-import Landing from "./screens/Landing";
-import Profile from "./screens/account/Profile";
-import ForgotPassword from "./screens/auth/ForgotPassword";
-import Steps from "./screens/category/Steps";
-import StepsHeader from './components/StepsHeader';
-import AddNewAddress from './screens/address/AddNewAddress';
-import Map from './screens/address/Map';
-import SubcategoryHeader from "./components/SubcategoryHeader";
-import Preview from "./screens/category/Preview";
-import Details from "./screens/orders/Details";
-import Invoice from "./screens/orders/Invoice";
+import Register from "./org/logreg/Register";
+import TestConnection from "./org/logreg/TestConnection";
+import TechnicianVisitScreen from "./org/TechnicianVisitScreen";
+import AddressScreen from "./screens/account/AddressScreen";
 import Increase from "./screens/account/Increase";
 import PaymentScreen from "./screens/account/PaymentScreen";
+import Profile from "./screens/account/Profile";
+import AddNewAddress from './screens/address/AddNewAddress';
+import Map from './screens/address/Map';
+import ForgotPassword from "./screens/auth/ForgotPassword";
+import LoginScreen from "./screens/auth/LoginScreen";
+import MainSignIn from "./screens/auth/MainSignIn";
+import RegistrationVerificationScreen from "./screens/auth/RegistrationVerificationScreen";
+import ResetPasswordScreen from "./screens/auth/ResetPasswordScreen";
+import SignInLanding from "./screens/auth/SignInLanding";
+import Preview from "./screens/category/Preview";
+import Steps from "./screens/category/Steps";
+import SubCategories from "./screens/category/SubCategories";
 import ChatRoom from "./screens/chat/ChatRoom";
 import Club from './screens/club/Club';
 import DiscountDetail from "./screens/club/DiscountDetail";
 import GemTransactions from './screens/club/GemTransactions';
 import UserDiscounts from './screens/club/UserDiscounts';
-import NotesScreen from './screens/NotesScreen';
-import AddEditNoteScreen from './screens/notes/AddEditNoteScreen';
-import WarrantyScreen from "./screens/resources/WarrantyScreen";
+import FeedbackSurveyScreen from "./screens/contact/FeedbackSurveyScreen";
+import ViolationReportScreen from "./screens/contact/ViolationReportScreen";
+import DeviceModelInfoScreen from "./screens/DeviceModelInfoScreen";
+import Fekrobekr from "./screens/Fekrobekr";
+import FolderScreen from "./screens/FolderScreen";
+import Footer from "./screens/Footer";
 import GameMenuScreen from './screens/game/GameMenuScreen';
 import GamePlayScreen from './screens/game/GamePlayScreen';
 import GameResultScreen from './screens/game/GameResultScreen';
-import WebViewScreen from './screens/WebViewScreen';
-import ScreenHeaders from "./components/ScreenHeaders";
-import AccessRestrictedScreen from "./components/AccessRestrictedScreen";
-import AuthInitializer from "./components/AuthInitializer";
-import OrganizationTermsScreen from "./screens/resources/OrganizationTermsScreen";
+import GuideScreen from "./screens/GuideScreen";
+import HardwareIssueScreen from "./screens/HardwareIssueScreen";
+import IncentivePlansScreen from "./screens/IncentivePlansScreen";
+import Landing from "./screens/Landing";
+import MapPickerScreen from "./screens/MapPickerScreen";
+import MessageScreen from "./screens/MessageScreen";
+import AddEditNoteScreen from './screens/notes/AddEditNoteScreen';
+import NotesScreen from './screens/NotesScreen';
+import CanceledOrdersScreen from "./screens/orders/CanceledOrdersScreen";
+import Details from "./screens/orders/Details";
+import DeviceOrderSummary from "./screens/orders/DeviceOrderSummary";
+import Invoice from "./screens/orders/Invoice";
+import OrderMenuScreen from "./screens/orders/OrderMenuScreen";
+import OrdersScreen from "./screens/orders/OrdersScreen";
+import OrderSummaryScreen from "./screens/orders/OrderSummaryScreen";
+import OrderTrackingScreen from "./screens/orders/OrderTrackingScreen";
+import OrganizationContract from "./screens/organization/OrganizationContract";
+import PartsSupplyScreen from "./screens/PartsSupplyScreen";
+import ProductIssueScreen from "./screens/ProductIssueScreen";
 import RateCategory from "./screens/RateCategory";
-import i18n from 'i18next';
-import { I18nextProvider, initReactI18next, useTranslation } from 'react-i18next';
-import en from './assets/locales/en.json';
-import fa from './assets/locales/fa.json';
+import RateListScreen from "./screens/RateListScreen";
+import AboutScreen from "./screens/resources/AboutScreen";
+import LearnMoreScreen from "./screens/resources/LearnMoreScreen";
+import OrganizationTermsScreen from "./screens/resources/OrganizationTermsScreen";
+import PrivacyScreen from "./screens/resources/PrivacyScreen";
+import WarrantyScreen from "./screens/resources/WarrantyScreen";
+import SoftwareInstallScreen from "./screens/SoftwareInstallScreen";
+import TechnicianBookingScreen from "./screens/TechnicianBookingScreen";
+import TrainingRegistrationScreen from "./screens/TrainingRegistrationScreen";
+import TransactionsScreen from "./screens/TransactionsScreen";
+import ViolationReportsListScreen from "./screens/ViolationReportsListScreen";
+import WebViewScreen from './screens/WebViewScreen';
+import Welcome from "./screens/Welcome";
+import WindowsInstallScreen from "./screens/WindowsInstallScreen";
+import { setNavigationRef } from "./services/axiosConfig";
+import store from "./store";
 const Stack = createNativeStackNavigator();
 I18nManager.forceRTL(false);
 
@@ -109,8 +104,8 @@ i18n
       fa: { translation: fa },
       en: { translation: en },
     },
-    lng: "en",
-    fallbackLng: "en",
+    lng: "fa",
+    fallbackLng: "fa",
     interpolation: {
       escapeValue: false
     }
@@ -122,19 +117,7 @@ SplashScreen.setOptions({
   duration: 2000,
   fade: true,
 });
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      fa: { translation: fa },
-    },
-    lng: "en",
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false
-    }
-  });
+ 
 const App = () => {
   const navigationRef = useRef(null);
 

@@ -77,8 +77,8 @@ const ProtectedOrderButton = ({
       alertTitle = 'تکمیل اطلاعات';
       alertMessage = 'لطفا ابتدا اطلاعات پروفایل خود را تکمیل کنید. ';
     } else if (!contractStatus || contractStatus === 'not_uploaded') {
-      alertTitle = 'آپلود قرارداد';
-      alertMessage = 'لطفا ابتدا قرارداد خود را آپلود کنید. ';
+      alertTitle = 'آپلود توافق نامه';
+      alertMessage = 'لطفا ابتدا توافق نامه خود را آپلود کنید. ';
     }
 
     // اضافه کردن مراحل بعدی
@@ -104,7 +104,7 @@ const ProtectedOrderButton = ({
 
     if (contractStatus === 'rejected' || contractStatus === 'not_uploaded' || contractStatus === null) {
       buttons.unshift({
-        text: 'مدیریت قرارداد',
+        text: 'مدیریت توافق نامه',
         onPress: () => navigation.navigate('OrganizationContract')
       });
     }
@@ -190,7 +190,7 @@ const ProtectedOrderButton = ({
         {isOrganizationUser && !hasCompleteAccess && !loading && (
           <Text style={styles.statusText}>
             {profileStatus !== 'approved' ? '⚠️ پروفایل نیاز به تایید' : ''}
-            {contractStatus !== 'approved' ? '⚠️ قرارداد نیاز به تایید' : ''}
+            {contractStatus !== 'approved' ? '⚠️ توافق نامه نیاز به تایید' : ''}
           </Text>
         )}
       </View>

@@ -5,9 +5,8 @@ import { uri } from './URL';
 import i18next from 'i18next';
 
 const categoriesAPI = {
-  getCategories: async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
+  getCategories: async (token) => {
+    try { 
       const response = await axios.get(`${uri}/categories`, {
         headers: {
           'Authorization': `Bearer ${token}`,

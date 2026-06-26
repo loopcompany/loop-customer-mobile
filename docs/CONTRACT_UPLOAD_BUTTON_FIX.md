@@ -1,4 +1,4 @@
-# 🔧 رفع مشکل دکمه بارگذاری قرارداد
+# 🔧 رفع مشکل دکمه بارگذاری توافق نامه
 
 **تاریخ**: 2025-11-10  
 **فایل**: `screens/organization/OrganizationContractScreen.js`
@@ -17,7 +17,7 @@
 ```javascript
 {/* دکمه فقط اگر فایل انتخاب شده بود نمایش داده میشد */}
 {selectedFile && (
-  <Button title="آپلود قرارداد" ... />
+  <Button title="آپلود توافق نامه" ... />
 )}
 ```
 
@@ -64,7 +64,7 @@ const selectFile = async () => {
 <Button
   title={
     uploading ? 'در حال آپلود...' : 
-    selectedFile ? 'آپلود قرارداد' : 
+    selectedFile ? 'آپلود توافق نامه' : 
     'ابتدا فایل را انتخاب کنید'  // ← پیام واضح
   }
   onPress={uploadContract}
@@ -113,7 +113,7 @@ if (!allowedTypes.includes(file.mimeType)) {
 ### 2️⃣ فایل انتخاب شده:
 ```
 ┌──────────────────────────────┐
-│      آپلود قرارداد           │  ← enabled, سبز
+│      آپلود توافق نامه           │  ← enabled, سبز
 └──────────────────────────────┘
 ```
 

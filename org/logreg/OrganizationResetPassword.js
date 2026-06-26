@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect,useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -17,13 +18,15 @@ import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '../../styles/NewStyles';
+import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
+import { themeColor0, themeColor4 } from '../../theme/Color';
 const OrganizationResetPassword = ({ route, navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-      // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const { organizationCode, phone } = route.params;
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -36,6 +39,12 @@ const OrganizationResetPassword = ({ route, navigation }) => {
   const [timer, setTimer] = useState(120); // 2 minutes
   const [errors, setErrors] = useState({});
   const inputRefs = useRef([]);
+  const ref = useBlurOnFulfill({ code, cellCount: 6 });
+
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value: code,
+    setValue: setCode,
+  });
 
   useEffect(() => {
     // Start countdown timer
@@ -85,10 +94,8 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate code
-    const verificationCode = code.join('');
-    if (verificationCode.length !== 6) {
+ 
+    if (code.length !== 6) {
       newErrors.code = t('Please enter the complete 6-digit code');
     }
 
@@ -114,17 +121,17 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     if (!validateForm()) {
       return;
     }
-
+    console.log('====================================');
+    console.log("sss");
+    console.log('====================================');
     setLoading(true);
 
     try {
-      const verificationCode = code.join('');
-
       console.log('📤 Resetting password...');
       console.log('Data:', {
         organization_code: organizationCode,
         phone: phone,
-        code: verificationCode,
+        code: code,
       });
 
       const response = await axios.post(
@@ -132,7 +139,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
         {
           organization_code: organizationCode,
           phone: phone,
-          code: verificationCode,
+          code: code,
           password: newPassword,
           password_confirmation: confirmPassword,
         },
@@ -232,7 +239,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     >
       <CustomStatusBar />
       <ScreenHeaders
-        title={t('Change Password')} 
+        title={t('Change Password')}
       />
 
       <ScrollView
@@ -312,13 +319,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
           {/* OTP Input */}
           <Text
-            style={{
-              fontSize: 14,
-              fontFamily: 'VazirBold',
-              color: '#333',
-              marginBottom: 10,
-              textAlign: 'right',
-            }}
+            style={NewStyles.text10}
           >
             {t('Verification code')} *
           </Text>
@@ -330,29 +331,35 @@ const OrganizationResetPassword = ({ route, navigation }) => {
               gap: 10,
             }}
           >
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => (inputRefs.current[index] = ref)}
-                value={code[index]}
-                onChangeText={(text) => handleCodeChange(text, index)}
-                onKeyPress={(e) => handleKeyPress(e, index)}
-                keyboardType="number-pad"
-                maxLength={1}
-                style={{
-                  width: 45,
-                  height: 55,
-                  backgroundColor: '#fff',
-                  borderRadius: 10,
-                  borderWidth: 2,
-                  borderColor: code[index] ? '#1976d2' : '#ccc',
-                  fontSize: 22,
-                  fontFamily: 'VazirBold',
-                  textAlign: 'center',
-                  elevation: 2,
-                }}
-              />
-            ))}
+
+            <CodeField
+              ref={ref}
+              {...props}
+              value={code}
+              onChangeText={(text) => {
+                setCode(text);
+              }}
+              cellCount={6}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              autoComplete={Platform.select({
+                android: "sms-otp",
+                default: "one-time-code",
+              })}
+              renderCell={({ index, symbol, isFocused }) => (
+                <Text
+                  key={index}
+                  style={[
+                    styles.codeCell,
+                    isFocused && styles.codeCellFocused,
+                    NewStyles.border10
+                  ]}
+                  onLayout={getCellOnLayoutHandler(index)}
+                >
+                  {symbol || (isFocused ? <Cursor /> : null)}
+                </Text>
+              )}
+            />
           </View>
           {errors.code && (
             <Text
@@ -372,14 +379,12 @@ const OrganizationResetPassword = ({ route, navigation }) => {
           {/* Timer */}
           {timer > 0 && (
             <Text
-              style={{
+              style={[NewStyles.text10, {
                 textAlign: 'center',
                 fontSize: 14,
-                fontFamily: 'VazirLight',
-                color: '#666',
                 marginTop: 10,
                 marginBottom: 20,
-              }}
+              }]}
             >
               {t('Resend code in')}: {formatTime(timer)}
             </Text>
@@ -388,17 +393,14 @@ const OrganizationResetPassword = ({ route, navigation }) => {
           {/* New Password */}
           <View style={{ marginBottom: 15 }}>
             <Text
-              style={{
-                fontSize: 14,
-                fontFamily: 'VazirBold',
-                color: '#333',
-                marginBottom: 8,
-                textAlign: 'right',
-              }}
+              style={NewStyles.text10}
             >
               {t('New Password')} *
             </Text>
-            <View style={{ position: 'relative' }}>
+            <View style={[NewStyles.row, {
+              gap: 5, backgroundColor: themeColor4.bgColor(0.7),
+              paddingHorizontal: 20,
+            }, NewStyles.border10]}>
               <TextInput
                 value={newPassword}
                 onChangeText={(text) => {
@@ -409,33 +411,18 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 }}
                 placeholder={t('Password must be at least 8 characters')}
                 secureTextEntry={!showPassword}
-                style={{
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 15,
-                  paddingRight: 45,
-                  borderWidth: 1,
-                  borderColor: errors.newPassword ? '#ff0000' : '#ccc',
-                  fontSize: 16,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'right',
-                }}
+                style={[NewStyles.text10, { flex: 1, height: 45 }]}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={{
-                  position: 'absolute',
-                  left: 15,
-                  top: 0,
-                  bottom: 0,
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons 
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'} 
-                  size={22} 
-                  color="#666" 
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={22}
+                  color="#666"
                 />
               </TouchableOpacity>
             </View>
@@ -455,19 +442,16 @@ const OrganizationResetPassword = ({ route, navigation }) => {
           </View>
 
           {/* Confirm Password */}
-          <View style={{ marginBottom: 25 }}>
+          <View style={{ marginBottom: 15 }}>
             <Text
-              style={{
-                fontSize: 14,
-                fontFamily: 'VazirBold',
-                color: '#333',
-                marginBottom: 8,
-                textAlign: 'right',
-              }}
+              style={NewStyles.text10}
             >
               {t('Confirm Password')} *
             </Text>
-            <View style={{ position: 'relative' }}>
+            <View style={[NewStyles.row, {
+              gap: 5, backgroundColor: themeColor4.bgColor(0.7),
+              paddingHorizontal: 20,
+            }, NewStyles.border10]}>
               <TextInput
                 value={confirmPassword}
                 onChangeText={(text) => {
@@ -478,33 +462,18 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 }}
                 placeholder={t('Confirm Password')}
                 secureTextEntry={!showConfirmPassword}
-                style={{
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 15,
-                  paddingRight: 45,
-                  borderWidth: 1,
-                  borderColor: errors.confirmPassword ? '#ff0000' : '#ccc',
-                  fontSize: 16,
-                  fontFamily: 'VazirLight',
-                  textAlign: 'right',
-                }}
+                style={[NewStyles.text10, { flex: 1, height: 45 }]}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 style={{
-                  position: 'absolute',
-                  left: 15,
-                  top: 0,
-                  bottom: 0,
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons 
-                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} 
-                  size={22} 
-                  color="#666" 
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={22}
+                  color="#666"
                 />
               </TouchableOpacity>
             </View>
@@ -590,3 +559,19 @@ const OrganizationResetPassword = ({ route, navigation }) => {
 
 export default OrganizationResetPassword;
 
+const createLocalStyles = (NewStyles) => StyleSheet.create({
+  codeCell: {
+    width: 45,
+    height: 50,
+    backgroundColor: themeColor4.bgColor(0.7),
+    fontSize: 20,
+    color: themeColor0.bgColor(1),
+    fontFamily: 'VazirBold',
+    textAlign: 'center',
+    lineHeight: 50,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+})

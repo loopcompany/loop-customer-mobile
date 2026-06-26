@@ -104,7 +104,7 @@ const { token } = await loginResponse.json();
 | `long_term.duration` | string | ❌ | دوره تناوب (ماهانه/سالانه) | `"monthly"` یا `"yearly"` |
 | `long_term.date` | string | ❌ | تاریخ شروع (YYYY-MM-DD) | `"2025-11-01"` |
 | `long_term.time` | string | ❌ | بازه زمانی | `"09:00-11:00"` |
-| `long_term.file` | string | ❌ | مسیر فایل قرارداد | `"uploads/contracts/file.pdf"` |
+| `long_term.file` | string | ❌ | مسیر فایل توافق نامه | `"uploads/contracts/file.pdf"` |
 
 #### نوع کوتاه‌مدت (Short-term)
 
@@ -113,7 +113,7 @@ const { token } = await loginResponse.json();
 | `type` | string | ✅ | نوع زمان‌بندی | `"short_term"` |
 | `short_term.date` | string | ❌ | تاریخ سرویس (YYYY-MM-DD) | `"2025-11-05"` |
 | `short_term.time` | string | ❌ | بازه زمانی | `"14:00-16:00"` |
-| `short_term.file` | string | ❌ | مسیر فایل قرارداد | `"uploads/contracts/file.pdf"` |
+| `short_term.file` | string | ❌ | مسیر فایل توافق نامه | `"uploads/contracts/file.pdf"` |
 
 ---
 
@@ -191,7 +191,7 @@ const { token } = await loginResponse.json();
 {
   "address_id": 3,
   "category_id": 2,
-  "total_price": 800000,
+  "total_price": 1200000,
   "date": "2025-11-20",
   "time": "10:00-12:00",
   "description": "سرویس یکبار مصرف قبل از مراسم",

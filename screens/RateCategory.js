@@ -15,13 +15,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '../styles/NewStyles';
 import ScreenHeaders from '../components/ScreenHeaders';
 import Footer from './Footer';
-import { formatJalaaliDate } from '../helpers/Common';
+import { formatJalaaliDate, formatPrice } from '../helpers/Common';
 import { themeColor0, themeColor1, themeColor4 } from '../theme/Color';
 import { RefreshControl } from 'react-native';
 import letterRatesCategoryAPI from '../services/LetterRatesService';
 import { useNavigation } from '@react-navigation/native';
 import { createStyles } from '../styles/NewStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 
 export default function RateCategory() {
@@ -85,12 +86,13 @@ export default function RateCategory() {
       </View>
     )
   };
+  const minPrice = useSelector(state => state.minPrice?.data)
 
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t('Rate List')} />
-      <View style={[{ padding: 10, backgroundColor: themeColor1.bgColor(1), marginHorizontal:'5%', marginTop:15 }, NewStyles.border10]}>
-        <Text style={[NewStyles.title10, {textAlign:'center', fontSize:14}]}>{t("Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)")}</Text>
+      <View style={[{ padding: 10, backgroundColor: themeColor1.bgColor(1), marginHorizontal: '5%', marginTop: 15 }, NewStyles.border10]}>
+        <Text style={[NewStyles.title10, { textAlign: 'center', fontSize: 14 }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
       </View>
       <View style={[{ flex: 1 }]}>
         <FlatList

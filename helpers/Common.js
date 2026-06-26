@@ -252,7 +252,7 @@ export const handleError = (error, t) => {
     } else if (error?.response?.status == 401) {
       showToastOrAlert(`${t("Unauthorized access!")}`);
     }
-    else if(error?.response?.status==402){
+    else if (error?.response?.status == 402) {
       showToastOrAlert(`${t("Your wallet balance is not enough.")}`)
     }
     else {
@@ -289,17 +289,7 @@ export const hexToRgb = (hex) => {
     : null;
 };
 
-export const cleanText = (text) =>
-  text
-    ?.replace(/(<([^>]+)>)/gi, "")
-    ?.replace(/\&nbsp;/g, "")
-    ?.replace(/\&ldquo;/g, "")
-    ?.replace(/\&rdquo;/g, "")
-    ?.replace(/\&hellip;/g, "")
-    ?.replace(/\&zwnj;/g, "‌")
-    ?.replace(/\&raquo;/g, "")
-    ?.replace(/\&laquo;/g, "")
-    ?.replace(/\&quot;/g, "");
+export const cleanText = (text) => text?.replace(/<br\s*\/?>/gi, "\n")?.replace(/<\/?li>/gi, "\n")?.replace(/(<([^>]+)>)/gi, "")?.replace(/\&nbsp;/g, '')?.replace(/\&ldquo;/g, '')?.replace(/\&rdquo;/g, '')?.replace(/\&hellip;/g, '')?.replace(/\&zwnj;/g, '‌')?.replace(/\&raquo;/g, '')?.replace(/\&laquo;/g, '')?.replace(/\&quot;/g, '');
 
 export const showToastOrAlert = (message) => {
   Platform.OS === "android"
@@ -483,12 +473,12 @@ export const getPaymentStatusColor = (status) => {
 };
 
 export function convertToEnglish(str) {
-    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    
-    return str.toString()
-        .replace(/[۰-۹]/g, (char) => persianNumbers.indexOf(char))
-        .replace(/[٠-٩]/g, (char) => arabicNumbers.indexOf(char));
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+  return str.toString()
+    .replace(/[۰-۹]/g, (char) => persianNumbers.indexOf(char))
+    .replace(/[٠-٩]/g, (char) => arabicNumbers.indexOf(char));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -79,12 +79,12 @@ if ((accountType === 'organization' || accountType === 'company') && hasServiceS
 - ✅ **Duration** (monthly/yearly): اجباری
 - ✅ **Date** (تاریخ شروع): اجباری
 - ✅ **Time** (بازه زمانی): اجباری
-- ❌ **File** (فایل قرارداد): اختیاری
+- ❌ **File** (فایل توافق نامه): اختیاری
 
 #### برای Short-term:
 - ✅ **Date** (تاریخ سرویس): اجباری
 - ✅ **Time** (بازه زمانی): اجباری
-- ❌ **File** (فایل قرارداد): اختیاری
+- ❌ **File** (فایل توافق نامه): اختیاری
 
 ### کد Validation
 

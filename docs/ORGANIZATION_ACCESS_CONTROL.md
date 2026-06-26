@@ -16,11 +16,11 @@
 ## 🎯 نیازمندی‌ها
 
 ### هدف اصلی:
-کاربر سازمانی تا زمانی که **هم پروفایلش** و **هم قراردادش** توسط ادمین تایید نشده، فقط به صفحات محدود دسترسی داشته باشد.
+کاربر سازمانی تا زمانی که **هم پروفایلش** و **هم توافق نامهش** توسط ادمین تایید نشده، فقط به صفحات محدود دسترسی داشته باشد.
 
 ### صفحات مجاز (قبل از تایید):
 - ✅ ویرایش حساب کاربری (`OrganizationProfile`)
-- ✅ قراردادنامه (`OrganizationContract`) 
+- ✅ توافق نامه (`OrganizationContract`) 
 - ✅ تنظیمات حساب (`AccountSettings`)
 
 ### صفحات غیرمجاز (قبل از تایید):
@@ -35,7 +35,7 @@
 ## 🔧 API های Backend
 
 ### 1. **GET /organization/profile/status**
-**توضیح:** دریافت وضعیت تایید پروفایل و قرارداد
+**توضیح:** دریافت وضعیت تایید پروفایل و توافق نامه
 
 **Request:**
 ```http
@@ -55,7 +55,7 @@ Content-Type: application/json
     "profile_approved_at": "2024-01-15T10:30:00Z",
     "contract_approved_at": null,
     "profile_rejection_reason": null,
-    "contract_rejection_reason": "فایل قرارداد خوانا نیست",
+    "contract_rejection_reason": "فایل توافق نامه خوانا نیست",
     "blocked_message": "لطفا منتظر تایید ادمین باشید",
     "next_steps": [
       "upload_contract",
@@ -145,7 +145,7 @@ Content-Type: application/json
 ---
 
 ### 4. **GET /organization/contracts**
-**توضیح:** دریافت لیست قراردادهای آپلود شده (موجود)
+**توضیح:** دریافت لیست توافق نامههای آپلود شده (موجود)
 
 **Request:**
 ```http
@@ -161,7 +161,7 @@ Authorization: Bearer {token}
     {
       "id": 1,
       "contract_url": "https://domain.com/storage/contracts/contract_123.pdf",
-      "file_name": "قرارداد امضا شده",
+      "file_name": "توافق نامه امضا شده",
       "status": "pending|approved|rejected",
       "status_label": "در انتظار تایید",
       "rejection_reason": "امضا واضح نیست",
@@ -176,7 +176,7 @@ Authorization: Bearer {token}
 ---
 
 ### 5. **POST /organization/contracts/upload**
-**توضیح:** آپلود قرارداد امضا شده (موجود)
+**توضیح:** آپلود توافق نامه امضا شده (موجود)
 
 ---
 
@@ -394,9 +394,9 @@ const AccessRestrictedScreen = ({ accessStatus, allowedScreens = [] }) => {
           )}
         </View>
         
-        {/* وضعیت قرارداد */}
+        {/* وضعیت توافق نامه */}
         <View style={styles.statusContainer}>
-          <Text style={styles.statusTitle}>وضعیت قرارداد:</Text>
+          <Text style={styles.statusTitle}>وضعیت توافق نامه:</Text>
           <View style={styles.statusRow}>
             <Ionicons 
               name={getStatusIcon(accessStatus?.contract_status).name} 
@@ -431,7 +431,7 @@ const AccessRestrictedScreen = ({ accessStatus, allowedScreens = [] }) => {
             onPress={() => navigation.navigate('OrganizationContract')}
           >
             <Ionicons name="document-text-outline" size={20} color="#2196f3" />
-            <Text style={styles.actionButtonText}>قراردادنامه</Text>
+            <Text style={styles.actionButtonText}>توافق نامه</Text>
           </TouchableOpacity>
         </View>
         
@@ -453,7 +453,7 @@ const AccessRestrictedScreen = ({ accessStatus, allowedScreens = [] }) => {
 
 const getStepText = (step) => {
   switch (step) {
-    case 'upload_contract': return 'آپلود قرارداد امضا شده';
+    case 'upload_contract': return 'آپلود توافق نامه امضا شده';
     case 'wait_for_approval': return 'انتظار برای تایید ادمین';
     case 'complete_profile': return 'تکمیل اطلاعات پروفایل';
     default: return step;
@@ -605,21 +605,21 @@ const OrdersScreen = withOrganizationAccess(Orders, { requireCompleteAccess: tru
 - `profile_status`: `pending`
 - `contract_status`: `not_uploaded`
 - `has_complete_access`: `false`
-- **دسترسی:** فقط ویرایش پروفایل و آپلود قرارداد
+- **دسترسی:** فقط ویرایش پروفایل و آپلود توافق نامه
 
-#### 2. **قرارداد آپلود شده**
+#### 2. **توافق نامه آپلود شده**
 - `profile_status`: `pending`
 - `contract_status`: `pending`
 - `has_complete_access`: `false`
-- **دسترسی:** فقط ویرایش پروفایل و مشاهده وضعیت قرارداد
+- **دسترسی:** فقط ویرایش پروفایل و مشاهده وضعیت توافق نامه
 
-#### 3. **پروفایل تایید، قرارداد رد شده**
+#### 3. **پروفایل تایید، توافق نامه رد شده**
 - `profile_status`: `approved`
 - `contract_status`: `rejected`
 - `has_complete_access`: `false`
-- **دسترسی:** ویرایش پروفایل + آپلود مجدد قرارداد
+- **دسترسی:** ویرایش پروفایل + آپلود مجدد توافق نامه
 
-#### 4. **پروفایل رد، قرارداد تایید شده**
+#### 4. **پروفایل رد، توافق نامه تایید شده**
 - `profile_status`: `rejected`
 - `contract_status`: `approved`
 - `has_complete_access`: `false`
@@ -635,7 +635,7 @@ const OrdersScreen = withOrganizationAccess(Orders, { requireCompleteAccess: tru
 - `profile_status`: `rejected`
 - `contract_status`: `rejected`
 - `has_complete_access`: `false`
-- **دسترسی:** ویرایش پروفایل + آپلود مجدد قرارداد
+- **دسترسی:** ویرایش پروفایل + آپلود مجدد توافق نامه
 
 ---
 
@@ -649,7 +649,7 @@ const OrdersScreen = withOrganizationAccess(Orders, { requireCompleteAccess: tru
 
 تعریف آماده:
 - ✅ فرم ویرایش پروفایل در دسترس باشد
-- ✅ امکان آپلود قرارداد وجود داشته باشد  
+- ✅ امکان آپلود توافق نامه وجود داشته باشد  
 - ✅ وضعیت تایید نمایش داده شود
 - ✅ از سایر بخش‌ها محروم باشم
 ```
@@ -662,7 +662,7 @@ const OrdersScreen = withOrganizationAccess(Orders, { requireCompleteAccess: tru
 
 تعریف آماده:
 - ✅ وضعیت پروفایل نمایش داده شود
-- ✅ وضعیت قرارداد نمایش داده شود
+- ✅ وضعیت توافق نامه نمایش داده شود
 - ✅ دلایل رد (در صورت وجود) نمایش داده شود
 - ✅ مراحل بعدی مشخص باشد
 ```

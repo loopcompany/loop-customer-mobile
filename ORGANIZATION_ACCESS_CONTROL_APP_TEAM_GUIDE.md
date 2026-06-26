@@ -8,7 +8,7 @@
 
 ## 🎯 هدف و نیازمندی
 
-کاربران سازمانی تا زمانی که **هم پروفایل** و **هم قرارداد** آن‌ها توسط ادمین تایید نشود، فقط به بخش‌های محدودی از اپلیکیشن دسترسی دارند.
+کاربران سازمانی تا زمانی که **هم پروفایل** و **هم توافق نامه** آن‌ها توسط ادمین تایید نشود، فقط به بخش‌های محدودی از اپلیکیشن دسترسی دارند.
 
 ### تفاوت کاربران:
 - **کاربران فردی:** دسترسی کامل و فوری ✅
@@ -61,7 +61,7 @@ localStorage.setItem('userType', userType);
     "contract_rejection_reason": null,
     "next_steps": [
       "لطفا منتظر تایید پروفایل باشید",
-      "لطفا منتظر تایید قرارداد باشید"
+      "لطفا منتظر تایید توافق نامه باشید"
     ],
     "blocked_message": "اطلاعات شما در حال بررسی توسط ادمین است. لطفا منتظر بمانید.",
     "allowed_screens": [
@@ -349,11 +349,11 @@ const AccessRestrictedScreen = ({ accessStatus }) => {
         </View>
       </View>
       
-      {/* وضعیت قرارداد */}
+      {/* وضعیت توافق نامه */}
       <View style={styles.statusSection}>
         <View style={styles.statusHeader}>
           <Ionicons name="document-text-outline" size={24} color="#2196F3" />
-          <Text style={styles.statusTitle}>وضعیت قرارداد</Text>
+          <Text style={styles.statusTitle}>وضعیت توافق نامه</Text>
         </View>
         
         <View style={styles.statusItem}>
@@ -376,7 +376,7 @@ const AccessRestrictedScreen = ({ accessStatus }) => {
               style={styles.infoButton}
               onPress={() => showRejectionReason(
                 accessStatus?.contract_rejection_reason, 
-                'قرارداد'
+                'توافق نامه'
               )}
             >
               <Ionicons name="information-circle" size={20} color="#2196F3" />
@@ -416,7 +416,7 @@ const AccessRestrictedScreen = ({ accessStatus }) => {
           onPress={() => navigation.navigate('OrganizationContract')}
         >
           <Ionicons name="document-text-outline" size={20} color="#2196F3" />
-          <Text style={styles.actionButtonText}>مدیریت قراردادها</Text>
+          <Text style={styles.actionButtonText}>مدیریت توافق نامهها</Text>
           <Ionicons name="chevron-forward" size={16} color="#999" />
         </TouchableOpacity>
         
@@ -730,7 +730,7 @@ const testApprovedOrgUser = async () => {
 // utils/testAccessStatus.js
 export const testAccessScenarios = [
   {
-    name: 'پروفایل و قرارداد در انتظار',
+    name: 'پروفایل و توافق نامه در انتظار',
     status: {
       profile_status: 'pending',
       contract_status: 'pending',
@@ -739,13 +739,13 @@ export const testAccessScenarios = [
     expectedMessage: 'اطلاعات شما در حال بررسی توسط ادمین است'
   },
   {
-    name: 'پروفایل تایید، قرارداد در انتظار',
+    name: 'پروفایل تایید، توافق نامه در انتظار',
     status: {
       profile_status: 'approved',
       contract_status: 'pending',
       has_complete_access: false
     },
-    expectedMessage: 'لطفا منتظر تایید قرارداد باشید'
+    expectedMessage: 'لطفا منتظر تایید توافق نامه باشید'
   },
   {
     name: 'پروفایل رد شده',

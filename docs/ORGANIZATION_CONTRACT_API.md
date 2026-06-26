@@ -1,8 +1,8 @@
-# 📄 مستندات API قراردادنامه سازمانی
+# 📄 مستندات API توافق نامه سازمانی
 
 ## نمای کلی
 
-این مستندات API‌های مورد نیاز برای صفحه **قراردادنامه سازمانی** را توضیح می‌دهد. این صفحه به کاربران سازمانی اجازه می‌دهد تا قرارداد بارگذاری شده توسط ادمین را مشاهده و دانلود کنند، و قرارداد امضا شده خود را آپلود نمایند.
+این مستندات API‌های مورد نیاز برای صفحه **توافق نامه سازمانی** را توضیح می‌دهد. این صفحه به کاربران سازمانی اجازه می‌دهد تا توافق نامه بارگذاری شده توسط ادمین را مشاهده و دانلود کنند، و توافق نامه امضا شده خود را آپلود نمایند.
 
 ---
 
@@ -20,11 +20,11 @@ Authorization: Bearer {token}
 
 ## 📋 API Endpoints
 
-### 1️⃣ دریافت اطلاعات قرارداد
+### 1️⃣ دریافت اطلاعات توافق نامه
 
 **Endpoint:** `GET /organization/contract`
 
-**توضیح:** دریافت اطلاعات قرارداد بارگذاری شده توسط ادمین و قرارداد آپلود شده توسط سازمان
+**توضیح:** دریافت اطلاعات توافق نامه بارگذاری شده توسط ادمین و توافق نامه آپلود شده توسط سازمان
 
 **Headers:**
 ```http
@@ -36,21 +36,21 @@ Accept: application/json
 ```json
 {
   "status": "success",
-  "message": "اطلاعات قرارداد با موفقیت دریافت شد",
+  "message": "اطلاعات توافق نامه با موفقیت دریافت شد",
   "data": {
     "admin_contract": {
       "id": 1,
       "file_url": "https://example.com/storage/contracts/contract_123.pdf",
-      "file_name": "قرارداد_همکاری_سازمانی.pdf",
+      "file_name": "توافق نامه_همکاری_سازمانی.pdf",
       "file_size": 2048576,
       "mime_type": "application/pdf",
       "uploaded_at": "1403/08/17",
-      "description": "قرارداد همکاری سازمانی با شرکت لوپ"
+      "description": "توافق نامه همکاری سازمانی با شرکت لوپ"
     },
     "user_contract": {
       "id": 5,
       "file_url": "https://example.com/storage/user_contracts/signed_contract_456.pdf",
-      "file_name": "قرارداد_امضا_شده.pdf",
+      "file_name": "توافق نامه_امضا_شده.pdf",
       "file_size": 3145728,
       "mime_type": "application/pdf",
       "uploaded_at": "1403/08/18",
@@ -67,15 +67,15 @@ Accept: application/json
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `admin_contract` | Object/null | قرارداد بارگذاری شده توسط ادمین (null اگر هنوز بارگذاری نشده) |
-| `admin_contract.id` | Integer | شناسه قرارداد |
-| `admin_contract.file_url` | String | URL کامل فایل قرارداد |
+| `admin_contract` | Object/null | توافق نامه بارگذاری شده توسط ادمین (null اگر هنوز بارگذاری نشده) |
+| `admin_contract.id` | Integer | شناسه توافق نامه |
+| `admin_contract.file_url` | String | URL کامل فایل توافق نامه |
 | `admin_contract.file_name` | String | نام فایل |
 | `admin_contract.file_size` | Integer | حجم فایل به بایت |
 | `admin_contract.mime_type` | String | نوع فایل (application/pdf, image/jpeg, etc.) |
 | `admin_contract.uploaded_at` | String | تاریخ شمسی بارگذاری |
-| `admin_contract.description` | String | توضیحات قرارداد |
-| `user_contract` | Object/null | قرارداد آپلود شده توسط کاربر (null اگر هنوز آپلود نشده) |
+| `admin_contract.description` | String | توضیحات توافق نامه |
+| `user_contract` | Object/null | توافق نامه آپلود شده توسط کاربر (null اگر هنوز آپلود نشده) |
 | `user_contract.status` | String | وضعیت: `pending`, `approved`, `rejected` |
 | `user_contract.status_label` | String | برچسب فارسی وضعیت |
 | `user_contract.reviewed_at` | String/null | تاریخ بررسی توسط ادمین |
@@ -85,7 +85,7 @@ Accept: application/json
 ```json
 {
   "status": "error",
-  "message": "هیچ قراردادی یافت نشد"
+  "message": "هیچ توافق نامهی یافت نشد"
 }
 ```
 
@@ -99,11 +99,11 @@ Accept: application/json
 
 ---
 
-### 2️⃣ آپلود قرارداد امضا شده
+### 2️⃣ آپلود توافق نامه امضا شده
 
 **Endpoint:** `POST /organization/contract/upload`
 
-**توضیح:** آپلود فایل قرارداد امضا شده توسط سازمان
+**توضیح:** آپلود فایل توافق نامه امضا شده توسط سازمان
 
 **Headers:**
 ```http
@@ -115,7 +115,7 @@ Accept: application/json
 **Request Body (FormData):**
 ```javascript
 {
-  "contract": File // فایل قرارداد (PDF, JPG, PNG)
+  "contract": File // فایل توافق نامه (PDF, JPG, PNG)
 }
 ```
 
@@ -128,12 +128,12 @@ Accept: application/json
 ```json
 {
   "status": "success",
-  "message": "قرارداد با موفقیت آپلود شد و در انتظار بررسی است",
+  "message": "توافق نامه با موفقیت آپلود شد و در انتظار بررسی است",
   "data": {
     "contract": {
       "id": 5,
       "file_url": "https://example.com/storage/user_contracts/signed_contract_456.pdf",
-      "file_name": "قرارداد_امضا_شده.pdf",
+      "file_name": "توافق نامه_امضا_شده.pdf",
       "file_size": 3145728,
       "mime_type": "application/pdf",
       "uploaded_at": "1403/08/18",
@@ -151,7 +151,7 @@ Accept: application/json
   "message": "خطای اعتبارسنجی",
   "errors": {
     "contract": [
-      "فایل قرارداد الزامی است",
+      "فایل توافق نامه الزامی است",
       "فرمت فایل باید PDF یا تصویر باشد",
       "حجم فایل نباید بیشتر از 10 مگابایت باشد"
     ]
@@ -163,17 +163,17 @@ Accept: application/json
 ```json
 {
   "status": "error",
-  "message": "قرارداد شما در حال حاضر در انتظار بررسی است. لطفا منتظر تایید ادمین بمانید."
+  "message": "توافق نامه شما در حال حاضر در انتظار بررسی است. لطفا منتظر تایید ادمین بمانید."
 }
 ```
 
 ---
 
-### 3️⃣ دانلود قرارداد ادمین (Optional)
+### 3️⃣ دانلود توافق نامه ادمین (Optional)
 
 **Endpoint:** `GET /organization/contract/download/{contract_id}`
 
-**توضیح:** دانلود مستقیم فایل قرارداد (اگر سرور نیاز به لاگ دانلود دارد)
+**توضیح:** دانلود مستقیم فایل توافق نامه (اگر سرور نیاز به لاگ دانلود دارد)
 
 **Headers:**
 ```http
@@ -187,17 +187,17 @@ Authorization: Bearer {token}
 ```json
 {
   "status": "error",
-  "message": "فایل قرارداد یافت نشد"
+  "message": "فایل توافق نامه یافت نشد"
 }
 ```
 
 ---
 
-### 4️⃣ حذف قرارداد آپلود شده (Optional)
+### 4️⃣ حذف توافق نامه آپلود شده (Optional)
 
 **Endpoint:** `DELETE /organization/contract/{contract_id}`
 
-**توضیح:** حذف قرارداد آپلود شده توسط کاربر (فقط اگر هنوز تایید نشده)
+**توضیح:** حذف توافق نامه آپلود شده توسط کاربر (فقط اگر هنوز تایید نشده)
 
 **Headers:**
 ```http
@@ -209,7 +209,7 @@ Accept: application/json
 ```json
 {
   "status": "success",
-  "message": "قرارداد با موفقیت حذف شد"
+  "message": "توافق نامه با موفقیت حذف شد"
 }
 ```
 
@@ -217,7 +217,7 @@ Accept: application/json
 ```json
 {
   "status": "error",
-  "message": "امکان حذف قرارداد تایید شده وجود ندارد"
+  "message": "امکان حذف توافق نامه تایید شده وجود ندارد"
 }
 ```
 
@@ -227,15 +227,15 @@ Accept: application/json
 
 | Status | Label | Description |
 |--------|-------|-------------|
-| `pending` | در انتظار بررسی | قرارداد آپلود شده و منتظر تایید ادمین |
-| `approved` | تایید شده ✓ | قرارداد توسط ادمین تایید شده |
-| `rejected` | رد شده ✗ | قرارداد رد شده (نیاز به آپلود مجدد) |
+| `pending` | در انتظار بررسی | توافق نامه آپلود شده و منتظر تایید ادمین |
+| `approved` | تایید شده ✓ | توافق نامه توسط ادمین تایید شده |
+| `rejected` | رد شده ✗ | توافق نامه رد شده (نیاز به آپلود مجدد) |
 
 ---
 
 ## 🎨 Frontend Implementation
 
-### مثال: دریافت اطلاعات قرارداد
+### مثال: دریافت اطلاعات توافق نامه
 
 ```javascript
 const loadContractData = async () => {
@@ -256,20 +256,20 @@ const loadContractData = async () => {
     }
   } catch (error) {
     console.error('Error loading contract:', error);
-    Alert.alert('خطا', error.response?.data?.message || 'خطا در بارگذاری اطلاعات قرارداد');
+    Alert.alert('خطا', error.response?.data?.message || 'خطا در بارگذاری اطلاعات توافق نامه');
   } finally {
     setLoadingContract(false);
   }
 };
 ```
 
-### مثال: آپلود قرارداد
+### مثال: آپلود توافق نامه
 
 ```javascript
 const handleUploadContract = async () => {
   try {
     if (!selectedFile) {
-      Alert.alert('خطا', 'لطفا ابتدا فایل قرارداد را انتخاب کنید');
+      Alert.alert('خطا', 'لطفا ابتدا فایل توافق نامه را انتخاب کنید');
       return;
     }
 
@@ -305,20 +305,20 @@ const handleUploadContract = async () => {
     }
   } catch (error) {
     console.error('Error uploading contract:', error);
-    Alert.alert('خطا', error.response?.data?.message || 'خطا در آپلود قرارداد');
+    Alert.alert('خطا', error.response?.data?.message || 'خطا در آپلود توافق نامه');
   } finally {
     setUploadingContract(false);
   }
 };
 ```
 
-### مثال: دانلود قرارداد
+### مثال: دانلود توافق نامه
 
 ```javascript
 const handleDownloadAdminContract = async () => {
   try {
     if (!adminContract || !adminContract.file_url) {
-      Alert.alert('خطا', 'فایل قرارداد موجود نیست');
+      Alert.alert('خطا', 'فایل توافق نامه موجود نیست');
       return;
     }
 
@@ -331,7 +331,7 @@ const handleDownloadAdminContract = async () => {
     }
   } catch (error) {
     console.error('Error downloading contract:', error);
-    Alert.alert('خطا', 'خطا در دانلود قرارداد');
+    Alert.alert('خطا', 'خطا در دانلود توافق نامه');
   }
 };
 ```
@@ -350,19 +350,19 @@ const handleDownloadAdminContract = async () => {
 
 ## 📱 UI/UX Considerations
 
-### صفحه نمایش قرارداد شامل:
+### صفحه نمایش توافق نامه شامل:
 
-1. **قسمت قرارداد ادمین:**
+1. **قسمت توافق نامه ادمین:**
    - نمایش اطلاعات فایل (نام، تاریخ، حجم)
    - دکمه دانلود/مشاهده
    - پیام "هنوز بارگذاری نشده" اگر فایلی وجود ندارد
 
-2. **قسمت آپلود قرارداد:**
+2. **قسمت آپلود توافق نامه:**
    - دکمه انتخاب فایل
    - نمایش فایل انتخاب شده
    - دکمه آپلود
    - نمایش وضعیت آپلود (در حال آپلود...)
-   - نمایش قرارداد آپلود شده قبلی با وضعیت
+   - نمایش توافق نامه آپلود شده قبلی با وضعیت
 
 3. **راهنمایی:**
    - توضیح مراحل
@@ -373,14 +373,14 @@ const handleDownloadAdminContract = async () => {
 
 ## 🧪 Testing Checklist
 
-- [ ] دریافت قرارداد زمانی که ادمین فایل بارگذاری کرده
-- [ ] دریافت قرارداد زمانی که هیچ فایلی بارگذاری نشده
-- [ ] دانلود فایل قرارداد ادمین
+- [ ] دریافت توافق نامه زمانی که ادمین فایل بارگذاری کرده
+- [ ] دریافت توافق نامه زمانی که هیچ فایلی بارگذاری نشده
+- [ ] دانلود فایل توافق نامه ادمین
 - [ ] انتخاب فایل با فرمت‌های مختلف (PDF, JPG, PNG)
 - [ ] انتخاب فایل با حجم بیش از حد مجاز
-- [ ] آپلود قرارداد با موفقیت
-- [ ] آپلود مجدد زمانی که قرارداد pending است
-- [ ] نمایش صحیح وضعیت قرارداد (pending, approved, rejected)
+- [ ] آپلود توافق نامه با موفقیت
+- [ ] آپلود مجدد زمانی که توافق نامه pending است
+- [ ] نمایش صحیح وضعیت توافق نامه (pending, approved, rejected)
 - [ ] دسترسی محدود به کاربران سازمانی
 - [ ] نمایش خطاهای validation
 
@@ -389,7 +389,7 @@ const handleDownloadAdminContract = async () => {
 ## 📝 Database Schema (Suggestion)
 
 ```sql
--- جدول قراردادهای ادمین
+-- جدول توافق نامههای ادمین
 CREATE TABLE admin_contracts (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     file_path VARCHAR(255) NOT NULL,
@@ -402,7 +402,7 @@ CREATE TABLE admin_contracts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- جدول قراردادهای آپلود شده توسط سازمان‌ها
+-- جدول توافق نامههای آپلود شده توسط سازمان‌ها
 CREATE TABLE organization_contracts (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     organization_id BIGINT NOT NULL,

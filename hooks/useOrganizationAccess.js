@@ -415,7 +415,7 @@ export const useOrganizationAccess = () => {
   }, [dispatch]);
 
   /**
-   * بروزرسانی دستی وضعیت قرارداد
+   * بروزرسانی دستی وضعیت توافق نامه
    */
   const updateContract = useCallback((status) => {
     dispatch(updateContractStatus(status));

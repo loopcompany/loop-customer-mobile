@@ -97,7 +97,7 @@ class OrganizationService {
   }
 
   /**
-   * دریافت لیست قراردادهای آپلود شده
+   * دریافت لیست توافق نامههای آپلود شده
    * API: GET /organization/contracts
    */
   static async getContracts(token) {
@@ -125,7 +125,7 @@ class OrganizationService {
   }
 
   /**
-   * آپلود قرارداد جدید
+   * آپلود توافق نامه جدید
    * API: POST /organization/contracts/upload
    */
   static async uploadContract(token, contractFile, onProgress = null) {
@@ -169,7 +169,7 @@ class OrganizationService {
   }
 
   /**
-   * دانلود فایل نمونه قرارداد
+   * دانلود فایل نمونه توافق نامه
    * API: GET /organization/contract/template
    */
   static async getContractTemplate(token) {
@@ -234,7 +234,7 @@ class OrganizationService {
   }
 
   /**
-   * بررسی معتبر بودن فایل قرارداد
+   * بررسی معتبر بودن فایل توافق نامه
    */
   static validateContractFile(file) {
     const errors = [];

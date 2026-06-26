@@ -8,7 +8,7 @@ import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
 import { formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import Button from '../../components/Button';
-import { imageUri, uri } from '../../services/URL';
+import { imageUri, mainUri, uri } from '../../services/URL';
 import { fetchUser } from '../../slices/userSlice';
 import { fetchOrders } from '../../slices/orderSlice';
 
@@ -180,7 +180,7 @@ function Invoice({ route, navigation }) {
             setLoadingGateway(false);
         }
     };
-
+    const minPrice = useSelector(state => state.minPrice?.data)
     if (data.length <= 0) { return <Loader /> };
 
     return (
@@ -192,8 +192,8 @@ function Invoice({ route, navigation }) {
                         <View style={[{ width: '100%', padding: '5%', }, NewStyles.border10, NewStyles.center]}>
                             <View style={[NewStyles.row, { gap: 5 }]}>
                                 <Image
-                                source={{uri:`${imageUri}/userfolder/reciept.png`}}
-                                style={{height:40, width: 40,}}
+                                    source={{ uri: `${imageUri}/userfolder/reciept.png` }}
+                                    style={{ height: 40, width: 40, }}
                                 />
                                 <Text style={NewStyles.title}>{t('Order Invoice')}: {data?.id}</Text>
                             </View>
@@ -213,9 +213,9 @@ function Invoice({ route, navigation }) {
                         {(data?.extra_price > 0) && renderRow(t('Extra parts cost'), data?.extra_price ? `${formatPrice(data?.extra_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(data?.discount_price > 0) && renderRow(t('Your discount amount'), data?.discount_price ? `${formatPrice(data?.discount_price)}` + ' ' + t('Toman') : '0 ' + t('Toman'))}
                         {(totalPrice > totalDiscountedPrice > 0) && renderRow(t('Final amount without discount'), `${formatPrice(totalPrice)}` + ' ' + t('Toman'), NewStyles.text, [NewStyles.text10, { textDecorationLine: 'line-through' }])}
-                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable amount'), formatPrice(totalDiscountedPrice > 800000 ? totalDiscountedPrice : (totalDiscountedPrice + 200000)) + ' ' + t('Toman'))}
+                        {(data?.status > 0 && data?.technician_price) && renderRow(t('Payable amount'), formatPrice(totalDiscountedPrice > minPrice?.price ? totalDiscountedPrice : (totalDiscountedPrice + 200000)) + ' ' + t('Toman'))}
                         {
-                            ((data?.status > 0 && data?.technician_price && totalDiscountedPrice < 800000) || (data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at)) &&
+                            ((data?.status > 0 && data?.technician_price && totalDiscountedPrice < minPrice?.price) || (data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at)) &&
                             renderRow(t('Travel and tuition fees'), formatPrice('200000') + ' ' + t('Toman'))
                         }
                         {renderRow(`${t('Your wallet balance')}:`, formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
@@ -255,17 +255,17 @@ function Invoice({ route, navigation }) {
 
                     </View>
                     <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                        <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than 800 thousand tomans, you are a guest of Loop (travel and examination expenses are covered)")}</Text>
+                        <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
                     </View>
                     <Text style={NewStyles.title7}>{t('Thank you for your trust:')}</Text>
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
                     <View style={{ paddingHorizontal: '5%', alignItems: 'center' }}>
-                        <TouchableOpacity style={{ padding: 10 }} onPress={()=>{
+                        <TouchableOpacity style={{ padding: 10 }} onPress={() => {
                             navigation.navigate("FolderScreen")
                         }}>
                             <Text style={NewStyles.title}> {t("Reorder")} </Text>
                         </TouchableOpacity>
-                        <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${uri}/orders/${orderId}/invoice`) }} />
+                        <Button title={t('Save Invoice')} style={{ backgroundColor: themeColor7.bgColor(1) }} textStyle={{ color: themeColor4.bgColor(1) }} onPress={() => { Linking.openURL(`${mainUri}/reciept/${orderId}`) }} />
                     </View>
 
                 </View>

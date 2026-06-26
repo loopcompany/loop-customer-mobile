@@ -36,9 +36,10 @@ function FolderScreen({ navigation }) {
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector(state => state?.user?.data);
+  const token = useSelector(state => state?.auth?.token);
   const loadCategories = async () => {
     try {
-      const res = await categoriesAPI.getCategories();
+      const res = await categoriesAPI.getCategories(token);
       // API shape: { success: true, data: [...] }
       const categories = Array.isArray(res.data)
         ? res.data

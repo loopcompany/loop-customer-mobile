@@ -53,7 +53,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                 </View>
 
             </View>
-            <View style={[{ paddingHorizontal: '10%' }]}>
+            {(data?.user_initial_accept && (data?.status == 0 || data?.status == 1)) && <View style={[{ paddingHorizontal: '10%' }]}>
                 <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => {
                     if (data?.status == 0 || data?.status == 1) {
                         Linking.openURL(`tel:${data?.technician?.phone}`)
@@ -77,7 +77,7 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Scan QR code')}</Text>
                 </Pressable>}
-            </View>
+            </View>}
 
             {/* QR Code Modal */}
             <Modal

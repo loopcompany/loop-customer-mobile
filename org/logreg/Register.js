@@ -37,6 +37,7 @@ const Register = ({ navigation }) => {
   const [history, setHistory] = useState('');
 
   const [nationalCode, setNationalCode] = useState('');
+  const [nationalID, setNationalID] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [organizationPhoneNumber, setOrganizationPhoneNumber] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -129,6 +130,9 @@ const Register = ({ navigation }) => {
     } else if (!validateNationalCode(nationalCode)) {
       newErrors.nationalCode = t('National ID is invalid');
     }
+    if (!nationalID) {
+      newErrors.nationalID = t('National Identifier is required');
+    } 
 
     if (!mobileNumber) {
       newErrors.mobileNumber = t('Mobile number is required');
@@ -263,6 +267,7 @@ const Register = ({ navigation }) => {
       formData.append('organization_address', organizationAddress);
       formData.append('manager_full_name', familyName);
       formData.append('manager_national_code', nationalCode);
+      formData.append('melicode', nationalID);
       formData.append('account_type', accountType);
       formData.append('manager_mobile', mobileNumber);
       formData.append('manager_birthdate', gregorianDate);  // Send Gregorian date to API
@@ -560,6 +565,34 @@ const Register = ({ navigation }) => {
               {errors.nationalCode && (
                 <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                   {errors.nationalCode}
+                </Text>
+              )}
+            </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t("National Identifier")} <Text style={NewStyles.title6}>*</Text></Text>
+
+              <TextInput
+                value={nationalID}
+                onChangeText={setNationalID}
+                placeholder={`${t("National Identifier")}  *`}
+                keyboardType="numeric" 
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.nationalID ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  ...NewStyles.text10,
+                  height: 40
+                }}
+                placeholderTextColor={themeColor3.bgColor(1)}
+              />
+              {errors.nationalID && (
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                  {errors.nationalID}
                 </Text>
               )}
             </View>

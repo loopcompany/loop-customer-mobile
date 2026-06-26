@@ -13,6 +13,8 @@ import orderSlice from './slices/orderSlice';
 import ordersSlice from './slices/ordersSlice';
 import organizationSlice from './slices/organizationSlice';
 import radiusSlice from './slices/radiusSlice';
+import pdfSlice from './slices/pdfDocumentSlice';
+import minPriceSlice from './slices/minPriceSlice';
 
 // Redux state persistence functions for web platform
 const loadState = () => {
@@ -63,6 +65,8 @@ const store = configureStore({
     orders: ordersSlice,
     organization: organizationSlice,
     radius: radiusSlice,
+    pdf: pdfSlice,
+    minPrice: minPriceSlice,
   },
   preloadedState
 });

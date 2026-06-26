@@ -9,7 +9,8 @@ import CustomStatusBar from "../../components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
 import { createStyles } from '../../styles/NewStyles';
 import TransparentButton from "../../components/TransparentButton";
-import { mainUri } from "../../services/URL";
+import { imageUri, mainUri } from "../../services/URL";
+import { useSelector } from "react-redux";
 const Grouping = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -26,7 +27,7 @@ const Grouping = ({ navigation }) => {
     // Navigate to company login
     navigation.navigate("Login"); // You can create a separate company login screen if needed
   };
-
+  const pdf = useSelector(state=>state.pdf?.data)
   return (
     <View style={[NewStyles.container, { flex: 1 }]}>
       <CustomStatusBar />
@@ -169,7 +170,7 @@ const Grouping = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
             <TransparentButton
-              onPress={() => { Linking.openURL(`${mainUri}/assets/guid/organ.pdf`) }}
+              onPress={() => { Linking.openURL(`${imageUri}/${pdf?.organ}`) }}
               customStyle={[{ borderColor: themeColor0.bgColor(1), borderWidth: 1, width: '70%', maxWidth: 400, backgroundColor: themeColor4.bgColor(0.5) }, NewStyles.border10]}
               title={t("Organizational Application Guide")}
               customTextStyle={NewStyles.title}

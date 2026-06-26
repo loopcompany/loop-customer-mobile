@@ -1,6 +1,6 @@
 # Organization Access Control System
 
-سیستم کنترل دسترسی سازمانی برای محدود کردن دسترسی کاربران سازمانی تا زمان تایید پروفایل و قرارداد آن‌ها.
+سیستم کنترل دسترسی سازمانی برای محدود کردن دسترسی کاربران سازمانی تا زمان تایید پروفایل و توافق نامه آن‌ها.
 
 ## معماری سیستم
 
@@ -106,7 +106,7 @@ const OrderButton = () => {
 
 ### صفحات مجاز (بدون محدودیت):
 - `OrganizationProfile` - پروفایل سازمان
-- `OrganizationContract` - قرارداد سازمان  
+- `OrganizationContract` - توافق نامه سازمان  
 - `Profile` - پروفایل کاربری
 - `AddressScreen` - آدرس‌ها
 - `PaymentScreen` - پرداخت
@@ -249,7 +249,7 @@ const MyScreen = ({ navigation }) => {
     <View>
       <Text>صفحه محافظت شده</Text>
       <Text>وضعیت پروفایل: {profileStatus}</Text>
-      <Text>وضعیت قرارداد: {contractStatus}</Text>
+      <Text>وضعیت توافق نامه: {contractStatus}</Text>
       
       {canPlaceOrder() ? (
         <Button title="ثبت سفارش" onPress={() => {}} />

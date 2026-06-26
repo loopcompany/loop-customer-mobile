@@ -17,6 +17,7 @@ import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import { createStyles } from '../../styles/NewStyles';
+import { themeColor3 } from '../../theme/Color';
 const OrganizationForgotPassword = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -34,9 +35,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
     // Validate organization code (6 digits)
     if (!organizationCode) {
       newErrors.organizationCode = t('Organization code is required');
-    } else if (organizationCode.length !== 6 || !/^\d{6}$/.test(organizationCode)) {
-      newErrors.organizationCode = t('Organization code must be 6 digits');
-    }
+    } 
 
     // Validate mobile number
     if (!mobileNumber) {
@@ -196,8 +195,8 @@ const OrganizationForgotPassword = ({ navigation }) => {
                 }
               }}
               placeholder={t('Organization code *')}
-              keyboardType="number-pad"
-              maxLength={6}
+              placeholderTextColor={themeColor3.bgColor(1)}
+              keyboardType="number-pad" 
               style={{
                 backgroundColor: '#f5f5f5',
                 borderRadius: 8,
@@ -247,6 +246,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   setErrors({ ...errors, mobileNumber: null });
                 }
               }}
+              placeholderTextColor={themeColor3.bgColor(1)}
               placeholder={t('Mobile number (example: 09123456789)')}
               keyboardType="phone-pad"
               maxLength={11}
