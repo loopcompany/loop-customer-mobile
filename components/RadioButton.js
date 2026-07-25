@@ -18,6 +18,7 @@ import NewStyles from '../styles/NewStyles';
 import {
   themeColor0,
   themeColor1,
+  themeColor3,
   themeColor4,
 } from '../theme/Color';
 import {
@@ -28,6 +29,7 @@ import {
 } from '../slices/stepSlice';
 import { formatPrice, langIsRTL } from '../helpers/Common';
 import i18n from 'i18next';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const RadioOptionItem = React.memo(
   function RadioOptionItem({
@@ -36,6 +38,7 @@ const RadioOptionItem = React.memo(
     onSelect,
     onIncrement,
     onDecrement,
+    borderRadius
   }) {
     const selected = item?.value > 0;
 
@@ -55,6 +58,7 @@ const RadioOptionItem = React.memo(
           style={[
             isColumn ? styles.columnButton : styles.rowButton,
             selected && styles.selectedButton,
+            { borderRadius: Number(borderRadius) }
           ]}
         >
           {!!item?.image_path && (
@@ -63,6 +67,7 @@ const RadioOptionItem = React.memo(
                 styles.imageBox,
                 isColumn && styles.imageBoxColumn,
                 selected && isColumn && styles.imageBoxSelected,
+                { borderRadius: Number(borderRadius) }, 
               ]}
             >
               <Image
@@ -70,6 +75,7 @@ const RadioOptionItem = React.memo(
                 style={[
                   styles.image,
                   isColumn && styles.imageColumn,
+                  { borderRadius: Number(borderRadius) }
                 ]}
                 resizeMode="contain"
                 resizeMethod="resize"
@@ -163,6 +169,7 @@ export default function RadioButton({ step, data, setLoading }) {
   const isRTL = useMemo(() => langIsRTL(lang), [lang]);
 
   const isColumn = data?.is_column == 1;
+  const borderRadius = Number(data?.border_radius);
   const fieldId = data?.id;
   const isConditional = data?.is_conditional == 1;
 
@@ -256,72 +263,35 @@ export default function RadioButton({ step, data, setLoading }) {
       <RadioOptionItem
         item={item}
         isColumn={isColumn}
+        borderRadius={borderRadius}
         onSelect={handleSelect}
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
       />
     ),
-    [isColumn, handleSelect, handleIncrement, handleDecrement]
+    [isColumn, handleSelect, handleIncrement, handleDecrement, borderRadius]
   );
 
   return (
     <View style={NewStyles.seperator1}>
-      <Pressable
-        style={[
-          styles.header,
-          NewStyles.border10,
-          NewStyles.center,
-        ]}
-        onPress={() => setShow(prev => !prev)}
-      >
+      <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
         <View style={[NewStyles.row, { gap: 10 }]}>
-          {!!data?.icon_name && (
-            <View
-              style={{
-                flex: 1,
-                alignItems: isRTL ? 'flex-start' : 'flex-end',
-              }}
-            >
-              <Ionicons
-                name={data.icon_name}
-                size={24}
-                color={themeColor4.bgColor(1)}
-              />
-            </View>
-          )}
-
-          <Text
-            style={[
-              NewStyles.title4,
-              {
-                flex: 1,
-                textAlign: data?.icon_name
-                  ? isRTL
-                    ? 'right'
-                    : 'left'
-                  : 'center',
-              },
-            ]}
-          >
-            {data?.title}{' '}
-            {data?.is_required == 1 && (
-              <Text style={NewStyles.title6}>*</Text>
-            )}
-          </Text>
+          {data?.icon_name &&
+            <Image
+              source={{ uri: `${imageUri}/${data?.icon_name}` }}
+              style={{ height: 70, width: 70, resizeMode: 'contain' }}
+            />
+          }
+          <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
         </View>
-
-        <Ionicons
-          name="chevron-down"
-          color={themeColor1.bgColor(1)}
-          size={20}
-        />
+        <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
       </Pressable>
 
-      {show && !!data?.des && (
-        <View style={styles.descriptionBox}>
-          <Text style={NewStyles.text10}>{data.des}</Text>
-        </View>
-      )}
+      {(data?.des && show) &&
+        <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1) }, NewStyles.border10]}>
+          <Text style={NewStyles.title10}>{data?.des}</Text>
+        </LinearGradient>
+      }
 
       {show && (
         <FlatList
@@ -342,7 +312,7 @@ export default function RadioButton({ step, data, setLoading }) {
           maxToRenderPerBatch={isColumn ? 12 : 8}
           windowSize={10}
           updateCellsBatchingPeriod={50}
-          style={{gap:10}}
+          style={{ gap: 10 }}
           contentContainerStyle={
             Platform.OS === 'web'
               ? styles.webContent
@@ -364,7 +334,7 @@ const styles = StyleSheet.create({
   },
 
   listContent: {
-    paddingBottom: 10, 
+    paddingBottom: 10,
   },
 
   webContent: {

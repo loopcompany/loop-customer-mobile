@@ -18,11 +18,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '../../styles/NewStyles';
-import { themeColor1 } from '../../theme/Color';
+import { themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '../../theme/Color';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import DatePickerModal from '../../components/DatePickerModal';
-import { showAlert } from '../../helpers/Common';
+import { langIsRTL, showAlert } from '../../helpers/Common';
 
 import useLogout from '../../hooks/useLogout';
 import { imageUri, uri } from '../../services/URL';
@@ -43,6 +43,9 @@ const OrganizationProfile = () => {
   // Form states - مطابق با فیلدهای ثبت‌نام
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [editRequest, setEditRequest] = useState(null);
+  const [savedMainData, setSavedMainData] = useState(null);
 
   const [agentName, setAgentName] = useState('');
   const [agentPhone, setAgentPhone] = useState('');
@@ -82,7 +85,6 @@ const OrganizationProfile = () => {
   const loadOrganizationProfile = async () => {
     try {
       setLoadingProfile(true);
-      const token = await AsyncStorage.getItem('userToken');
 
       if (!token) {
         showAlert(t('Error'), t('Please log in first.'));
@@ -101,8 +103,10 @@ const OrganizationProfile = () => {
 
       if (response.data.status === 'success') {
         const data = response.data.data;
-
+        setEditRequest(data?.edited_organization)
+        setSavedMainData(data)
         setOrganizationName(data.organization_name || '');
+        setBusinessName(data.business_name || '');
         setAgentName(data.agent_name || '');
         setAgentPhone(data.agent_phone || '');
         setHistory(data.history || '');
@@ -162,7 +166,7 @@ const OrganizationProfile = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'Images',
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -202,8 +206,6 @@ const OrganizationProfile = () => {
       };
 
       if (hasNewImage) {
-        // اگر عکس جدید داریم، از FormData استفاده کن
-        console.log('📦 [OrganizationProfile] استفاده از FormData (با عکس)');
         const formData = new FormData();
 
         const uriParts = profileImage.uri.split('.');
@@ -216,6 +218,7 @@ const OrganizationProfile = () => {
         });
 
         formData.append('organization_name', organizationName);
+        formData.append('business_name', businessName);
         formData.append('agent_name', agentName);
         formData.append('agent_phone', agentPhone);
         formData.append('history', history);
@@ -230,14 +233,14 @@ const OrganizationProfile = () => {
         if (birthDate) {
           // Backend تاریخ شمسی می‌خواد (مثلاً 1370/01/01)
           formData.append('manager_birthdate', birthDate);
-          console.log('📅 [OrganizationProfile] تاریخ تولد (شمسی):', birthDate);
         }
 
         requestData = formData;
         requestHeaders['Content-Type'] = 'multipart/form-data';
-      } else { 
+      } else {
         const jsonData = {
           organization_name: organizationName,
+          business_name: businessName,
           agent_name: agentName,
           agent_phone: agentPhone,
           history: history,
@@ -253,7 +256,7 @@ const OrganizationProfile = () => {
         if (birthDate) {
           // Backend تاریخ شمسی می‌خواد (مثلاً 1370/01/01)
           jsonData.manager_birthdate = birthDate;
-          console.log('📅 [OrganizationProfile] تاریخ تولد (شمسی):', birthDate);
+
         }
 
         requestData = jsonData;
@@ -360,10 +363,6 @@ const OrganizationProfile = () => {
         return;
       }
 
-      console.log('📡 [OrganizationProfile] ارسال درخواست با body:', {
-        current_password: '***',
-        password: '***'
-      });
 
       const response = await axios.patch(
         `${uri}/profile/password`,
@@ -380,7 +379,6 @@ const OrganizationProfile = () => {
         }
       );
 
-      console.log('✅ [OrganizationProfile] پاسخ سرور:', response.data);
 
       if (response.data.success) {
         showAlert(t('Success'), response.data.message || t('Password changed successfully.'));
@@ -390,7 +388,6 @@ const OrganizationProfile = () => {
         setErrors({});
       }
     } catch (error) {
-      console.error('Error changing password:', error);
       const errorMessage = error.response?.data?.message || t('Error changing password');
       showAlert(t('Error'), errorMessage);
     } finally {
@@ -425,9 +422,71 @@ const OrganizationProfile = () => {
       >
         {/* Header با دکمه ویرایش */}
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>{t('Organization information')}</Text>
+          <View style={{alignItems: langIsRTL(i18n.language) ? 'flex-end' : 'flex-start'}}>
+            <Text style={styles.headerTitle}>{t('Organization information')}</Text>
+            {
+              editRequest &&
+              <View style={[{ backgroundColor: themeColor4.bgColor(1) }, NewStyles.border100]}>
+                <View style={[{ paddingHorizontal: 10, paddingVertical: 5, backgroundColor: editRequest?.status == 0 ? themeColor11.bgColor(0.1) : editRequest?.status == 1 ? themeColor7.bgColor(0.1) : themeColor6.bgColor(0.1) }, NewStyles.border100]}>
+                  <Text style={[editRequest?.status == 0 ? NewStyles.text11 : editRequest?.status == 1 ? NewStyles.text7 : NewStyles.text6]}>{editRequest?.status == 0 ? t("Awaiting review of changes") : editRequest?.status == 1 ? t("Approved") : t("Rejected")}</Text>
+                </View>
+              </View>
+            }
+          </View>
           <TouchableOpacity
-            onPress={() => setIsEditing(!isEditing)}
+            onPress={() => {
+
+              if (editRequest && !isEditing) {
+                setOrganizationName(editRequest.organization_name || '');
+                setBusinessName(editRequest.business_name || '');
+                setAgentName(editRequest.agent_name || '');
+                setAgentPhone(editRequest.agent_phone || '');
+                setHistory(editRequest.history || '');
+                setFamilyName(editRequest.manager_full_name || '');
+                setOrganizationPhoneNumber(editRequest.organization_phone || '');
+                setBirthDate(editRequest.manager_birthdate || '');
+                setOrganizationEmail(editRequest.organization_email || '');
+                setCity(editRequest.city || '');
+                setRegion(editRequest.region_id || '');
+                setOrganizationAddress(editRequest.organization_address || '');
+                setOrganizationPostalCode(editRequest.postal_code || '');
+                // بررسی: آیا URL کامل است؟
+                if (editRequest?.profile_image) {
+
+                  const isFullUrl = editRequest.profile_image.startsWith('http');
+
+                  const imageUrl = isFullUrl ? editRequest.profile_image : `${imageUri}/${editRequest.profile_image}`;
+                  setProfileImage({ uri: imageUrl, uploaded: true });
+                }
+                setIsEditing(true);
+              } else if (isEditing) {
+                setOrganizationName(savedMainData.organization_name || '');
+                setBusinessName(savedMainData.business_name || '');
+                setAgentName(savedMainData.agent_name || '');
+                setAgentPhone(savedMainData.agent_phone || '');
+                setHistory(savedMainData.history || '');
+                setFamilyName(savedMainData.manager_full_name || '');
+                setOrganizationPhoneNumber(savedMainData.organization_phone || '');
+                setBirthDate(savedMainData.manager_birthdate || '');
+                setOrganizationEmail(savedMainData.organization_email || '');
+                setCity(savedMainData.city || '');
+                setRegion(savedMainData.region_id || '');
+                setOrganizationAddress(savedMainData.organization_address || '');
+                setOrganizationPostalCode(savedMainData.postal_code || '');
+                // بررسی: آیا URL کامل است؟
+                if (savedMainData?.profile_image) {
+
+                  const isFullUrl = savedMainData.profile_image.startsWith('http');
+
+                  const imageUrl = isFullUrl ? savedMainData.profile_image : `${imageUri}/${savedMainData.profile_image}`;
+                  setProfileImage({ uri: imageUrl, uploaded: true });
+                }
+                setIsEditing(false);
+              } else if (!editRequest) {
+
+                setIsEditing(!isEditing);
+              }
+            }}
             style={styles.editButton}
           >
             <Ionicons
@@ -436,7 +495,7 @@ const OrganizationProfile = () => {
               color={themeColor1.bgColor(1)}
             />
             <Text style={styles.editButtonText}>
-              {isEditing ? t('Cancel') : t('Edit')}
+              {isEditing ? t('Cancel') : t("Edit request")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -472,6 +531,15 @@ const OrganizationProfile = () => {
             <TextInput
               value={organizationName}
               onChangeText={setOrganizationName}
+              editable={isEditing}
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t('Business name')}</Text>
+            <TextInput
+              value={businessName}
+              onChangeText={setBusinessName}
               editable={isEditing}
               style={[styles.input, !isEditing && styles.inputDisabled]}
             />
@@ -589,6 +657,7 @@ const OrganizationProfile = () => {
                 value={region}
                 onChangeText={setRegion}
                 editable={isEditing}
+                keyboardType='number-pad'
                 style={[styles.input, !isEditing && styles.inputDisabled]}
               />
             </View>

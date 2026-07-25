@@ -151,7 +151,7 @@ export default function AddressScreen({ route, navigation }) {
               <View style={styles.infoRow}>
                 <Ionicons name="home-outline" size={16} color={themeColor3.bgColor(1)} />
                 <Text style={[NewStyles.text10, { marginRight: 8, flex: 1 }]}>
-                  {item.address}
+                  {`${t("Number")} ${item?.number ?? ''} - ${t("Unit")} ${item?.unit ?? ''} - ${t("Floor")} ${item?.floor ?? ''} - ${item?.address}`}
                 </Text>
               </View>
             )}

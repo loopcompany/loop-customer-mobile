@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, TouchableOpacity, Image } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -10,15 +10,16 @@ import Time from './Time';
 import File from './File';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '../styles/NewStyles';
+import { imageUri } from '../services/URL';
 
-export default function ServiceSchedule({ step, data }) {
+export default function ServiceSchedule({ step, data }) { 
     const dispatch = useDispatch();
     const [show, setShow] = useState(false);
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
-    ); 
+    );
     // لاگ کردن Redux state برای این step
     const stepsState = useSelector(state => state.step);
 
@@ -76,7 +77,10 @@ export default function ServiceSchedule({ step, data }) {
                 }}
             >
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
+                    <Image
+                        source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                        style={{ height: 50, width: 50, resizeMode: 'contain' }}
+                    />
                     <Text style={NewStyles.title4}>{data?.title} <Text style={NewStyles.title6}>*</Text></Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
@@ -201,7 +205,7 @@ export default function ServiceSchedule({ step, data }) {
                                 </View>
                             );
                         }
- 
+
                         return null;
                     })}
                 </View>

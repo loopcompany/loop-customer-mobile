@@ -5,24 +5,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import CustomStatusBar from '../../components/CustomStatusBar';
 import { uri } from '../../services/URL';
-import { showAlert } from '../../helpers/Common';
+import { showAlert, showToastOrAlert } from '../../helpers/Common';
 import NewStyles from '../../styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CodeField, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import { Cursor } from 'react-native-confirmation-code-field';
 import { themeColor0, themeColor3, themeColor4 } from '../../theme/Color';
+import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
+
 
 const OTPVerification = ({ route, navigation }) => {
 
   const { phone, organizationCode, userId, organizationId } = route.params;
-
+  const { t } = useTranslation()
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(120); // 2 minutes
   const inputRefs = useRef([]);
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
-    value:code,
+    value: code,
     setValue: setCode,
   });
   const ref = useBlurOnFulfill({ code, cellCount: 6 });
@@ -168,7 +172,12 @@ const OTPVerification = ({ route, navigation }) => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
+  const copyToClipboard = async () => {
+    setPending(true);
+    await Clipboard.setStringAsync(organizationCode);
+    showToastOrAlert(t('The code was successfully copied.'));
+    setPending(false);
+  }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
 
@@ -247,6 +256,11 @@ const OTPVerification = ({ route, navigation }) => {
               }}>
                 این کد را برای ورود به سیستم نیاز دارید
               </Text>
+              <TouchableOpacity disabled={pending} style={[{ paddingHorizontal: 20, paddingVertical: 10, }]} onPress={() => {
+                copyToClipboard()
+              }}>
+                { pending ? <ActivityIndicator size={'small'} color={themeColor0.bgColor(1)}/> :  <Text style={NewStyles.title}> کپی کد </Text>}
+              </TouchableOpacity>
             </View>
 
             {/* OTP Input */}
@@ -256,7 +270,7 @@ const OTPVerification = ({ route, navigation }) => {
               marginBottom: 30,
               gap: 10
             }}>
-               
+
 
               <CodeField
                 ref={ref}

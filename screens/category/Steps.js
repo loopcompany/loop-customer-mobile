@@ -40,13 +40,14 @@ function Steps({ navigation, route }) {
     // دریافت categoryId از route params
     const categoryId = route?.params?.categoryId;
     const categoryTitle = route?.params?.categoryTitle;
+    const token = useSelector(state => state?.auth?.token);
 
     // بازیابی داده‌ها در صورت ریلود صفحه در وب
     useEffect(() => {
 
         // اگر در وب هستیم و داده‌ها خالی است (بعد از ریلود)، دوباره fetchSteps را صدا بزنیم
         if (Platform.OS === 'web' && (!steps?.data || steps.data.length === 0) && categoryId) {
-            dispatch(fetchSteps(categoryId));
+            dispatch(fetchSteps({categoryId, token}));
         }
 
         if (steps?.data && steps.data.length > 0) {
@@ -130,7 +131,7 @@ function Steps({ navigation, route }) {
                 const timeField = conditionalFields?.find(f =>
                     f.type === 'radioButton' &&
                     f.options?.some(opt => opt.hasOwnProperty('start_time'))
-                ); 
+                );
                 if (dateField && timeField) {
                     const selectedDate = dateField.value;
                     const selectedTimeOption = timeField.options?.find(opt => opt.value > 0);

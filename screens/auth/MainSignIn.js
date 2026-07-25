@@ -38,6 +38,8 @@ const initialState = {
     region: null,
     errors: {},
     isLoading: false,
+    acceptTerms: false
+
 };
 
 const formReducer = (state, action) => {
@@ -83,6 +85,11 @@ export default function MainSignIn({ navigation }) {
     // Form validation
     const validateForm = () => {
         const errors = {};
+        
+        if(!state.acceptTerms){
+            
+            errors.acceptTerms = t('Acceptance of the rules and regulations is mandatory.');
+        }
 
         // Melicode validation (10 digits)
         if (!state.melicode) {
@@ -346,6 +353,28 @@ export default function MainSignIn({ navigation }) {
                                 <Text style={styles.fieldErrorText}>{state.errors.captchaInput}</Text>
                             )}
                         </View>
+                        <View style={{ width: '100%', paddingHorizontal: '5%' }}>
+
+                            <View style={[NewStyles.row, {}]}>
+                                <TouchableOpacity style={{ padding: 10 }}>
+                                    <Ionicons
+                                        name={state.acceptTerms ? 'checkbox' : 'square-outline'}
+                                        size={24}
+                                        color={themeColor0.bgColor(1)}
+                                        onPress={() => {
+                                            dispatch({ type: 'SET_FIELD', field: 'acceptTerms', value: state.acceptTerms ? false : true })
+                                         }}
+                                    />
+                                </TouchableOpacity>
+                                <Text style={[NewStyles.text4, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>
+                            </View>
+                            {state.errors.acceptTerms && (
+                                <Text style={styles.fieldErrorText}>
+                                    {state.errors.acceptTerms}
+                                </Text>
+                            )}
+                        </View>
+
 
                         {/* Submit Button */}
                         <Button

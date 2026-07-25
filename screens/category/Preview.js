@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStyles } from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '../../theme/Color';
 import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
 import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
 import Button from '../../components/Button';
@@ -69,9 +69,6 @@ function Preview({ navigation }) {
         const serviceScheduleStep = steps?.data?.find(stepArray =>
             stepArray?.some(item => item?.type === 'service_schedule')
         );
-        console.log('====================================');
-        console.log(JSON.stringify(serviceScheduleStep, null, 2));
-        console.log('====================================');
         if (!serviceScheduleStep) {
             return null;
         }
@@ -293,7 +290,10 @@ function Preview({ navigation }) {
                 </View>
                 {user?.apple_check == 0 && <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={[NewStyles.row, { gap: 5 }]}>
-                        <Ionicons name="gift-outline" size={26} color={themeColor0.bgColor(1)} />
+                        <Image
+                            source={require('../../assets/images/discount.webp')}
+                            style={{ height: 35, width: 60, resizeMode: 'contain' }}
+                        />
                         <Text style={NewStyles.title}>{t('Discount Code')}</Text>
                     </View>
                     <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
@@ -353,7 +353,7 @@ function Preview({ navigation }) {
                     }
 
                     {renderRow(t('Address'), '')}
-                    {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + address?.region + ' - ' + address?.address, '', NewStyles.text10)}
+                    {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + t("Region") + ' ' + address?.region + ' - ' + t("Number") + ' ' + address?.number + ' - ' + t("Unit") + ' ' + address?.unit + ' - ' + t("Floor") + ' ' + address?.floor + ' - ' + address?.address, '', NewStyles.text10)}
                     {discountPercent && renderRow(t('Your Final Discount Percentage'), discountPercent + t(' percent'), NewStyles.text10)}
                 </View>
 
@@ -372,7 +372,6 @@ function Preview({ navigation }) {
                                         return (
                                             <View>
                                                 <View style={[NewStyles.row, { gap: 5, paddingHorizontal: '5%' }]}>
-                                                    <Ionicons name={item?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                                                     <Text style={[NewStyles.title, { flex: 1 }]}>{item?.title}</Text>
                                                 </View>
                                                 <FlatList
@@ -395,6 +394,18 @@ function Preview({ navigation }) {
                                                                             {(item?.has_counter >= 1 && item?.type != 'input') && <Text style={[NewStyles.text10, { flex: 1, textAlign: 'auto' }]}>{item?.value}</Text>}
                                                                         </View>
                                                                         {(item?.has_counter >= 1 && item?.type == 'input') && <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.value}</Text>}
+                                                                        {
+                                                                            item?.user_descriptions &&
+                                                                            <View style={{}}>
+                                                                                <View style={[NewStyles.row]}>
+                                                                                    <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
+                                                                                </View>
+                                                                                <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth: 2, borderColor: themeColor8.bgColor(1), borderStyle: 'dotted', minHeight: 45 }]}>
+
+                                                                                    <Text style={NewStyles.text10}>{item?.user_descriptions}</Text>
+                                                                                </View>
+                                                                            </View>
+                                                                        }
                                                                     </View>
                                                                     :
                                                                     null
@@ -416,7 +427,6 @@ function Preview({ navigation }) {
                                             return (
                                                 <View key={index}>
                                                     <View style={[NewStyles.row, { gap: 5, paddingHorizontal: '5%' }]}>
-                                                        <Ionicons name={item?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                                                         <Text style={[NewStyles.title, { flex: 1 }]}>{item?.title}</Text>
                                                     </View>
 
@@ -470,7 +480,7 @@ function Preview({ navigation }) {
                     <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
                 </View>
             </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent' }]}>
+            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: 10 }]}>
                 <View style={{ flex: 1, alignItems: 'center' }}>
                     <Button title={t('Final Order Submission')} textStyle={{ color: themeColor4.bgColor(1) }} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>

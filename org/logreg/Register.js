@@ -30,6 +30,7 @@ const Register = ({ navigation }) => {
   const [accountType, setAccountType] = useState('g_organization');
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [familyName, setFamilyName] = useState('');
 
   const [agentName, setAgentName] = useState('');
@@ -39,6 +40,7 @@ const Register = ({ navigation }) => {
   const [nationalCode, setNationalCode] = useState('');
   const [nationalID, setNationalID] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [organizationPhoneNumber, setOrganizationPhoneNumber] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [organizationEmail, setOrganizationEmail] = useState('');
@@ -103,6 +105,9 @@ const Register = ({ navigation }) => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!acceptTerms) {
+      newErrors.acceptTerms = t('Acceptance of the rules and regulations is mandatory.');
+    }
     if (!organizationName || organizationName.length < 2) {
       newErrors.organizationName = t('Organization name must be at least 2 characters');
     }
@@ -132,7 +137,7 @@ const Register = ({ navigation }) => {
     }
     if (!nationalID) {
       newErrors.nationalID = t('National Identifier is required');
-    } 
+    }
 
     if (!mobileNumber) {
       newErrors.mobileNumber = t('Mobile number is required');
@@ -259,6 +264,9 @@ const Register = ({ navigation }) => {
 
       // Add all form fields
       formData.append('organization_name', organizationName);
+
+      formData.append('business_name', businessName);
+
       formData.append('agent_name', agentName);
       formData.append('agent_phone', agentPhone);
       formData.append('history', history);
@@ -508,6 +516,32 @@ const Register = ({ navigation }) => {
                 </Text>
               )}
             </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[NewStyles.text, { marginBottom: 5 }]}>{t('Business name')} {t("(Optional)")} </Text>
+              <TextInput
+                value={businessName}
+                onChangeText={setBusinessName}
+                placeholder={t('Business name')}
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderWidth: 1,
+                  borderColor: errors.businessName ? '#ff0000' : '#ccc',
+                  fontSize: 14,
+                  fontFamily: 'VazirLight',
+                  ...NewStyles.text10,
+                  height: 40
+                }}
+                placeholderTextColor={themeColor3.bgColor(1)}
+              />
+              {errors.businessName && (
+                <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                  {errors.businessName}
+                </Text>
+              )}
+            </View>
 
             {/* نام و نام خانوادگی مدیر */}
             <View style={{ marginBottom: 8 }}>
@@ -575,7 +609,7 @@ const Register = ({ navigation }) => {
                 value={nationalID}
                 onChangeText={setNationalID}
                 placeholder={`${t("National Identifier")}  *`}
-                keyboardType="numeric" 
+                keyboardType="numeric"
                 style={{
                   backgroundColor: '#f5f5f5',
                   borderRadius: 8,
@@ -680,7 +714,7 @@ const Register = ({ navigation }) => {
                   paddingHorizontal: 12,
                   borderWidth: 1,
                   borderColor: errors.agentName ? '#ff0000' : '#ccc',
-                  fontSize: 14, 
+                  fontSize: 14,
                   ...NewStyles.text10,
                   height: 40
                 }}
@@ -706,7 +740,7 @@ const Register = ({ navigation }) => {
                   paddingHorizontal: 12,
                   borderWidth: 1,
                   borderColor: errors.agentPhone ? '#ff0000' : '#ccc',
-                  fontSize: 14, 
+                  fontSize: 14,
                   ...NewStyles.text10,
                   height: 40
                 }}
@@ -734,7 +768,7 @@ const Register = ({ navigation }) => {
                   paddingHorizontal: 12,
                   borderWidth: 1,
                   borderColor: errors.history ? '#ff0000' : '#ccc',
-                  fontSize: 14, 
+                  fontSize: 14,
                   ...NewStyles.text10,
                   height: 40
                 }}
@@ -1019,6 +1053,29 @@ const Register = ({ navigation }) => {
               )}
             </View>
           </View>
+          <View style={{width: '100%',paddingHorizontal: '5%'}}>
+
+            <View style={[NewStyles.row, {  }]}>
+              <TouchableOpacity style={{ padding: 10 }}>
+                <Ionicons
+                  name={acceptTerms ? 'checkbox' : 'square-outline'}
+                  size={24}
+                  color={themeColor0.bgColor(1)}
+                  onPress={() => {
+
+                    setAcceptTerms(pre => !pre)
+                  }}
+                />
+              </TouchableOpacity>
+              <Text style={[NewStyles.text10, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>
+            </View>
+            {errors.acceptTerms && (
+              <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
+                {errors.acceptTerms}
+              </Text>
+            )}
+          </View>
+
 
           {/* ثبت نام section */}
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>

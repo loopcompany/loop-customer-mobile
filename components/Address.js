@@ -100,7 +100,7 @@ export default function Address({ step, data, navigation }) {
                             </View>
                             <View style={{ flex: 1 }}>
                                 {renderRow(``, `${item?.title}`, [NewStyles.title, { flex: 1 }, addressId == item?.id && {color: themeColor4.bgColor(1)}])}
-                                {renderRow(``, `${item?.address}`, [NewStyles.text10, { flex: 1 }, addressId == item?.id && NewStyles.text4])}
+                                {renderRow(``, `${t("Number")} ${item?.number} - ${t("Unit")} ${item?.unit} - ${t("Floor")} ${item?.floor} - ${item?.address}`, [NewStyles.text10, { flex: 1 }, addressId == item?.id && NewStyles.text4])}
                             </View>
                             <Pressable style={styles.searchBarIcons} onPress={() => { setId(item?.id); setDeletModal(true); }}>
                                 <Ionicons name="trash" size={20} color={themeColor6.bgColor(1)} />

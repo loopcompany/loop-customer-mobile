@@ -1,11 +1,12 @@
-import { View, Text, FlatList, Pressable, ImageBackground, Platform, Image } from 'react-native';
+import { View, Text, FlatList, Pressable, ImageBackground, Platform, TextInput } from 'react-native';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
+import { Image } from 'expo-image';
 
 import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { decrement, increment } from '../slices/stepSlice';
+import { themeColor0, themeColor1, themeColor10, themeColor2, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '../theme/Color';
+import { decrement, increment, setCounterInputValue } from '../slices/stepSlice';
 import { formatPrice, langIsRTL } from '../helpers/Common';
 import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -132,7 +133,7 @@ const PackageCountdown = memo(function PackageCountdown({
 export default function Counter({ step, data }) {
 
     const dispatch = useDispatch();
-    const is_package = data?.is_package
+    const is_package = data?.is_package == '1' ? true : false
     const [show, setShow] = useState(true);
     const { t, i18n } = useTranslation();
     const lang = i18n.language
@@ -141,7 +142,6 @@ export default function Counter({ step, data }) {
         [i18n.language]
     );
     const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
-
     const renderPrice = (item) => {
         if (item.price > 0 && item.show_price == 1 && item?.value) {
             const total = item.price * item.value;
@@ -156,8 +156,13 @@ export default function Counter({ step, data }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    {data?.icon_name &&
+                        <Image
+                            source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                            style={{ height: 70, width: 70, resizeMode:'contain' }}
+                        />
+                    }
+                    <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -187,21 +192,21 @@ export default function Counter({ step, data }) {
                                         NewStyles={NewStyles}
                                     />
                                 ) : null}
-                                <View style={[is_package == 0 && NewStyles.rowWrapper, { paddingHorizontal: 10, }]}>
+                                <View style={[{ paddingHorizontal: 10, }]}>
                                     <View style={[NewStyles.rowWrapper, { width: 120 }]}>
                                         <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
                                             style={NewStyles.add}>
                                             <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
                                         </Pressable>
-                                        <View style={[is_package == 1 && styles.valueContainer]}>
-                                            <Text style={[NewStyles.text3, is_package == 1 && NewStyles.text4, { textAlign: 'center' }]}>{item.value}</Text>
+                                        <View style={[styles.valueContainer]}>
+                                            <Text style={[NewStyles.text3, NewStyles.text4, { textAlign: 'center' }]}>{item.value}</Text>
                                         </View>
                                         <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
                                             <Ionicons name='remove' size={24} color={themeColor4.bgColor(1)} />
                                         </Pressable>
                                     </View>
                                 </View>
-                                <View style={{ width: '100%', paddingHorizontal:15, paddingBottom:10 }}>
+                                <View style={{ width: '100%', paddingHorizontal: 15, paddingBottom: 10 }}>
                                     {renderPrice(item)}
                                 </View>
                             </View>
@@ -209,31 +214,51 @@ export default function Counter({ step, data }) {
                         )
                     }
                     return (
+                        <View style={[{ backgroundColor: themeColor4.bgColor(1), width: '100%' }, NewStyles.border10, NewStyles.shadow]}>
 
-                        <View style={[{ gap: 10 }, is_package == 1 && styles.package]}>
-                            {
-                                is_package && item?.precentage > 0 &&
-                                <ImageBackground style={[{ height: 65, width: 65, position: 'absolute', zIndex: 10, top: -15, left: -10 }, NewStyles.center]} source={require('../assets/images/star.png')}>
-                                    <Text style={[NewStyles.title10, { fontSize: 14 }]}>{item?.precentage}%</Text>
-                                </ImageBackground>
-                            }
-                            <View style={[is_package == 0 && NewStyles.rowWrapper,]}>
-                                <Text style={[NewStyles.text3, is_package == 1 && NewStyles.title10, { fontSize: 14 }]}>{item.title}</Text>
-                                <View style={[NewStyles.rowWrapper, { width: 120 }]}>
-                                    <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
-                                        style={NewStyles.add}>
-                                        <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
-                                    </Pressable>
-                                    <View style={[is_package == 1 && styles.valueContainer]}>
-                                        <Text style={[NewStyles.text3, is_package == 1 && NewStyles.text10, { textAlign: 'center' }]}>{item.value}</Text>
+                            <LinearGradient colors={[themeColor4.bgColor(1), themeColor8.bgColor(0.5)]} style={[{ gap: 10, padding: 10, width: '100%' }, NewStyles.border10]}>
+
+                                <View style={[{ width: '100%', gap: 20 }, NewStyles.row]}>
+                                    {
+                                        item?.image_path &&
+                                        <Image
+                                            source={{ uri: `${imageUri}/${item?.image_path}` }}
+                                            style={{ height: 100, width: 100 }}
+                                        />}
+                                    <View style={[{ flex: 1 }, NewStyles.center]}>
+                                        <Text style={[NewStyles.title10, { fontSize: 14, marginBottom: 10 }]}>{item.title}</Text>
+                                        {item?.des ? <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, marginBottom: 10 }, NewStyles.border5]}><Text style={NewStyles.text10}>{item?.des}</Text></View> : null}
+
+                                        <View style={[NewStyles.rowWrapper, { width: 120, borderWidth: 1, borderColor: themeColor0.bgColor(1), padding: 5 }, NewStyles.border5]}>
+                                            <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
+                                                style={NewStyles.add}>
+                                                <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
+                                            </Pressable>
+                                            <View style={[{ borderWidth: 1, borderColor: themeColor0.bgColor(1), paddingHorizontal: 10 }, NewStyles.border5]}>
+                                                <Text style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
+                                            </View>
+                                            <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
+                                                <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
+                                            </Pressable>
+                                        </View>
+
                                     </View>
-                                    <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
-                                        <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
-                                    </Pressable>
                                 </View>
-                            </View>
-                            {renderPrice(item)}
-                            {item?.des ? <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{item?.des}</Text></View> : null}
+
+                                {
+                                    data?.has_user_descriptions == 1 &&
+                                    <View style={{  }}>
+                                        <View style={[NewStyles.row]}>
+                                            <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
+                                        </View>
+                                        <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth:2, borderColor: themeColor8.bgColor(1), borderStyle:'dotted' }]}>
+                                            <TextInput style={[NewStyles.text10, { flex: 1, }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
+                                        </View>
+                                    </View>
+                                }
+                                {renderPrice(item)}
+
+                            </LinearGradient>
                         </View>
                     )
                 }

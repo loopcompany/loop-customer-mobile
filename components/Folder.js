@@ -19,14 +19,14 @@ export default function Folder({ onPress, title, style, loading, image }) {
     [i18n.language]
   );
   const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]); 
-  
+   
   return (
     <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style, {justifyContent:'flex-start'}]} onPress={onPress}>
       <Image
         source={{ uri: `${imageUri}/${image}` }}
         style={[styles.folderIcon]}
       />
-      <Text style={NewStyles.title4}>{title}</Text>
+      <Text style={NewStyles.title4}>{t(title)}</Text>
     </TouchableOpacity>
   );
 }

@@ -299,11 +299,9 @@ export const MenuProvider = ({ children }) => {
         ];
 
         if (userType === 'organization') {
-            console.log('✅ [MenuContext] Showing organization menu items');
             // Show all items including organization-only items
             return baseMenuItems;
         } else {
-            console.log('ℹ️ [MenuContext] Filtering out organization-only items');
             // Filter out organization-only items
             return baseMenuItems.filter(item => !item.organizationOnly);
         }
@@ -446,7 +444,7 @@ export const MenuProvider = ({ children }) => {
 
                     <View style={{ flex: 1, alignSelf: 'flex-start' }}>
                         <FlatList
-                            ListFooterComponent={() => {
+                            ListHeaderComponent={() => {
                                 return (
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
                                         {
@@ -459,7 +457,7 @@ export const MenuProvider = ({ children }) => {
                                     </View>
                                 )
                             }}
-                            inverted={true}
+                            // inverted={true}
                             data={filteredMenuItems}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={renderMenuItem}

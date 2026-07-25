@@ -61,6 +61,8 @@ export default function ProductIssueScreen({ navigation }) {
 
   const handleOrderSelect = (item) => {
     setSelectedOrder(item);
+    console.log(JSON.stringify(item, null, 2));
+
     // Auto-fill fields with order information
     setForm(prev => ({
       ...prev,
@@ -171,30 +173,31 @@ export default function ProductIssueScreen({ navigation }) {
       <ScreenHeaders title={t('Service / Product Fault')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={[NewStyles.wrapper, { paddingBottom: 100 }]}>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Product / Service Name')}<Text style={NewStyles.title6}>*</Text></Text>
-
-          <TextInput placeholder={t('Product / Service Name')} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
-
-          <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
-            <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
-              {form.orderDate || t('Order Registration Date')}
-            </Text>
-          </TouchableOpacity>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Delivery / Completion Date')}</Text>
-
-          <TouchableOpacity style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
-            <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
-              {form.completeDate || t('Delivery / Completion Date')}
-            </Text>
-          </TouchableOpacity>
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')} </Text>
 
           <OrderDropdown
             value={selectedOrder?.value}
             onChange={handleOrderSelect}
             placeholder={t('Select Order Number')}
           />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Product / Service Name')} </Text>
+
+          <TextInput placeholder={t('Product / Service Name')} editable={false} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Registration Date')} </Text>
+
+          <TouchableOpacity disabled={true} style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
+            <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
+              {form.orderDate || t('Order Registration Date')}
+            </Text>
+          </TouchableOpacity>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Delivery / Completion Date')}</Text>
+
+          <TouchableOpacity disabled={true} style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
+            <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
+              {form.completeDate || t('Delivery / Completion Date')}
+            </Text>
+          </TouchableOpacity>
+
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Technician Code')}</Text>
 
           <TextInput
@@ -203,6 +206,7 @@ export default function ProductIssueScreen({ navigation }) {
             onChangeText={(text) => handleChange('techCode', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
+            editable={false}
           />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Paid Amount')}</Text>
 
@@ -213,6 +217,7 @@ export default function ProductIssueScreen({ navigation }) {
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
             placeholderTextColor="#999"
             keyboardType="numeric"
+            editable={false}
           />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
 

@@ -6,7 +6,7 @@ import CustomStatusBar from '../../components/CustomStatusBar';
 import { handleError, showToastOrAlert } from '../../helpers/Common';
 import { SafeAreaView } from "react-native-safe-area-context";
 import categoriesAPI from '../../services/CategoriesApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { fetchSteps } from '../../slices/stepSlice';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import { setCategory } from "../../slices/categorySlice";
@@ -19,6 +19,7 @@ const SubCategories = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
+  const token = useSelector(state => state?.auth?.token);
 
   useEffect(() => {
     let mounted = true;
@@ -58,7 +59,7 @@ const SubCategories = ({ navigation, route }) => {
           {/* Header */}
           <ScreenHeaders
             title={categoryTitle || 'زیردسته‌ها'}
-            
+
             showLeftIcon={true}
           />
 
@@ -77,14 +78,10 @@ const SubCategories = ({ navigation, route }) => {
                   console.log('📂 [SubCategories] باز کردن زیر دسته:', item.title);
                   navigation.navigate('SubCategories', { categoryId: item.id, categoryTitle: item.title });
                 } else {
-                  // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن
-                  console.log('🎯 [SubCategories] انتخاب دسته‌بندی نهایی:', item.title);
-                  console.log('🎯 [SubCategories] اطلاعات کامل آیتم:', JSON.stringify(item, null, 2));
-                  console.log('🎯 [SubCategories] شروع دریافت مراحل برای ID:', item.id);
-
+                  // اگر زیر دسته ندارد، به steps برو و fetchSteps صدا بزن 
                   try {
                     dispatch(setCategory(item));
-                    const result = await dispatch(fetchSteps(item.id));
+                    const result = await dispatch(fetchSteps({ categoryId: item.id, token }));
 
                     navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
                   } catch (error) {

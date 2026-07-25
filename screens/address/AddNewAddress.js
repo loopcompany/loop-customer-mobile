@@ -8,7 +8,7 @@ import NewStyles from '../../styles/NewStyles';
 import { themeColor0, themeColor3, themeColor6, themeColor4 } from '../../theme/Color';
 import Button from '../../components/Button';
 import { uri } from '../../services/URL';
-import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile } from '../../slices/addressSlice';
+import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile, setUnit, setNumber, setFloor } from '../../slices/addressSlice';
 import { convertToEnglish, showToastOrAlert } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -153,6 +153,54 @@ export default function AddNewAddress({ navigation }) {
                             />
                         </View> */}
                     </View>
+                    <View style={[NewStyles.row, { gap: 10 }]}>
+
+                        <View style={{ flex: 1 }}>
+
+                            <Text style={NewStyles.text}>
+                                {t('Number')}
+                                <Text style={styles.required}>* </Text>
+                            </Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+                                keyboardType='number-pad'
+                                placeholder={t('Number')}
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                value={address?.number || ''}
+                                onChangeText={(text) => { dispatch(setNumber(text)) }}
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+
+                            <Text style={NewStyles.text}>
+                                {t('Unit')}
+                                <Text style={styles.required}>* </Text>
+                            </Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+                                keyboardType='number-pad'
+                                placeholder={t('Unit')}
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                value={address?.unit || ''}
+                                onChangeText={(text) => { dispatch(setUnit(text)) }}
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+
+                            <Text style={NewStyles.text}>
+                                {t('Floor')}
+                                <Text style={styles.required}>* </Text>
+                            </Text>
+                            <TextInput
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10]}
+                                keyboardType='number-pad'
+                                placeholder={t('Floor')}
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                value={address?.floor || ''}
+                                onChangeText={(text) => { dispatch(setFloor(text)) }}
+                            />
+                        </View>
+                    </View>
 
                     <Text style={NewStyles.text}>
                         {t('Full detailed address')}
@@ -170,7 +218,7 @@ export default function AddNewAddress({ navigation }) {
                 </ScrollView>
                 <View style={[NewStyles.row, NewStyles.nav, { alignItems: 'center', justifyContent: 'center', }]}>
                     <Button title={t('Next Step')} onPress={() => {
-                        if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address) {
+                        if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address || !address?.unit || !address?.number || !address?.floor) {
                             showToastOrAlert(t('Please fill in all the required fields.'))
                             return;
                         };

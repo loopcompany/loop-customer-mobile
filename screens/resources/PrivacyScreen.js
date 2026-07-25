@@ -82,5 +82,6 @@ export default function PrivacyScreen() {
 const styles = StyleSheet.create({
   privaciesContainer: {
     padding: 15,
+    paddingBottom:100
   },
 });

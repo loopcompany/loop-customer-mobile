@@ -30,8 +30,7 @@ export default function OrderDropdown({ value, onChange, placeholder }) {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await orderAPI.getOrdersSummary();
-            
+            const response = await orderAPI.getOrdersSummary(); 
             if (response.success && response.data?.orders) {
                 // Format orders for dropdown
                 const formattedOrders = response.data.orders.map(order => ({

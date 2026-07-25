@@ -43,9 +43,13 @@
     },
     "plugins": [
       "expo-font",
-      "expo-video",
-      "expo-asset",
-      "expo-audio"
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true
+        }
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {

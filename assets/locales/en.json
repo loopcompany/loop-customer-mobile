@@ -1546,5 +1546,11 @@
   "Unit price": "Unit price",
   "Total Price": "Total Price",
   "National Identifier": "National Identifier",
-  "National Identifier is required": "National Identifier is required"
+  "National Identifier is required": "National Identifier is required",
+  "Business name": "Business name",
+  "Floor": "Floor",
+  "By continuing, I accept Loop's Terms of Use and Privacy Policy.": "By continuing, I accept Loop's Terms of Use and Privacy Policy.",
+  "Acceptance of the rules and regulations is mandatory.": "Acceptance of the rules and regulations is mandatory.",
+  "انتخاب جامع": "Enterprise Service",
+  "Edit request": "Edit request"
 }

@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import NewStyles from '../styles/NewStyles';
 import { themeColor0, themeColor1, themeColor4, themeColor6 } from '../theme/Color';
 import { setMaleCount, setFemaleCount, setUnspecifiedCount, setGeneralData } from '../slices/stepSlice';
+import { imageUri } from '../services/URL';
 
 export default function Gender({ step, data }) {
 
@@ -18,9 +19,21 @@ export default function Gender({ step, data }) {
 
     return (
         <View style={NewStyles.seperator1}>
-            <View style={[NewStyles.row, { gap: 5 }]}>
-                <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{ backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>{t('Required')}</Text></View>}</Text>
+            <View
+                style={[NewStyles.center, {
+                    backgroundColor: themeColor0.bgColor(1),
+                    paddingVertical: 10,
+                    ...NewStyles.border10
+                }]}
+
+            >
+                <View style={[NewStyles.row, { gap: 10 }]}>
+                    <Image
+                        source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                        style={{ height: 50, width: 50, resizeMode: 'contain' }}
+                    />
+                    <Text style={NewStyles.title4}>{data?.title} {data?.is_required == '1' && <Text style={NewStyles.title6}>*</Text>}</Text>
+                </View>
             </View>
             {data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{data?.des}</Text></View>}
 

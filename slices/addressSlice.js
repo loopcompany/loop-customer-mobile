@@ -6,12 +6,12 @@ export const fetchAddresses = createAsyncThunk('addresses/addresses', async (tok
     return await axios
         .get(`${uri}/addresses`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
         .then(response => {
-            
+
             // بر اساس response شما که نشون دادید، data در response.data.data هست
             if (response.data.success && response.data.data) {
                 return response.data.data;
             }
-            
+
             // fallback
             return response.data.data || response.data || [];
         })
@@ -30,6 +30,9 @@ export const addressSlice = createSlice({
         title: '',
         fname: '',
         lname: '',
+        unit: '',
+        number: '',
+        floor: '',
         telephone: '',
         mobile: '',
         city: 'تهران',
@@ -62,6 +65,15 @@ export const addressSlice = createSlice({
         },
         setLname: (state, action) => {
             state.lname = action.payload;
+        },
+        setUnit: (state, action) => {
+            state.unit = action.payload;
+        },
+        setNumber: (state, action) => {
+            state.number = action.payload;
+        },
+        setFloor: (state, action) => {
+            state.floor = action.payload;
         },
         setTelephone: (state, action) => {
             state.telephone = action.payload;
@@ -99,6 +111,6 @@ export const addressSlice = createSlice({
     }
 })
 
-export const { setTitle, setFname, setLname, setTelephone, setMobile, setCity, setRegion, setAddress, setLatitude, setLongitude, emptyAddress } = addressSlice.actions
+export const { setTitle, setFname, setLname, setTelephone, setMobile, setCity, setRegion, setAddress, setLatitude, setLongitude, emptyAddress, setUnit, setNumber, setFloor } = addressSlice.actions
 
 export default addressSlice.reducer

@@ -25,7 +25,7 @@ export default function Landing({ navigation }) {
   const [checking, setChecking] = useState(true);
   const player = useVideoPlayer(require('../assets/video/InShot_20260626_171217014.mp4'), player => {
     console.log("player ready");
-    if(Platform.OS==='web'){
+    if (Platform.OS === 'web') {
 
       player.muted = true;
     }
@@ -103,11 +103,24 @@ export default function Landing({ navigation }) {
       subscription.remove();
     };
   }, [player]);
-  const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing }); 
+
+ useEffect(() => {
+  const subscription = player.addListener('statusChange', ({ status, error }) => {
+ 
+    console.log('Player status changed: ', error);
+  });
+
+  return () => {
+    subscription.remove();
+  };
+}, []);
+  const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+   
+
   useEffect(() => {
     if (Platform.OS === 'web' && !isPlaying && player) {
       player.play();
-      
+
 
     }
   }, [player, isPlaying])

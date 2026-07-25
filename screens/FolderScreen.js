@@ -90,9 +90,9 @@ function FolderScreen({ navigation }) {
 
           </ScrollView>
         </View>
-        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap', gap:10 , paddingHorizontal:10,}}>
-         
-          <TouchableOpacity style={[styles.button, NewStyles.center, {justifyContent:'flex-start'}]} onPress={()=>{
+        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, paddingHorizontal: 10, }}>
+
+          <TouchableOpacity style={[styles.button, NewStyles.center, { justifyContent: 'flex-start' }]} onPress={() => {
             navigation.navigate("Profile")
           }} >
             <Image
@@ -109,7 +109,7 @@ function FolderScreen({ navigation }) {
                     title={item?.title}
                     image={item?.image_path}
                     onPress={async () => {
-                      if(item?.id=='trash'){
+                      if (item?.id == 'trash') {
                         showToastOrAlert(t("(Coming soon)"))
                         return
                       }
@@ -124,7 +124,7 @@ function FolderScreen({ navigation }) {
                         });
                       } else {
                         try {
-                          const result = await dispatch(fetchSteps(item.id));
+                          await dispatch(fetchSteps({ categoryId: item.id, token }));
 
                           dispatch(setCategory(item));
                           navigation.navigate("Steps", {

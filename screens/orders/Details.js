@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { imageUri, uri } from '../../services/URL';
 import NewStyles from '../../styles/NewStyles'
 import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '../../theme/Color';
 import Loader from '../../components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -84,7 +84,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                 <View style={[NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                     <Ionicons name={'ellipse'} size={10} color={themeColor0.bgColor(0.5)} />
                     <View>
-                        <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.city + ' - ' + t("Region") + ' ' + data?.user_address?.region + ' - ' + data?.user_address?.address}</Text>
+                        <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.city + ' - ' + t("Region") + ' ' + data?.user_address?.region + ' - ' + t("Number") + ' ' + data?.user_address?.number + ' - ' + t("Unit") + ' ' + data?.user_address?.unit + ' - ' + t("Floor") + ' ' + data?.user_address?.floor + ' - ' + data?.user_address?.address}</Text>
                         <Text style={[NewStyles.text10, { flex: 1 }]}>{data?.user_address?.fname + ' - ' + data?.user_address?.lname + ' - ' + data?.user_address?.telephone}</Text>
                     </View>
                 </View>
@@ -102,13 +102,13 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                     is_package = section?.is_package;
                     return (
                         <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Ionicons name={section?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                             <Text style={[NewStyles.title, { flex: 1 }]}>{section?.title}</Text>
                         </View>
                     )
                 }}
                 SectionSeparatorComponent={() => <View style={{ paddingVertical: 5 }} />}
-                renderItem={({ item }) => (
+                renderItem={({ item }) => { 
+                    return(
                     <View style={[styles.itemWrapper, NewStyles.border10, is_package == 1 && styles.package]}>
                         <View style={[is_package == 0 && NewStyles.rowWrapper]}>
                             <View style={[NewStyles.rowWrapper, { justifyContent: 'flex-end', flex: 2, gap: 5 }]}>
@@ -118,8 +118,20 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
                             {(item?.field_detail?.has_counter >= 1 && item?.type != 'input') && <Text style={[NewStyles.text10, { flex: 1, textAlign: 'auto' }]}>{item?.value}</Text>}
                         </View>
                         {(item?.field_detail?.has_counter >= 1 && item?.type == 'input') && <Text style={[NewStyles.text10, { flex: 1 }]}>{item?.value}</Text>}
+                        {
+                            item?.user_descriptions &&
+                            <View style={{}}>
+                                <View style={[NewStyles.row]}>
+                                    <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
+                                </View>
+                                <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth: 2, borderColor: themeColor8.bgColor(1), borderStyle: 'dotted', minHeight: 45 }]}>
+
+                                    <Text style={NewStyles.text10}>{item?.user_descriptions}</Text>
+                                </View>
+                            </View>
+                        }
                     </View>
-                )}
+                )}}
             />
 
             {data?.des && <View style={{ paddingHorizontal: '5%', gap: 10 }}>
@@ -760,7 +772,7 @@ function Details({ route, navigation }) {
                         <OrderExtraServices orderId={orderId} navigation={navigation} />
                     }
 
-                    {/* مرحله پرداخت هزینه */} 
+                    {/* مرحله پرداخت هزینه */}
                     {user?.apple_check == 0 && <AccordionHeader
                         title={t("Payment")}
                         isActive={(data?.started_at || data?.status == 2 || (data?.done_in_place && data?.technician_price > 0))}

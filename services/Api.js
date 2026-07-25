@@ -10,7 +10,7 @@ const apiClient = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept-Language': i18next.language || 'en', // Default language header
+    'Accept-Language': i18next.language || 'fa', // Default language header
   },
 });
 

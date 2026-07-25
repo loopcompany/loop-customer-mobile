@@ -4,8 +4,7 @@ import { uri } from '../services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from 'i18next';
 
-export const fetchSteps = createAsyncThunk('steps/steps', async (categoryId) => {
-    const token = await AsyncStorage.getItem('userToken');
+export const fetchSteps = createAsyncThunk('steps/steps', async ({ categoryId, token }) => {
     return await axios
         .post(`${uri}/steps/fetch`,
             { categoryId: categoryId },
@@ -48,15 +47,15 @@ const stepSlice = createSlice({
         extraData: [],
     },
     extraReducers: builder => {
-        builder.addCase(fetchSteps.pending, state => { 
+        builder.addCase(fetchSteps.pending, state => {
             state.loading = true
         })
-        builder.addCase(fetchSteps.fulfilled, (state, action) => { 
+        builder.addCase(fetchSteps.fulfilled, (state, action) => {
             state.loading = false
             state.data = action.payload
             state.error = ''
         })
-        builder.addCase(fetchSteps.rejected, (state, action) => { 
+        builder.addCase(fetchSteps.rejected, (state, action) => {
             state.loading = false
             state.data = []
             state.error = action.error.message
@@ -82,7 +81,6 @@ const stepSlice = createSlice({
             console.log('🔄 [stepSlice] updateRadioButton called:', { fieldId, fieldDetailId, step });
 
             const newData = JSON.parse(JSON.stringify(state.data));
-            console.log('📦 [stepSlice] Current step data:', newData[step]);
 
             // پیدا کردن item اصلی (مثلاً service_schedule)
             const foundItem = newData[step].find(item => item.id == fieldId);
@@ -101,7 +99,7 @@ const stepSlice = createSlice({
                                     opt.value = 1;
                                     console.log('✅ [stepSlice] Set value=1 for option:', opt.id);
                                 } else {
-                                    opt.value = 0; 
+                                    opt.value = 0;
                                 }
                             });
                             return {
@@ -111,7 +109,7 @@ const stepSlice = createSlice({
                         }
                     }
                 }
- 
+
                 return state;
             }
 
@@ -125,7 +123,7 @@ const stepSlice = createSlice({
                         item.value = 1;
                         console.log('✅ [stepSlice] Set value=1 for:', item.id);
                     } else {
-                        item.value = 0; 
+                        item.value = 0;
                     }
                 });
             }
@@ -273,14 +271,14 @@ const stepSlice = createSlice({
             // پیدا کردن service_schedule item
             const serviceScheduleItem = newData[step]?.find(item => item.type === 'service_schedule');
 
-            if (!serviceScheduleItem) { 
+            if (!serviceScheduleItem) {
                 return state;
             }
 
             // پیدا کردن فیلد مورد نظر در field_details
             const field = serviceScheduleItem.field_details?.find(f => f.id === fieldId);
 
-            if (!field) { 
+            if (!field) {
                 return state;
             }
 
@@ -301,6 +299,19 @@ const stepSlice = createSlice({
             if (foundStep) {
                 const foundItem = foundStep.field_details.find((item) => item.id == fieldDetailId);
                 if (foundItem) { foundItem.value = value }
+            }
+            return {
+                ...state,
+                data: newData,
+            };
+        },
+        setCounterInputValue: (state, action) => {
+            const { fieldId, fieldDetailId, value, step } = action.payload;
+            const newData = JSON.parse(JSON.stringify(state.data));
+            const foundStep = newData[step].find(item => item.id == fieldId);
+            if (foundStep) {
+                const foundItem = foundStep.field_details.find((item) => item.id == fieldDetailId);
+                if (foundItem) { foundItem.user_descriptions = value }
             }
             return {
                 ...state,
@@ -462,6 +473,7 @@ export const {
     setDescription,
     setGeneralData,
     setInputValue,
+    setCounterInputValue,
     setFile,
     removeFile,
     addExtraData,
