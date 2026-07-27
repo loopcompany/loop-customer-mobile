@@ -1,6 +1,6 @@
-import React, { useState,useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Button from "../../components/Button";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor10 } from "../../theme/Color";
@@ -11,14 +11,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from '../../styles/NewStyles';
+import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
-  const { t, i18n } = useTranslation();
-  const NewStyles = useMemo(
-    () => createStyles(i18n.language),
-    [i18n.language]
-  );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const { t, i18n } = useTranslation();
+    const NewStyles = useMemo(
+        () => createStyles(i18n.language),
+        [i18n.language]
+    );
+    const hashApp = useSelector(state=>state.hashApp?.hash)
+    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const [formData, setFormData] = useState({
         melicode: "",
         phone: "",
@@ -84,10 +86,19 @@ export default function ForgotPassword({ navigation }) {
         dispatch(setAuthLoading(true));
 
         try {
+            if (Platform.OS === 'android') {
+                try {
+                    await restartOtpRetriever();
+                } catch (otpError) {
+                    console.warn('OTP Retriever start error:', otpError);
+                }
+            }
+
             const response = await authAPI.forgotPassword({
                 melicode: formData.melicode.trim(),
                 phone: formData.phone.trim(),
-                email: formData.email.trim()
+                email: formData.email.trim(),
+                hashApp: hashApp?.[0] ?? ''
             });
 
             if (response.success) {
@@ -101,10 +112,12 @@ export default function ForgotPassword({ navigation }) {
                     });
                 }, 1500);
             } else {
+                stopOtpRetriever({ clearPending: true });
                 showToastOrAlert(response.message || t('An error occurred'));
                 dispatch(setAuthError(response.message));
             }
         } catch (error) {
+            stopOtpRetriever({ clearPending: true });
             console.error('Forgot password error:', error);
 
             let errorMessage = t('Server connection error');
@@ -232,9 +245,9 @@ export default function ForgotPassword({ navigation }) {
                             <TouchableOpacity
                                 style={[styles.backToLoginContainer]}
                                 onPress={() => {
-                                    if(Platform.OS == 'web'){
+                                    if (Platform.OS == 'web') {
                                         window.history.back()
-                                    }else{
+                                    } else {
 
                                         navigation.goBack()
                                     }

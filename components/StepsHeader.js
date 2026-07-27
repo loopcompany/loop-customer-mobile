@@ -26,15 +26,15 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
 
         }]}>
             <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
-                <Image source={require("../assets/next.png")} style={styles.arrow} />
                 <Text style={styles.titleText}>{t("Next")}</Text>
+                <Image source={require("../assets/gif/next.gif")} style={styles.arrow} />
             </TouchableOpacity>
             <View style={styles.titleContainer}>
                 <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
             </View>
             {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
 
-                <Image source={require("../assets/back.png")} style={styles.arrow} />
+                <Image source={require("../assets/gif/prev.gif")} style={styles.arrow} />
                 <Text style={styles.titleText}>{t("Back")}</Text>
             </TouchableOpacity>
                 :

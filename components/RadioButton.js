@@ -18,6 +18,7 @@ import NewStyles from '../styles/NewStyles';
 import {
   themeColor0,
   themeColor1,
+  themeColor10,
   themeColor3,
   themeColor4,
 } from '../theme/Color';
@@ -67,7 +68,7 @@ const RadioOptionItem = React.memo(
                 styles.imageBox,
                 isColumn && styles.imageBoxColumn,
                 selected && isColumn && styles.imageBoxSelected,
-                { borderRadius: Number(borderRadius) }, 
+                { borderRadius: Number(borderRadius) },
               ]}
             >
               <Image
@@ -135,10 +136,18 @@ const RadioOptionItem = React.memo(
         ) : null}
 
         {!!item?.des && !isColumn && (
-          <View style={styles.descriptionBox}>
-            <Text style={NewStyles.text10}>{item.des}</Text>
-          </View>
+
+          <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, width:'100%' }, NewStyles.border10, NewStyles.row]}>
+            <Ionicons
+              name={'help-circle-outline'}
+              size={20}
+              color={themeColor10.bgColor(1)}
+            />
+            <Text style={[NewStyles.title10, { fontSize: 12 }]}>{item?.des}</Text>
+          </LinearGradient>
+
         )}
+
       </View>
     );
   },
@@ -288,8 +297,13 @@ export default function RadioButton({ step, data, setLoading }) {
       </Pressable>
 
       {(data?.des && show) &&
-        <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1) }, NewStyles.border10]}>
-          <Text style={NewStyles.title10}>{data?.des}</Text>
+        <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth:'100%' }, NewStyles.border10, NewStyles.row]}>
+          <Ionicons
+            name={'help-circle-outline'}
+            size={20}
+            color={themeColor10.bgColor(1)}
+          />
+          <Text style={[NewStyles.title10, { fontSize: 12 }]}>{data?.des}</Text>
         </LinearGradient>
       }
 

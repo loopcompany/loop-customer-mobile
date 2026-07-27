@@ -438,6 +438,9 @@ export const selectTotalPrice = createSelector(
                         const count = typeof detail.value === 'number' ? detail.value : detail.value ? 1 : 0;
                         const price = detail.price || 0;
                         if (field?.is_package == 0 && count * detail?.affect_on_price != 0) {
+                            console.log('====================================');
+                            console.log("affect_on_price:", detail?.affect_on_price, field?.id);
+                            console.log('====================================');
                             showPrice = false;
                         }
                         total += count * price;

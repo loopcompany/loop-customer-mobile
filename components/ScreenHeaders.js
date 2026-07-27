@@ -46,7 +46,7 @@ const ScreenHeaders = ({
         onPress={handleBack}
         style={[styles.iconContainer, NewStyles.row]}
       >
-        <Image source={require("../assets/back.png")} style={styles.arrow} />
+         <Image source={require("../assets/gif/prev.gif")} style={styles.arrow} />
         <Text style={[NewStyles.title10, styles.titleText]}>{t("Back")}</Text>
       </TouchableOpacity>
     </View>

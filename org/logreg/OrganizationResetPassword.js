@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,13 @@ import { useTranslation } from 'react-i18next';
 import { createStyles } from '../../styles/NewStyles';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import { themeColor0, themeColor4 } from '../../theme/Color';
+import { useSelector } from 'react-redux';
+import {
+  restartOtpRetriever,
+  startOtpRetriever,
+  stopOtpRetriever,
+  subscribeOtp,
+} from './../../screens/auth/OtpRetriever';
 const OrganizationResetPassword = ({ route, navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -28,8 +35,9 @@ const OrganizationResetPassword = ({ route, navigation }) => {
   );
   const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
   const { organizationCode, phone } = route.params;
+  const hashApp = useSelector(state => state.hashApp?.hash);
 
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,8 +46,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
   const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(120); // 2 minutes
   const [errors, setErrors] = useState({});
-  const inputRefs = useRef([]);
-  const ref = useBlurOnFulfill({ code, cellCount: 6 });
+  const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
 
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
     value: code,
@@ -47,19 +54,32 @@ const OrganizationResetPassword = ({ route, navigation }) => {
   });
 
   useEffect(() => {
-    // Start countdown timer
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
+    const unsubscribe = subscribeOtp(otp => {
+      setCode(otp);
+      setErrors(currentErrors => ({ ...currentErrors, code: null }));
+    });
+
+    if (Platform.OS === 'android') {
+      startOtpRetriever().catch(otpError => {
+        console.warn('Unable to start SMS Retriever:', otpError);
       });
+    }
+
+    return () => {
+      unsubscribe();
+      stopOtpRetriever();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (timer <= 0) return undefined;
+
+    const timeout = setTimeout(() => {
+      setTimer(currentTimer => Math.max(currentTimer - 1, 0));
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [timer]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -67,35 +87,25 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handleCodeChange = (text, index) => {
-    // Only allow numbers
-    if (!/^\d*$/.test(text)) return;
+  const handleCodeChange = text => {
+    const normalizedCode = String(text || '')
+      .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+      .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+      .replace(/\D/g, '')
+      .slice(0, 6);
 
-    const newCode = [...code];
-    newCode[index] = text;
-    setCode(newCode);
+    setCode(normalizedCode);
 
-    // Clear error
     if (errors.code) {
-      setErrors({ ...errors, code: null });
-    }
-
-    // Auto-focus next input
-    if (text && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+      setErrors(currentErrors => ({ ...currentErrors, code: null }));
     }
   };
 
-  const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
 
   const validateForm = () => {
     const newErrors = {};
- 
-    if (code.length !== 6) {
+
+    if (!/^\d{6}$/.test(code)) {
       newErrors.code = t('Please enter the complete 6-digit code');
     }
 
@@ -121,9 +131,6 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     if (!validateForm()) {
       return;
     }
-    console.log('====================================');
-    console.log("sss");
-    console.log('====================================');
     setLoading(true);
 
     try {
@@ -155,6 +162,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
       console.log('✅ Password reset response:', response.data);
 
       if (response.data.status === 'success') {
+        stopOtpRetriever({ clearPending: true });
         showAlert(
           t('success'),
           t('Your password has been successfully changed. Please log in with the new information.'),
@@ -201,13 +209,24 @@ const OrganizationResetPassword = ({ route, navigation }) => {
     }
 
     setResendLoading(true);
+    setCode('');
+    setErrors(currentErrors => ({ ...currentErrors, code: null }));
 
     try {
+      if (Platform.OS === 'android') {
+        try {
+          await restartOtpRetriever();
+        } catch (otpError) {
+          console.warn('Unable to restart SMS Retriever:', otpError);
+        }
+      }
+
       const response = await axios.post(
         `${uri}/organization/forgot-password`,
         {
           organization_code: organizationCode,
           mobile: phone,
+          hashApp: hashApp?.[0] ?? '',
         },
         {
           headers: {
@@ -221,10 +240,12 @@ const OrganizationResetPassword = ({ route, navigation }) => {
       if (response.data.status === 'success') {
         showAlert(t('success'), t('Verification code resent'));
         setTimer(120);
-        setCode(['', '', '', '', '', '']);
-        inputRefs.current[0]?.focus();
+      } else {
+        stopOtpRetriever({ clearPending: true });
+        showAlert(t('Error'), response.data.message || t('Error resending code'));
       }
     } catch (error) {
+      stopOtpRetriever({ clearPending: true });
       console.error('❌ Resend code error:', error);
       showAlert(t('Error'), error.response?.data?.message || t('Error resending code'));
     } finally {
@@ -271,16 +292,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
             >
               {t('Recovery code sent')}
             </Text>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 14,
-                fontFamily: 'VazirLight',
-                textAlign: 'center',
-              }}
-            >
-              {t('Enter the 6-digit code sent to {phone}')}
-            </Text>
+            
           </View>
 
           {/* Organization Code Display */}
@@ -336,16 +348,14 @@ const OrganizationResetPassword = ({ route, navigation }) => {
               ref={ref}
               {...props}
               value={code}
-              onChangeText={(text) => {
-                setCode(text);
-              }}
+              onChangeText={handleCodeChange}
               cellCount={6}
+              maxLength={6}
               keyboardType="number-pad"
-              textContentType="oneTimeCode"
-              autoComplete={Platform.select({
-                android: "sms-otp",
-                default: "one-time-code",
-              })}
+              inputMode="numeric"
+              textContentType={Platform.OS === 'ios' ? 'oneTimeCode' : undefined}
+              autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+              importantForAutofill={Platform.OS === 'android' ? 'yes' : undefined}
               renderCell={({ index, symbol, isFocused }) => (
                 <Text
                   key={index}

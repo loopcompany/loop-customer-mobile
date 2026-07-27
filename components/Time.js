@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet, Image } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +7,7 @@ import { selectTime, setGeneralData } from '../slices/stepSlice';
 import { generateTimeSlots } from '../helpers/Common';
 import { createStyles } from '../styles/NewStyles';
 import { useTranslation } from 'react-i18next';
+import { imageUri } from '../services/URL';
 
 
 
@@ -34,8 +35,13 @@ export default function Time({ step, data }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    {data?.icon_name &&
+                        <Image
+                            source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                            style={{ height: 45, width: 45, resizeMode: 'contain' }}
+                        />
+                    }
+                    <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -48,7 +54,7 @@ export default function Time({ step, data }) {
                 keyExtractor={(item) => item.id?.toString()}
                 data={slots}
                 renderItem={({ item }) => {
-                    const activeItem = item?.value == time;
+                    const activeItem = (item?.value == time && data?.value);
                     return (
                         <Pressable style={[styles.timeItem, NewStyles.center, NewStyles.border10, activeItem && { backgroundColor: themeColor0.bgColor(1) }]} onPress={() => { dispatch(selectTime(item.value)); dispatch(setGeneralData({ fieldId: data?.id, value: 1, step })) }}>
                             <Text style={[NewStyles.text, activeItem && { color: themeColor4.bgColor(1) }, { fontSize: 12, textAlign: 'center' }]}>{item.value}</Text>

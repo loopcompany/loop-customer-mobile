@@ -8,10 +8,12 @@ import TokenManager from '../services/TokenManager';
 import { setToken, setUserType } from '../slices/authSlice';
 import { clearOrganizationData } from '../slices/organizationSlice';
 import { showAlert } from '../helpers/Common';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setLanguage } from '../slices/languageSlice';
 
 // Custom hook for logout functionality
 export const useLogout = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -20,15 +22,15 @@ export const useLogout = () => {
   const logout = async () => {
     try {
       setIsLoggingOut(true);
-      
+
       const result = await TokenManager.logout();
-      
+
       if (result.success) {
         // Clear Redux state
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
-        
+
         return result;
       } else {
         throw new Error(result.message);
@@ -47,12 +49,12 @@ export const useLogout = () => {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
         const confirmed = window.confirm(t('Are you sure you want to log out?'));
-        
+
         if (confirmed) {
           logout()
             .then((result) => {
               if (typeof options.onSuccess === 'function') {
-                try { options.onSuccess(); } catch {}
+                try { options.onSuccess(); } catch { }
               }
               if (window.alert) {
                 window.alert(result.message || t('You have successfully logged out!'));
@@ -79,7 +81,7 @@ export const useLogout = () => {
         logout()
           .then(() => {
             if (typeof options.onSuccess === 'function') {
-              try { options.onSuccess(); } catch {}
+              try { options.onSuccess(); } catch { }
             }
             if (navigation.replace) {
               navigation.replace('Welcome');
@@ -109,13 +111,16 @@ export const useLogout = () => {
               try {
                 const result = await logout();
                 if (typeof options.onSuccess === 'function') {
-                  try { options.onSuccess(); } catch {}
+                  try { options.onSuccess(); } catch { }
                 }
                 showAlert(t('Successful'), result.message, [
                   {
                     text: t('Ok'),
-                    onPress: () => {
+                    onPress: async () => {
                       // Navigate to Welcome screen after showing alert
+                      await AsyncStorage.removeItem("language")
+                      dispatch(setLanguage("fa"))
+                      await i18n.changeLanguage("fa");
                       if (navigation.replace) {
                         navigation.replace('Welcome');
                       } else {
@@ -141,15 +146,15 @@ export const useLogout = () => {
   const logoutFromAllDevices = async () => {
     try {
       setIsLoggingOut(true);
-      
+
       const result = await TokenManager.logoutFromAllDevices();
-      
+
       if (result.success) {
         // Clear Redux state
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
-        
+
         return result;
       } else {
         throw new Error(result.message);
@@ -168,7 +173,7 @@ export const useLogout = () => {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
         const confirmed = window.confirm(t('Do you want to log out from all devices logged in with this account?'));
-        
+
         if (confirmed) {
           logoutFromAllDevices()
             .then((result) => {
@@ -253,12 +258,12 @@ export const useLogout = () => {
   const forceLogout = async () => {
     try {
       setIsLoggingOut(true);
-      
+
       const result = await TokenManager.forceLogout();
-      
+
       // Clear Redux state
       dispatch(setToken(null));
-      
+
       // Navigate to Welcome screen
       if (navigation.replace) {
         navigation.replace('Welcome');
@@ -268,7 +273,7 @@ export const useLogout = () => {
           routes: [{ name: 'Welcome' }],
         });
       }
-      
+
       return result;
     } catch (error) {
       console.error('Force logout error:', error);

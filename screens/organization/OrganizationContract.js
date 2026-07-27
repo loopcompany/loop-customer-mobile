@@ -11,6 +11,7 @@ import {
   TextInput,
   RefreshControl,
   KeyboardAvoidingView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
@@ -488,7 +489,13 @@ const OrganizationContract = ({ navigation }) => {
           />}
         >
           <View style={[{ width: '100%', backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, marginBottom: 10 }, NewStyles.border10, NewStyles.center]}>
-            <Text style={NewStyles.title4}>{t("Organization contract")}</Text>
+            <View style={[NewStyles.row, { gap: 10 }]}>
+              <Image
+                source={require('../../assets/images/upload.png')}
+                style={{ width: 40, height: 40, }}
+              />
+              <Text style={NewStyles.title4}>{t("Organization contract")}</Text>
+            </View>
 
             <Ionicons
               name={"chevron-down"}
@@ -782,7 +789,7 @@ const OrganizationContract = ({ navigation }) => {
                       {/* دکمه دانلود توافق نامه آپلود شده */}
                     </View>
                   </View>
-                   
+
 
                   <TouchableOpacity
                     style={[styles.downloadBtn, NewStyles.border10]}

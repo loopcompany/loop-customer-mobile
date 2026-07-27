@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import NewStyles from '../../styles/NewStyles';
 import { createStyles } from '../../styles/NewStyles';
 import { themeColor3 } from '../../theme/Color';
+import { useSelector } from 'react-redux';
+import { restartOtpRetriever, stopOtpRetriever } from './../../screens/auth/OtpRetriever';
 const OrganizationForgotPassword = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -28,6 +30,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const hashApp = useSelector(state=>state.hashApp?.hash)
 
   const validateForm = () => {
     const newErrors = {};
@@ -57,6 +60,14 @@ const OrganizationForgotPassword = ({ navigation }) => {
     setErrors({});
 
     try {
+      if (Platform.OS === 'android') {
+        try {
+          await restartOtpRetriever();
+        } catch (otpError) {
+          console.warn('Unable to start SMS Retriever:', otpError);
+        }
+      }
+
       console.log('📤 Sending forgot password request...');
       console.log('Data:', { organization_code: organizationCode, mobile: mobileNumber });
 
@@ -65,6 +76,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
         {
           organization_code: organizationCode.trim(),
           mobile: mobileNumber.trim(),
+          hashApp: hashApp?.[0] ?? ''
         },
         {
           headers: {
@@ -86,15 +98,19 @@ const OrganizationForgotPassword = ({ navigation }) => {
               text: t('Next'),
               onPress: () => {
                 navigation.navigate('OrganizationResetPassword', {
-                  organizationCode: organizationCode,
-                  phone: mobileNumber,
+                  organizationCode: organizationCode.trim(),
+                  phone: mobileNumber.trim(),
                 });
               },
             },
           ]
         );
+      } else {
+        stopOtpRetriever({ clearPending: true });
+        showAlert(t('Error'), response.data.message || t('Error submitting request'));
       }
     } catch (error) {
+      stopOtpRetriever({ clearPending: true });
       console.error('❌ Forgot password error:', error);
 
       let errorMessage = t('Error submitting request');

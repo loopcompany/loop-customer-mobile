@@ -5,7 +5,7 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { useDispatch } from 'react-redux';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '../theme/Color';
 import { decrement, increment, setCounterInputValue, updateCheckbox } from '../slices/stepSlice';
 import { formatPrice } from '../helpers/Common';
 import { imageUri } from '../services/URL';
@@ -59,8 +59,13 @@ export default function CheckBox({ step, data }) {
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
             {(data?.des && show) &&
-                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1) }, NewStyles.border10]}>
-                    <Text style={NewStyles.title10}>{data?.des}</Text>
+                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
+                    <Ionicons
+                        name={'help-circle-outline'}
+                        size={20}
+                        color={themeColor10.bgColor(1)}
+                    />
+                    <Text style={[NewStyles.title10, { fontSize: 12 }]}>{data?.des}</Text>
                 </LinearGradient>
             }
             {show && <FlatList
@@ -77,7 +82,7 @@ export default function CheckBox({ step, data }) {
 
                                 dispatch(updateCheckbox({ fieldId: data?.id, fieldDetailId: item.id, step }))
                             }
-                        }} style={[{ backgroundColor: themeColor4.bgColor(item?.has_counter =='1' ? 0 : 1), padding: 10, ...NewStyles.border5, ...NewStyles.row, gap: 10 }, (item?.value > 0 && item?.has_counter != 1) && { backgroundColor: themeColor0.bgColor(1) }]}>
+                        }} style={[{ backgroundColor: themeColor4.bgColor(item?.has_counter == '1' ? 0 : 1), padding: 10, ...NewStyles.border5, ...NewStyles.row, gap: 10 }, (item?.value > 0 && item?.has_counter != 1) && { backgroundColor: themeColor0.bgColor(1) }]}>
                             {
                                 item?.image_path &&
 

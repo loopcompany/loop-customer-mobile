@@ -14,6 +14,7 @@ import ScreenHeaders from "../../components/ScreenHeaders";
 import { showToastOrAlert, formatTime, showAlert } from "../../helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
+import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from "./OtpRetriever";
 
 export default function ResetPasswordScreen({ navigation, route }) {
   const { t } = useTranslation();
@@ -30,6 +31,26 @@ export default function ResetPasswordScreen({ navigation, route }) {
     value,
     setValue,
   });
+
+  // Subscribe to OTP messages. The listener may have started in ForgotPassword
+  // before the recovery SMS was requested.
+  useEffect(() => {
+    const unsubscribe = subscribeOtp((otp) => {
+      setError('');
+      setValue(otp);
+    });
+
+    if (Platform.OS === 'android') {
+      startOtpRetriever().catch((otpError) => {
+        console.warn('OTP Retriever start error:', otpError);
+      });
+    }
+
+    return () => {
+      unsubscribe();
+      stopOtpRetriever({ clearPending: true });
+    };
+  }, []);
 
   // Timer for resend code
   useEffect(() => {
@@ -52,6 +73,8 @@ export default function ResetPasswordScreen({ navigation, route }) {
 
   // Verify the reset code
   const codeVerification = async () => {
+    if (loading) return;
+
     if (value.length !== 6) {
       setError(t('Please enter the complete 6-digit code'));
       return;
@@ -82,6 +105,8 @@ export default function ResetPasswordScreen({ navigation, route }) {
       });
 
       if (response.success) {
+        stopOtpRetriever({ clearPending: true });
+
         // Save auth data using TokenManager
         const token = response.data?.token;
         const user = response.data?.user;
@@ -119,6 +144,14 @@ export default function ResetPasswordScreen({ navigation, route }) {
 
     setLoading(true);
     try {
+      if (Platform.OS === 'android') {
+        try {
+          await restartOtpRetriever();
+        } catch (otpError) {
+          console.warn('OTP Retriever restart error:', otpError);
+        }
+      }
+
       const response = await authAPI.resendResetCode(params?.phone);
 
       if (response.success) {
@@ -127,9 +160,11 @@ export default function ResetPasswordScreen({ navigation, route }) {
         setError('');
         showToastOrAlert(response.message || t("Verification code resent"));
       } else {
+        stopOtpRetriever({ clearPending: true });
         setError(response.message || t("Error resending code"));
       }
     } catch (error) {
+      stopOtpRetriever({ clearPending: true });
       console.error('Resend code error:', error);
       setError(t("Error resending code"));
     } finally {
@@ -197,16 +232,20 @@ export default function ResetPasswordScreen({ navigation, route }) {
                   {...props}
                   value={value}
                   onChangeText={(text) => {
-                    setValue(text);
-                    if (error) setError(""); // Clear error when user starts typing
+                    setValue(String(text || '').replace(/\D/g, '').slice(0, 6));
+                    if (error) setError('');
                   }}
                   cellCount={6}
+                  maxLength={6}
                   keyboardType="number-pad"
-                  textContentType="oneTimeCode"
+                  inputMode="numeric"
+                  textContentType={Platform.OS === 'ios' ? 'oneTimeCode' : undefined}
                   autoComplete={Platform.select({
-                    android: "sms-otp",
-                    default: "one-time-code",
+                    android: 'sms-otp',
+                    ios: 'one-time-code',
+                    default: 'off',
                   })}
+                  importantForAutofill={Platform.OS === 'android' ? 'yes' : undefined}
                   renderCell={({ index, symbol, isFocused }) => (
                     <Text
                       key={index}

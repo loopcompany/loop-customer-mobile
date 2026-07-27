@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { createStyles } from '../styles/NewStyles';
@@ -7,6 +7,7 @@ import { getNext20DaysJalaali, langIsRTL } from '../helpers/Common';
 import { selectDate, setGeneralData, updateServiceScheduleField } from '../slices/stepSlice';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { imageUri } from '../services/URL';
 
 export default function Date({ step, data, isServiceSchedule }) {
 
@@ -25,7 +26,7 @@ export default function Date({ step, data, isServiceSchedule }) {
     const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
 
     const selectedValue = isServiceSchedule ? data?.value : date;
- 
+
 
     const handleDateSelect = (dateValue) => {
 
@@ -55,7 +56,7 @@ export default function Date({ step, data, isServiceSchedule }) {
                     keyExtractor={(item) => item.id?.toString()}
                     data={days}
                     renderItem={({ item }) => {
-                        const activeItem = item?.value == selectedValue;
+                        const activeItem = ((item?.value == selectedValue) && data?.value);
                         return (
                             <Pressable
                                 style={[
@@ -85,8 +86,13 @@ export default function Date({ step, data, isServiceSchedule }) {
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
                 <View style={[NewStyles.row, { gap: 10 }]}>
-                    {data?.icon_name && <Ionicons name={data?.icon_name} size={24} color={themeColor4.bgColor(1)} />}
-                    <Text style={NewStyles.title4}>{data?.title}</Text>
+                    {data?.icon_name &&
+                        <Image
+                            source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                            style={{ height: 45, width: 45, resizeMode: 'contain' }}
+                        />
+                    }
+                    <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
@@ -99,7 +105,7 @@ export default function Date({ step, data, isServiceSchedule }) {
                 keyExtractor={(item) => item.id?.toString()}
                 data={days}
                 renderItem={({ item }) => {
-                    const activeItem = item?.value == selectedValue;
+                    const activeItem = (item?.value == selectedValue && data?.value);
                     return (
                         <Pressable style={[NewStyles.center, styles.dateItem, NewStyles.border10, activeItem && { backgroundColor: themeColor0.bgColor(1) }]} onPress={() => handleDateSelect(item.value)}>
                             <Text style={[NewStyles.text, activeItem && { color: themeColor4.bgColor(1) }]}>{item.weekday}</Text>

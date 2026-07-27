@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useMemo } from "react";
+import React, { useState, useReducer, useMemo, useEffect } from "react";
 import {
     View,
     Text,
@@ -26,6 +26,8 @@ import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from '../../styles/NewStyles';
 import { langIsRTL } from '../../helpers/Common';
+import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
+import { useSelector } from "react-redux";
 const initialState = {
     melicode: '',
     phone: '',
@@ -74,6 +76,9 @@ const formReducer = (state, action) => {
 
 export default function MainSignIn({ navigation }) {
     const [state, dispatch] = useReducer(formReducer, initialState);
+    const hashApp = useSelector(state => state.hashApp?.hash)
+    // console.log(hashApp?.[0]);
+
     const inviteLetter = 'L'; // Static invite letter
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(
@@ -82,12 +87,13 @@ export default function MainSignIn({ navigation }) {
     );
     const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const isRtl = langIsRTL(i18n.language)
+
     // Form validation
     const validateForm = () => {
         const errors = {};
-        
-        if(!state.acceptTerms){
-            
+
+        if (!state.acceptTerms) {
+
             errors.acceptTerms = t('Acceptance of the rules and regulations is mandatory.');
         }
 
@@ -146,6 +152,12 @@ export default function MainSignIn({ navigation }) {
         dispatch({ type: 'SET_LOADING', isLoading: true });
 
         try {
+            try {
+                await restartOtpRetriever();
+            } catch (otpError) {
+                console.log('SMS Retriever start error:', otpError);
+            }
+
             const userData = {
                 melicode: state.melicode,
                 phone: state.phone,
@@ -154,6 +166,7 @@ export default function MainSignIn({ navigation }) {
                 city_id: state.city?.id,
                 region_id: state.region?.id,
                 other_referral_code: state.otherReferralCode ? `${inviteLetter}${state.otherReferralCode}` : null,
+                hashApp: hashApp?.[0]
             };
 
             const response = await authAPI.register(userData);
@@ -167,6 +180,7 @@ export default function MainSignIn({ navigation }) {
                     userData
                 });
             } else {
+                stopOtpRetriever({ clearPending: true });
                 dispatch({
                     type: 'SET_ERROR',
                     field: 'general',
@@ -174,6 +188,7 @@ export default function MainSignIn({ navigation }) {
                 });
             }
         } catch (error) {
+            stopOtpRetriever({ clearPending: true });
             console.log('Registration error:', error);
             let errorMessage = t("Registration failed. Please try again");
 
@@ -363,7 +378,7 @@ export default function MainSignIn({ navigation }) {
                                         color={themeColor0.bgColor(1)}
                                         onPress={() => {
                                             dispatch({ type: 'SET_FIELD', field: 'acceptTerms', value: state.acceptTerms ? false : true })
-                                         }}
+                                        }}
                                     />
                                 </TouchableOpacity>
                                 <Text style={[NewStyles.text4, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>

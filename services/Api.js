@@ -137,7 +137,8 @@ export const authAPI = {
       const response = await apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
         melicode: userData.melicode,
         phone: userData.phone,
-        email: userData.email
+        email: userData.email,
+        hashApp: userData.hashApp
       });
       return response.data;
     } catch (error) {

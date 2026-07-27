@@ -18,6 +18,7 @@ import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
+import { LinearGradient } from 'expo-linear-gradient';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
     // const token = useSelector((state) => state?.auth?.token)
@@ -56,8 +57,9 @@ function Preview({ navigation }) {
     const [discountPercent, setDiscountPercent] = useState(null);
 
     const address = useSelector(state => state.address?.data)?.find(item => item?.id == addressId);
-
+    
     const isFixed = (Number(category?.is_fixed) > 0 && totalPrice > 0) ? 1 : 0;
+    console.log(showPrice);
 
     /**
      * تبدیل ساختار service_schedule از Redux به فرمت API
@@ -274,31 +276,67 @@ function Preview({ navigation }) {
             />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800, marginTop: 20 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
-                    <View style={NewStyles.rowWrapper}>
-                        {user?.apple_check == 0 && <View style={[NewStyles.row, { gap: 5 }]}>
-                            <Ionicons name="cash-outline" size={26} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>{isFixed ? t('Loop Fixed Amount') : t('Loop Base Amount')}</Text>
-                        </View>}
-                        <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 }]} >
+                    <View style={[]}>
+                        {user?.apple_check == 0 &&
+                            <View
+                                style={[NewStyles.center, {
+                                    backgroundColor: themeColor0.bgColor(1),
+                                    paddingVertical: 10,
+                                    ...NewStyles.border10
+                                }]}
+
+                            >
+                                <View style={[NewStyles.row, { gap: 10 }]}>
+                                    <Image
+                                        source={require('../../assets/images/price.png')}
+                                        style={{ height: 60, width: 60, resizeMode: 'contain' }}
+                                    />
+                                    <Text style={NewStyles.title4}> {isFixed == 1 ? t('Loop Fixed Amount') : t('Loop Base Amount')} </Text>
+                                </View>
+                            </View>
+                        }
+                        <Pressable style={[NewStyles.shadow, NewStyles.border100, NewStyles.whiteButton, NewStyles.row, { gap: 5 , alignSelf:'center'}]} >
                             <Ionicons name="cash-outline" size={24} color={themeColor0.bgColor(1)} />
                             <Text style={NewStyles.text}>{(totalPrice > 0 && showPrice) ? `${formatPrice(totalPrice)}${t(' Toman')}` : t('Needs Review')}</Text>
                         </Pressable>
                     </View>
-                    <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
-                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t('Dear user, your order information will be finalized after review by Loop technicians and specialized evaluations.')}</Text>
-                    </View>
+
+                    <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
+                        <Ionicons
+                            name={'help-circle-outline'}
+                            size={20}
+                            color={themeColor10.bgColor(1)}
+                        />
+                        <Text style={[NewStyles.text10, { textAlign: 'center', fontSize: 11 }]}>{t('Dear user, your order information will be finalized after review by Loop technicians and specialized evaluations.')}</Text>
+                    </LinearGradient>
                 </View>
                 {user?.apple_check == 0 && <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
-                    <View style={[NewStyles.row, { gap: 5 }]}>
-                        <Image
-                            source={require('../../assets/images/discount.webp')}
-                            style={{ height: 35, width: 60, resizeMode: 'contain' }}
+
+                    <View
+                        style={[NewStyles.center, {
+                            backgroundColor: themeColor0.bgColor(1),
+                            paddingVertical: 10,
+                            ...NewStyles.border10
+                        }]}
+
+                    >
+                        <View style={[NewStyles.row, { gap: 10 }]}>
+                            <Image
+                                source={require('../../assets/images/discount.png')}
+                                style={{ height: 60, width: 60, resizeMode: 'contain' }}
+                            />
+                            <Text style={NewStyles.title4}> {t('Discount Code')} </Text>
+                        </View>
+                    </View>
+
+                    {/* <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
+                        <Ionicons
+                            name={'help-circle-outline'}
+                            size={20}
+                            color={themeColor10.bgColor(1)}
                         />
-                        <Text style={NewStyles.title}>{t('Discount Code')}</Text>
-                    </View>
-                    <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border10 }}>
-                        <Text style={[NewStyles.text10, { textAlign: 'center' }]}>{t("Dear user, to receive a discount code, you can visit the promotions section and participate in Loop's lucky wheel every week!")}</Text>
-                    </View>
+                        <Text style={[NewStyles.text10, { textAlign: 'center', fontSize:11 }]}>{t("Dear user, to receive a discount code, you can visit the promotions section and participate in Loop's lucky wheel every week!")}</Text>
+                    </LinearGradient> */}
                     <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
                         <View
                             style={[

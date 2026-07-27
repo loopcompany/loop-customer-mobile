@@ -19,6 +19,8 @@ import { fetchMinPrice } from '../slices/minPriceSlice';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEvent } from 'expo';
+import { getHash } from 'react-native-otp-verify';
+import { setHashApp } from '../slices/hashAppSlice';
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
@@ -38,6 +40,19 @@ export default function Landing({ navigation }) {
     dispatch(fetchPdfDocs())
     dispatch(fetchMinPrice())
 
+  }, []);
+  
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    getHash()
+      .then(hashes => {
+        dispatch(setHashApp(hashes))
+        console.log('SMS hashes:', hashes);
+      })
+      .catch(error => {
+        console.log('Hash error:', error);
+      });
   }, []);
 
   const checkAuthenticationStatus = async () => {
@@ -104,18 +119,18 @@ export default function Landing({ navigation }) {
     };
   }, [player]);
 
- useEffect(() => {
-  const subscription = player.addListener('statusChange', ({ status, error }) => {
- 
-    console.log('Player status changed: ', error);
-  });
+  useEffect(() => {
+    const subscription = player.addListener('statusChange', ({ status, error }) => {
 
-  return () => {
-    subscription.remove();
-  };
-}, []);
+      console.log('Player status changed: ', error);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
-   
+
 
   useEffect(() => {
     if (Platform.OS === 'web' && !isPlaying && player) {

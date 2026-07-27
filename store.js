@@ -15,13 +15,14 @@ import organizationSlice from './slices/organizationSlice';
 import radiusSlice from './slices/radiusSlice';
 import pdfSlice from './slices/pdfDocumentSlice';
 import minPriceSlice from './slices/minPriceSlice';
+import hashAppSlice from './slices/hashAppSlice';
 
 // Redux state persistence functions for web platform
 const loadState = () => {
   if (Platform.OS !== 'web') {
     return undefined;
   }
-  
+
   try {
     const serializedState = localStorage.getItem('reduxState');
     if (serializedState === null) {
@@ -38,7 +39,7 @@ const saveState = (state) => {
   if (Platform.OS !== 'web') {
     return;
   }
-  
+
   try {
     const serializedState = JSON.stringify(state);
     localStorage.setItem('reduxState', serializedState);
@@ -67,6 +68,7 @@ const store = configureStore({
     radius: radiusSlice,
     pdf: pdfSlice,
     minPrice: minPriceSlice,
+    hashApp: hashAppSlice,
   },
   preloadedState
 });

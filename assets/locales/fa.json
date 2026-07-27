@@ -1071,8 +1071,7 @@
   "You are the best!": "تو بهترین هستی!",
   "You are strong!": "تو قوی هستی!",
   "Amazing!": "شگفت‌انگیز!",
-  "Correct!": "درست!",
-  "Laptop": "لپ‌تاپ",
+  "Correct!": "درست!", 
   "Computer": "کامپیوتر",
   "Mouse": "ماوس",
   "Keyboard": "کیبورد",
@@ -1554,5 +1553,7 @@
   "Acceptance of the rules and regulations is mandatory.": "پذیرش قوانین و مقررات الزامی می باشد",
   "انتخاب جامع": "انتخاب جامع",
   "Edit request": "درخواست ویرایش",
-  "Awaiting review of changes": "در انتظار بررسی تغییرات"
+  "Awaiting review of changes": "در انتظار بررسی تغییرات",
+  "Verification code": "کدبازیابی",
+  "Recovery code sent": "کدبازیابی ارسال شد"
 }

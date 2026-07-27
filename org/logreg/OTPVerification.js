@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenHeaders from '../../components/ScreenHeaders';
@@ -13,60 +13,67 @@ import { Cursor } from 'react-native-confirmation-code-field';
 import { themeColor0, themeColor3, themeColor4 } from '../../theme/Color';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
+import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from './../../screens/auth/OtpRetriever';
 
+const normalizeOtpCode = value => String(value || '')
+  .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+  .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+  .replace(/\D/g, '')
+  .slice(0, 6);
 
 const OTPVerification = ({ route, navigation }) => {
 
   const { phone, organizationCode, userId, organizationId } = route.params;
   const { t } = useTranslation()
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(120); // 2 minutes
-  const inputRefs = useRef([]);
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
     value: code,
     setValue: setCode,
   });
-  const ref = useBlurOnFulfill({ code, cellCount: 6 });
+  const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
   useEffect(() => {
-    // Start countdown timer
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (Platform.OS !== 'android') return undefined;
 
-    return () => clearInterval(interval);
+    const unsubscribe = subscribeOtp(receivedCode => {
+      const normalizedCode = normalizeOtpCode(receivedCode);
+
+      if (normalizedCode.length === 6) {
+        setCode(normalizedCode);
+      }
+    });
+
+    startOtpRetriever().catch(error => {
+      console.warn('OTP Retriever start error:', error);
+    });
+
+    return () => {
+      unsubscribe();
+      stopOtpRetriever({ clearPending: true });
+    };
   }, []);
 
-  const handleCodeChange = (text, index) => {
-    // Only allow numbers
-    if (!/^\d*$/.test(text)) return;
+  useEffect(() => {
+    if (timer <= 0) return undefined;
 
-    const newCode = [...code];
-    newCode[index] = text;
-    setCode(newCode);
+    const timeout = setTimeout(() => {
+      setTimer(previousTimer => Math.max(previousTimer - 1, 0));
+    }, 1000);
 
-    // Auto-focus next input
-    if (text && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
+    return () => clearTimeout(timeout);
+  }, [timer]);
 
-  const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
+  const handleCodeChange = text => {
+    setCode(normalizeOtpCode(text));
   };
 
   const handleVerify = async () => {
-    const verificationCode = code;
+    if (loading) return;
+
+    const verificationCode = normalizeOtpCode(code);
 
     if (verificationCode.length !== 6) {
       showAlert('خطا', 'لطفا کد 6 رقمی را وارد کنید');
@@ -84,6 +91,8 @@ const OTPVerification = ({ route, navigation }) => {
       console.log('✅ Verification response:', response.data);
 
       if (response.data.status === 'success') {
+        stopOtpRetriever({ clearPending: true });
+
         // Save organization info (token might not be provided in verify step)
         await AsyncStorage.setItem('accountType', 'organization');
         await AsyncStorage.setItem('organizationCode', organizationCode);
@@ -117,11 +126,26 @@ const OTPVerification = ({ route, navigation }) => {
                 navigation.navigate('Login');
               },
             },
+            {
+              text: 'کپی کد',
+              onPress: () => {
+                // Navigate to Login screen
+                copyToClipboard(true)
+
+              },
+            },
           ]
+        );
+      } else {
+        setCode('');
+        showAlert(
+          'خطا در تایید',
+          response.data.message || 'کد تایید اشتباه است. لطفا مجددا تلاش کنید.'
         );
       }
     } catch (error) {
       console.error('❌ Verification error:', error);
+      setCode('');
 
       if (error.response) {
         console.error('Response error:', error.response.data);
@@ -141,6 +165,13 @@ const OTPVerification = ({ route, navigation }) => {
     }
   };
 
+
+  useEffect(() => {
+    if (code.length === 6 && !loading) {
+      handleVerify();
+    }
+  }, [code]);
+
   const handleResendCode = async () => {
     if (timer > 0) {
       showAlert('توجه', `لطفا ${timer} ثانیه صبر کنید`);
@@ -148,18 +179,31 @@ const OTPVerification = ({ route, navigation }) => {
     }
 
     setResendLoading(true);
+    setCode('');
 
     try {
+      if (Platform.OS === 'android') {
+        try {
+          await restartOtpRetriever();
+        } catch (otpError) {
+          console.warn('OTP Retriever restart error:', otpError);
+        }
+      }
+
       const response = await axios.post(`${uri}/organization/resend-code`, {
         phone: phone,
       });
 
       if (response.data.status === 'success') {
         showAlert('موفق', 'کد تایید مجددا ارسال شد');
-        setTimer(120); // Reset timer
-        setCode(['', '', '', '', '', '']); // Clear inputs (6 digits)
+        setTimer(120);
+        setCode('');
+      } else {
+        stopOtpRetriever({ clearPending: true });
+        showAlert('خطا', response.data.message || 'خطا در ارسال مجدد کد');
       }
     } catch (error) {
+      stopOtpRetriever({ clearPending: true });
       console.error('Resend error:', error);
       showAlert('خطا', error.response?.data?.message || 'خطا در ارسال مجدد کد');
     } finally {
@@ -172,11 +216,14 @@ const OTPVerification = ({ route, navigation }) => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (loginAfter = false) => {
     setPending(true);
     await Clipboard.setStringAsync(organizationCode);
     showToastOrAlert(t('The code was successfully copied.'));
     setPending(false);
+    if(loginAfter){
+      navigation.navigate('Login');
+    }
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
@@ -259,7 +306,7 @@ const OTPVerification = ({ route, navigation }) => {
               <TouchableOpacity disabled={pending} style={[{ paddingHorizontal: 20, paddingVertical: 10, }]} onPress={() => {
                 copyToClipboard()
               }}>
-                { pending ? <ActivityIndicator size={'small'} color={themeColor0.bgColor(1)}/> :  <Text style={NewStyles.title}> کپی کد </Text>}
+                {pending ? <ActivityIndicator size={'small'} color={themeColor0.bgColor(1)} /> : <Text style={NewStyles.title}> کپی کد </Text>}
               </TouchableOpacity>
             </View>
 
@@ -276,16 +323,15 @@ const OTPVerification = ({ route, navigation }) => {
                 ref={ref}
                 {...props}
                 value={code}
-                onChangeText={(text) => {
-                  setCode(text);
-                }}
+                onChangeText={handleCodeChange}
                 cellCount={6}
+                maxLength={6}
                 keyboardType="number-pad"
-                textContentType="oneTimeCode"
-                autoComplete={Platform.select({
-                  android: "sms-otp",
-                  default: "one-time-code",
-                })}
+                inputMode="numeric"
+                autoFocus
+                textContentType={Platform.OS === 'ios' ? 'oneTimeCode' : undefined}
+                autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+                importantForAutofill={Platform.OS === 'android' ? 'yes' : undefined}
                 renderCell={({ index, symbol, isFocused }) => (
                   <Text
                     key={index}

@@ -18,6 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/Button';
 import { createStyles } from '../../styles/NewStyles';
 import { Dropdown } from 'react-native-element-dropdown';
+import { useSelector } from 'react-redux';
+import { restartOtpRetriever, stopOtpRetriever } from './../../screens/auth/OtpRetriever';
 
 const Register = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -25,6 +27,8 @@ const Register = ({ navigation }) => {
     () => createStyles(i18n.language),
     [i18n.language]
   );
+
+  const hashApp = useSelector(state=>state.hashApp?.hash)
   // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   // Form states
   const [accountType, setAccountType] = useState('g_organization');
@@ -217,6 +221,8 @@ const Register = ({ navigation }) => {
 
   // Register handler
   const handleRegister = async () => {
+    if (loading) return;
+
     // Clear previous errors
     setErrors({});
 
@@ -284,9 +290,18 @@ const Register = ({ navigation }) => {
       formData.append('postal_code', organizationPostalCode);
       formData.append('password', password);
       formData.append('password_confirmation', password);
+      formData.append('hashApp', hashApp?.[0] ?? '');
 
       if (selectedRegion) {
         formData.append('region_id', selectedRegion.id);
+      }
+
+      if (Platform.OS === 'android') {
+        try {
+          await restartOtpRetriever();
+        } catch (otpError) {
+          console.warn('OTP Retriever start error:', otpError);
+        }
       }
 
       // Make API call with timeout
@@ -312,7 +327,6 @@ const Register = ({ navigation }) => {
             {
               text: t('Confirm'),
               onPress: () => {
-                // Navigate to OTP verification screen
                 navigation.navigate('OTPVerification', {
                   phone: mobileNumber,
                   organizationCode: response.data.data.organization_code,
@@ -323,9 +337,12 @@ const Register = ({ navigation }) => {
             },
           ]
         );
+      } else {
+        stopOtpRetriever({ clearPending: true });
+        showAlert(t('Error'), response.data.message || t('Registration error'));
       }
     } catch (error) {
-
+      stopOtpRetriever({ clearPending: true });
 
       if (error.response) {
         // Server responded with error (4xx, 5xx)

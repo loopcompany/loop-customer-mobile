@@ -159,7 +159,7 @@ export default function Counter({ step, data }) {
                     {data?.icon_name &&
                         <Image
                             source={{ uri: `${imageUri}/${data?.icon_name}` }}
-                            style={{ height: 70, width: 70, resizeMode:'contain' }}
+                            style={{ height: 70, width: 70, resizeMode: 'contain' }}
                         />
                     }
                     <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
@@ -167,8 +167,13 @@ export default function Counter({ step, data }) {
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
             {(data?.des && show) &&
-                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1) }, NewStyles.border10]}>
-                    <Text style={NewStyles.title10}>{data?.des}</Text>
+                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap:5, maxWidth:'100%' }, NewStyles.border10, NewStyles.row]}>
+                    <Ionicons
+                        name={'help-circle-outline'}
+                        size={20}
+                        color={themeColor10.bgColor(1)}
+                    />
+                    <Text style={[NewStyles.title10, { fontSize: 12 }]}>{data?.des}</Text>
                 </LinearGradient>
             }
             {show && <FlatList
@@ -247,11 +252,11 @@ export default function Counter({ step, data }) {
 
                                 {
                                     data?.has_user_descriptions == 1 &&
-                                    <View style={{  }}>
+                                    <View style={{}}>
                                         <View style={[NewStyles.row]}>
                                             <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
                                         </View>
-                                        <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth:2, borderColor: themeColor8.bgColor(1), borderStyle:'dotted' }]}>
+                                        <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth: 2, borderColor: themeColor8.bgColor(1), borderStyle: 'dotted' }]}>
                                             <TextInput style={[NewStyles.text10, { flex: 1, }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
                                         </View>
                                     </View>

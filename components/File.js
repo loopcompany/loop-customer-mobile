@@ -8,11 +8,12 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor6 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
 import { removeFile, setFile } from '../slices/stepSlice';
 import { imageUri, uri } from '../services/URL';
 import { useTranslation } from 'react-i18next';
 import { handleError, showToastOrAlert } from '../helpers/Common';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function FileStep({ step, data }) {
 
@@ -126,14 +127,34 @@ export default function FileStep({ step, data }) {
 
     return (
         <View style={NewStyles.seperator}>
-            <View style={[NewStyles.row, { gap: 5 }]}>
-                <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
-                <Text style={NewStyles.title}>
-                    {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}
-                </Text>
+             
+            <View
+                style={[NewStyles.center, {
+                    backgroundColor: themeColor0.bgColor(1),
+                    paddingVertical: 10,
+                    ...NewStyles.border10
+                }]}
+
+            >
+                <View style={[NewStyles.row, { gap: 10 }]}>
+                    <Image
+                        source={{ uri: `${imageUri}/${data?.icon_name}` }}
+                        style={{ height: 50, width: 50, resizeMode: 'contain' }}
+                    />
+                    <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>} </Text>
+                </View>
             </View>
 
-            {data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{data?.des}</Text></View>}
+            {data?.des &&
+                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
+                    <Ionicons
+                        name={'help-circle-outline'}
+                        size={20}
+                        color={themeColor10.bgColor(1)}
+                    />
+                    <Text style={[NewStyles.title10, { fontSize: 12 }]}>{data?.des}</Text>
+                </LinearGradient>
+            }
 
             <View
                 style={[styles.file, NewStyles.border10, NewStyles.center]}

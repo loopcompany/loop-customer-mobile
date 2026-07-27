@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor4, themeColor6 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
 import { setMaleCount, setFemaleCount, setUnspecifiedCount, setGeneralData } from '../slices/stepSlice';
 import { imageUri } from '../services/URL';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Gender({ step, data }) {
 
@@ -35,7 +36,17 @@ export default function Gender({ step, data }) {
                     <Text style={NewStyles.title4}>{data?.title} {data?.is_required == '1' && <Text style={NewStyles.title6}>*</Text>}</Text>
                 </View>
             </View>
-            {data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{data?.des}</Text></View>}
+            {data?.des &&
+
+                <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
+                    <Ionicons
+                        name={'help-circle-outline'}
+                        size={20}
+                        color={themeColor10.bgColor(1)}
+                    />
+                    <Text style={[NewStyles.title10, { fontSize: 12 }]}>{data?.des}</Text>
+                </LinearGradient>
+            }
 
             {data?.is_required == 1 && <Pressable
                 onPress={() => {

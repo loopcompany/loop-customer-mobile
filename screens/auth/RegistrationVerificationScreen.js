@@ -31,6 +31,18 @@ import { fetchUser } from '../../slices/userSlice';
 import { showToastOrAlert, formatTime } from '../../helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground } from 'expo-image';
+import {
+  restartOtpRetriever,
+  startOtpRetriever,
+  stopOtpRetriever,
+  subscribeOtp,
+} from './OtpRetriever';
+
+const normalizeVerificationCode = value => String(value || '')
+  .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+  .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+  .replace(/\D/g, '')
+  .slice(0, 6);
 
 export default function RegistrationVerificationScreen({ route, navigation }) {
   const { t } = useTranslation();
@@ -50,6 +62,28 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
     setValue: setVerificationCode,
   });
 
+  useEffect(() => {
+    if (Platform.OS !== 'android') return undefined;
+
+    const unsubscribe = subscribeOtp(code => {
+      const normalizedCode = normalizeVerificationCode(code);
+
+      if (normalizedCode.length === 6) {
+        setError('');
+        setVerificationCode(normalizedCode);
+      }
+    });
+
+    startOtpRetriever().catch(error => {
+      console.log('SMS Retriever start error:', error);
+    });
+
+    return () => {
+      unsubscribe();
+      stopOtpRetriever({ clearPending: true });
+    };
+  }, []);
+
   // Timer for resend code
   useEffect(() => {
     if (timer > 0) {
@@ -62,14 +96,13 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
     }
   }, [timer]);
 
-  // Auto-submit when code is complete
-  useEffect(() => {
-    if (verificationCode.length === 6) {
-      handleVerifyCode();
-    }
-  }, [verificationCode]);
+  const handleVerificationCodeChange = value => {
+    setError('');
+    setVerificationCode(normalizeVerificationCode(value));
+  };
 
   const handleVerifyCode = async () => {
+    if (loading) return;
     if (verificationCode.length !== 6) {
       setError(t('Please enter the complete 6-digit code'));
       return;
@@ -99,6 +132,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
           dispatch(fetchUser(response.data.token));
         }
 
+        stopOtpRetriever({ clearPending: true });
         showToastOrAlert(t('Mobile number successfully verified'));
         navigation.navigate('FolderScreen'); // Navigate to main app
       } else {
@@ -134,11 +168,23 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
     }
   };
 
+  useEffect(() => {
+    if (verificationCode.length === 6 && !loading) {
+      handleVerifyCode();
+    }
+  }, [verificationCode]);
+
   const handleResendCode = async () => {
     if (!canResend) return;
 
     setLoading(true);
     try {
+      try {
+        await restartOtpRetriever();
+      } catch (otpError) {
+        console.log('SMS Retriever restart error:', otpError);
+      }
+
       const response = await authAPI.resendCode(phone);
 
       if (response.success) {
@@ -147,9 +193,11 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         setError('');
         showToastOrAlert(t('Verification code resent'));
       } else {
+        stopOtpRetriever({ clearPending: true });
         setError(response.message || t('Error resending code'));
       }
     } catch (error) {
+      stopOtpRetriever({ clearPending: true });
       console.error('Resend code error:', error);
 
       let errorMessage = t('Error resending code');
@@ -235,14 +283,15 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
                   ref={ref}
                   {...props}
                   value={verificationCode}
-                  onChangeText={setVerificationCode}
+                  onChangeText={handleVerificationCodeChange}
                   cellCount={6}
+                  maxLength={6}
                   keyboardType="number-pad"
-                  textContentType="oneTimeCode"
-                  autoComplete={Platform.select({
-                    android: 'sms-otp',
-                    default: 'one-time-code',
-                  })}
+                  inputMode="numeric"
+                  autoFocus
+                  textContentType={Platform.OS === 'ios' ? 'oneTimeCode' : undefined}
+                  autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+                  importantForAutofill={Platform.OS === 'android' ? 'yes' : undefined}
                   renderCell={({ index, symbol, isFocused }) => (
                     <Text
                       key={index}

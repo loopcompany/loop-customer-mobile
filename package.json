@@ -61,6 +61,7 @@
     "react-native-gifted-charts": "^1.4.64",
     "react-native-maps": "1.20.1",
     "react-native-modern-datepicker": "^1.0.0-beta.91",
+    "react-native-otp-verify": "^1.2.0",
     "react-native-pager-view": "6.7.1",
     "react-native-qrcode-svg": "^6.3.16",
     "react-native-reanimated": "~3.17.4",
