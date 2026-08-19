@@ -12,6 +12,7 @@ import ScreenHeaders from "../../components/ScreenHeaders";
 import NewStyles from "../../styles/NewStyles";
 import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
 import CustomStatusBar from "../../components/CustomStatusBar";
+import HintBadge from "../../components/HintBadge";
 
 const Method = ({ navigation }) => {
   const { t } = useTranslation();
@@ -91,53 +92,59 @@ const Method = ({ navigation }) => {
             }}
           >
             {/* Main header - سازمانی / دولتی */}
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("List");
-              }}
-              style={{
-                width: "75%",
-                backgroundColor: "#1a4480",
-                borderRadius: 12,
-                paddingVertical: 18,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 8,
-                shadowColor: "#1a4480",
-                shadowOpacity: 0.5,
-                shadowRadius: 8,
-                position: "relative",
-                marginBottom: 8,
-              }}
-            >
-              <Text
+            <View style={{ width: "75%", position: "relative", marginBottom: 8 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("List");
+                }}
                 style={{
-                  color: "#ffeb3b",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
+                  backgroundColor: "#1a4480",
+                  borderRadius: 12,
+                  paddingVertical: 18,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  elevation: 8,
+                  shadowColor: "#1a4480",
+                  shadowOpacity: 0.5,
+                  shadowRadius: 8,
+                  position: "relative",
                 }}
               >
-                {t("Comprehensive selection")}
-              </Text>
-              {/* Arrow down */}
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -10,
-                  alignSelf: "center",
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 12,
-                  borderRightWidth: 12,
-                  borderTopWidth: 10,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderTopColor: "#1a4480",
-                }}
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    fontFamily: "VazirBold",
+                    textAlign: "center",
+                  }}
+                >
+                  {t("Comprehensive selection")}
+                </Text>
+                {/* Arrow down */}
+                <View
+                  style={{
+                    position: "absolute",
+                    bottom: -10,
+                    alignSelf: "center",
+                    width: 0,
+                    height: 0,
+                    borderLeftWidth: 12,
+                    borderRightWidth: 12,
+                    borderTopWidth: 10,
+                    borderLeftColor: "transparent",
+                    borderRightColor: "transparent",
+                    borderTopColor: "#1a4480",
+                  }}
+                />
+              </TouchableOpacity>
+              <HintBadge
+                hint={t("Comprehensive selection guide")}
+                title={t("Comprehensive selection")}
+                size={26}
+                style={{ position: "absolute", top: -8, left: -8 }}
               />
-            </TouchableOpacity>
+            </View>
 
             {/* Login button for organizational */}
           </View>
@@ -150,48 +157,54 @@ const Method = ({ navigation }) => {
             }}
           >
             {/* Main header - شرکتی / خصوصی */}
-            <View
-              style={{
-                width: "75%",
-                backgroundColor: "#1a4480",
-                borderRadius: 12,
-                paddingVertical: 18,
-                alignItems: "center",
-                justifyContent: "center",
-                elevation: 8,
-                shadowColor: "#1a4480",
-                shadowOpacity: 0.5,
-                shadowRadius: 8,
-                position: "relative",
-                marginBottom: 8,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#ffeb3b",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  fontFamily: "VazirBold",
-                  textAlign: "center",
-                }}
-              >
-                {t("Systematic selection")}
-              </Text>
-              {/* Arrow down */}
+            <View style={{ width: "75%", position: "relative", marginBottom: 8 }}>
               <View
                 style={{
-                  position: "absolute",
-                  bottom: -10,
-                  alignSelf: "center",
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 12,
-                  borderRightWidth: 12,
-                  borderTopWidth: 10,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderTopColor: "#1a4480",
+                  backgroundColor: "#1a4480",
+                  borderRadius: 12,
+                  paddingVertical: 18,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  elevation: 8,
+                  shadowColor: "#1a4480",
+                  shadowOpacity: 0.5,
+                  shadowRadius: 8,
+                  position: "relative",
                 }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    fontFamily: "VazirBold",
+                    textAlign: "center",
+                  }}
+                >
+                  {t("Systematic selection")}
+                </Text>
+                {/* Arrow down */}
+                <View
+                  style={{
+                    position: "absolute",
+                    bottom: -10,
+                    alignSelf: "center",
+                    width: 0,
+                    height: 0,
+                    borderLeftWidth: 12,
+                    borderRightWidth: 12,
+                    borderTopWidth: 10,
+                    borderLeftColor: "transparent",
+                    borderRightColor: "transparent",
+                    borderTopColor: "#1a4480",
+                  }}
+                />
+              </View>
+              <HintBadge
+                hint={t("Systematic selection guide")}
+                title={t("Systematic selection")}
+                size={26}
+                style={{ position: "absolute", top: -8, left: -8 }}
               />
             </View>
 
@@ -227,110 +240,6 @@ const Method = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Bottom yellow sections with arrows - positioned absolutely */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 20,
-            right: 0,
-            left: 0,
-          }}
-        >
-          {/* First yellow section - Full width banner */}
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: "#ffeb3b",
-              paddingVertical: 8,
-              marginBottom: 10,
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 10,
-            }}
-          >
-            {/* Dotted line */}
-            <View
-              style={{
-                flex: 1,
-                borderTopWidth: 2,
-                borderTopColor: "#000",
-                borderStyle: "dotted",
-                marginRight: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: "VazirBold",
-                color: "#000",
-                textAlign: "center",
-              }}
-            >
-              {t("Comprehensive selection guide")}
-            </Text>
-            {/* Red arrow pointing down */}
-            <View
-              style={{
-                marginLeft: 15,
-                width: 0,
-                height: 0,
-                borderLeftWidth: 8,
-                borderRightWidth: 8,
-                borderTopWidth: 12,
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                borderTopColor: "#ff0000",
-              }}
-            />
-          </View>
-
-          {/* Second yellow section - Full width banner */}
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: "#ffeb3b",
-              paddingVertical: 8,
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 10,
-            }}
-          >
-            {/* Dotted line */}
-            <View
-              style={{
-                flex: 1,
-                borderTopWidth: 2,
-                borderTopColor: "#000",
-                borderStyle: "dotted",
-                marginRight: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: "VazirBold",
-                color: "#000",
-                textAlign: "center",
-              }}
-            >
-              {t("Systematic selection guide")}
-            </Text>
-            {/* Red arrow pointing down */}
-            <View
-              style={{
-                marginLeft: 15,
-                width: 0,
-                height: 0,
-                borderLeftWidth: 8,
-                borderRightWidth: 8,
-                borderTopWidth: 12,
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                borderTopColor: "#ff0000",
-              }}
-            />
-          </View>
-        </View>
       </ImageBackground>
     </View>
   );

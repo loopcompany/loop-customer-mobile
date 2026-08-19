@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import moment from 'moment-jalaali';
 import { createStyles } from '../../styles/NewStyles';
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor4, themeColor5 } from '../../theme/Color';
+import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor14 } from '../../theme/Color';
 import { imageUri, mainUri, uri } from '../../services/URL';
 import OfferItem from './OfferItem';
 import axios from 'axios';
@@ -306,14 +306,14 @@ export default function Club({ navigation }) {
                     <View style={{
                       marginTop: 20,
                       padding: 15,
-                      backgroundColor: '#fff3cd',
+                      backgroundColor: themeColor14.bgColor(1),
                       borderRadius: 10,
                       alignItems: 'center'
                     }}>
-                      <Text style={[NewStyles.text10, { textAlign: 'center', color: '#856404' }]}>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', color: themeColor0.color }]}>
                         {t('You have participated this week! 🎉')}
                       </Text>
-                      <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: '#856404' }]}>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: themeColor0.color }]}>
                         {t('Next participation:')} {moment(nextPlayDate).format('jYYYY/jMM/jDD')}
                       </Text>
                     </View>

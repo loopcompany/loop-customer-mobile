@@ -13,9 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from './Footer';
 import ScreenHeaders from '../components/ScreenHeaders';
 import ScreenTitle from '../components/ScreenTitle';
+import HintBadge from '../components/HintBadge';
 import NewStyles from '../styles/NewStyles';
 import { themeColor10 } from '../theme/Color';
-export default function DeviceModelInfoScreen({ navigation }) {
+export default function DeviceModelInfoScreen({ navigation, route }) {
+  const category = route?.params?.category || 'لپ تاپ';
   const [visibleSection, setVisibleSection] = useState(null);
   const [techGender, setTechGender] = useState('آقا');
   const [timeSlot, setTimeSlot] = useState('10-12');
@@ -28,11 +30,10 @@ export default function DeviceModelInfoScreen({ navigation }) {
   const genders = ['آقا', 'خانم'];
 
   return (
-    <ImageBackground source={require('../assets/moon.jpg')} style={styles.background} >
+    <ImageBackground source={require('../assets/moon.jpg')} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
   
-        <ScreenHeaders 
-          title={'لپ تاپ'}  
-          onPressRight={() => navigation.navigate('NextScreen')} 
+        <ScreenHeaders
+          title={category}
         />
         <ScrollView contentContainerStyle={styles.container} edges={['left', 'right']}>
           <ScreenTitle title={'بررسی دستگاه'} />
@@ -226,14 +227,14 @@ export default function DeviceModelInfoScreen({ navigation }) {
 // 🔁 Reusable Section Component
 const FormSection = ({ label, visible, onPress, children, yellowText }) => (
   <>
-    <TouchableOpacity style={styles.sectionButton} onPress={onPress}>
-      <Text style={NewStyles.text4}>{label}</Text>
-    </TouchableOpacity>
+    <View style={styles.sectionButtonRow}>
+      <TouchableOpacity style={styles.sectionButton} onPress={onPress}>
+        <Text style={NewStyles.text4}>{label}</Text>
+      </TouchableOpacity>
+      <HintBadge hint={yellowText} title={label} style={styles.sectionHintBadge} />
+    </View>
     {visible && (
       <View style={styles.sectionContent}>
-        <View style={styles.yellowLabel}>
-          <Text style={NewStyles.text10}>{yellowText}</Text>
-        </View>
         {children}
       </View>
     )}
@@ -264,11 +265,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
+  sectionButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
   sectionButton: {
+    flex: 1,
     backgroundColor: '#2196F3',
     borderRadius: 10,
     padding: 12,
-    marginVertical: 6,
+  },
+  sectionHintBadge: {
+    marginLeft: 10,
   },
   sectionButtonText: {
     color: '#fff',
@@ -281,19 +290,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     textAlign: 'right'
-  },
-  yellowLabel: {
-    backgroundColor: '#ffff33',
-    padding: 6,
-    marginBottom: 8,
-    borderRadius: 5,
-    textAlign: 'right'
-  },
-  yellowText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 13,
-    textAlign: 'right',
   },
   whiteInput: {
     backgroundColor: '#fff',

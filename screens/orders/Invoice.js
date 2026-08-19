@@ -15,6 +15,7 @@ import { fetchOrders } from '../../slices/orderSlice';
 import Loader from '../../components/Loader';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '../../components/ScreenHeaders';
+import HintBadge from '../../components/HintBadge';
 import { createStyles } from '../../styles/NewStyles';
 function Invoice({ route, navigation }) {
 
@@ -254,8 +255,11 @@ function Invoice({ route, navigation }) {
                         )}
 
                     </View>
-                    <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                        <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
+                    <View style={{ width: '90%', alignSelf: 'center', marginVertical: 10, alignItems: 'flex-end' }}>
+                        <HintBadge
+                            hint={t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}
+                            title={t('Invoice')}
+                        />
                     </View>
                     <Text style={NewStyles.title7}>{t('Thank you for your trust:')}</Text>
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>

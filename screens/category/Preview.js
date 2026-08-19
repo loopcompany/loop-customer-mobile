@@ -18,6 +18,7 @@ import { emptyAddress } from '../../slices/addressSlice';
 import Loader from '../../components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '../../components/ScreenHeaders';
+import HintBadge from '../../components/HintBadge';
 import { LinearGradient } from 'expo-linear-gradient';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
@@ -514,8 +515,11 @@ function Preview({ navigation }) {
                     </View>
                 </View>}
                 {imagePath && <Image style={[{ height: 250, margin: '5%', resizeMode: 'contain' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
-                <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                    <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
+                <View style={{ width: '90%', alignSelf: 'center', marginVertical: 10, alignItems: 'flex-end' }}>
+                    <HintBadge
+                        hint={t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}
+                        title={t('Preview')}
+                    />
                 </View>
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: 10 }]}>

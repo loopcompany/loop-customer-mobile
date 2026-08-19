@@ -662,6 +662,7 @@
   "Login to account": "Login to account",
   "Organization code": "Organization code",
   "Organization code *": "Organization code *",
+  "User code": "User code",
   "Password": "Password",
   "Password * (at least 8 characters)": "Password * (at least 8 characters)",
   "Password (at least 6 characters)": "Password (at least 6 characters)",
@@ -1554,5 +1555,6 @@
   "انتخاب جامع": "Enterprise Service",
   "Edit request": "Edit request",
   "Verification code": "Verification code",
-  "Recovery code sent": "Recovery code sent"
+  "Recovery code sent": "Recovery code sent",
+  "Guide": "Guide"
 }

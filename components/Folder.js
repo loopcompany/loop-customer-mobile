@@ -12,7 +12,9 @@ import { imageUri } from "../services/URL";
 import { useTranslation } from "react-i18next";
 import { createStyles } from "../styles/NewStyles";
 
-export default function Folder({ onPress, title, style, loading, image }) {
+// `image` مسیر تصویر روی سرور است (رفتار قبلی). برای کاشی‌هایی که تصویرشان محلی
+// است `imageSource` را بدهید و برای دسته‌هایی که اصلاً تصویر ندارند `icon` را.
+export default function Folder({ onPress, title, style, loading, image, imageSource, icon }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
@@ -22,10 +24,14 @@ export default function Folder({ onPress, title, style, loading, image }) {
    
   return (
     <TouchableOpacity disabled={loading} style={[styles.button, NewStyles.center, style, {justifyContent:'flex-start'}]} onPress={onPress}>
-      <Image
-        source={{ uri: `${imageUri}/${image}` }}
-        style={[styles.folderIcon]}
-      />
+      {imageSource || image ? (
+        <Image
+          source={imageSource || { uri: `${imageUri}/${image}` }}
+          style={[styles.folderIcon]}
+        />
+      ) : (
+        <View style={[styles.folderIcon, NewStyles.center]}>{icon}</View>
+      )}
       <Text style={NewStyles.title4}>{t(title)}</Text>
     </TouchableOpacity>
   );

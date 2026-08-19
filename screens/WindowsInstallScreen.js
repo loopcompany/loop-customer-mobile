@@ -17,7 +17,8 @@ import ScreenHeaders from "../components/ScreenHeaders";
 import RadioButton from "../components/RadioButton";
 import ScreenTitle from "../components/ScreenTitle";
 import NewStyles from "../styles/NewStyles";
-export default function WindowsInstallScreen({ navigation }) {
+export default function WindowsInstallScreen({ navigation, route }) {
+  const category = route?.params?.category || 'لپ تاپ';
   const windowsVersions = [
     {
       id: 1,
@@ -55,9 +56,9 @@ export default function WindowsInstallScreen({ navigation }) {
   ];
 
   return (
-    <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} >
+    <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
       <ScreenHeaders
-        title={'لپ تاپ'}
+        title={category}
       />
 
       <FlatList
@@ -65,7 +66,7 @@ export default function WindowsInstallScreen({ navigation }) {
         ListHeaderComponent={() => {
           return (
 
-            <ScreenTitle title={'نصب سیستم عامل'} onPress={() => navigation.navigate("DeviceModelInfoScreen")} />
+            <ScreenTitle title={'نصب سیستم عامل'} onPress={() => navigation.navigate("DeviceModelInfoScreen", { category })} />
           )
         }}
         data={windowsVersions}

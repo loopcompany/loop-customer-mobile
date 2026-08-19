@@ -50,6 +50,7 @@ export default function OrderTrackingScreen({ navigation, route }) {
     <ImageBackground
       source={require('../../assets/moon.jpg')}
       style={NewStyles.container}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} />
       <ScreenHeaders 

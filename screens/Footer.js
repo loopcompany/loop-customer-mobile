@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,13 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { themeColor0, themeColor10, themeColor13, themeColor4 } from "../theme/Color";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
+import { themeColor0, themeColor4 } from "../theme/Color";
+import { spacing } from "../theme/Spacing";
+import { radius } from "../theme/Radius";
+import { fontSize } from "../theme/Typography";
 import NewStyles from "../styles/NewStyles";
 
 export default function Footer() {
@@ -44,6 +50,14 @@ export default function Footer() {
     { id: 21, title: "حریم خصوصی", screen: "PrivacyScreen" },
   ]);
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // ساعت سینی سیستم - الهام‌گرفته از ساعت گوشه‌ی تسک‌بار ویندوز 7
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+  const timeLabel = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -88,24 +102,55 @@ export default function Footer() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      <View style={[styles.footer, NewStyles.rowWrapper]}>
+      {/* نوار پایین با الهام از تسک‌بار شیشه‌ای (Aero) ویندوز 7:
+          دکمه‌ی استارت گرد سمت چپ، دکمه‌های سنجاق‌شده‌ی وسط، سینی سیستم + ساعت سمت راست */}
+      <View style={styles.taskbar}>
+        <LinearGradient
+          colors={["#5b8fd6", "#2f5fa8", "#0f2d5c"]}
+          locations={[0, 0.45, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <BlurView intensity={25} tint="dark" style={StyleSheet.absoluteFill} />
+        <LinearGradient
+          colors={["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"]}
+          style={styles.glassSheen}
+          pointerEvents="none"
+        />
 
+        <View style={styles.taskbarRow}>
+          <TouchableOpacity
+            onPress={() => setMenuVisible(!menuVisible)}
+            style={styles.startOrbWrap}
+            activeOpacity={0.75}
+          >
+            <View style={styles.startOrbGlow} pointerEvents="none" />
+            <Image source={require("../assets/icon.png")} style={styles.startOrb} />
+            <View style={styles.startOrbShine} pointerEvents="none" />
+          </TouchableOpacity>
 
+          <TouchableOpacity
+            onPress={() => { Linking.openURL(`tel:02121164552`) }}
+            style={styles.taskbarButton}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="call-outline" size={16} color={themeColor4.bgColor(1)} />
+            <Text style={styles.taskbarButtonText}>21164552</Text>
+          </TouchableOpacity>
 
+          <TouchableOpacity style={styles.taskbarButton} activeOpacity={0.75}>
+            <Ionicons name="headset-outline" size={16} color={themeColor4.bgColor(1)} />
+            <Text style={styles.taskbarButtonText}>پشتیبانی</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { Linking.openURL(`tel:02121164552`) }}>
-          <Text style={NewStyles.text4}>21164552</Text>
-        </TouchableOpacity>
-        <Text style={NewStyles.text4}>فا</Text>
-        <TouchableOpacity style={styles.supportButton}>
-          <Text style={NewStyles.text4}>پشتیبانی</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Image
-            source={require("../assets/logo.png")}
-            style={styles.footerLogo}
-          />
-        </TouchableOpacity>
+          <View style={{ flex: 1 }} />
+
+          <View style={styles.trayCluster}>
+            <Ionicons name="globe-outline" size={14} color={themeColor4.bgColor(0.9)} />
+            <Text style={styles.trayText}>فا</Text>
+            <View style={styles.trayDivider} />
+            <Text style={styles.trayClock}>{timeLabel}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -166,33 +211,105 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  footer: {
-backgroundColor: themeColor13.bgColor(1),
+  taskbar: {
     width: "100%",
-    paddingHorizontal: 15,
+    overflow: "hidden",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.25)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  footerLogo: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
+  glassSheen: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "55%",
   },
-  supportButton: {
-    backgroundColor: "#005b9f",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+  taskbarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minHeight: 64,
+  },
+  startOrbWrap: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: spacing.sm,
+  },
+  startOrb: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: "rgba(255,215,0,0.85)",
+  },
+  startOrbGlow: {
+    position: "absolute",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,215,0,0.18)",
+  },
+  startOrbShine: {
+    position: "absolute",
+    top: 5,
+    left: 11,
+    width: 20,
+    height: 9,
     borderRadius: 5,
+    backgroundColor: "rgba(255,255,255,0.35)",
   },
-  supportText: {
-    color: "#fff",
-    fontWeight: "bold",
+  taskbarButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.28)",
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    marginRight: spacing.sm,
   },
-  language: {
+  taskbarButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: fontSize.xs,
+    fontFamily: "VazirBold",
+    marginLeft: 6,
   },
-  phone: {
+  trayCluster: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  trayText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: fontSize.xs,
+    fontFamily: "VazirBold",
+    marginLeft: 4,
+  },
+  trayDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    marginHorizontal: spacing.sm,
+  },
+  trayClock: {
+    color: "#fff",
+    fontSize: fontSize.sm,
+    fontFamily: "VazirBold",
+    letterSpacing: 0.5,
   },
   menuBox: {
     backgroundColor: "rgba(255,255,255,0.95)",

@@ -192,6 +192,7 @@ export const MenuProvider = ({ children }) => {
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
     const [currentRouteName, setCurrentRouteName] = useState('');
+    const [showCodeHint, setShowCodeHint] = useState(false);
     const insets = useSafeAreaInsets();
     // Get user type and auth token from Redux
     const userType = useSelector(state => state.auth.userType);
@@ -326,6 +327,11 @@ export const MenuProvider = ({ children }) => {
         Linking.openURL(`tel:02121164552`);
     }, []);
 
+    const handleCodePress = useCallback(() => {
+        setShowCodeHint(true);
+        setTimeout(() => setShowCodeHint(false), 1800);
+    }, []);
+
 
     const renderMenuItem = useCallback(({ item }) => (
         <TouchableOpacity
@@ -429,10 +435,19 @@ export const MenuProvider = ({ children }) => {
                                 style={{ height: 40, width: 60, resizeMode: 'contain', }}
                             />
                         </TouchableOpacity>
-                        <View>
-                            <Text style={NewStyles.text4}>
-                                {user?.code}
-                            </Text>
+                        <View style={styles.codeWrapper}>
+                            {showCodeHint && (
+                                <View style={styles.codeHintBubble}>
+                                    <Text style={styles.codeHintText}>
+                                        {userType === 'organization' ? t('Organization code') : t('User code')}
+                                    </Text>
+                                </View>
+                            )}
+                            <TouchableOpacity onPress={handleCodePress}>
+                                <Text style={NewStyles.text4}>
+                                    {user?.code}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
 
                     </View>
@@ -514,10 +529,34 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         backgroundColor: 'rgba(100, 180, 240, 0.4)',
         width: "100%",
         paddingHorizontal: 15,
-        position: 'absolute',
+        position: Platform.OS === 'web' ? 'fixed' : 'absolute',
         bottom: 0,
+        left: 0,
+        zIndex: 10,
         borderTopWidth: 1.5,
         borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    codeWrapper: {
+        position: 'relative',
+        alignItems: 'center',
+    },
+    codeHintBubble: {
+        position: 'absolute',
+        bottom: '100%',
+        marginBottom: 8,
+        backgroundColor: themeColor0.bgColor(0.95),
+        borderRadius: 8,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+    codeHintText: {
+        color: '#fff',
+        fontSize: 11,
+        fontFamily: 'VazirBold',
     },
     footerLogo: {
         width: 50,

@@ -8,6 +8,7 @@ import { selectDate, setGeneralData, updateServiceScheduleField } from '../slice
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { imageUri } from '../services/URL';
+import HintBadge from './HintBadge';
 
 export default function Date({ step, data, isServiceSchedule }) {
 
@@ -93,12 +94,10 @@ export default function Date({ step, data, isServiceSchedule }) {
                         />
                     }
                     <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
+                    <HintBadge hint={data?.des} title={data?.title} size={22} />
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
-            {show && data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}>
-                <Text style={NewStyles.text10}>{data?.des}</Text>
-            </View>}
             {show && <FlatList
                 contentContainerStyle={{ gap: 10 }}
                 horizontal inverted showsHorizontalScrollIndicator={false}

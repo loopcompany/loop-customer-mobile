@@ -28,6 +28,7 @@ export default function OrderSummaryScreen({ navigation }) {
     <ImageBackground
       source={require('../../assets/moon.jpg')}
       style={NewStyles.container}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <CustomStatusBar />
       <View style={{ padding: 10 }}>

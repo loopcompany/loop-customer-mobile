@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, StatusBar, Platform } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View, StatusBar, Platform } from "react-native";
 import React from "react";
 import { useTranslation } from 'react-i18next';
 import NewStyles from "../styles/NewStyles";
@@ -14,7 +14,6 @@ const ScreenHeaders = ({
   onBackPress
 }) => {
   const { t } = useTranslation();
-  const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
   const navigation = useNavigation();
 
@@ -29,7 +28,6 @@ const ScreenHeaders = ({
 
   return (
     <View style={[styles.header, NewStyles.rowWrapper, {
-      width: width,
       paddingTop: statusBarHeight,
       height: 50 + statusBarHeight
     }]}>

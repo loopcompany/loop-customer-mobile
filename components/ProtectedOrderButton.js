@@ -247,19 +247,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'VazirBold',
     textAlign: 'right',
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: 'Vazir-Light',
+    fontFamily: 'VazirLight',
     textAlign: 'right',
     marginTop: 4,
     opacity: 0.8,
   },
   statusText: {
     fontSize: 12,
-    fontFamily: 'Vazir-Light',
+    fontFamily: 'VazirLight',
     textAlign: 'right',
     marginTop: 6,
     color: themeColor11.color,

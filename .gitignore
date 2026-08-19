@@ -2,39 +2,114 @@
 
 # dependencies
 node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
-.kotlin/
+# Native - iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace
+!ios/*.xcworkspace/contents.xcworkspacedata
+ios/*.xcuserstate
+ios/**/xcuserdata/
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.ipa
 
-# Metro
+# Native - Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/*.iml
+android/.idea/
+android/app/release/
+*.hprof
+.cxx/
+.kotlin/
+*.keystore
+!debug.keystore
+*.apk
+*.aab
+
+# Metro / React Native
 .metro-health-check*
+.metro-cache/
+*.jsbundle
 
-# debug
+# Debug logs
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+pnpm-debug.*
+lerna-debug.*
+*.log
+logs/
+
+# Testing
+coverage/
+
+# Build outputs
+build/
+out/
 
 # macOS
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# local env files - never commit secrets
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
 
 # typescript
 *.tsbuildinfo
 
-# VSCode
-.vscode/
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# EAS
+.easignore
+
+# Sentry / source maps
+*.map
+
+# Graphify (local knowledge-graph output, not part of the app)
+graphify-out/

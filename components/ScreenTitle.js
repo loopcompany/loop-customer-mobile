@@ -4,24 +4,25 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import NewStyles from '../styles/NewStyles'
 import { themeColor0 } from '../theme/Color'
 
-const ScreenTitle = ({title, onPress}) => {
+const ScreenTitle = ({title, onPress, style, textStyle}) => {
     const insets = useSafeAreaInsets()
     const { width } = Dimensions.get('window')
-    
+
     return (
-        <Pressable 
+        <Pressable
             style={[
-                styles.title, 
+                styles.title,
                 NewStyles.border10,
                 {
                     marginTop: insets.top > 0 ? insets.top + 10 : Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 20,
                     width: width * 0.9,
                     alignSelf: 'center'
-                }
-            ]} 
+                },
+                style,
+            ]}
             onPress={onPress}
         >
-            <Text style={NewStyles.title4}>{title}</Text>
+            <Text style={[NewStyles.title4, textStyle]}>{title}</Text>
         </Pressable>
     )
 }

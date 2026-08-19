@@ -36,7 +36,7 @@ const AccardeonComponent = ({ item, expandedItems, setExpandedItems, needMap = f
       {(isExpanded) && (
         <View style={styles.termContent}>
           {item.description &&
-            <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10 }}>
+            <View style={{ backgroundColor: themeColor14.bgColor(1), padding: 10 }}>
               <Text style={[styles.termDescription,]}>{cleanText(item.description)}</Text>
             </View>
           }

@@ -19,6 +19,8 @@ import ContractScreen from "./org/ContractScreen";
 import DiscountCodeScreen from "./org/DiscountCodeScreen";
 import HardwareSelectionScreen from "./org/HardwareSelectionScreen";
 import List from "./org/List";
+import SystematicCategoryScreen from "./org/SystematicCategoryScreen";
+import SystematicDeviceScreen from "./org/SystematicDeviceScreen";
 import Grouping from "./org/logreg/Grouping";
 import Login from "./org/logreg/Login";
 import Method from "./org/logreg/Method";
@@ -234,6 +236,8 @@ const App = () => {
         TechnicianVisitScreen: 'technician-visit',
         HardwareSelectionScreen: 'hardware-selection',
         ComprehensiveSelectionScreen: 'comprehensive-selection',
+        SystematicCategoryScreen: 'systematic-selection',
+        SystematicDeviceScreen: 'systematic-selection/:categoryId',
         GuideScreen: 'guide',
         HardwareIssueScreen: 'hardware-issue',
         WindowsInstallScreen: 'windows-install',
@@ -447,6 +451,8 @@ const App = () => {
                   <Stack.Screen component={TechnicianVisitScreen} name="TechnicianVisitScreen" />
                   <Stack.Screen component={HardwareSelectionScreen} name="HardwareSelectionScreen" />
                   <Stack.Screen component={ComprehensiveSelectionScreen} name="ComprehensiveSelectionScreen" />
+                  <Stack.Screen component={SystematicCategoryScreen} name="SystematicCategoryScreen" />
+                  <Stack.Screen component={SystematicDeviceScreen} name="SystematicDeviceScreen" />
                   <Stack.Screen component={GuideScreen} name="GuideScreen" />
                   <Stack.Screen component={HardwareIssueScreen} name="HardwareIssueScreen" />
                   <Stack.Screen component={WindowsInstallScreen} name="WindowsInstallScreen" />

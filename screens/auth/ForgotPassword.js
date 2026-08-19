@@ -291,14 +291,14 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         marginBottom: 10,
-        fontFamily: 'Vazir-Bold',
+        fontFamily: 'VazirBold',
     },
     instructionsText: {
         fontSize: 14,
         color: '#fff',
         textAlign: 'center',
         lineHeight: 22,
-        fontFamily: 'Vazir-Light',
+        fontFamily: 'VazirLight',
     },
     inputContainer: {
         width: '100%',
@@ -313,7 +313,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         fontSize: 12,
         marginTop: 5,
         marginRight: 10,
-        fontFamily: 'Vazir-Light',
+        fontFamily: 'VazirLight',
     },
     backToLoginContainer: {
         marginTop: 15,

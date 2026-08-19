@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import HintBadge from '../components/HintBadge';
 
 export default function TechnicianBookingScreen({navigation}) {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function TechnicianBookingScreen({navigation}) {
     <ImageBackground
       source={require('../assets/moon.jpg')}
       style={styles.background}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{t("Technician Visit Booking")}</Text>
@@ -95,10 +97,13 @@ export default function TechnicianBookingScreen({navigation}) {
           <Text style={styles.actionText}>{t("Printer Software")}</Text>
         </TouchableOpacity>
 
-        {/* متن هشدار زرد */}
-        <Text style={styles.notice}>
-          {t("(Connect to Printer Software section)")}
-        </Text>
+        {/* راهنمای اتصال به بخش نرم‌افزار چاپگر */}
+        <View style={{ alignItems: 'flex-end' }}>
+          <HintBadge
+            hint={t("(Connect to Printer Software section)")}
+            title={t('Printer Software')}
+          />
+        </View>
 
         {/* دکمه ثبت نهایی */}
         <TouchableOpacity style={styles.submitButton}>
@@ -195,11 +200,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  notice: {
-    marginTop: 10,
-    color: '#ffeb3b',
-    fontWeight: 'bold',
   },
   submitButton: {
     backgroundColor: '#2196f3',

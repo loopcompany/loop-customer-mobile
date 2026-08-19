@@ -114,7 +114,7 @@ const Grouping = ({ navigation }) => {
             >
               <Text
                 style={{
-                  color: "#ffeb3b",
+                  color: "#fff",
                   fontSize: 20,
                   fontFamily: "VazirBold",
                   textAlign: "center",

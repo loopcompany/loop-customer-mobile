@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 16,
-    fontFamily: 'Vazir-Light',
+    fontFamily: 'VazirLight',
     color: themeColor10.color,
     flex: 1,
     textAlign: 'right',
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 12,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'VazirBold',
     color: themeColor4.bgColor(1),
   },
   section: {
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'VazirBold',
     color: themeColor10.color,
     marginBottom: 15,
     textAlign: 'right',
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 14,
-    fontFamily: 'Vazir-Light',
+    fontFamily: 'VazirLight',
     color: themeColor3.color,
     textAlign: 'right',
     lineHeight: 22,

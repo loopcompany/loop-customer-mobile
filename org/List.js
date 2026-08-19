@@ -1,77 +1,130 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import Footer from '../screens/Footer';
+import React from 'react';
+import { View, Text, TouchableOpacity, ImageBackground, Image, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
+import HintBadge from '../components/HintBadge';
+import { themeColor0, themeColor4 } from '../theme/Color';
 import CustomStatusBar from '../components/CustomStatusBar';
 
+const entryOptions = [
+  {
+    id: 'comprehensive',
+    title: 'انتخاب جامع',
+    icon: 'share-social-outline',
+    screen: 'ComprehensiveSelectionScreen',
+    hint: 'در «انتخاب جامع» تمام خدمات نرم‌افزاری، سخت‌افزاری و تامین تجهیزات سازمان را یکجا در یک فرم کامل ثبت می‌کنید.',
+  },
+  {
+    id: 'systematic',
+    title: 'انتخاب سیستماتیک',
+    icon: 'checkmark-circle-outline',
+    screen: 'SystematicCategoryScreen',
+    hint: 'در «انتخاب سیستماتیک» دسته‌بندی مورد نظر (کیس، لپ‌تاپ، پرینتر و ...) را جداگانه انتخاب و سفارش می‌دهید.',
+  },
+];
+
 const List = ({ navigation }) => {
-
-  const handleNavigation = (screenName) => {
-    // Navigate to respective screen
-    navigation.navigate(screenName);
-  };
-
-  const menuItems = [
-    { id: 1, title: 'توافق نامه', screen: 'ContractScreen' },
-    { id: 2, title: 'انتخاب جامع', screen: 'ComprehensiveSelectionScreen' },
-    { id: 3, title: 'تامین قطعات / کالا', screen: 'HardwareSelectionScreen' },
-    { id: 4, title: 'رزرو / مراجعه تکنسین', screen: 'TechnicianVisitScreen' },
-    { id: 5, title: 'انتخاب تکنسین', screen: 'Choosingatechnician' },
-    { id: 6, title: 'تخفیف پنل / کد تخفیف', screen: 'DiscountCodeScreen' },
-    { id: 7, title: 'اطلاعات اپراتور', screen: 'OperatorInfoScreen' },
-    { id: 8, title: 'نمایش / استعلام / ثبت سفارش', screen: 'OrderMenuScreen' }
-  ];
+  const organizationName = useSelector(
+    (state) => state?.organization?.profile?.company_name
+  );
 
   return (
-    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}> 
+    <ImageBackground
+      source={require('../assets/moon.jpg')}
+      style={{ flex: 1 }}
+      imageStyle={{ width: '100%', height: '100%' }}
+    >
       <CustomStatusBar />
-      <ScreenHeaders
-        title="سازمانی / دولتی"
-      />
-      
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
-        
-        {/* Menu Items */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 20 }}>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => handleNavigation(item.screen)}
-              style={{ 
-                width: '100%',
-                backgroundColor: '#1976d2', 
-                borderRadius: 12, 
-                paddingVertical: 15, 
-                marginBottom: 12, 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                elevation: 4,
-                shadowColor: '#1976d2',
-                shadowOpacity: 0.3,
-                shadowRadius: 5,
-                position: 'relative'
-              }}
-            >
-              <Text style={{ 
-                color: '#fff', 
-                fontSize: 16, 
-                fontWeight: 'bold', 
-                fontFamily: 'VazirBold',
-                textAlign: 'center' 
-              }}>{item.title}</Text>
-              
-              {/* Yellow arrow down */}
+      <ScreenHeaders title={organizationName || 'سازمانی / دولتی'} />
 
-            </TouchableOpacity>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+        <Image
+          source={require('../assets/logo.png')}
+          style={{ width: 140, height: 70, resizeMode: 'contain', marginBottom: 50 }}
+        />
+
+        <View style={{ width: '100%' }}>
+          {entryOptions.map((item) => (
+            <View key={item.id} style={styles.optionWrapper}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate(item.screen)}
+                style={styles.iconTile}
+              >
+                <Ionicons name={item.icon} size={38} color={themeColor4.bgColor(1)} />
+              </TouchableOpacity>
+
+              <View style={styles.labelRow}>
+                <View style={styles.hintBadgeSpacer} />
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate(item.screen)}
+                  style={styles.labelRibbon}
+                >
+                  <Text style={styles.labelText}>{item.title}</Text>
+                </TouchableOpacity>
+                <HintBadge hint={item.hint} title={item.title} style={styles.hintBadge} />
+              </View>
+            </View>
           ))}
         </View>
-
-      </ScrollView>
-      
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
+
+const styles = StyleSheet.create({
+  optionWrapper: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  iconTile: {
+    width: 84,
+    height: 84,
+    borderRadius: 20,
+    backgroundColor: themeColor0.bgColor(1),
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  labelRibbon: {
+    backgroundColor: themeColor0.bgColor(0.92),
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  labelText: {
+    color: themeColor4.bgColor(1),
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: 'VazirBold',
+    textAlign: 'center',
+  },
+  hintBadge: {
+    marginLeft: 8,
+  },
+  hintBadgeSpacer: {
+    width: 32,
+  },
+});
 
 export default List;

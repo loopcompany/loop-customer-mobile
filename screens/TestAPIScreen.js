@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'VazirBold',
     color: themeColor0.color,
     textAlign: 'center',
     marginBottom: 20,
@@ -78,13 +78,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'VazirBold',
     color: themeColor0.color,
     marginBottom: 10,
   },
   statusText: {
     fontSize: 14,
-    fontFamily: 'Vazir',
+    fontFamily: 'VazirLight',
     color: themeColor0.color,
     marginBottom: 5,
   },

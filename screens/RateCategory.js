@@ -17,6 +17,7 @@ import ScreenHeaders from '../components/ScreenHeaders';
 import Footer from './Footer';
 import { formatJalaaliDate, formatPrice } from '../helpers/Common';
 import { themeColor0, themeColor1, themeColor4 } from '../theme/Color';
+import HintBadge from '../components/HintBadge';
 import { RefreshControl } from 'react-native';
 import letterRatesCategoryAPI from '../services/LetterRatesService';
 import { useNavigation } from '@react-navigation/native';
@@ -91,8 +92,11 @@ export default function RateCategory() {
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t('Rate List')} />
-      <View style={[{ padding: 10, backgroundColor: themeColor1.bgColor(1), marginHorizontal: '5%', marginTop: 15 }, NewStyles.border10]}>
-        <Text style={[NewStyles.title10, { textAlign: 'center', fontSize: 14 }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
+      <View style={{ marginHorizontal: '5%', marginTop: 15, alignItems: 'flex-end' }}>
+        <HintBadge
+          hint={t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}
+          title={t('Rate List')}
+        />
       </View>
       <View style={[{ flex: 1 }]}>
         <FlatList

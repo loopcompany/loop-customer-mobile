@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1 } from '../theme/Color';
+import { themeColor0, themeColor14 } from '../theme/Color';
 import ScreenTitle from '../components/ScreenTitle';
 import CustomStatusBar from '../components/CustomStatusBar';
 import Footer from '../screens/Footer';
@@ -44,8 +44,8 @@ const ContractScreen = ({ navigation }) => {
         <TouchableOpacity style={[NewStyles.button, NewStyles.shadow, { width: '95%', alignSelf: 'center', backgroundColor: '#b2e0c7', borderRadius: 12, marginBottom: 8, paddingVertical: 10 }]}>
           <Text style={[NewStyles.title, { color: themeColor0.bgColor(1), fontSize: 15 }]}>نمونه توافق نامه معین</Text>
         </TouchableOpacity>
-        {/* راهنمای زرد */}
-        <TouchableOpacity onPress={pickDocument} style={[NewStyles.center, { width: '95%', alignSelf: 'center', backgroundColor: '#ffe600', borderRadius: 8, marginBottom: 10, paddingVertical: 6 }]}>
+        {/* دکمه بارگذاری */}
+        <TouchableOpacity onPress={pickDocument} style={[NewStyles.center, { width: '95%', alignSelf: 'center', backgroundColor: themeColor14.bgColor(1), borderRadius: 8, marginBottom: 10, paddingVertical: 6 }]}>
           <Text style={[NewStyles.text3, { fontWeight: 'bold', fontSize: 13 }]}>بارگذاری اطلاعات جامع / درخواست ها / ویرایش توافق نامه</Text>
         </TouchableOpacity>
         {selectedFile ? (

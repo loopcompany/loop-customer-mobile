@@ -8,7 +8,7 @@ import { createStyles } from '../../styles/NewStyles';
 import { uri } from '../../services/URL'
 import NewStyles from '../../styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor1, themeColor4, themeColor5 } from '../../theme/Color'
+import { themeColor0, themeColor4, themeColor5, themeColor14 } from '../../theme/Color'
 import Button from '../../components/Button'
 import ConfirmationModal from '../../components/ConfirmationModal'
 
@@ -128,7 +128,7 @@ const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) =
     return (
         <View style={[{ width: '90%', alignSelf: 'center', paddingBottom: 10 }, NewStyles.center]}>
             {/* توضیحات */}
-            <View style={[styles.noticeBox, !isConfirmed && { backgroundColor: themeColor1.bgColor(1) }]}>
+            <View style={[styles.noticeBox, !isConfirmed && { backgroundColor: themeColor14.bgColor(1) }]}>
                 <Text style={[NewStyles.text10]}>
                     {isConfirmed
                         ? t('The delivery report has been confirmed by you')
@@ -363,7 +363,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         alignSelf: 'center',
     },
     noticeBox: {
-        backgroundColor: themeColor1.bgColor(1),
+        backgroundColor: themeColor5.bgColor(1),
         padding: 10,
         ...NewStyles.border10,
         marginBottom: 12,

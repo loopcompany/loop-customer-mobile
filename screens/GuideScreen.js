@@ -15,21 +15,24 @@ import ScreenTitle from './../components/ScreenTitle';
 import Button from '../components/Button';
  // فعال کردن RTL برای زبان فارسی
 
-export default function GuideScreen({ navigation }) {
+export default function GuideScreen({ navigation, route }) {
+  const category = route?.params?.category || 'لپ تاپ';
+
   return (
     <ImageBackground
       source={require('../assets/moon.jpg')} // مسیر بک‌گراند خودت
       style={styles.container}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       {/* لوگو بالا */}
       <Image source={require('../assets/logo.png')} style={NewStyles.logo} />
 
       {/* دکمه نرم افزار */}
       <View style={{ width: '100%', paddingHorizontal:20 }}>
-        <Button title={'نرم افزار'} onPress={() => navigation.navigate('SoftwareInstallScreen')}/>
+        <Button title={'نرم افزار'} onPress={() => navigation.navigate('SoftwareInstallScreen', { category })}/>
       </View>
       <View style={{ width: '100%', paddingHorizontal:20 }}>
-        <Button title={'سخت افزار'} onPress={() => navigation.navigate('HardwareIssueScreen')}/>
+        <Button title={'سخت افزار'} onPress={() => navigation.navigate('HardwareIssueScreen', { category })}/>
       </View>
 
       {/* دکمه سخت افزار */}

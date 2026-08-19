@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     },
     profileImageThumbnail: {
         fontSize: 20,
-        fontFamily: 'iransans',
+        fontFamily: 'VazirBold',
         color: themeColor5.bgColor(1),
         textTransform: 'uppercase',
     },

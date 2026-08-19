@@ -2,7 +2,6 @@ import { ActivityIndicator, StyleSheet } from 'react-native';
 import React from 'react';
 
 import { themeColor1, themeColor5 } from '../theme/Color';
-import { deviceHeight, deviceWidth } from '../styles/Styles';
 
 export default function Loader() {
 
@@ -13,8 +12,8 @@ export default function Loader() {
 
 const styles = StyleSheet.create({
     loaderWrapper: {
-        height: deviceHeight,
-        width: deviceWidth,
+        height: '100%',
+        width: '100%',
         backgroundColor: themeColor5.bgColor(1),
     },
 })

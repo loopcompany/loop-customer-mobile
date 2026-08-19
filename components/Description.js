@@ -4,6 +4,7 @@ import { useState } from 'react'
 import NewStyles from '../styles/NewStyles';
 import Filters from './Filters';
 import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
+import HintBadge from './HintBadge';
 
 export default function Description({ data }) {
 
@@ -14,7 +15,12 @@ export default function Description({ data }) {
             <Filters data={data?.field_details} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
             {data?.field_details?.[activeIndex]?.field_charts?.length > 0 ?
                 <View style={NewStyles.seperator1}>
-                    {data?.field_details?.[activeIndex]?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text3}>{data?.field_details?.[activeIndex]?.des}</Text></View>}
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <HintBadge
+                            hint={data?.field_details?.[activeIndex]?.des}
+                            title={data?.field_details?.[activeIndex]?.title}
+                        />
+                    </View>
                     <FlatList
                         style={{ gap: 50 }}
                         showsVerticalScrollIndicator={false}

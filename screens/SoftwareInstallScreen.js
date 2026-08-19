@@ -19,8 +19,8 @@ import { themeColor4 } from "../theme/Color";
 import ScreenHeaders from "../components/ScreenHeaders";
 import ScreenTitle from "../components/ScreenTitle";
 import { SafeAreaView } from 'react-native-safe-area-context';
-export default function SoftwareInstallScreen({ navigation }) {
-
+export default function SoftwareInstallScreen({ navigation, route }) {
+  const category = route?.params?.category || 'لپ تاپ';
 
   const data = [
     {
@@ -66,10 +66,10 @@ export default function SoftwareInstallScreen({ navigation }) {
   ]
   return (
 
-    <ImageBackground source={require("../assets/moon.jpg")} style={styles.background} >
+    <ImageBackground source={require("../assets/moon.jpg")} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
 
       <ScreenHeaders
-        title={'لپ تاپ'}
+        title={category}
       />
       {/* عنوان اصلی */}
 
@@ -77,7 +77,7 @@ export default function SoftwareInstallScreen({ navigation }) {
       <FlatList
         ListHeaderComponent={() => {
           return (
-            <ScreenTitle title={'نرم افزار'} onPress={() => navigation.navigate("WindowsInstallScreen")} />
+            <ScreenTitle title={'نرم افزار'} onPress={() => navigation.navigate("WindowsInstallScreen", { category })} />
           )
         }}
         data={data}

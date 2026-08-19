@@ -5,8 +5,9 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { useDispatch, useSelector } from 'react-redux';
 
 import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor5, themeColor6 } from '../theme/Color';
+import { themeColor0, themeColor5, themeColor6 } from '../theme/Color';
 import { disableDateAndTime, toggleUrgent } from '../slices/stepSlice';
+import HintBadge from './HintBadge';
 
 export default function Urgent({ step, data }) {
 
@@ -18,8 +19,8 @@ export default function Urgent({ step, data }) {
             <View style={[NewStyles.row, { gap: 5 }]}>
                 <Ionicons name={data?.icon_name} size={24} color={themeColor0.bgColor(1)} />
                 <Text style={NewStyles.title}>{data?.title} {data?.is_required == 1 && <View style={[{backgroundColor: themeColor6.bgColor(1), paddingHorizontal: 5 }, NewStyles.border5]}><Text style={NewStyles.text4}>الزامی</Text></View>}</Text>
+                <HintBadge hint={data?.des} title={data?.title} size={22} />
             </View>
-            {data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{data?.des}</Text></View>}
             <BouncyCheckbox
                 size={25}
                 fillColor={themeColor0.bgColor(1)}

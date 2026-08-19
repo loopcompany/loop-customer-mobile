@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import ScreenTitle from '../../components/ScreenTitle';
 import NewStyles from '../../styles/NewStyles';
 import CustomStatusBar from '../../components/CustomStatusBar';
-import { themeColor10 } from '../../theme/Color';
+import { themeColor10, themeColor14 } from '../../theme/Color';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import Footer from '../Footer';
 
@@ -39,7 +39,7 @@ export default function DeviceOrderSummary({ navigation }) {
   ];
 
   return (
-    <ImageBackground source={require('../../assets/moon.jpg')} style={NewStyles.container}>
+    <ImageBackground source={require('../../assets/moon.jpg')} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
       {/* <View style={{ padding: 10 }}>
         <ScreenTitle title={'سفارش‌های جاری من'} />
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
 
   noticeBox: {
-    backgroundColor: '#ffee58',
+    backgroundColor: themeColor14.bgColor(1),
     padding: 10,
     borderRadius: 6,
     marginBottom: 12,

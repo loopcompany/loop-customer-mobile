@@ -22,6 +22,7 @@ export default function DeviceInfoFormScreen() {
     <ImageBackground
       source={require('../assets/moon.jpg')}
       style={styles.background}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>اطلاعات دستگاه و توضیح ایراد</Text>

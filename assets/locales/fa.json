@@ -662,6 +662,7 @@
   "Login to account": "ورود به حساب کاربری",
   "Organization code": "کد سازمانی",
   "Organization code *": "کد سازمانی",
+  "User code": "کد کاربری",
   "Password": "رمز عبور",
   "Password * (at least 8 characters)": "رمز عبور * (حداقل 8 کاراکتر)",
   "Password (at least 6 characters)": "رمز عبور (حداقل 6 کاراکتر)",
@@ -1555,5 +1556,6 @@
   "Edit request": "درخواست ویرایش",
   "Awaiting review of changes": "در انتظار بررسی تغییرات",
   "Verification code": "کدبازیابی",
-  "Recovery code sent": "کدبازیابی ارسال شد"
+  "Recovery code sent": "کدبازیابی ارسال شد",
+  "Guide": "راهنما"
 }

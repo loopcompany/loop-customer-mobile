@@ -12,6 +12,7 @@ import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { imageUri } from '../services/URL';
 import { useTranslation } from 'react-i18next';
+import HintBadge from './HintBadge';
 
 const pad2 = value => String(value).padStart(2, '0');
 
@@ -89,7 +90,7 @@ const PackageCountdown = memo(function PackageCountdown({
     if (!nowServer || !endAt) return null;
     if (countdown.isFinished) return null;
     return (
-        <ImageBackground source={require('../assets/images/backtimer.png')} style={styles.timerContainer}>
+        <ImageBackground source={require('../assets/images/backtimer.png')} style={styles.timerContainer} imageStyle={{ width: '100%', height: '100%' }}>
             {countdown.isFinished ? (
                 <Text style={[NewStyles.title1,]}>زمان این پکیج تمام شده</Text>
             ) : (
@@ -231,8 +232,10 @@ export default function Counter({ step, data }) {
                                             style={{ height: 100, width: 100 }}
                                         />}
                                     <View style={[{ flex: 1 }, NewStyles.center]}>
-                                        <Text style={[NewStyles.title10, { fontSize: 14, marginBottom: 10 }]}>{item.title}</Text>
-                                        {item?.des ? <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, marginBottom: 10 }, NewStyles.border5]}><Text style={NewStyles.text10}>{item?.des}</Text></View> : null}
+                                        <View style={[NewStyles.row, { gap: 8, marginBottom: 10 }]}>
+                                            <Text style={[NewStyles.title10, { fontSize: 14 }]}>{item.title}</Text>
+                                            <HintBadge hint={item?.des} title={item?.title} size={22} />
+                                        </View>
 
                                         <View style={[NewStyles.rowWrapper, { width: 120, borderWidth: 1, borderColor: themeColor0.bgColor(1), padding: 5 }, NewStyles.border5]}>
                                             <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}

@@ -10,8 +10,9 @@ import { fetchAddresses } from '../../slices/addressSlice';
 import Footer from '../../screens/Footer';
 import ScreenHeaders from '../../components/ScreenHeaders';
 import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
+import { themeColor0, themeColor3 } from '../../theme/Color';
 import CustomStatusBar from '../../components/CustomStatusBar';
+import HintBadge from '../../components/HintBadge';
 import { uri } from '../../services/URL';
 import { showAlert } from '../../helpers/Common';
 import { useTranslation } from 'react-i18next';
@@ -129,10 +130,9 @@ const Login = ({ navigation }) => {
             {
               text: t('Confirm'),
               onPress: () => {
-                // Navigate to FolderScreen
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'FolderScreen' }],
+                  routes: [{ name: 'List' }],
                 });
               },
             },
@@ -203,26 +203,29 @@ const Login = ({ navigation }) => {
             backgroundColor: '#1976d2',
             borderRadius: 10,
             paddingVertical: 12,
+            paddingHorizontal: 12,
             marginBottom: 15,
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 10,
             elevation: 3,
             shadowColor: '#1976d2',
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
             <Text style={{
+              flex: 1,
               color: '#fff',
               fontSize: 16,
               fontFamily: 'VazirBold',
               textAlign: 'center'
             }}>{t('Login to account')}</Text>
-          </View>
-
-          {/* Form Container */}
-
-          <View style={[{ width: '90%', alignSelf: 'center', padding: 10, backgroundColor: themeColor1.bgColor(1), marginBottom: 12 }, NewStyles.border10]}>
-            <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("To find out and send and receive the contract, refer to the application menu or the contract start field section.")}</Text>
+            <HintBadge
+              hint={t("To find out and send and receive the contract, refer to the application menu or the contract start field section.")}
+              title={t('Login to account')}
+              size={22}
+            />
           </View>
 
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>

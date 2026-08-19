@@ -10,6 +10,7 @@ import { decrement, increment, setCounterInputValue, updateCheckbox } from '../s
 import { formatPrice } from '../helpers/Common';
 import { imageUri } from '../services/URL';
 import { LinearGradient } from 'expo-linear-gradient';
+import HintBadge from './HintBadge';
 
 export default function CheckBox({ step, data }) {
 
@@ -94,6 +95,7 @@ export default function CheckBox({ step, data }) {
                                 </View>
                             }
                             <Text style={[NewStyles.text10, (item?.value > 0 && item?.has_counter != 1) && NewStyles.text4]}>{item.title}</Text>
+                            <HintBadge hint={item?.des} title={item?.title} size={22} />
                         </TouchableOpacity>
                         {
                             item.has_counter == 1 ? renderCounter(item) : renderPrice(item)}
@@ -108,7 +110,6 @@ export default function CheckBox({ step, data }) {
                                 </View>
                             </View>
                         }
-                        {item?.des ? <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text10}>{item?.des}</Text></View> : null}
                     </LinearGradient>
                 }
             />}
