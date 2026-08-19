@@ -9,19 +9,19 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import Folder from "../components/Folder";
-import CustomStatusBar from "./../components/CustomStatusBar";
-import { handleError, showToastOrAlert } from "./../helpers/Common";
+import Folder from "@components/Folder";
+import CustomStatusBar from "@components/CustomStatusBar";
+import { handleError, showToastOrAlert } from "@helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
-import categoriesAPI from "../services/CategoriesApi";
+import categoriesAPI from "@services/CategoriesApi";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSteps } from "../slices/stepSlice";
-import { setCategory } from "../slices/categorySlice";
-import Loader from "../components/Loader";
+import { fetchSteps } from "@slices/stepSlice";
+import { setCategory } from "@slices/categorySlice";
+import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { createStyles } from "../styles/NewStyles";
-import { imageUri } from "../services/URL";
+import { createStyles } from "@styles/NewStyles";
+import { imageUri } from "@services/URL";
 import { Text } from "react-native";
 
 function FolderScreen({ navigation }) {
@@ -72,7 +72,7 @@ function FolderScreen({ navigation }) {
       style={NewStyles.container}
       edges={{ top: "off", bottom: "off" }}
     >
-      <ImageBackground cachePolicy={'memory-disk'} imageStyle={{ opacity: 0.8, }} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} imageStyle={{ opacity: 0.8, }} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
         <View>
           <ScrollView style={{ height: 140, width: '100%' }} refreshControl={
@@ -83,7 +83,7 @@ function FolderScreen({ navigation }) {
           } contentContainerStyle={{ height: 140 }}>
             <View style={styles.logoWrapper}>
               <Image
-                source={require("../assets/logo.png")}
+                source={require("@assets/logo.png")}
                 style={NewStyles.logo}
               />
             </View>
@@ -184,8 +184,6 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     flex: 1,
   },
   folderItem: {
-    width: 80,
-    alignItems: "center",
     margin: 12,
     // flexDirection: 'row-reverse',
     alignItems: "center",

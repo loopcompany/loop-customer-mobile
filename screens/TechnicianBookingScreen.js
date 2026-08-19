@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import HintBadge from '../components/HintBadge';
+import HintBadge from '@components/HintBadge';
 
 export default function TechnicianBookingScreen({navigation}) {
   const { t } = useTranslation();
@@ -24,7 +24,7 @@ export default function TechnicianBookingScreen({navigation}) {
 
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={styles.background}
       imageStyle={{ width: '100%', height: '100%' }}
     >
@@ -113,7 +113,7 @@ export default function TechnicianBookingScreen({navigation}) {
 
       {/* فوتر */}
       <View style={styles.footer}>
-        <Image source={require('../assets/logo.png')} style={styles.footerLogo} />
+        <Image source={require('@assets/logo.png')} style={styles.footerLogo} />
         <Text style={styles.support}>{t("Support")}</Text>
         <Text style={styles.language}>{t("FA")}</Text>
         <Text style={styles.phone}>21164552</Text>

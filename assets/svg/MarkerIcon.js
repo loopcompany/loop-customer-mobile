@@ -1,5 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
-import { themeColor0 } from '../../theme/Color';
+import { themeColor0 } from '@theme/Color';
 
 export default function MarkerIcon() {
     return (

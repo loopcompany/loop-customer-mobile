@@ -4,11 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { useDispatch, useSelector } from "react-redux";
-import { emptySteps } from '../slices/stepSlice';
-import NewStyles from '../styles/NewStyles';
-import { emptyAddress } from '../slices/addressSlice';
-import { themeColor0, themeColor4, themeColor5 } from '../theme/Color';
-import { emptyCategory } from '../slices/categorySlice';
+import { emptySteps } from '@slices/stepSlice';
+import NewStyles from '@styles/NewStyles';
+import { emptyAddress } from '@slices/addressSlice';
+import { themeColor0, themeColor4, themeColor5 } from '@theme/Color';
+import { emptyCategory } from '@slices/categorySlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) {
@@ -27,14 +27,14 @@ export default function StepsHeader({ handleNextStep, handlePreStep, showPre }) 
         }]}>
             <TouchableOpacity onPress={handleNextStep} style={styles.iconContainer}>
                 <Text style={styles.titleText}>{t("Next")}</Text>
-                <Image source={require("../assets/gif/next.gif")} style={styles.arrow} />
+                <Image source={require("@assets/gif/next.gif")} style={styles.arrow} />
             </TouchableOpacity>
             <View style={styles.titleContainer}>
                 <Text style={[NewStyles.title, NewStyles.title]} numberOfLines={1} adjustsFontSizeToFit>{category?.data?.title?.substr(0, 20)}</Text>
             </View>
             {showPre ? <TouchableOpacity onPress={handlePreStep} style={styles.iconContainer}>
 
-                <Image source={require("../assets/gif/prev.gif")} style={styles.arrow} />
+                <Image source={require("@assets/gif/prev.gif")} style={styles.arrow} />
                 <Text style={styles.titleText}>{t("Back")}</Text>
             </TouchableOpacity>
                 :

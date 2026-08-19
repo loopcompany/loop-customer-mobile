@@ -13,7 +13,7 @@ import {
   themeColor10,
   themeColor11,
   themeColor14,
-} from "../theme/Color";
+} from "@theme/Color";
 
 export const { width: deviceWidth, height: deviceHeight } =
   Dimensions.get("window");

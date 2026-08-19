@@ -7,12 +7,12 @@ import {
   ScrollView,
 } from "react-native";
 import { ImageBackground } from "expo-image";
-import Footer from "../../screens/Footer";
-import ScreenHeaders from "../../components/ScreenHeaders";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor3 } from "../../theme/Color";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import HintBadge from "../../components/HintBadge";
+import Footer from "@screens/Footer";
+import ScreenHeaders from "@components/ScreenHeaders";
+import NewStyles from "@styles/NewStyles";
+import { themeColor0, themeColor1, themeColor3 } from "@theme/Color";
+import CustomStatusBar from "@components/CustomStatusBar";
+import HintBadge from "@components/HintBadge";
 
 const Method = ({ navigation }) => {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ const Method = ({ navigation }) => {
       {/* Background with image */}
       <ImageBackground
         cachePolicy={"memory-disk"}
-        source={require("../../assets/moon.jpg")}
+        source={require("@assets/moon.jpg")}
         style={[NewStyles.container, { backgroundColor: "#020305" }]}
         contentPosition={"center"}
         contentFit="contain"

@@ -12,8 +12,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { G, Path, Text as SvgText, Circle, Polygon } from 'react-native-svg';
 
-import { themeColor0, themeColor1, themeColor6, themeColor7 } from '../theme/Color';
-import NewStyles from '../styles/NewStyles';
+import { themeColor0, themeColor1, themeColor6, themeColor7 } from '@theme/Color';
+import NewStyles from '@styles/NewStyles';
 
 const { width } = Dimensions.get('window');
 const WHEEL_SIZE = width > 800 ? 800 * 0.75 : width * 0.75;

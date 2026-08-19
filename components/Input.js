@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { setInputValue } from '../slices/stepSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { setInputValue } from '@slices/stepSlice';
+import { imageUri } from '@services/URL';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 

@@ -14,11 +14,11 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
-import { themeColor0, themeColor4 } from "../theme/Color";
-import { spacing } from "../theme/Spacing";
-import { radius } from "../theme/Radius";
-import { fontSize } from "../theme/Typography";
-import NewStyles from "../styles/NewStyles";
+import { themeColor0, themeColor4 } from "@theme/Color";
+import { spacing } from "@theme/Spacing";
+import { radius } from "@theme/Radius";
+import { fontSize } from "@theme/Typography";
+import NewStyles from "@styles/NewStyles";
 
 export default function Footer() {
   const navigation = useNavigation();
@@ -37,7 +37,7 @@ export default function Footer() {
       title: "ثبت‌نام دوره‌های آموزشی ",
       screen: "TrainingRegistrationScreen",
     },
-    { id: 11, title: "فکروبکر", screen: "Fekrobekr" },
+    { id: 11, title: "فکروبکر", screen: "IdeaBoxScreen" },
     { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
     { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
     { id: 14, title: "نرخنامه", screen: "RateListScreen" },
@@ -124,7 +124,7 @@ export default function Footer() {
             activeOpacity={0.75}
           >
             <View style={styles.startOrbGlow} pointerEvents="none" />
-            <Image source={require("../assets/icon.png")} style={styles.startOrb} />
+            <Image source={require("@assets/icon.png")} style={styles.startOrb} />
             <View style={styles.startOrbShine} pointerEvents="none" />
           </TouchableOpacity>
 
@@ -187,8 +187,6 @@ const styles = StyleSheet.create({
    
   },
   folderItem: {
-    width: 80,
-    alignItems: "center",
     margin: 12,
     // flexDirection: 'row-reverse',
     alignItems: "center",

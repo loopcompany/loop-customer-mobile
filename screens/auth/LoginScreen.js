@@ -2,21 +2,21 @@ import React, { useState, useReducer,useMemo } from "react";
 import { Text, TextInput, Image, Platform, StyleSheet, ScrollView, View, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from "react-redux";
-import TransparentButton from "../../components/TransparentButton";
-import Button from "../../components/Button";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import { authAPI } from "../../services/Api";
-import TokenManager from "../../services/TokenManager";
-import { showToastOrAlert } from "../../helpers/Common";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor10, themeColor4 } from "../../theme/Color";
+import TransparentButton from "@components/TransparentButton";
+import Button from "@components/Button";
+import CustomStatusBar from "@components/CustomStatusBar";
+import { authAPI } from "@services/Api";
+import TokenManager from "@services/TokenManager";
+import { showToastOrAlert } from "@helpers/Common";
+import NewStyles from "@styles/NewStyles";
+import { themeColor0, themeColor1, themeColor10, themeColor4 } from "@theme/Color";
 import { useTranslation } from "react-i18next";
-import { setToken, setUserType } from "../../slices/authSlice";
-import { fetchUser } from "../../slices/userSlice";
-import { fetchAddresses } from "../../slices/addressSlice";
+import { setToken, setUserType } from "@slices/authSlice";
+import { fetchUser } from "@slices/userSlice";
+import { fetchAddresses } from "@slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
-import { createStyles } from '../../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 const initialState = {
   phone: '',
   password: '',
@@ -313,7 +313,7 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
       <CustomStatusBar />
       <KeyboardAvoidingView behavior={'padding'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
         <ScrollView
@@ -321,7 +321,7 @@ export default function LoginScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
         >
           <Image
-            source={require("../../assets/logo.png")}
+            source={require("@assets/logo.png")}
             style={NewStyles.logo}
             resizeMode={"contain"}
           />

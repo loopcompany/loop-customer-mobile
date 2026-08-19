@@ -3,9 +3,9 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from './Footer';
-import ScreenHeaders from "../components/ScreenHeaders";
+import ScreenHeaders from "@components/ScreenHeaders";
 import { ScreenStackHeaderBackButtonImage } from 'react-native-screens';
-import NewStyles from '../styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
 export default function IncentivePlansScreen({ navigation }) {
   return (
     <SafeAreaView style={[NewStyles.container, styles.mainContainer]} edges={{ top: 'off', bottom: 'additive' }}>

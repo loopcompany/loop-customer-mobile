@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import HintBadge from '../components/HintBadge';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
-import CustomStatusBar from '../components/CustomStatusBar';
+import Footer from '@screens/Footer';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
 
 const DiscountCodeScreen = ({ navigation }) => {
   const [discountCode, setDiscountCode] = useState('');

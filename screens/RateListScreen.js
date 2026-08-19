@@ -10,12 +10,12 @@ import {
   FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NewStyles from '../styles/NewStyles';
-import ScreenHeaders from '../components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
 import Footer from './Footer';
-import { formatJalaaliDate } from '../helpers/Common';
-import { themeColor0, themeColor4 } from '../theme/Color';
-import letterRatesAPI from '../services/LetterRatesApi';
+import { formatJalaaliDate } from '@helpers/Common';
+import { themeColor0, themeColor4 } from '@theme/Color';
+import letterRatesAPI from '@services/LetterRatesApi';
 import { RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 

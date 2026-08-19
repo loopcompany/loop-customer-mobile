@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import i18next from 'i18next';
 
 export const fetchOrders = createAsyncThunk('orders/orders', async (token) => {

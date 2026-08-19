@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform, Linking } from "react-native";
 import { useTranslation } from "react-i18next";
-import Footer from "../../screens/Footer";
-import ScreenHeaders from "../../components/ScreenHeaders";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor3, themeColor4 } from "../../theme/Color";
-import CustomStatusBar from "../../components/CustomStatusBar";
+import Footer from "@screens/Footer";
+import ScreenHeaders from "@components/ScreenHeaders";
+import NewStyles from "@styles/NewStyles";
+import { themeColor0, themeColor1, themeColor3, themeColor4 } from "@theme/Color";
+import CustomStatusBar from "@components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
-import { createStyles } from '../../styles/NewStyles';
-import TransparentButton from "../../components/TransparentButton";
-import { imageUri, mainUri } from "../../services/URL";
+import { createStyles } from '@styles/NewStyles';
+import TransparentButton from "@components/TransparentButton";
+import { imageUri, mainUri } from "@services/URL";
 import { useSelector } from "react-redux";
 const Grouping = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -38,7 +38,7 @@ const Grouping = ({ navigation }) => {
       {/* Background with image */}
       <ImageBackground
         cachePolicy={"memory-disk"}
-        source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")}
+        source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")}
         style={[NewStyles.container, { backgroundColor: "#020305" }]}
         contentPosition={"center"}
         contentFit="cover"

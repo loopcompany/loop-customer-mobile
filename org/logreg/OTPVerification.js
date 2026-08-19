@@ -2,18 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import { uri } from '../../services/URL';
-import { showAlert, showToastOrAlert } from '../../helpers/Common';
-import NewStyles from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { uri } from '@services/URL';
+import { showAlert, showToastOrAlert } from '@helpers/Common';
+import NewStyles from '@styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CodeField, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import { Cursor } from 'react-native-confirmation-code-field';
-import { themeColor0, themeColor3, themeColor4 } from '../../theme/Color';
+import { themeColor0, themeColor3, themeColor4 } from '@theme/Color';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
-import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from './../../screens/auth/OtpRetriever';
+import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from '@screens/auth/OtpRetriever';
 
 const normalizeOtpCode = value => String(value || '')
   .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))

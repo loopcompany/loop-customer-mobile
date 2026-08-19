@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { ScreenHeaders } from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
-import CustomStatusBar from '../../components/CustomStatusBar';
+import { ScreenHeaders } from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
 
 const Privacy = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);

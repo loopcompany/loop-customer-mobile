@@ -10,10 +10,10 @@ import {
   Image,
   ImageBackground,
 } from 'react-native';
-import Footer from '../Footer';
-import NewStyles from '../../styles/NewStyles';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import ScreenTitle from '../../components/ScreenTitle';
+import Footer from '@screens/Footer';
+import NewStyles from '@styles/NewStyles';
+import CustomStatusBar from '@components/CustomStatusBar';
+import ScreenTitle from '@components/ScreenTitle';
 export default function OrderSummaryScreen({ navigation }) {
   const orderDetails = {
     type: 'سفارش نرم‌افزاری - نصب ویندوز 10',
@@ -26,7 +26,7 @@ export default function OrderSummaryScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('../../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={NewStyles.container}
       imageStyle={{ width: '100%', height: '100%' }}
     >

@@ -3,16 +3,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { useDispatch, useSelector } from "react-redux";
-import { setLatitude, setLongitude, fetchAddresses } from '../../slices/addressSlice';
+import { setLatitude, setLongitude, fetchAddresses } from '@slices/addressSlice';
 import { useTranslation } from 'react-i18next';
-import Button from '../../components/Button';
-import NewStyles from '../../styles/NewStyles';
-import MarkerIcon from '../../assets/svg/MarkerIcon';
+import Button from '@components/Button';
+import NewStyles from '@styles/NewStyles';
+import MarkerIcon from '@assets/svg/MarkerIcon';
 import axios from 'axios';
-import { uri } from '../../services/URL';
-import { showToastOrAlert } from '../../helpers/Common';
+import { uri } from '@services/URL';
+import { showToastOrAlert } from '@helpers/Common';
 import { Ionicons } from '@expo/vector-icons';
-import { themeColor0, themeColor4 } from '../../theme/Color';
+import { themeColor0, themeColor4 } from '@theme/Color';
 
 // جایگزین کردن API Key نشان
 const NESHAN_API_KEY = 'web.1152adf3d8884734af16cc9e8f83e649';

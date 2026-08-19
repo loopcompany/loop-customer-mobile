@@ -4,19 +4,19 @@ import axios from 'axios';
 import * as Linking from "expo-linking";
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
-import { formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
-import Button from '../../components/Button';
-import { imageUri, mainUri, uri } from '../../services/URL';
-import { fetchUser } from '../../slices/userSlice';
-import { fetchOrders } from '../../slices/orderSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '@theme/Color';
+import { formatDateTime, formatPrice, showToastOrAlert } from '@helpers/Common';
+import Button from '@components/Button';
+import { imageUri, mainUri, uri } from '@services/URL';
+import { fetchUser } from '@slices/userSlice';
+import { fetchOrders } from '@slices/orderSlice';
 
-import Loader from '../../components/Loader';
+import Loader from '@components/Loader';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import HintBadge from '../../components/HintBadge';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
+import { createStyles } from '@styles/NewStyles';
 function Invoice({ route, navigation }) {
 
     const dispatch = useDispatch()

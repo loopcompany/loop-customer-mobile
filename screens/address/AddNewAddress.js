@@ -4,15 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor6, themeColor4 } from '../../theme/Color';
-import Button from '../../components/Button';
-import { uri } from '../../services/URL';
-import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile, setUnit, setNumber, setFloor } from '../../slices/addressSlice';
-import { convertToEnglish, showToastOrAlert } from '../../helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor3, themeColor6, themeColor4 } from '@theme/Color';
+import Button from '@components/Button';
+import { uri } from '@services/URL';
+import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile, setUnit, setNumber, setFloor } from '@slices/addressSlice';
+import { convertToEnglish, showToastOrAlert } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { createStyles } from '@styles/NewStyles';
 export default function AddNewAddress({ navigation }) {
 
     const dispatch = useDispatch()

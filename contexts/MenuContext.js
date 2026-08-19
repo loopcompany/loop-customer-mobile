@@ -25,17 +25,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6 } from '../theme/Color';
-import { deviceHeight } from '../styles/NewStyles';
+import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6 } from '@theme/Color';
+import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import useLogout from '../hooks/useLogout';
-import { fetchContacts } from '../slices/contactSlice';
-import { fetchUser } from '../slices/userSlice';
-import { createStyles } from '../styles/NewStyles';
-import { imageUri, mainUri } from '../services/URL';
+import useLogout from '@hooks/useLogout';
+import { fetchContacts } from '@slices/contactSlice';
+import { fetchUser } from '@slices/userSlice';
+import { createStyles } from '@styles/NewStyles';
+import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setLanguage } from '../slices/languageSlice';
-import { langIsRTL } from '../helpers/Common';
+import { setLanguage } from '@slices/languageSlice';
+import { langIsRTL } from '@helpers/Common';
 // Create Context
 const MenuContext = createContext();
 const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
@@ -165,7 +165,7 @@ const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
                         }}
                     >
                         <Image
-                            source={require("../assets/images/start.png")}
+                            source={require("@assets/images/start.png")}
                             style={logoStyle}
                         />
                     </Animated.View>
@@ -431,7 +431,7 @@ export const MenuProvider = ({ children }) => {
                             }}
                         >
                             <Image
-                                source={require('../assets/images/support.png')}
+                                source={require('@assets/images/support.png')}
                                 style={{ height: 40, width: 60, resizeMode: 'contain', }}
                             />
                         </TouchableOpacity>

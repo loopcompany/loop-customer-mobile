@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleApiError, handleOrganizationApiError } from '../utils/apiErrorHandler';
+import { handleApiError, handleOrganizationApiError } from '@utils/apiErrorHandler';
 import i18next from 'i18next';
 
 /**

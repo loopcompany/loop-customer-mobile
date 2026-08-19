@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, Modal, Pressable, ScrollView, StyleSheet 
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { colors } from '../theme/Color';
-import { spacing } from '../theme/Spacing';
-import { radius } from '../theme/Radius';
-import { fontSize, getFontFamily } from '../theme/Typography';
-import { shadow } from '../theme/Shadows';
+import { colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
+import { shadow } from '@theme/Shadows';
 
 // دکمه‌ی دایره‌ای «؟» که با لمس، یک درُر (bottom sheet) از پایین صفحه باز می‌کند
 // و متن راهنما را نشان می‌دهد. جایگزین باکس‌های زرد راهنما در سراسر اپ.

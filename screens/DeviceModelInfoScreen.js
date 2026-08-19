@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from './Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import ScreenTitle from '../components/ScreenTitle';
-import HintBadge from '../components/HintBadge';
-import NewStyles from '../styles/NewStyles';
-import { themeColor10 } from '../theme/Color';
+import ScreenHeaders from '@components/ScreenHeaders';
+import ScreenTitle from '@components/ScreenTitle';
+import HintBadge from '@components/HintBadge';
+import NewStyles from '@styles/NewStyles';
+import { themeColor10 } from '@theme/Color';
 export default function DeviceModelInfoScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const [visibleSection, setVisibleSection] = useState(null);
@@ -30,7 +30,7 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
   const genders = ['آقا', 'خانم'];
 
   return (
-    <ImageBackground source={require('../assets/moon.jpg')} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require('@assets/moon.jpg')} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
   
         <ScreenHeaders
           title={category}
@@ -84,7 +84,7 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
             </TouchableOpacity>
 
             <View style={styles.cameraBox}>
-              <Image source={require('../assets/camera.png')} style={styles.cameraIcon} />
+              <Image source={require('@assets/camera.png')} style={styles.cameraIcon} />
               <Text style={NewStyles.text10}>انتخاب از گالری و دوربین</Text>
             </View>
           </FormSection>

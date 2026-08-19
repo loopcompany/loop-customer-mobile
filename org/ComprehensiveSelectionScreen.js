@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import ScreenHeaders from '../components/ScreenHeaders';
-import ScreenTitle from '../components/ScreenTitle';
-import CustomStatusBar from '../components/CustomStatusBar';
-import DatePickerModal from '../components/DatePickerModal';
+import ScreenHeaders from '@components/ScreenHeaders';
+import ScreenTitle from '@components/ScreenTitle';
+import CustomStatusBar from '@components/CustomStatusBar';
+import DatePickerModal from '@components/DatePickerModal';
 import {
   AccordionHeader,
   SectionBody,
@@ -16,7 +16,7 @@ import {
   ProcurementCard,
   CounterWithDescription,
   SummaryBox,
-} from '../components/OrgSelectionKit';
+} from '@components/OrgSelectionKit';
 import {
   DEVICE_TYPES,
   HARDWARE_ITEMS,
@@ -25,10 +25,10 @@ import {
   SOFTWARE_ITEMS,
   TIME_SLOT_OPTIONS,
 } from './deviceCatalog';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, themeColor14, colors } from '../theme/Color';
-import { fontSize } from '../theme/Typography';
-import { showAlert, showToastOrAlert, validateMelicode } from '../helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, themeColor14, colors } from '@theme/Color';
+import { fontSize } from '@theme/Typography';
+import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
 
 const DELIVERY_MODE_OPTIONS = [
   { id: 'once_short', title: 'کوتاه مدت / یکبار' },
@@ -71,73 +71,73 @@ const SECTIONS = [
     id: 'delivery_mode',
     title: 'نحوه ارائه خدمات',
     hint: 'مشخص کنید خدمات به چه شکل و در چه بازه‌ای ارائه شود: کوتاه‌مدت/یکبار، ماهانه، سالیانه یا پروژه‌ای.',
-    icon: require('../assets/icons/sections/delivery-mode.png'),
+    icon: require('@assets/icons/sections/delivery-mode.png'),
   },
   {
     id: 'software_services',
     title: 'خدمات نرم‌افزاری',
     hint: 'تعداد سیستم‌عامل‌ها و نرم‌افزارهای مورد نیاز برای نصب را برای هر مورد مشخص کنید.',
-    icon: require('../assets/icons/sections/software-services.png'),
+    icon: require('@assets/icons/sections/software-services.png'),
   },
   {
     id: 'hardware_services',
     title: 'خدمات سخت‌افزاری',
     hint: 'تعداد و توضیحات مربوط به سرویس سخت‌افزاری هر دسته از تجهیزات (لپ‌تاپ، کیس، مانیتور و ...) را وارد کنید.',
-    icon: require('../assets/icons/sections/hardware-services.png'),
+    icon: require('@assets/icons/sections/hardware-services.png'),
   },
   {
     id: 'procurement',
     title: 'تامین تجهیزات / کالا',
     hint: 'تعداد تجهیزات آکبند یا کارکرده‌ای که نیاز به تامین دارید را برای هر دسته وارد کنید.',
-    icon: require('../assets/icons/sections/procurement.png'),
+    icon: require('@assets/icons/sections/procurement.png'),
   },
   {
     id: 'equipment_status',
     title: 'وضعیت فعلی تجهیزات',
     hint: 'وضعیت کنونی تجهیزات سازمان را از نظر نیاز به بررسی نرم‌افزاری، سخت‌افزاری یا تامین کالا مشخص کنید.',
-    icon: require('../assets/icons/sections/equipment-status.png'),
+    icon: require('@assets/icons/sections/equipment-status.png'),
   },
   {
     id: 'critical_infra',
     title: 'زیر ساخت‌های حیاتی',
     hint: 'مهم‌ترین زیرساخت سازمان (نرم‌افزار سازمانی، شبکه/اینترنت یا سخت‌افزار) را انتخاب کنید تا در اولویت بررسی قرار گیرد.',
-    icon: require('../assets/icons/sections/critical-infra.png'),
+    icon: require('@assets/icons/sections/critical-infra.png'),
   },
   {
     id: 'service_level',
     title: 'سطح خدمات و تامین تجهیزات',
     hint: 'سطح اولویت ارائه خدمت (استاندارد، اولویت‌دار یا اضطراری) را انتخاب کنید.',
-    icon: require('../assets/icons/sections/service-level.png'),
+    icon: require('@assets/icons/sections/service-level.png'),
   },
   {
     id: 'time_range',
     title: 'بازه زمانی / رزرو',
     hint: 'بسته به نحوه ارائه خدمات انتخابی، تاریخ، بازه زمانی و تعداد بازدید مورد نیاز را تعیین کنید.',
-    icon: require('../assets/icons/sections/time-range.png'),
+    icon: require('@assets/icons/sections/time-range.png'),
   },
   {
     id: 'operator_info',
     title: 'اطلاعات اپراتور',
     hint: 'مشخصات فردی که به عنوان اپراتور/رابط سازمان با تکنسین در ارتباط خواهد بود را وارد کنید.',
-    icon: require('../assets/icons/sections/operator-info.png'),
+    icon: require('@assets/icons/sections/operator-info.png'),
   },
   {
     id: 'technician',
     title: 'انتخاب تکنسین',
     hint: 'این بخش برای انتخاب مستقیم تکنسین به‌زودی فعال می‌شود.',
-    icon: require('../assets/icons/sections/technician.png'),
+    icon: require('@assets/icons/sections/technician.png'),
   },
   {
     id: 'letter_upload',
     title: 'بارگزاری نامه / درخواست',
     hint: 'در صورت نیاز، نامه یا درخواست رسمی سازمان را به‌صورت فایل بارگذاری کنید (اختیاری).',
-    icon: require('../assets/icons/sections/letter-upload.png'),
+    icon: require('@assets/icons/sections/letter-upload.png'),
   },
   {
     id: 'order_actions',
     title: 'نمایش / استعلام / ثبت سفارش',
     hint: 'پیش از ثبت نهایی می‌توانید پیش‌رسید را صادر یا مشاهده کنید و در نهایت سفارش را ثبت یا لغو نمایید.',
-    icon: require('../assets/icons/sections/order-actions.png'),
+    icon: require('@assets/icons/sections/order-actions.png'),
   },
 ];
 
@@ -195,7 +195,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     });
 
   const updateProcurementDesc = (id, desc) =>
-    setProcurementItems((prev) => ({ ...prev, [id]: { new: 0, used: 0, desc: '', ...prev[id], desc } }));
+    setProcurementItems((prev) => ({ ...prev, [id]: { new: 0, used: 0, ...prev[id], desc } }));
 
   // «بازه زمانی/رزرو» شرطیه: اگر «کوتاه‌مدت/یکبار» جزو حالت‌های انتخاب‌شده باشد
   // (نحوه ارائه خدمات چندانتخابی است)، فقط تاریخ+ساعت نمایش داده می‌شود.
@@ -285,7 +285,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   }, [procurementItems]);
 
   return (
-    <ImageBackground source={require('../assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
       <ScreenHeaders title="سازمانی / دولتی" />
       <ScreenTitle

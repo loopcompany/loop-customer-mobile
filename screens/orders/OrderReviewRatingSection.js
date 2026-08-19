@@ -12,13 +12,13 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from '../../theme/Color';
-import Button from '../../components/Button';
-import { uri } from '../../services/URL';
-import { showToastOrAlert } from '../../helpers/Common';
-import { submitReview, checkReviewForOrder } from '../../services/ReviewApi';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from '@theme/Color';
+import Button from '@components/Button';
+import { uri } from '@services/URL';
+import { showToastOrAlert } from '@helpers/Common';
+import { submitReview, checkReviewForOrder } from '@services/ReviewApi';
 
 export default function OrderReviewRatingSection({ orderId, technicianId, orderStatus, finishedAt }) {
   const { t, i18n } = useTranslation();

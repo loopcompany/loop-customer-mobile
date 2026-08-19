@@ -7,11 +7,11 @@ import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import HintBadge from './HintBadge';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor10, colors } from '../theme/Color';
-import { spacing } from '../theme/Spacing';
-import { radius } from '../theme/Radius';
-import { fontSize } from '../theme/Typography';
-import { shadow } from '../theme/Shadows';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor10, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize } from '@theme/Typography';
+import { shadow } from '@theme/Shadows';
 
 // سربرگ آکاردئونی هر بخش. با پاس‌دادن step، شماره‌ی مرحله در سمت راست عنوان
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).

@@ -1,22 +1,22 @@
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import React, { useState } from 'react';
-import MapView, { Circle } from '../../components/MapView';
+import MapView, { Circle } from '@components/MapView';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useDispatch, useSelector } from "react-redux";
-import { showAlert } from '../../helpers/Common';
+import { showAlert } from '@helpers/Common';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor4 } from '../../theme/Color';
-import Button from '../../components/Button';
-import { fetchAddresses, setLatitude, setLongitude } from '../../slices/addressSlice';
-import { fetchRadii } from '../../slices/radiusSlice';
-import { uri } from '../../services/URL';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor4 } from '@theme/Color';
+import Button from '@components/Button';
+import { fetchAddresses, setLatitude, setLongitude } from '@slices/addressSlice';
+import { fetchRadii } from '@slices/radiusSlice';
+import { uri } from '@services/URL';
 import axios from 'axios';
-import { showToastOrAlert } from '../../helpers/Common';
+import { showToastOrAlert } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
 import NeshanMap from './NeshanMap';
 

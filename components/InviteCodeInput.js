@@ -6,8 +6,8 @@ import {
     useBlurOnFulfill,
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
-import NewStyles from '../styles/NewStyles';
-import { themeColor10, themeColor3 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { themeColor10, themeColor3 } from '@theme/Color';
 import { useTranslation } from 'react-i18next';
 
 /**

@@ -4,13 +4,13 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatPrice, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor4, themeColor5, themeColor14 } from '../../theme/Color'
-import Button from '../../components/Button'
-import ConfirmationModal from '../../components/ConfirmationModal'
+import { createStyles } from '@styles/NewStyles';
+import { uri } from '@services/URL'
+import NewStyles from '@styles/NewStyles'
+import { formatPrice, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor4, themeColor5, themeColor14 } from '@theme/Color'
+import Button from '@components/Button'
+import ConfirmationModal from '@components/ConfirmationModal'
 
 const OrderLoopDispatchSection = ({ orderId, onUpdate, onReportStatusChange }) => {
     const { t, i18n } = useTranslation();

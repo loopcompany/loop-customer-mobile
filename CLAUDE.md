@@ -20,22 +20,52 @@ dual calendars.
 ## Directory map
 
 ```
-screens/      Main app screens (flat, ~40+ registered directly in App.js)
+App.js        Providers only (~80 lines). Do NOT register screens here.
+navigation/   routes.js is the single source of truth for all 85 screens;
+              RootNavigator.js and linking.js are both derived from it
+i18n/         i18next bootstrap (extracted out of App.js)
+screens/      Customer screens, grouped into subdirectories by domain
 org/          Organization-specific flows, isolated from /screens
   logreg/     Org login/register/OTP
 components/   Reusable UI (Button, ScreenHeaders, CustomStatusBar, ...)
+contexts/     React contexts (MenuContext)
 slices/       Redux Toolkit slices (one file per domain)
 services/     Axios instance, per-domain API modules, TokenManager, OrganizationService
-hoc/          Higher-order components (withOrganizationAccess)
-hooks/        Custom hooks (useAuth, useOrganizationAccess, useLogout)
-styles/       NewStyles.js (current) — Styles.js (legacy, do not extend)
+hooks/        Custom hooks (useOrganizationAccess, useLogout)
+styles/       NewStyles.js — the only shared stylesheet
 theme/        Color.js, Spacing.js, Radius.js, Typography.js, Shadows.js —
               the design-token single source of truth (see below)
 helpers/      Common.js — the everything-utility file (dates, validation, alerts, formatting)
-utils/        Smaller focused utilities (screenProtectionHelper, performanceOptimization)
+utils/        Smaller focused utilities (apiErrorHandler, performanceOptimization)
 docs/         Feature/bugfix write-ups — check here before re-solving a problem
-cross-platform-map-package/  Vendored, semi-independent map package (own package.json)
+  guides/       web setup / build / deploy
+  architecture/ access control, review system, transactions
 ```
+
+### Import paths — always use an `@alias`
+
+Cross-directory imports go through aliases, never `../`:
+
+```js
+import Button from '@components/Button';
+import { colors } from '@theme/Color';
+import { showAlert } from '@helpers/Common';
+```
+
+Aliases: `@assets @components @contexts @helpers @hooks @i18n @navigation @org @screens
+@services @slices @store @styles @theme @utils`. A parent-relative `../` specifier is an
+ESLint **error**. Same-directory `./x` is fine.
+
+The alias table lives in `babel.config.js` and is mirrored in `jsconfig.json` (editor
+intellisense) and `eslint.config.js` (import resolution) — add a new alias to all three.
+
+### Tooling — `npm run lint` must stay at zero errors
+
+`npm run lint` / `lint:fix` / `format` / `verify`. ESLint is tiered on purpose: **errors**
+are defects or convention breaks and the count is currently **0** — keep it there.
+**Warnings** (~1500) are legacy debt (`no-unused-vars`, `eqeqeq`, `no-console`,
+`react-hooks/*`) meant to trend down, not to be silenced. Never add a blanket
+`eslint-disable` to clear a warning.
 
 ## Non-negotiable conventions
 
@@ -160,9 +190,21 @@ until their profile/contract is approved. It follows two explicit principles doc
   because another layer "already covers it" — that's how the bugs in
   `docs/SECURITY_FIX_ACCESS_CONTROL.md` happened.
 
-**Known landmine:** there appear to be two `withOrganizationAccess` implementations —
-`components/withOrganizationAccess.js` and `hoc/withOrganizationAccess.js`. Confirm which one
-a screen actually imports before editing either; don't assume they're kept in sync.
+**Known landmine — the docs describe more layers than the code actually wires up.** An
+import-graph pass (2026-08) found that of the four documented layers, only two are live:
+
+| Layer | File | Status |
+| --- | --- | --- |
+| hook | `hooks/useOrganizationAccess.js` | **live** |
+| axios interceptor | `services/axiosConfig.js` | **live** |
+| HOC-wrapped screen | `components/withOrganizationAccess.js` | **present but imported by nothing** |
+| protected-button | `components/ProtectedOrderButton.js` | **present but imported by nothing** |
+
+There is only one `withOrganizationAccess` now (`hoc/` never existed in the current tree).
+Both unwired files were deliberately kept rather than deleted, because "defense in depth" is
+the stated principle and deleting an unused guard is the wrong default — but do not assume
+they are protecting anything today. Wiring them up is outstanding work; treat the current
+state as two layers, not four.
 
 ## Platform-split files
 
@@ -208,9 +250,11 @@ keeps working.
 
 ## Adding things — the expected shape
 
-**New screen:** create in `screens/` (or `org/` if organization-specific) → register in the
-`Stack.Navigator` in `App.js` → use `CustomStatusBar` + `ScreenHeaders` at the top, consistent
-with every other screen.
+**New screen:** create in `screens/` (or `org/` if organization-specific) → add **one entry to
+`navigation/routes.js`** → use `CustomStatusBar` + `ScreenHeaders` at the top, consistent with
+every other screen. That single entry registers the screen on the navigator *and* gives it a
+web URL; there is nothing to edit in `App.js`. Use `getComponent: () => require('@screens/X').default`
+like every other route so the screen stays lazily evaluated.
 
 **New Redux state:** new slice in `slices/`, wire into `store.js`. Check existing slices first
 (see Redux section above) before assuming it doesn't exist yet.
@@ -221,11 +265,28 @@ nearby.
 
 **New styling:** compose from `theme/Color.js` (`colors`/`themeColor*`), `theme/Spacing.js`,
 `theme/Radius.js`, `theme/Typography.js`, `theme/Shadows.js` — see Design tokens above. No new
-hex literals, no new raw spacing/radius/fontSize numbers, no `Styles.js` additions, no
-`Colors.*`.
+hex literals, no new raw spacing/radius/fontSize numbers, no `Colors.*`. (`styles/Styles.js`
+has been deleted; `NewStyles.js` is the only shared stylesheet.)
 
 **New alert/confirm dialog:** `showAlert()` / `showToastOrAlert()` from `helpers/Common.js`,
 never bare `Alert.alert()`.
+
+## Performance — what is already done, and what isn't
+
+Three things are wired up; don't undo them:
+
+- **Lazy screens.** `navigation/routes.js` uses `getComponent`, so a screen's module is only
+  evaluated the first time it is shown. Registering a screen with a static `component={X}`
+  import would put it back in the startup path.
+- **`inlineRequires`** is enabled in `metro.config.js`. Expo ships it off. Modules whose top
+  level does real work can behave differently under it — initialise explicitly.
+- **`console.log`/`debug`/`info` are stripped from production builds** by
+  `babel-plugin-transform-remove-console` in `babel.config.js`. `warn`/`error` survive. So
+  `console.log` for local debugging is fine; it will not ship.
+
+Still outstanding, in rough value order: ~378 inline arrow props in JSX, only a handful of
+`React.memo`, `FlatList`s without `getItemLayout`/`windowSize` tuning, and `contexts/MenuContext.js`
+(~600 lines) re-rendering every consumer on any change.
 
 ## Before large changes
 

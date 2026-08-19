@@ -6,11 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../styles/NewStyles';
-import ScreenHeaders from '../components/ScreenHeaders';
-import { formatPrice, formatDateTime, showToastOrAlert } from '../helpers/Common';
-import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '../theme/Color';
-import { getTransactions } from '../services/WalletApi';
+import { createStyles } from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { formatPrice, formatDateTime, showToastOrAlert } from '@helpers/Common';
+import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
+import { getTransactions } from '@services/WalletApi';
 
 export default function TransactionsScreen() {
   const { t, i18n } = useTranslation();

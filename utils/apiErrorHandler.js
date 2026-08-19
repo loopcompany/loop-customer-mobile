@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { showAlert } from '@helpers/Common';
 
 /**
  * مدیریت خطاهای API مربوط به کنترل دسترسی کاربران سازمانی
@@ -17,7 +17,7 @@ export const handleApiError = (error, navigation) => {
 
   if (!error?.response) {
     // خطای شبکه یا عدم دسترسی به سرور
-    Alert.alert(
+    showAlert(
       'خطای ارتباط',
       'اتصال به سرور برقرار نیست. لطفا اتصال اینترنت خود را بررسی کنید.',
       [{ text: 'متوجه شدم', style: 'default' }]
@@ -49,7 +49,7 @@ export const handleApiError = (error, navigation) => {
           });
         } else {
           // اگر navigation نداریم، فقط alert نشون بدیم
-          Alert.alert(
+          showAlert(
             'دسترسی محدود',
             data.message || 'لطفا منتظر تایید ادمین باشید',
             [{ text: 'متوجه شدم', style: 'default' }]
@@ -59,7 +59,7 @@ export const handleApiError = (error, navigation) => {
       }
       
       // سایر خطاهای 403
-      Alert.alert(
+      showAlert(
         'عدم دسترسی',
         'شما مجوز انجام این عمل را ندارید',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -71,7 +71,7 @@ export const handleApiError = (error, navigation) => {
       // خطای احراز هویت - token منقضی شده
       console.log('🔐 Authentication error detected');
       
-      Alert.alert(
+      showAlert(
         'خطای احراز هویت',
         'نشست شما منقضی شده است. لطفا مجددا وارد شوید.',
         [
@@ -99,7 +99,7 @@ export const handleApiError = (error, navigation) => {
       const firstError = Object.values(validationErrors)[0];
       const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
       
-      Alert.alert(
+      showAlert(
         'خطای اعتبارسنجی',
         errorMessage || data.message || 'اطلاعات وارد شده نامعتبر است',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -109,7 +109,7 @@ export const handleApiError = (error, navigation) => {
     
     case 429: {
       // خطای محدودیت درخواست
-      Alert.alert(
+      showAlert(
         'درخواست‌های زیاد',
         'شما درخواست‌های زیادی ارسال کرده‌اید. لطفا کمی صبر کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -119,7 +119,7 @@ export const handleApiError = (error, navigation) => {
     
     case 500: {
       // خطای سرور
-      Alert.alert(
+      showAlert(
         'خطای سرور',
         'مشکلی در سرور پیش آمده است. لطفا چند دقیقه دیگر مجددا تلاش کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -129,7 +129,7 @@ export const handleApiError = (error, navigation) => {
     
     case 503: {
       // سرویس در دسترس نیست
-      Alert.alert(
+      showAlert(
         'سرویس در دسترس نیست',
         'سرویس موقتاً در دسترس نیست. لطفا بعداً مجددا تلاش کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -140,7 +140,7 @@ export const handleApiError = (error, navigation) => {
     default: {
       // سایر خطاها
       const message = data.message || 'خطای غیرمنتظره‌ای رخ داده است';
-      Alert.alert(
+      showAlert(
         'خطا',
         message,
         [{ text: 'متوجه شدم', style: 'default' }]

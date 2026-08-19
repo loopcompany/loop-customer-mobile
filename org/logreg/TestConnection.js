@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import { uri } from '../../services/URL';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import { showAlert } from '../../helpers/Common';
+import { uri } from '@services/URL';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { showAlert } from '@helpers/Common';
 
 const TestConnection = ({ navigation }) => {
   const [loading, setLoading] = useState(false);

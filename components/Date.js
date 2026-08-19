@@ -1,13 +1,13 @@
 import { View, Text, FlatList, Pressable, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { getNext20DaysJalaali, langIsRTL } from '../helpers/Common';
-import { selectDate, setGeneralData, updateServiceScheduleField } from '../slices/stepSlice';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { getNext20DaysJalaali, langIsRTL } from '@helpers/Common';
+import { selectDate, setGeneralData, updateServiceScheduleField } from '@slices/stepSlice';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { imageUri } from '../services/URL';
+import { imageUri } from '@services/URL';
 import HintBadge from './HintBadge';
 
 export default function Date({ step, data, isServiceSchedule }) {

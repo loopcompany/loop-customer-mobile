@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
-import { handleError, showToastOrAlert } from '../helpers/Common';
+import { handleError, showToastOrAlert } from '@helpers/Common';
 import i18next from 'i18next';
 
 // Create axios instance with default config
@@ -195,7 +195,8 @@ export const authAPI = {
   },
 
   // Verify phone number with code (for regular registration)
-  verifyPhone: async (userData) => {
+  // `legacyCode` supports the older two-argument call shape: verifyPhone(phone, code).
+  verifyPhone: async (userData, legacyCode) => {
     try {
       console.log('verifyPhone called with:', userData);
       console.log('API endpoint:', API_ENDPOINTS.AUTH.VERIFY_PHONE);
@@ -212,7 +213,7 @@ export const authAPI = {
         // Legacy format - first param is phone, second is code
         requestData = {
           phone: userData?.toString().trim(),
-          verification_code: arguments[1]?.toString().trim()
+          verification_code: legacyCode?.toString().trim()
         };
       }
 

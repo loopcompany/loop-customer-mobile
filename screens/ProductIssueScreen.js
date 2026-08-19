@@ -14,17 +14,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
 import Footer from './Footer';
-import OrderDropdown from '../components/OrderDropdown';
-import DatePickerModal from '../components/DatePickerModal';
-import { formatDate } from '../helpers/Common';
-import { faultReportAPI } from '../services/Api';
-import { showToastOrAlert } from '../helpers/Common';
-import { themeColor1, themeColor4 } from '../theme/Color';
-import Button from '../components/Button';
-import { createStyles } from '../styles/NewStyles';
+import OrderDropdown from '@components/OrderDropdown';
+import DatePickerModal from '@components/DatePickerModal';
+import { formatDate } from '@helpers/Common';
+import { faultReportAPI } from '@services/Api';
+import { showToastOrAlert } from '@helpers/Common';
+import { themeColor1, themeColor4 } from '@theme/Color';
+import Button from '@components/Button';
+import { createStyles } from '@styles/NewStyles';
 
 
 export default function ProductIssueScreen({ navigation }) {

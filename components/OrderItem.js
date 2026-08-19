@@ -4,18 +4,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { createStyles } from '../styles/NewStyles';
-import NewStyles from '../styles/NewStyles';
-import { imageUri, uri } from '../services/URL';
-import { fetchOrders } from '../slices/ordersSlice';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor5, themeColor6, themeColor7 } from '../theme/Color';
-import { calculateDaysDifference, formatDate, formatPrice, showToastOrAlert } from '../helpers/Common';
-import PairButton from '../components/PairButton';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { imageUri, uri } from '@services/URL';
+import { fetchOrders } from '@slices/ordersSlice';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor5, themeColor6, themeColor7 } from '@theme/Color';
+import { calculateDaysDifference, formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
+import PairButton from '@components/PairButton';
 import ConfirmationModal from './ConfirmationModal';
-import { fetchSteps } from '../slices/stepSlice';
-import { setCategory } from '../slices/categorySlice';
+import { fetchSteps } from '@slices/stepSlice';
+import { setCategory } from '@slices/categorySlice';
 import RateModal from './RateModal';
-import { langIsRTL } from '../helpers/Common';
+import { langIsRTL } from '@helpers/Common';
 export default function OrderItem({ item, navigation, user }) {
 
     const { t, i18n } = useTranslation();
@@ -71,7 +71,7 @@ export default function OrderItem({ item, navigation, user }) {
             const response = await axios.post(`${uri}/orders/end`, { orderId: item?.id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
             if (response.status == 200) {
                 dispatch(fetchOrders(token));
-                navigation.navigate('Orders', { screen: 'Completed' });
+                navigation.navigate('OrdersScreen');
             }
         } catch (error) {
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');

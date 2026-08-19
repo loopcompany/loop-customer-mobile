@@ -13,19 +13,19 @@ import {
     Linking,
 } from "react-native";
 // CodeField imports removed - using InviteCodeInput component instead
-import Button from "../../components/Button";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "../../theme/Color";
-import { authAPI } from "../../services/Api";
-import { showToastOrAlert } from "../../helpers/Common";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import InviteCodeInput from "../../components/InviteCodeInput";
-import LocationPicker from "../../components/LocationPicker";
+import Button from "@components/Button";
+import NewStyles from "@styles/NewStyles";
+import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "@theme/Color";
+import { authAPI } from "@services/Api";
+import { showToastOrAlert } from "@helpers/Common";
+import CustomStatusBar from "@components/CustomStatusBar";
+import InviteCodeInput from "@components/InviteCodeInput";
+import LocationPicker from "@components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { createStyles } from '../../styles/NewStyles';
-import { langIsRTL } from '../../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import { langIsRTL } from '@helpers/Common';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
 import { useSelector } from "react-redux";
 const initialState = {
@@ -213,7 +213,7 @@ export default function MainSignIn({ navigation }) {
     };
 
     return (
-        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
             <CustomStatusBar />
             <KeyboardAvoidingView
                 behavior={'padding'}
@@ -221,7 +221,7 @@ export default function MainSignIn({ navigation }) {
             >
                 <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                     <View style={[styles.card, NewStyles.center]}>
-                        <Image source={require("../../assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
+                        <Image source={require("@assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
 
                         {/* General Error Message */}
                         {state.errors.general && (
@@ -461,17 +461,6 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         width: "100%",
         fontSize: 16,
         textAlign: "right",
-    },
-    submitButton: {
-        backgroundColor: "#3366ff",
-        borderRadius: 30,
-        paddingVertical: 14,
-        paddingHorizontal: 50,
-        marginTop: 30,
-        shadowColor: "#00f",
-        shadowOpacity: 0.8,
-        shadowRadius: 12,
-        elevation: 5,
     },
     submitButtonText: {
         color: "#fff",

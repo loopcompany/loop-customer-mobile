@@ -12,26 +12,26 @@
 import { PROCUREMENT_ITEMS, SOFTWARE_ITEMS } from './deviceCatalog';
 
 const sectionIcon = {
-  software: require('../assets/icons/sections/software-services.png'),
-  hardware: require('../assets/icons/sections/hardware-services.png'),
-  procurement: require('../assets/icons/sections/procurement.png'),
-  equipmentStatus: require('../assets/icons/sections/equipment-status.png'),
-  deliveryMode: require('../assets/icons/sections/delivery-mode.png'),
-  serviceLevel: require('../assets/icons/sections/service-level.png'),
-  technician: require('../assets/icons/sections/technician.png'),
-  timeRange: require('../assets/icons/sections/time-range.png'),
-  orderActions: require('../assets/icons/sections/order-actions.png'),
-  operatorInfo: require('../assets/icons/sections/operator-info.png'),
-  criticalInfra: require('../assets/icons/sections/critical-infra.png'),
+  software: require('@assets/icons/sections/software-services.png'),
+  hardware: require('@assets/icons/sections/hardware-services.png'),
+  procurement: require('@assets/icons/sections/procurement.png'),
+  equipmentStatus: require('@assets/icons/sections/equipment-status.png'),
+  deliveryMode: require('@assets/icons/sections/delivery-mode.png'),
+  serviceLevel: require('@assets/icons/sections/service-level.png'),
+  technician: require('@assets/icons/sections/technician.png'),
+  timeRange: require('@assets/icons/sections/time-range.png'),
+  orderActions: require('@assets/icons/sections/order-actions.png'),
+  operatorInfo: require('@assets/icons/sections/operator-info.png'),
+  criticalInfra: require('@assets/icons/sections/critical-infra.png'),
 };
 
 const deviceIcon = {
-  laptop: require('../assets/icons/hardware-services/laptop.png'),
-  monitor: require('../assets/icons/hardware-services/monitor.png'),
-  case: require('../assets/icons/hardware-services/case-standard.png'),
-  allInOne: require('../assets/icons/hardware-services/all-in-one.png'),
-  printer: require('../assets/icons/hardware-services/printer-multi.png'),
-  hardDisk: require('../assets/icons/hardware-services/storage-drive.png'),
+  laptop: require('@assets/icons/hardware-services/laptop.png'),
+  monitor: require('@assets/icons/hardware-services/monitor.png'),
+  case: require('@assets/icons/hardware-services/case-standard.png'),
+  allInOne: require('@assets/icons/hardware-services/all-in-one.png'),
+  printer: require('@assets/icons/hardware-services/printer-multi.png'),
+  hardDisk: require('@assets/icons/hardware-services/storage-drive.png'),
 };
 
 // ---------------------------------------------------------------------------

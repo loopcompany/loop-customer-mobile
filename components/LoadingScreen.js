@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../theme/Color';
-import { NewStyles } from '../styles/NewStyles';
+import { themeColor0, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
+import { NewStyles } from '@styles/NewStyles';
 import CustomStatusBar from './CustomStatusBar';
 
 /**

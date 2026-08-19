@@ -4,17 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { cleanText, formatPrice, handleError, showToastOrAlert } from '../../helpers/Common';
-import { imageUri, uri } from '../../services/URL';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor5 } from '../../theme/Color';
-import Button from '../../components/Button';
+import { cleanText, formatPrice, handleError, showToastOrAlert } from '@helpers/Common';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor3, themeColor5 } from '@theme/Color';
+import Button from '@components/Button';
 import { useTranslation } from 'react-i18next';
 import DiscountModal from './DiscountModal';
-import { fetchUser } from '../../slices/userSlice';
+import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { createStyles } from '@styles/NewStyles';
 export default function DiscountDetail({ route, navigation }) {
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

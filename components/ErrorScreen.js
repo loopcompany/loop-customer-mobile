@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6 } from '../theme/Color';
-import { NewStyles } from '../styles/NewStyles';
+import { themeColor0, themeColor3, themeColor4, themeColor5, themeColor6 } from '@theme/Color';
+import { NewStyles } from '@styles/NewStyles';
 import CustomStatusBar from './CustomStatusBar';
 import Button from './Button';
 

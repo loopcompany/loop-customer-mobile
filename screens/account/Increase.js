@@ -6,15 +6,15 @@ import * as Linking from "expo-linking";
 import axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
-import Button from '../../components/Button';
-import { uri } from '../../services/URL';
-import { formatPrice, showToastOrAlert } from '../../helpers/Common';
-import { fetchUser } from '../../slices/userSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import Button from '@components/Button';
+import { uri } from '@services/URL';
+import { formatPrice, showToastOrAlert } from '@helpers/Common';
+import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { createStyles } from '@styles/NewStyles';
 export default function Increase({ navigation }) {
       const { t, i18n } = useTranslation();
   const NewStyles = useMemo(

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor14 } from '../theme/Color';
-import ScreenTitle from '../components/ScreenTitle';
-import CustomStatusBar from '../components/CustomStatusBar';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor14 } from '@theme/Color';
+import ScreenTitle from '@components/ScreenTitle';
+import CustomStatusBar from '@components/CustomStatusBar';
+import Footer from '@screens/Footer';
+import ScreenHeaders from '@components/ScreenHeaders';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ContractScreen = ({ navigation }) => {

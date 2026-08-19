@@ -3,17 +3,17 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import NewStyles from '../../styles/NewStyles';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import Footer from '../Footer';
-import { themeColor0, themeColor1, themeColor4, themeColor10 } from '../../theme/Color';
-import { infoAPI } from '../../services/Api';
-import { showToastOrAlert } from '../../helpers/Common';
-import BlankScreen from '../../components/BlankScreen';
+import NewStyles from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import Footer from '@screens/Footer';
+import { themeColor0, themeColor1, themeColor4, themeColor10 } from '@theme/Color';
+import { infoAPI } from '@services/Api';
+import { showToastOrAlert } from '@helpers/Common';
+import BlankScreen from '@components/BlankScreen';
 import { RefreshControl } from 'react-native';
-import Loader from '../../components/Loader';
-import AccardeonComponent from '../../components/AccardeonComponent';
-import { createStyles } from '../../styles/NewStyles';
+import Loader from '@components/Loader';
+import AccordionItem from '@components/AccordionItem';
+import { createStyles } from '@styles/NewStyles';
 import { ImageBackground } from 'expo-image';
 export default function WarrantyScreen() {
   const { t, i18n } = useTranslation();
@@ -60,7 +60,7 @@ export default function WarrantyScreen() {
   const renderTermItem = ({ item }) => {
 
     return (
-      <AccardeonComponent needMap={true} item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
+      <AccordionItem needMap={true} item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
     );
   };
   if (isLoading) {
@@ -70,7 +70,7 @@ export default function WarrantyScreen() {
   }
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
         <ScreenHeaders title={t("Warranty / Guarantee")} />
         <FlatList
         style={{width:'100%'}}

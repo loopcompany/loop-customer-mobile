@@ -2,8 +2,8 @@ import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { WebView } from 'react-native-webview';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../styles/NewStyles';
-import { themeColor4 } from '../theme/Color';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor4 } from '@theme/Color';
 
 const NESHAN_API_KEY = 'web.1152adf3d8884734af16cc9e8f83e649';
 

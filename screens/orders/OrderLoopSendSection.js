@@ -4,15 +4,15 @@ import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL' 
-import { formatPrice, handleError, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color'
-import Button from '../../components/Button'
-import ConfirmationModal from '../../components/ConfirmationModal'
+import { createStyles } from '@styles/NewStyles';
+import { uri } from '@services/URL' 
+import { formatPrice, handleError, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor4, themeColor5, themeColor6, themeColor7 } from '@theme/Color'
+import Button from '@components/Button'
+import ConfirmationModal from '@components/ConfirmationModal'
 import { useNavigation } from '@react-navigation/native'
-import { fetchOrders } from '../../slices/orderSlice'
-import { fetchUser } from '../../slices/userSlice'
+import { fetchOrders } from '@slices/orderSlice'
+import { fetchUser } from '@slices/userSlice'
 import * as Linking from "expo-linking";
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {

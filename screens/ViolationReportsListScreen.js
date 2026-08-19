@@ -4,12 +4,12 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor1, themeColor0, themeColor10 } from '../theme/Color';
-import violationReportAPI from '../services/ViolationReportApi';
-import { formatJalaaliDate, formatPrice, showToastOrAlert } from '../helpers/Common';
-import { createStyles } from '../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor1, themeColor0, themeColor10 } from '@theme/Color';
+import violationReportAPI from '@services/ViolationReportApi';
+import { formatJalaaliDate, formatPrice, showToastOrAlert } from '@helpers/Common';
+import { createStyles } from '@styles/NewStyles';
 export default function ViolationReportsListScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(

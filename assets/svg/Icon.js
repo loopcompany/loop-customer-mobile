@@ -1,5 +1,5 @@
 import { Path, Svg } from 'react-native-svg';
-import { themeColor4, themeColor5 } from '../../theme/Color';
+import { themeColor4, themeColor5 } from '@theme/Color';
 
 export default function Icon({ name, size, color }) {
     return (

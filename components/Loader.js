@@ -1,7 +1,7 @@
 import { ActivityIndicator, StyleSheet } from 'react-native';
 import React from 'react';
 
-import { themeColor1, themeColor5 } from '../theme/Color';
+import { themeColor1, themeColor5 } from '@theme/Color';
 
 export default function Loader() {
 

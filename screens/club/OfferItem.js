@@ -1,9 +1,9 @@
 import { Text, StyleSheet, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 
-import { imageUri } from '../../services/URL';
-import NewStyles, { deviceWidth } from '../../styles/NewStyles';
-import { themeColor5 } from '../../theme/Color';
+import { imageUri } from '@services/URL';
+import NewStyles, { deviceWidth } from '@styles/NewStyles';
+import { themeColor5 } from '@theme/Color';
 
 export default function OfferItem({ item, navigation }) {
     return (

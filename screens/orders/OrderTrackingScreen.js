@@ -9,10 +9,10 @@ import {
   ScrollView,
   ImageBackground,
 } from 'react-native';
-import NewStyles from '../../styles/NewStyles';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { themeColor0, themeColor4 } from '../../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import CustomStatusBar from '@components/CustomStatusBar';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { themeColor0, themeColor4 } from '@theme/Color';
 
 export default function OrderTrackingScreen({ navigation, route }) {
   // دریافت اطلاعات سفارش از route params
@@ -48,7 +48,7 @@ export default function OrderTrackingScreen({ navigation, route }) {
   };
   return (
     <ImageBackground
-      source={require('../../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={NewStyles.container}
       imageStyle={{ width: '100%', height: '100%' }}
     >

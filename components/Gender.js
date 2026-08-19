@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { setMaleCount, setFemaleCount, setUnspecifiedCount, setGeneralData } from '../slices/stepSlice';
-import { imageUri } from '../services/URL';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { setMaleCount, setFemaleCount, setUnspecifiedCount, setGeneralData } from '@slices/stepSlice';
+import { imageUri } from '@services/URL';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Gender({ step, data }) {

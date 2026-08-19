@@ -4,21 +4,21 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createStyles } from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '../../theme/Color';
-import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
-import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
-import Button from '../../components/Button';
-import { imageUri, uri } from '../../services/URL';
-import { fetchOrders } from '../../slices/orderSlice';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
+import { formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
+import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
+import Button from '@components/Button';
+import { imageUri, uri } from '@services/URL';
+import { fetchOrders } from '@slices/orderSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { emptyCategory } from '../../slices/categorySlice';
-import ProgressBar from '../../components/ProgressBar';
-import { emptyAddress } from '../../slices/addressSlice';
-import Loader from '../../components/Loader';
+import { emptyCategory } from '@slices/categorySlice';
+import ProgressBar from '@components/ProgressBar';
+import { emptyAddress } from '@slices/addressSlice';
+import Loader from '@components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import HintBadge from '../../components/HintBadge';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
 import { LinearGradient } from 'expo-linear-gradient';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
@@ -289,7 +289,7 @@ function Preview({ navigation }) {
                             >
                                 <View style={[NewStyles.row, { gap: 10 }]}>
                                     <Image
-                                        source={require('../../assets/images/price.png')}
+                                        source={require('@assets/images/price.png')}
                                         style={{ height: 60, width: 60, resizeMode: 'contain' }}
                                     />
                                     <Text style={NewStyles.title4}> {isFixed == 1 ? t('Loop Fixed Amount') : t('Loop Base Amount')} </Text>
@@ -323,7 +323,7 @@ function Preview({ navigation }) {
                     >
                         <View style={[NewStyles.row, { gap: 10 }]}>
                             <Image
-                                source={require('../../assets/images/discount.png')}
+                                source={require('@assets/images/discount.png')}
                                 style={{ height: 60, width: 60, resizeMode: 'contain' }}
                             />
                             <Text style={NewStyles.title4}> {t('Discount Code')} </Text>

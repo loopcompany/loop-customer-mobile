@@ -2,12 +2,12 @@ import { View, Text, FlatList, Pressable, StyleSheet, Image } from 'react-native
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { selectTime, setGeneralData } from '../slices/stepSlice';
-import { generateTimeSlots } from '../helpers/Common';
-import { createStyles } from '../styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { selectTime, setGeneralData } from '@slices/stepSlice';
+import { generateTimeSlots } from '@helpers/Common';
+import { createStyles } from '@styles/NewStyles';
 import { useTranslation } from 'react-i18next';
-import { imageUri } from '../services/URL';
+import { imageUri } from '@services/URL';
 import HintBadge from './HintBadge';
 
 

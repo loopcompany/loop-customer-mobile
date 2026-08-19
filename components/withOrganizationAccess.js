@@ -1,11 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useOrganizationAccess } from '../hooks/useOrganizationAccess';
-import AccessRestrictedScreen from '../components/AccessRestrictedScreen';
-import Loader from '../components/Loader';
-import LoadingScreen from '../components/LoadingScreen';
-import ErrorScreen from '../components/ErrorScreen';
-import { useIntersectionObserver } from '../utils/performanceOptimization';
+import { useOrganizationAccess } from '@hooks/useOrganizationAccess';
+import AccessRestrictedScreen from '@screens/AccessRestrictedScreen';
+import Loader from '@components/Loader';
+import LoadingScreen from '@components/LoadingScreen';
+import ErrorScreen from '@components/ErrorScreen';
+import { useIntersectionObserver } from '@utils/performanceOptimization';
 import { useTranslation } from 'react-i18next';
 
 /**

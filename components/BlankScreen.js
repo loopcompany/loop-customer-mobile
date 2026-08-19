@@ -3,10 +3,10 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { Ionicons } from '@expo/vector-icons'
-import NewStyles from '../styles/NewStyles'
-import { themeColor0, themeColor4, themeColor10 } from '../theme/Color'
+import NewStyles from '@styles/NewStyles'
+import { themeColor0, themeColor4, themeColor10 } from '@theme/Color'
 import ScreenHeaders from './ScreenHeaders'
-import Footer from '../screens/Footer'
+import Footer from '@screens/Footer'
 
 const BlankScreen = ({
     title = "Empty Page",
@@ -22,7 +22,7 @@ const BlankScreen = ({
                 
                 <View style={styles.logoContainer}>
                     <Image
-                        source={require("../assets/logo.png")}
+                        source={require("@assets/logo.png")}
                         style={styles.logo}
                     />
                 </View>

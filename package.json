@@ -1,12 +1,23 @@
 {
-  "name": "loop",
+  "name": "loop-customer-mobile",
   "version": "1.0.0",
+  "description": "Loop (لوپ) — Expo/React Native customer app for the Loop home-service platform.",
+  "private": true,
   "main": "index.js",
+  "engines": {
+    "node": ">=20.18.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "doctor": "expo-doctor",
+    "verify": "npm run lint && npm run format:check",
     "build:web": "expo export -p web",
     "serve:web": "serve dist -p 3000",
     "deploy:netlify": "cd dist && netlify deploy --prod",
@@ -75,7 +86,14 @@
     "redux": "^5.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
-  },
-  "private": true
+    "@babel/core": "^7.20.0",
+    "babel-plugin-module-resolver": "^5.0.3",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-babel-module": "^5.3.2",
+    "eslint-plugin-prettier": "^5.5.6",
+    "prettier": "^3.9.6"
+  }
 }

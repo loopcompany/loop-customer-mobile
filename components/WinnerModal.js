@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { themeColor1, themeColor7 } from '../theme/Color';
-import NewStyles from '../styles/NewStyles';
+import { themeColor1, themeColor7 } from '@theme/Color';
+import NewStyles from '@styles/NewStyles';
 
 const { width } = Dimensions.get('window');
 

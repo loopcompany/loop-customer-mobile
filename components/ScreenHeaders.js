@@ -1,8 +1,8 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View, StatusBar, Platform } from "react-native";
 import React from "react";
 import { useTranslation } from 'react-i18next';
-import NewStyles from "../styles/NewStyles";
-import { themeColor4 } from "../theme/Color";
+import NewStyles from "@styles/NewStyles";
+import { themeColor4 } from "@theme/Color";
 import { useNavigation } from "@react-navigation/native";
 
 const ScreenHeaders = ({
@@ -44,7 +44,7 @@ const ScreenHeaders = ({
         onPress={handleBack}
         style={[styles.iconContainer, NewStyles.row]}
       >
-         <Image source={require("../assets/gif/prev.gif")} style={styles.arrow} />
+         <Image source={require("@assets/gif/prev.gif")} style={styles.arrow} />
         <Text style={[NewStyles.title10, styles.titleText]}>{t("Back")}</Text>
       </TouchableOpacity>
     </View>

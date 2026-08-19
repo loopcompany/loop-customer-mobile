@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import Footer from './Footer';
-import NewStyles from '../styles/NewStyles';
-import ScreenTitle from '../components/ScreenTitle';
-import { themeColor10, themeColor4 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import ScreenTitle from '@components/ScreenTitle';
+import { themeColor10, themeColor4 } from '@theme/Color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 
@@ -42,7 +42,7 @@ export default function PartsSupplyScreen() {
 
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={styles.background}
       imageStyle={{ width: '100%', height: '100%' }}
     >

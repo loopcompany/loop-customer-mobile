@@ -2,7 +2,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import React from 'react';
 
 import FilterItem from './FilterItem'; 
-import NewStyles from '../styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
 
 export default function Filters({ data, activeIndex, setActiveIndex   ,isRtl = false, }) {
     return (

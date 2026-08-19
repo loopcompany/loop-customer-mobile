@@ -4,9 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { useDispatch, useSelector } from 'react-redux';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor5, themeColor6 } from '../theme/Color';
-import { disableDateAndTime, toggleUrgent } from '../slices/stepSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor5, themeColor6 } from '@theme/Color';
+import { disableDateAndTime, toggleUrgent } from '@slices/stepSlice';
 import HintBadge from './HintBadge';
 
 export default function Urgent({ step, data }) {

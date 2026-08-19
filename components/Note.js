@@ -1,12 +1,12 @@
 import { View, Text, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { themeColor0, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { setDescription } from '../slices/stepSlice';
+import { themeColor0, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { setDescription } from '@slices/stepSlice';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
-import { createStyles } from '../styles/NewStyles';
-import { imageUri } from '../services/URL';
+import { createStyles } from '@styles/NewStyles';
+import { imageUri } from '@services/URL';
 
 export default function Note({ step, data }) {
 

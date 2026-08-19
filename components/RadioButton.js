@@ -13,22 +13,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 
-import { imageUri, uri } from '../services/URL';
-import NewStyles from '../styles/NewStyles';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles';
 import {
   themeColor0,
   themeColor1,
   themeColor10,
   themeColor3,
   themeColor4,
-} from '../theme/Color';
+} from '@theme/Color';
 import {
   addStep,
   decrement,
   increment,
   updateRadioButton,
-} from '../slices/stepSlice';
-import { formatPrice, langIsRTL } from '../helpers/Common';
+} from '@slices/stepSlice';
+import { formatPrice, langIsRTL } from '@helpers/Common';
 import i18n from 'i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 

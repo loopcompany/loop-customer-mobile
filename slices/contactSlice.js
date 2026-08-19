@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 
 export const fetchContacts = createAsyncThunk('contact/fetchContacts', async () => {
     return await axios

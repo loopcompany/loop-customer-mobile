@@ -13,11 +13,11 @@ import {
   FlatList,
 } from "react-native";
 import Footer from "./Footer";
-import CheckBox from './../components/CheckBox';
-import NewStyles from "../styles/NewStyles";
-import { themeColor4 } from "../theme/Color";
-import ScreenHeaders from "../components/ScreenHeaders";
-import ScreenTitle from "../components/ScreenTitle";
+import CheckBox from '@components/CheckBox';
+import NewStyles from "@styles/NewStyles";
+import { themeColor4 } from "@theme/Color";
+import ScreenHeaders from "@components/ScreenHeaders";
+import ScreenTitle from "@components/ScreenTitle";
 import { SafeAreaView } from 'react-native-safe-area-context';
 export default function SoftwareInstallScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
@@ -66,7 +66,7 @@ export default function SoftwareInstallScreen({ navigation, route }) {
   ]
   return (
 
-    <ImageBackground source={require("../assets/moon.jpg")} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require("@assets/moon.jpg")} style={styles.background} imageStyle={{ width: '100%', height: '100%' }}>
 
       <ScreenHeaders
         title={category}

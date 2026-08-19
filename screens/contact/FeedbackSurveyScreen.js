@@ -14,11 +14,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
-import { themeColor1, themeColor0, themeColor10, themeColor7, themeColor3, themeColor4 } from '../../theme/Color';
-import Button from '../../components/Button';
-import pollAPI from '../../services/PollApi';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor1, themeColor0, themeColor10, themeColor7, themeColor3, themeColor4 } from '@theme/Color';
+import Button from '@components/Button';
+import pollAPI from '@services/PollApi';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 

@@ -1,14 +1,14 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NewStyles from '../../styles/NewStyles';
-import ScreenHeaders from '../../components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchOrders } from '../../slices/ordersSlice';
+import { fetchOrders } from '@slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
-import OrderItem from '../../components/OrderItem';
-import { createStyles } from '../../styles/NewStyles';
+import OrderItem from '@components/OrderItem';
+import { createStyles } from '@styles/NewStyles';
 function CanceledOrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(

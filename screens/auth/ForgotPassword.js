@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import Button from "../../components/Button";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor10 } from "../../theme/Color";
-import { authAPI } from "../../services/Api";
-import { setAuthLoading, setAuthError, clearAuthError } from "../../slices/authSlice";
-import { validateMelicode, validatePhone, validateEmail, showToastOrAlert } from "../../helpers/Common";
+import Button from "@components/Button";
+import NewStyles from "@styles/NewStyles";
+import { themeColor10 } from "@theme/Color";
+import { authAPI } from "@services/Api";
+import { setAuthLoading, setAuthError, clearAuthError } from "@slices/authSlice";
+import { validateMelicode, validatePhone, validateEmail, showToastOrAlert } from "@helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { createStyles } from '../../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
@@ -144,7 +144,7 @@ export default function ForgotPassword({ navigation }) {
 
     return (
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
-            <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} imageStyle={{ opacity: 0.8, }} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
+            <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} imageStyle={{ opacity: 0.8, }} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
                 <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior='padding'>
                     <ScrollView
                         contentContainerStyle={styles.container}
@@ -152,7 +152,7 @@ export default function ForgotPassword({ navigation }) {
                         {/* Logo Section */}
                         <View style={[{ flex: 1 }, NewStyles.center]}>
                             <Image
-                                source={require("../../assets/logo.png")}
+                                source={require("@assets/logo.png")}
                                 style={NewStyles.logo}
                                 resizeMode="contain"
                             />

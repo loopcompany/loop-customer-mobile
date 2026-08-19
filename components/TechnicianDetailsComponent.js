@@ -1,14 +1,14 @@
 import { Image, Linking, StyleSheet, Text, View, Modal, TouchableOpacity, Share } from 'react-native'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6 } from '../theme/Color'
-import { imageUri, mainUri } from '../services/URL'
-import { formatDate, showToastOrAlert } from '../helpers/Common'
+import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6 } from '@theme/Color'
+import { imageUri, mainUri } from '@services/URL'
+import { formatDate, showToastOrAlert } from '@helpers/Common'
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useDispatch, useSelector } from 'react-redux';
-import { createStyles } from '../styles/NewStyles'
+import { createStyles } from '@styles/NewStyles'
 const TechnicianDetailsComponent = ({ data, navigation }) => {
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

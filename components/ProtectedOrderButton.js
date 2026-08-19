@@ -1,14 +1,14 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import { useOrganizationAccess } from '../hooks/useOrganizationAccess';
-import { showAlert } from '../helpers/Common';
+import { useOrganizationAccess } from '@hooks/useOrganizationAccess';
+import { showAlert } from '@helpers/Common';
 import { 
   themeColor0, themeColor1, themeColor3, themeColor4, 
   themeColor5, themeColor7, themeColor10, themeColor11 
-} from '../theme/Color';
+} from '@theme/Color';
 
 /**
  * کامپوننت دکمه محافظت شده برای سفارشات

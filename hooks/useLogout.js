@@ -4,12 +4,12 @@ import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import TokenManager from '../services/TokenManager';
-import { setToken, setUserType } from '../slices/authSlice';
-import { clearOrganizationData } from '../slices/organizationSlice';
-import { showAlert } from '../helpers/Common';
+import TokenManager from '@services/TokenManager';
+import { setToken, setUserType } from '@slices/authSlice';
+import { clearOrganizationData } from '@slices/organizationSlice';
+import { showAlert } from '@helpers/Common';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setLanguage } from '../slices/languageSlice';
+import { setLanguage } from '@slices/languageSlice';
 
 // Custom hook for logout functionality
 export const useLogout = () => {

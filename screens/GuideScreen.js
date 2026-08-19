@@ -10,9 +10,9 @@ import {
   I18nManager,
 } from 'react-native';
 import Footer from './Footer';
-import NewStyles from '../styles/NewStyles';
-import ScreenTitle from './../components/ScreenTitle';
-import Button from '../components/Button';
+import NewStyles from '@styles/NewStyles';
+import ScreenTitle from '@components/ScreenTitle';
+import Button from '@components/Button';
  // فعال کردن RTL برای زبان فارسی
 
 export default function GuideScreen({ navigation, route }) {
@@ -20,12 +20,12 @@ export default function GuideScreen({ navigation, route }) {
 
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')} // مسیر بک‌گراند خودت
+      source={require('@assets/moon.jpg')} // مسیر بک‌گراند خودت
       style={styles.container}
       imageStyle={{ width: '100%', height: '100%' }}
     >
       {/* لوگو بالا */}
-      <Image source={require('../assets/logo.png')} style={NewStyles.logo} />
+      <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
 
       {/* دکمه نرم افزار */}
       <View style={{ width: '100%', paddingHorizontal:20 }}>
@@ -49,7 +49,7 @@ export default function GuideScreen({ navigation, route }) {
 
       {/* فوتر پشتیبانی */}
       {/* <View style={styles.footer}>
-  <Image source={require('../assets/logo.png')} style={styles.footerLogo} />
+  <Image source={require('@assets/logo.png')} style={styles.footerLogo} />
 
   <TouchableOpacity style={styles.supportButton}>
     <Text style={styles.supportText}>پشتیبانی</Text>

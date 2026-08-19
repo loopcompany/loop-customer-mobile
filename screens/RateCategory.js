@@ -12,16 +12,16 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NewStyles from '../styles/NewStyles';
-import ScreenHeaders from '../components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
 import Footer from './Footer';
-import { formatJalaaliDate, formatPrice } from '../helpers/Common';
-import { themeColor0, themeColor1, themeColor4 } from '../theme/Color';
-import HintBadge from '../components/HintBadge';
+import { formatJalaaliDate, formatPrice } from '@helpers/Common';
+import { themeColor0, themeColor1, themeColor4 } from '@theme/Color';
+import HintBadge from '@components/HintBadge';
 import { RefreshControl } from 'react-native';
-import letterRatesCategoryAPI from '../services/LetterRatesService';
+import letterRatesCategoryAPI from '@services/LetterRatesService';
 import { useNavigation } from '@react-navigation/native';
-import { createStyles } from '../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 

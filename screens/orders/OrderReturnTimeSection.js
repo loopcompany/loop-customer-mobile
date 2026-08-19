@@ -7,12 +7,12 @@ import jalaali from 'jalaali-js'
 import moment from 'moment-jalaali'
 import { useTranslation } from 'react-i18next'
 
-import { uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatDate, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
-import Button from '../../components/Button'
-import ConfirmationModal from '../../components/ConfirmationModal'
+import { uri } from '@services/URL'
+import NewStyles from '@styles/NewStyles'
+import { formatDate, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor7 } from '@theme/Color'
+import Button from '@components/Button'
+import ConfirmationModal from '@components/ConfirmationModal'
 import i18n from 'i18next'
 const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
     const { t } = useTranslation()

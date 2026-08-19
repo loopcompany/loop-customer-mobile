@@ -1,10 +1,10 @@
 import { TouchableOpacity, Text } from 'react-native'
 import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import NewStyles from '../styles/NewStyles'
+import NewStyles from '@styles/NewStyles'
 import { useTranslation } from 'react-i18next';
-import { themeColor0, themeColor4 } from '../theme/Color'
-import { createStyles } from '../styles/NewStyles';
+import { themeColor0, themeColor4 } from '@theme/Color'
+import { createStyles } from '@styles/NewStyles';
 const AccordionHeader = ({
     title,
     isActive,

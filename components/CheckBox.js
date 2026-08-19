@@ -4,11 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { useDispatch } from 'react-redux';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '../theme/Color';
-import { decrement, increment, setCounterInputValue, updateCheckbox } from '../slices/stepSlice';
-import { formatPrice } from '../helpers/Common';
-import { imageUri } from '../services/URL';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '@theme/Color';
+import { decrement, increment, setCounterInputValue, updateCheckbox } from '@slices/stepSlice';
+import { formatPrice } from '@helpers/Common';
+import { imageUri } from '@services/URL';
 import { LinearGradient } from 'expo-linear-gradient';
 import HintBadge from './HintBadge';
 

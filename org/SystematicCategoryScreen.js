@@ -23,17 +23,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
-import Folder from '../components/Folder';
-import Loader from '../components/Loader';
-import ScreenHeaders from '../components/ScreenHeaders';
-import CustomStatusBar from '../components/CustomStatusBar';
-import categoriesAPI from '../services/CategoriesApi';
-import { imageUri } from '../services/URL';
-import { fetchSteps } from '../slices/stepSlice';
-import { setCategory } from '../slices/categorySlice';
-import { showToastOrAlert } from '../helpers/Common';
-import { createStyles } from '../styles/NewStyles';
-import { colors } from '../theme/Color';
+import Folder from '@components/Folder';
+import Loader from '@components/Loader';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import categoriesAPI from '@services/CategoriesApi';
+import { imageUri } from '@services/URL';
+import { fetchSteps } from '@slices/stepSlice';
+import { setCategory } from '@slices/categorySlice';
+import { showToastOrAlert } from '@helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import { colors } from '@theme/Color';
 import {
   SYSTEMATIC_CATEGORIES,
   getFlow,
@@ -157,8 +157,8 @@ const SystematicCategoryScreen = ({ navigation }) => {
         imageStyle={{ opacity: 0.8 }}
         source={
           Platform.OS === 'web'
-            ? require('../assets/loopbackground.webp')
-            : require('../assets/moon.jpg')
+            ? require('@assets/loopbackground.webp')
+            : require('@assets/moon.jpg')
         }
         style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]}
         contentPosition={'center'}
@@ -176,7 +176,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
             }
           >
             <View style={styles.logoWrapper}>
-              <Image source={require('../assets/logo.png')} style={NewStyles.logo} />
+              <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
             </View>
           </ScrollView>
         </View>

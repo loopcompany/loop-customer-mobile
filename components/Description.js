@@ -1,9 +1,9 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 import { useState } from 'react'
 
-import NewStyles from '../styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
 import Filters from './Filters';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import HintBadge from './HintBadge';
 
 export default function Description({ data }) {

@@ -4,11 +4,11 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../styles/NewStyles';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor5 } from '../theme/Color';
-import { orderAPI } from '../services/Api';
-import { formatDate, showToastOrAlert } from '../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor5 } from '@theme/Color';
+import { orderAPI } from '@services/Api';
+import { formatDate, showToastOrAlert } from '@helpers/Common';
 
 export default function OrderDropdown({ value, onChange, placeholder }) {
   const { t, i18n } = useTranslation();

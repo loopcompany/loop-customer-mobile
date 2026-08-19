@@ -2,8 +2,8 @@ import { View, Text } from 'react-native'
 import React from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import NewStyles from '../styles/NewStyles'
-import { themeColor1, themeColor4 } from '../theme/Color'
+import NewStyles from '@styles/NewStyles'
+import { themeColor1, themeColor4 } from '@theme/Color'
 
 export default function ProgressBar({ step }) {
     return (

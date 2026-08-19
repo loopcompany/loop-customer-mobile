@@ -12,12 +12,12 @@ import {
   FlatList,
 } from "react-native";
 import Footer from "./Footer";
-import NewStyles from "../styles/NewStyles";
-import { themeColor4 } from "../theme/Color";
-import CustomStatusBar from "../components/CustomStatusBar";
-import ScreenHeaders from "../components/ScreenHeaders";
-import ScreenTitle from "../components/ScreenTitle";
-import CheckBox from "../components/CheckBox";
+import NewStyles from "@styles/NewStyles";
+import { themeColor4 } from "@theme/Color";
+import CustomStatusBar from "@components/CustomStatusBar";
+import ScreenHeaders from "@components/ScreenHeaders";
+import ScreenTitle from "@components/ScreenTitle";
+import CheckBox from "@components/CheckBox";
 export default function HardwareIssueScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const issues = [
@@ -75,7 +75,7 @@ export default function HardwareIssueScreen({ navigation, route }) {
   ];
 
   return (
-    <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require("@assets/moon.jpg")} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
       <ScreenHeaders
         title={category}
@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
     fontWeight: "300",
   },
   container: {
-    padding: 20,
     // paddingBottom: 100,
     // alignItems: 'stretch',
     padding: 30,
@@ -170,8 +169,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 30,
-    flexDirection: "row-reverse",
-    justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     flex: 1,

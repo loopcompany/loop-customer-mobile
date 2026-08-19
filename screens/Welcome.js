@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   TouchableWithoutFeedback,
   Platform,
 } from "react-native";
-import NewStyles from "../styles/NewStyles";
-import { themeColor0, themeColor10 } from "../theme/Color";
+import NewStyles from "@styles/NewStyles";
+import { themeColor0, themeColor10 } from "@theme/Color";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { fetchContacts } from "../slices/contactSlice";
+import { fetchContacts } from "@slices/contactSlice";
 import { useDispatch } from "react-redux";
 
 export default function Welcome({ navigation }) {
@@ -27,7 +27,7 @@ export default function Welcome({ navigation }) {
     dispatch(fetchContacts());
   }, [])
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <TouchableWithoutFeedback
         onPress={() => {
           // navigation.navigate("OrderMenuScreen");
@@ -45,7 +45,7 @@ export default function Welcome({ navigation }) {
           <View style={[{}, NewStyles.center]}>
 
             <Image
-              source={require("../assets/logo.png")}
+              source={require("@assets/logo.png")}
               style={NewStyles.logo}
               resizeMode="contain"
             />

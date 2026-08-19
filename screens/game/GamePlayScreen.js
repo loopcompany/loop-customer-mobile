@@ -11,9 +11,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import  { createStyles } from '../../styles/NewStyles';
-import { themeColor1, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
+import ScreenHeaders from '@components/ScreenHeaders';
+import  { createStyles } from '@styles/NewStyles';
+import { themeColor1, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
 import {
   GAME_LEVELS,
   generateQuestion,

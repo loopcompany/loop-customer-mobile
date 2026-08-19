@@ -9,13 +9,13 @@ import {
   Platform,
 } from "react-native";
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from "../../components/ScreenHeaders";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../../theme/Color";
-import { notesAPI } from "../../services/Api";
-import { showToastOrAlert, showAlert } from "../../helpers/Common";
-import Button from "../../components/Button";
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from "@components/ScreenHeaders";
+import NewStyles from "@styles/NewStyles";
+import { themeColor1, themeColor4, themeColor0, themeColor3 } from "@theme/Color";
+import { notesAPI } from "@services/Api";
+import { showToastOrAlert, showAlert } from "@helpers/Common";
+import Button from "@components/Button";
+import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function AddEditNoteScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();

@@ -17,19 +17,19 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import { themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '../../theme/Color';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import DatePickerModal from '../../components/DatePickerModal';
-import { langIsRTL, showAlert } from '../../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '@theme/Color';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import DatePickerModal from '@components/DatePickerModal';
+import { langIsRTL, showAlert } from '@helpers/Common';
 
-import useLogout from '../../hooks/useLogout';
-import { imageUri, uri } from '../../services/URL';
-import NewStyles from '../../styles/NewStyles';
+import useLogout from '@hooks/useLogout';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
-// import { jalaliToGregorian } from '../../helpers/Common';
+// import { jalaliToGregorian } from '@helpers/Common';
 
 const OrganizationProfile = () => {
   const navigation = useNavigation();

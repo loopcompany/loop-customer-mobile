@@ -97,7 +97,7 @@ export const ALLOWED_SCREENS = [
   
   // صفحات کلی و منو
   'Footer',
-  'Fekrobekr',
+  'IdeaBoxScreen',
   'RateListScreen',
   'ProductIssueScreen',
   'TrainingRegistrationScreen',

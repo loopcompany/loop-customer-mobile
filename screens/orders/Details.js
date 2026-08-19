@@ -6,27 +6,27 @@ import * as Linking from "expo-linking";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
-import { imageUri, uri } from '../../services/URL';
-import NewStyles from '../../styles/NewStyles'
-import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8, themeColor14 } from '../../theme/Color';
-import Loader from '../../components/Loader';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles'
+import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8, themeColor14 } from '@theme/Color';
+import Loader from '@components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import TechnicianDetailsComponent from '../../components/TechnicianDetailsComponent';
-import Button from '../../components/Button';
+import ScreenHeaders from '@components/ScreenHeaders';
+import TechnicianDetailsComponent from '@components/TechnicianDetailsComponent';
+import Button from '@components/Button';
 import OrderExtraServices from './OrderExtraServices';
 import OrderReviewSection from './OrderReviewSection';
 import OrderReviewRatingSection from './OrderReviewRatingSection';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
-import AccordionHeader from '../../components/AccordionHeader';
-import { fetchUser } from '../../slices/userSlice';
-import { fetchOrders } from '../../slices/orderSlice';
-import { createStyles } from '../../styles/NewStyles';
-import ShowMapDetailComponent from '../../components/ShowMapDetailComponent';
+import AccordionHeader from '@components/AccordionHeader';
+import { fetchUser } from '@slices/userSlice';
+import { fetchOrders } from '@slices/orderSlice';
+import { createStyles } from '@styles/NewStyles';
+import ShowMapDetailComponent from '@components/ShowMapDetailComponent';
 
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
     let is_package = 0

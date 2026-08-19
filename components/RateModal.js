@@ -5,14 +5,14 @@ import { Rating } from '@kolking/react-native-rating';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 
-import { themeColor0, themeColor3, themeColor4 } from '../theme/Color';
-import NewStyles from '../styles/NewStyles';
-import { showToastOrAlert } from '../helpers/Common';
+import { themeColor0, themeColor3, themeColor4 } from '@theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { showToastOrAlert } from '@helpers/Common';
 import PairButton from './PairButton';
-import { fetchOrders } from '../slices/orderSlice';
-import { fetchUser } from '../slices/userSlice';
+import { fetchOrders } from '@slices/orderSlice';
+import { fetchUser } from '@slices/userSlice';
 
 export default function RateModal({ rateModal, setRateModal, orderId, data }) {
 
@@ -36,9 +36,6 @@ export default function RateModal({ rateModal, setRateModal, orderId, data }) {
         } catch (error) {
             const message = error.response ? t('An unexpected error occurred!') : t('Network error!');
             showToastOrAlert(message);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
         }
     }
 

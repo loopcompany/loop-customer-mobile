@@ -4,13 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { Image } from 'expo-image';
 
-import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor2, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '../theme/Color';
-import { decrement, increment, setCounterInputValue } from '../slices/stepSlice';
-import { formatPrice, langIsRTL } from '../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor2, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '@theme/Color';
+import { decrement, increment, setCounterInputValue } from '@slices/stepSlice';
+import { formatPrice, langIsRTL } from '@helpers/Common';
 import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { imageUri } from '../services/URL';
+import { imageUri } from '@services/URL';
 import { useTranslation } from 'react-i18next';
 import HintBadge from './HintBadge';
 
@@ -90,7 +90,7 @@ const PackageCountdown = memo(function PackageCountdown({
     if (!nowServer || !endAt) return null;
     if (countdown.isFinished) return null;
     return (
-        <ImageBackground source={require('../assets/images/backtimer.png')} style={styles.timerContainer} imageStyle={{ width: '100%', height: '100%' }}>
+        <ImageBackground source={require('@assets/images/backtimer.png')} style={styles.timerContainer} imageStyle={{ width: '100%', height: '100%' }}>
             {countdown.isFinished ? (
                 <Text style={[NewStyles.title1,]}>زمان این پکیج تمام شده</Text>
             ) : (

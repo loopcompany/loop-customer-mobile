@@ -8,14 +8,14 @@ import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
 
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { fetchOrders } from '../../slices/ordersSlice';
-import { themeColor0 } from '../../theme/Color';
-import OrderItem from '../../components/OrderItem';
-import BlankScreen from '../../components/BlankScreen';
-import Loader from './../../components/Loader';
-import { createStyles } from '../../styles/NewStyles';
-import Button from '../../components/Button';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { fetchOrders } from '@slices/ordersSlice';
+import { themeColor0 } from '@theme/Color';
+import OrderItem from '@components/OrderItem';
+import BlankScreen from '@components/BlankScreen';
+import Loader from '@components/Loader';
+import { createStyles } from '@styles/NewStyles';
+import Button from '@components/Button';
 
 function OrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();

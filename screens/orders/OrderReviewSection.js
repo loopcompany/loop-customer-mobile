@@ -4,13 +4,13 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-import { createStyles } from '../../styles/NewStyles';
-import { mainUri, uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatDate, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeColor7 } from '../../theme/Color'
-import ConfirmationModal from '../../components/ConfirmationModal'
-import Button from '../../components/Button'
+import { createStyles } from '@styles/NewStyles';
+import { mainUri, uri } from '@services/URL'
+import NewStyles from '@styles/NewStyles'
+import { formatDate, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor6, themeColor7 } from '@theme/Color'
+import ConfirmationModal from '@components/ConfirmationModal'
+import Button from '@components/Button'
 
 const OrderReviewSection = ({ data, orderId, onUpdate, navigation }) => {
   const user = useSelector((state) => state?.user);

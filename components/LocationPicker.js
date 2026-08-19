@@ -4,11 +4,11 @@ import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, Tex
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { uri } from '../services/URL';
-import { showAlert } from '../helpers/Common';
-import NewStyles from '../styles/NewStyles';
-import { createStyles } from '../styles/NewStyles';
-import { themeColor10, themeColor3, themeColor4 } from '../theme/Color';
+import { uri } from '@services/URL';
+import { showAlert } from '@helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor10, themeColor3, themeColor4 } from '@theme/Color';
 
 /**
  * LocationPicker Component

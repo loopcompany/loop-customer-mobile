@@ -2,30 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform, SafeAreaView, } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-import { setToken, setUserType } from '../slices/authSlice';
-import { fetchUser } from '../slices/userSlice';
-import TokenManager from '../services/TokenManager';
-import CustomStatusBar from '../components/CustomStatusBar';
-import { themeColor0, themeColor10 } from '../theme/Color';
-import { fetchAddresses } from '../slices/addressSlice';
+import { setToken, setUserType } from '@slices/authSlice';
+import { fetchUser } from '@slices/userSlice';
+import TokenManager from '@services/TokenManager';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { themeColor0, themeColor10 } from '@theme/Color';
+import { fetchAddresses } from '@slices/addressSlice';
 import { ImageBackground } from 'expo-image';
-import NewStyles, { deviceHeight, deviceWidth } from '../styles/NewStyles';
-import { fetchRadii } from '../slices/radiusSlice';
+import NewStyles, { deviceHeight, deviceWidth } from '@styles/NewStyles';
+import { fetchRadii } from '@slices/radiusSlice';
 import i18n from 'i18next';
-import { setLanguage } from '../slices/languageSlice';
+import { setLanguage } from '@slices/languageSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchPdfDocs } from '../slices/pdfDocumentSlice';
-import { fetchMinPrice } from '../slices/minPriceSlice';
+import { fetchPdfDocs } from '@slices/pdfDocumentSlice';
+import { fetchMinPrice } from '@slices/minPriceSlice';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEvent } from 'expo';
 import { getHash } from 'react-native-otp-verify';
-import { setHashApp } from '../slices/hashAppSlice';
+import { setHashApp } from '@slices/hashAppSlice';
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
   const [checking, setChecking] = useState(true);
-  const player = useVideoPlayer(require('../assets/video/InShot_20260626_171217014.mp4'), player => {
+  const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
     console.log("player ready");
     if (Platform.OS === 'web') {
 

@@ -7,10 +7,10 @@ import {
   Image,
 } from "react-native";
 import React, { useMemo } from "react";
-import { themeColor0, themeColor10 } from "../theme/Color";
-import { imageUri } from "../services/URL";
+import { themeColor0, themeColor10 } from "@theme/Color";
+import { imageUri } from "@services/URL";
 import { useTranslation } from "react-i18next";
-import { createStyles } from "../styles/NewStyles";
+import { createStyles } from "@styles/NewStyles";
 
 // `image` مسیر تصویر روی سرور است (رفتار قبلی). برای کاشی‌هایی که تصویرشان محلی
 // است `imageSource` را بدهید و برای دسته‌هایی که اصلاً تصویر ندارند `icon` را.

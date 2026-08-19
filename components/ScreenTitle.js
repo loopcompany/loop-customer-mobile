@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, Text, View, Platform, StatusBar, Dimensions } from 'react-native'
 import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import NewStyles from '../styles/NewStyles'
-import { themeColor0 } from '../theme/Color'
+import NewStyles from '@styles/NewStyles'
+import { themeColor0 } from '@theme/Color'
 
 const ScreenTitle = ({title, onPress, style, textStyle}) => {
     const insets = useSafeAreaInsets()

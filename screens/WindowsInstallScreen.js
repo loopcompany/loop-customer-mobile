@@ -13,10 +13,10 @@ import {
   FlatList,
 } from "react-native";
 import Footer from "./Footer";
-import ScreenHeaders from "../components/ScreenHeaders";
-import RadioButton from "../components/RadioButton";
-import ScreenTitle from "../components/ScreenTitle";
-import NewStyles from "../styles/NewStyles";
+import ScreenHeaders from "@components/ScreenHeaders";
+import RadioButton from "@components/RadioButton";
+import ScreenTitle from "@components/ScreenTitle";
+import NewStyles from "@styles/NewStyles";
 export default function WindowsInstallScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const windowsVersions = [
@@ -56,7 +56,7 @@ export default function WindowsInstallScreen({ navigation, route }) {
   ];
 
   return (
-    <ImageBackground source={require("../assets/moon.jpg")} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require("@assets/moon.jpg")} style={NewStyles.container} imageStyle={{ width: '100%', height: '100%' }}>
       <ScreenHeaders
         title={category}
       />

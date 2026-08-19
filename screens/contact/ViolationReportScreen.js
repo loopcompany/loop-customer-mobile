@@ -4,15 +4,15 @@ import React, { useState,useMemo } from 'react';
 import { View, TextInput, ScrollView, StyleSheet, I18nManager, KeyboardAvoidingView, Pressable, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor4, themeColor10 } from '../../theme/Color';
-import Button from '../../components/Button';
-import violationReportAPI from '../../services/ViolationReportApi';
-import { showToastOrAlert } from '../../helpers/Common';
-import DatePickerModal from '../../components/DatePickerModal';
+import ScreenHeaders from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor4, themeColor10 } from '@theme/Color';
+import Button from '@components/Button';
+import violationReportAPI from '@services/ViolationReportApi';
+import { showToastOrAlert } from '@helpers/Common';
+import DatePickerModal from '@components/DatePickerModal';
 import { Text } from 'react-native';
-import { createStyles } from '../../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 
 
 export default function ViolationReportScreen({ navigation }) {

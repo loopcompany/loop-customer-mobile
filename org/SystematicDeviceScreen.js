@@ -8,10 +8,10 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ScreenHeaders from '../components/ScreenHeaders';
-import ScreenTitle from '../components/ScreenTitle';
-import CustomStatusBar from '../components/CustomStatusBar';
-import DatePickerModal from '../components/DatePickerModal';
+import ScreenHeaders from '@components/ScreenHeaders';
+import ScreenTitle from '@components/ScreenTitle';
+import CustomStatusBar from '@components/CustomStatusBar';
+import DatePickerModal from '@components/DatePickerModal';
 import {
   AccordionHeader,
   SectionBody,
@@ -24,15 +24,15 @@ import {
   DescriptionInput,
   SummaryBox,
   OrderActionButtons,
-} from '../components/OrgSelectionKit';
+} from '@components/OrgSelectionKit';
 import { HARDWARE_ITEMS, OS_ITEMS, PROCUREMENT_ITEMS, TIME_SLOT_OPTIONS } from './deviceCatalog';
 import { getCategory, getFlow } from './systematicFlows';
-import NewStyles from '../styles/NewStyles';
-import { themeColor10, colors } from '../theme/Color';
-import { spacing } from '../theme/Spacing';
-import { radius } from '../theme/Radius';
-import { fontSize } from '../theme/Typography';
-import { showAlert, showToastOrAlert } from '../helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor10, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize } from '@theme/Typography';
+import { showAlert, showToastOrAlert } from '@helpers/Common';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -173,7 +173,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
 
   if (!category || steps.length === 0) {
     return (
-      <ImageBackground source={require('../assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
+      <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
         <CustomStatusBar />
         <ScreenHeaders title="انتخاب سیستماتیک" />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl }}>
@@ -379,7 +379,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   };
 
   return (
-    <ImageBackground source={require('../assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
+    <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
       <ScreenHeaders title={category.title} />
       <ScreenTitle

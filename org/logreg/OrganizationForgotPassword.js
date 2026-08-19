@@ -10,16 +10,16 @@ import {
   Platform,
 } from 'react-native';
 import axios from 'axios';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import { uri } from '../../services/URL';
-import { showAlert } from '../../helpers/Common';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { uri } from '@services/URL';
+import { showAlert } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
-import NewStyles from '../../styles/NewStyles';
-import { createStyles } from '../../styles/NewStyles';
-import { themeColor3 } from '../../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor3 } from '@theme/Color';
 import { useSelector } from 'react-redux';
-import { restartOtpRetriever, stopOtpRetriever } from './../../screens/auth/OtpRetriever';
+import { restartOtpRetriever, stopOtpRetriever } from '@screens/auth/OtpRetriever';
 const OrganizationForgotPassword = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(

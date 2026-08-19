@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { toJalaali } from 'jalaali-js';
 import i18n from 'i18next';
-var jalaali = require("jalaali-js");
+const jalaali = require("jalaali-js");
 
 const { width: deviceWidth, height: deviceHeight } = Dimensions.get("window");
 
@@ -284,7 +284,7 @@ export const hexToRgb = (hex) => {
     ? {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
-      g: parseInt(result[3], 16),
+      b: parseInt(result[3], 16),
     }
     : null;
 };
@@ -615,12 +615,16 @@ export const showAlert = (title, message, buttons = []) => {
       window.alert(alertMessage);
     }
   } else {
-    // Native platform (iOS/Android)
+    // Native platform (iOS/Android). This wrapper is the one sanctioned place
+    // in the app that may call Alert.alert directly — everywhere else must go
+    // through showAlert() so the web path is not silently a no-op.
+    /* eslint-disable no-restricted-properties */
     if (!buttons || buttons.length === 0) {
       // Add default "OK" button for simple alerts
       Alert.alert(title, message, [{ text: 'باشه', style: 'default' }]);
     } else {
       Alert.alert(title, message, buttons);
     }
+    /* eslint-enable no-restricted-properties */
   }
 };
