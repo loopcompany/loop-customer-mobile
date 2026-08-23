@@ -1,0 +1,93 @@
+{
+  "appScreenshots": [
+    {
+      "id": "screenshot_1",
+      "title": "Order Management",
+      "description": "آسان‌ترین راه برای سفارش خدمات",
+      "filename": "screenshot_order_management.png",
+      "path": "/assets/screenshots/order_management.png",
+      "platform": ["ios", "android", "web"]
+    },
+    {
+      "id": "screenshot_2",
+      "title": "Real-time Tracking",
+      "description": "پیگیری لحظه‌ای وضعیت سفارش",
+      "filename": "screenshot_tracking.png",
+      "path": "/assets/screenshots/tracking.png",
+      "platform": ["ios", "android", "web"]
+    },
+    {
+      "id": "screenshot_3",
+      "title": "Secure Payments",
+      "description": "پرداخت امن و قابل‌اعتماد",
+      "filename": "screenshot_payments.png",
+      "path": "/assets/screenshots/payments.png",
+      "platform": ["ios", "android", "web"]
+    },
+    {
+      "id": "screenshot_4",
+      "title": "User Profile",
+      "description": "مدیریت آسان پروفایل شخصی",
+      "filename": "screenshot_profile.png",
+      "path": "/assets/screenshots/profile.png",
+      "platform": ["ios", "android", "web"]
+    },
+    {
+      "id": "screenshot_5",
+      "title": "Customer Support",
+      "description": "پشتیبانی ۲۴/۷ برای شما",
+      "filename": "screenshot_support.png",
+      "path": "/assets/screenshots/support.png",
+      "platform": ["ios", "android", "web"]
+    }
+  ],
+  "downloadLinks": {
+    "ios": {
+      "title": "دانلود برای iOS",
+      "url": "https://apps.apple.com/app/loop",
+      "icon": "apple"
+    },
+    "android": {
+      "title": "دانلود برای Android",
+      "url": "https://play.google.com/store/apps/details?id=com.loop.app",
+      "icon": "android"
+    },
+    "web": {
+      "title": "نسخه وب",
+      "url": "https://app.loopservices.com",
+      "icon": "globe"
+    }
+  },
+  "appFeatures": [
+    {
+      "title": "سفارش سریع",
+      "icon": "⚡",
+      "description": "سفارش خدمات در کمتر از ۲ دقیقه"
+    },
+    {
+      "title": "ردیابی بلادرنگ",
+      "icon": "📍",
+      "description": "دیده‌بانی وضعیت سفارش لحظه به لحظه"
+    },
+    {
+      "title": "پرداخت ایمن",
+      "icon": "🔒",
+      "description": "روش‌های پرداخت متعدد و ایمن"
+    },
+    {
+      "title": "امتیاز و پاداش",
+      "icon": "⭐",
+      "description": "کسب امتیاز برای هر سفارش"
+    },
+    {
+      "title": "تکنسین‌های برتر",
+      "icon": "👨‍🔧",
+      "description": "فقط تکنسین‌های مجرب و معتبر"
+    },
+    {
+      "title": "ضمانت رضایت",
+      "icon": "✓",
+      "description": "ضمانت کیفیت و رضایت مشتری"
+    }
+  ]
+}
