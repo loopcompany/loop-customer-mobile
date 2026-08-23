@@ -335,6 +335,7 @@ export const createStyles = (lang) => {
         paddingVertical: 12,
         paddingHorizontal: 20,
         width: "100%",
+        textAlign: 'right',
         // maxWidth: 800,
       },
 

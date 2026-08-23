@@ -312,6 +312,7 @@ export const DescriptionInput = ({ value, onChangeText, placeholder = 'توضی�
         fontFamily: 'VazirLight',
         color: colors.textPrimary.color,
         textAlignVertical: 'top',
+        textAlign: 'right',
       },
       style,
     ]}

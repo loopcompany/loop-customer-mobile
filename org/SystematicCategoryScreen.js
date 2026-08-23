@@ -190,7 +190,14 @@ const SystematicCategoryScreen = ({ navigation }) => {
           />
 
           {items
-            .filter((entry) => resolveSystematicCategoryId(entry.apiItem) !== 'user_account')
+            .filter((entry) => {
+              const categoryId = resolveSystematicCategoryId(entry.apiItem);
+              const isComprehensive = entry.apiItem?.id === 'comprehensive' ||
+                                     entry.apiItem?.id === 1 || // API might return numeric ID
+                                     entry.title === 'انتخاب جامع' ||
+                                     entry.title === 'Comprehensive Selection';
+              return categoryId !== 'user_account' && !isComprehensive;
+            })
             .map((entry) => (
               <Folder
                 key={entry.key}

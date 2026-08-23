@@ -62,15 +62,69 @@ export const SYSTEMATIC_CATEGORIES = [
 // ---------------------------------------------------------------------------
 const toBrands = (names) => names.map((name) => ({ id: name.toLowerCase().replace(/[^a-z0-9]/g, '_'), title: name }));
 
+const monitorLogoMap = {
+  'alienware': require('@assets/icons/monitor_logos_transparent/Alienware.png'),
+  'aoc': require('@assets/icons/monitor_logos_transparent/AOC.png'),
+  'aopen': require('@assets/icons/monitor_logos_transparent/AOPEN.png'),
+  'asus': require('@assets/icons/monitor_logos_transparent/ASUS.png'),
+  'acer': require('@assets/icons/monitor_logos_transparent/Acer.png'),
+  'benq': require('@assets/icons/monitor_logos_transparent/BenQ.png'),
+  'cooler_master': require('@assets/icons/monitor_logos_transparent/Cooler_Master.png'),
+  'crua': require('@assets/icons/monitor_logos_transparent/CRUA.png'),
+  'daewoo': require('@assets/icons/monitor_logos_transparent/Daewoo.png'),
+  'dahua': require('@assets/icons/monitor_logos_transparent/Dahua.png'),
+  'dell': require('@assets/icons/monitor_logos_transparent/Dell.png'),
+  'fotor': require('@assets/icons/monitor_logos_transparent/Fotor.png'),
+  'gigabyte': require('@assets/icons/monitor_logos_transparent/Gigabyte.png'),
+  'gplus': require('@assets/icons/monitor_logos_transparent/GPlus.png'),
+  'horizon': require('@assets/icons/monitor_logos_transparent/Horizon.png'),
+  'hp': require('@assets/icons/monitor_logos_transparent/HP.png'),
+  'huawei': require('@assets/icons/monitor_logos_transparent/Huawei.png'),
+  'hyundai': require('@assets/icons/monitor_logos_transparent/Hyundai.png'),
+  'innoview': require('@assets/icons/monitor_logos_transparent/InnoView.png'),
+  'kefeya': require('@assets/icons/monitor_logos_transparent/Kefeya.png'),
+  'koorui': require('@assets/icons/monitor_logos_transparent/Koorui.png'),
+  'lg': require('@assets/icons/monitor_logos_transparent/LG.png'),
+  'life_digital': require('@assets/icons/monitor_logos_transparent/Life_Digital.png'),
+  'master_tech': require('@assets/icons/monitor_logos_transparent/Master_Tech.png'),
+  'meva': require('@assets/icons/monitor_logos_transparent/MEVA.png'),
+  'mindos': require('@assets/icons/monitor_logos_transparent/MINDOS.png'),
+  'mnn': require('@assets/icons/monitor_logos_transparent/MNN.png'),
+  'msi': require('@assets/icons/monitor_logos_transparent/MSI.png'),
+  'nec': require('@assets/icons/monitor_logos_transparent/NEC.png'),
+  'nexar': require('@assets/icons/monitor_logos_transparent/Nexar.png'),
+  'philips_badge': require('@assets/icons/monitor_logos_transparent/Philips_Badge.png'),
+  'philips_wordmark': require('@assets/icons/monitor_logos_transparent/Philips_Wordmark.png'),
+  'pixio': require('@assets/icons/monitor_logos_transparent/Pixio.png'),
+  'samsung': require('@assets/icons/monitor_logos_transparent/Samsung.png'),
+  'sam': require('@assets/icons/monitor_logos_transparent/SAM.png'),
+  'sansui': require('@assets/icons/monitor_logos_transparent/Sansui.png'),
+  'sceptre': require('@assets/icons/monitor_logos_transparent/Sceptre.png'),
+  'snowa': require('@assets/icons/monitor_logos_transparent/Snowa.png'),
+  'twisted_minds': require('@assets/icons/monitor_logos_transparent/Twisted_Minds.png'),
+  'univo': require('@assets/icons/monitor_logos_transparent/Univo.png'),
+  'viewsonic': require('@assets/icons/monitor_logos_transparent/ViewSonic.png'),
+  'xiaomi': require('@assets/icons/monitor_logos_transparent/Xiaomi.png'),
+  'xvision': require('@assets/icons/monitor_logos_transparent/XVision.png'),
+  'lenovo': require('@assets/icons/monitor_logos_transparent/Lenovo.png'),
+  'sony': require('@assets/icons/monitor_logos_transparent/Sony.png'),
+};
+
 const LAPTOP_BRANDS = toBrands([
   'Apple', 'HP', 'Lenovo', 'Asus', 'Acer', 'Dell', 'MSI', 'Microsoft', 'Sony',
   'Toshiba', 'Samsung', 'Fujitsu', 'GIGABYTE', 'Panasonic', 'Packard Bell', 'HTC', 'HCL', 'LG',
 ]);
 
 const MONITOR_BRANDS = toBrands([
-  'HP', 'Lenovo', 'Acer', 'Asus', 'BenQ', 'MSI', 'Dell', 'G-Plus', 'Sonic',
-  'Philips', 'Ultra-X', 'NEC', 'Hyundai', 'LG', 'Samsung',
-]);
+  'Alienware', 'AOC', 'AOPEN', 'ASUS', 'Acer', 'BenQ', 'Cooler Master', 'CRUA', 'Daewoo', 'Dahua',
+  'Dell', 'Fotor', 'Gigabyte', 'G-Plus', 'Horizon', 'HP', 'Huawei', 'Hyundai', 'InnoView', 'Kefeya',
+  'Koorui', 'LG', 'Life Digital', 'Master Tech', 'MEVA', 'MINDOS', 'MNN', 'MSI', 'NEC', 'Nexar',
+  'Philips', 'Pixio', 'Samsung', 'SAM', 'Sansui', 'Sceptre', 'Snowa', 'Twisted Minds', 'Univo', 'ViewSonic',
+  'Xiaomi', 'XVision', 'Lenovo', 'Sony', 'Sonic',
+]).map((brand) => ({
+  ...brand,
+  image: monitorLogoMap[brand.id],
+}));
 
 const CASE_BRANDS = toBrands([
   'HP', 'Lenovo', 'Dell', 'Asus', 'Acer', 'MSI', 'GIGABYTE', 'Green', 'TSCO', 'مونتاژ ایرانی',
