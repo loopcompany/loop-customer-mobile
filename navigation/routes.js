@@ -421,6 +421,21 @@ export const routes = [
     path: 'privacy',
   },
   {
+    name: 'LOOPMenuScreen',
+    getComponent: () => require('@screens/LOOPMenuScreen').default,
+    path: 'loop-menu',
+  },
+  {
+    name: 'FAQScreen',
+    getComponent: () => require('@screens/resources/FAQScreen').default,
+    path: 'faq',
+  },
+  {
+    name: 'ArticlesScreen',
+    getComponent: () => require('@screens/resources/ArticlesScreen').default,
+    path: 'articles',
+  },
+  {
     name: 'WarrantyScreen',
     getComponent: () => require('@screens/resources/WarrantyScreen').default,
     path: 'warranty',

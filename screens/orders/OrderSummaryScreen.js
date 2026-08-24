@@ -1,6 +1,6 @@
 // screens/OrderSummaryScreen.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,17 @@ import {
   ScrollView,
   Image,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import Footer from '@screens/Footer';
 import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenTitle from '@components/ScreenTitle';
+import { notificationAPI } from '@services/NotificationService';
+import { showToastOrAlert } from '@helpers/Common';
+
 export default function OrderSummaryScreen({ navigation }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const orderDetails = {
     type: 'سفارش نرم‌افزاری - نصب ویندوز 10',
     date: '1403/03/01',
@@ -22,6 +27,8 @@ export default function OrderSummaryScreen({ navigation }) {
     address: 'تهران، خیابان انقلاب، کوچه دانش، پلاک ۲',
     phone: '09123456789',
     status: 'در حال بررسی',
+    price: 450000,
+    currency: 'تومان',
   };
 
   return (
@@ -52,6 +59,11 @@ export default function OrderSummaryScreen({ navigation }) {
           <Text style={NewStyles.title10}>شماره تماس:</Text>
           <Text style={NewStyles.text10}>{orderDetails.phone}</Text>
 
+          <Text style={NewStyles.title10}>هزینه:</Text>
+          <Text style={[NewStyles.text11, styles.priceText]}>
+            {orderDetails.price?.toLocaleString('fa-IR')} {orderDetails.currency}
+          </Text>
+
           <Text style={NewStyles.title10}>وضعیت سفارش:</Text>
           <Text style={[NewStyles.text11]}>
             {orderDetails.status}
@@ -62,17 +74,45 @@ export default function OrderSummaryScreen({ navigation }) {
           <Text style={NewStyles.text4}>ویرایش اطلاعات</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.submitButton} onPress={() => { 
-          navigation.replace('OrderTrackingScreen', {
-            orderData: {
-              orderNumber: '984876565', // اینجا از API دریافت کنید
-              userId: '211-5015',
-              phone: orderDetails.phone,
-              date: orderDetails.date,
+        <TouchableOpacity
+          style={[styles.submitButton, isSubmitting && { opacity: 0.6 }]}
+          onPress={async () => {
+            setIsSubmitting(true);
+            try {
+              const orderNumber = '984876565';
+              const orderData = {
+                phone: orderDetails.phone,
+                type: orderDetails.type,
+                date: orderDetails.date,
+                customerName: 'مشتری',
+                price: orderDetails.price,
+              };
+
+              await notificationAPI.sendOrderConfirmation(orderNumber, orderData);
+              showToastOrAlert('سفارش با موفقیت ثبت شد. پیامک تایید برای شما ارسال شد.');
+
+              navigation.replace('OrderTrackingScreen', {
+                orderData: {
+                  orderNumber: orderNumber,
+                  userId: '211-5015',
+                  phone: orderDetails.phone,
+                  date: orderDetails.date,
+                }
+              });
+            } catch (error) {
+              console.error('Error submitting order:', error);
+              showToastOrAlert('خطا در ثبت سفارش. لطفا دوباره تلاش کنید.');
+            } finally {
+              setIsSubmitting(false);
             }
-          });
-        }}>
-          <Text style={NewStyles.text4}>ثبت نهایی سفارش</Text>
+          }}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={NewStyles.text4}>ثبت نهایی سفارش</Text>
+          )}
         </TouchableOpacity>
 
 
@@ -165,5 +205,9 @@ const styles = StyleSheet.create({
   phone: {
     color: '#fff',
     fontSize: 16,
+  },
+  priceText: {
+    color: '#2196F3',
+    fontWeight: '600',
   },
 });

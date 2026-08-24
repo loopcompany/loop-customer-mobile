@@ -56,9 +56,9 @@ export const SYSTEMATIC_CATEGORIES = [
 ];
 
 // ---------------------------------------------------------------------------
-// برندها - در طرح به‌صورت دایره‌های لوگو نمایش داده شده‌اند. asset لوگوی برندها
-// هنوز به پروژه اضافه نشده، بنابراین BrandGrid نام برند را داخل همان دایره
-// می‌نویسد؛ به‌محض اضافه‌شدن لوگو کافی است فیلد image به آیتم اضافه شود.
+// برندها - در طرح به‌صورت دایره‌های لوگو نمایش داده شده‌اند. اگر برندی در
+// logoMap مربوط به دسته‌اش نباشد (لوگوی معتبری برایش پیدا نشد)، BrandGrid به‌طور
+// خودکار نام برند را به‌جای تصویر داخل همان دایره می‌نویسد.
 // ---------------------------------------------------------------------------
 const toBrands = (names) => names.map((name) => ({ id: name.toLowerCase().replace(/[^a-z0-9]/g, '_'), title: name }));
 
@@ -110,10 +110,69 @@ const monitorLogoMap = {
   'sony': require('@assets/icons/monitor_logos_transparent/Sony.png'),
 };
 
+const laptopLogoMap = {
+  'apple': require('@assets/icons/laptop_logos_transparent/Apple.png'),
+  'hp': require('@assets/icons/laptop_logos_transparent/HP.png'),
+  'lenovo': require('@assets/icons/laptop_logos_transparent/Lenovo.png'),
+  'asus': require('@assets/icons/laptop_logos_transparent/ASUS.png'),
+  'acer': require('@assets/icons/laptop_logos_transparent/Acer.png'),
+  'dell': require('@assets/icons/laptop_logos_transparent/Dell.png'),
+  'msi': require('@assets/icons/laptop_logos_transparent/MSI.png'),
+  'microsoft': require('@assets/icons/laptop_logos_transparent/Microsoft.png'),
+  'sony': require('@assets/icons/laptop_logos_transparent/Sony.png'),
+  'toshiba': require('@assets/icons/laptop_logos_transparent/Toshiba.png'),
+  'samsung': require('@assets/icons/laptop_logos_transparent/Samsung.png'),
+  'fujitsu': require('@assets/icons/laptop_logos_transparent/Fujitsu.png'),
+  'gigabyte': require('@assets/icons/laptop_logos_transparent/Gigabyte.png'),
+  'panasonic': require('@assets/icons/laptop_logos_transparent/Panasonic.png'),
+  'packard_bell': require('@assets/icons/laptop_logos_transparent/Packard_Bell.png'),
+  'hcl': require('@assets/icons/laptop_logos_transparent/HCL.png'),
+  'lg': require('@assets/icons/laptop_logos_transparent/LG.png'),
+  // 'htc': لوگوی معتبری برای HTC پیدا نشد (فقط عکس استوک لپ‌تاپ با صفحه HTC بود).
+};
+
+// لوگوی CASE_BRANDS - هم برای «کیس» و هم برای «آل این وان» استفاده می‌شود.
+const caseLogoMap = {
+  'hp': require('@assets/icons/allinone_logos_transparent/HP.png'),
+  'lenovo': require('@assets/icons/allinone_logos_transparent/Lenovo.png'),
+  'dell': require('@assets/icons/allinone_logos_transparent/Dell.png'),
+  'asus': require('@assets/icons/allinone_logos_transparent/ASUS.png'),
+  'acer': require('@assets/icons/allinone_logos_transparent/Acer.png'),
+  'msi': require('@assets/icons/allinone_logos_transparent/MSI.png'),
+  'gigabyte': require('@assets/icons/allinone_logos_transparent/Gigabyte.png'),
+  'green': require('@assets/icons/allinone_logos_transparent/Green.png'),
+  // 'tsco' و 'مونتاژ ایرانی' لوگوی رسمی مشخصی ندارند.
+};
+
+const printerLogoMap = {
+  'hp': require('@assets/icons/printer_logos_transparent/HP.png'),
+  'canon': require('@assets/icons/printer_logos_transparent/Canon.png'),
+  'epson': require('@assets/icons/printer_logos_transparent/Epson.png'),
+  'brother': require('@assets/icons/printer_logos_transparent/Brother.png'),
+  'samsung': require('@assets/icons/printer_logos_transparent/Samsung.png'),
+  'xerox': require('@assets/icons/printer_logos_transparent/Xerox.png'),
+  'ricoh': require('@assets/icons/printer_logos_transparent/Ricoh.png'),
+  'sharp': require('@assets/icons/printer_logos_transparent/Sharp.png'),
+  'konica_minolta': require('@assets/icons/printer_logos_transparent/Konica_Minolta.png'),
+  // 'pantum': فایل موجود در assets واقعاً لوگوی برند رنگ Pantone بود، نه Pantum.
+};
+
+const hddLogoMap = {
+  'western_digital': require('@assets/icons/hdd_logos_transparent/Western_Digital.png'),
+  'seagate': require('@assets/icons/hdd_logos_transparent/Seagate.png'),
+  'samsung': require('@assets/icons/hdd_logos_transparent/Samsung.png'),
+  'toshiba': require('@assets/icons/hdd_logos_transparent/Toshiba.png'),
+  'kingston': require('@assets/icons/hdd_logos_transparent/Kingston.png'),
+  'adata': require('@assets/icons/hdd_logos_transparent/ADATA.png'),
+  'crucial': require('@assets/icons/hdd_logos_transparent/Crucial.png'),
+  'sandisk': require('@assets/icons/hdd_logos_transparent/SanDisk.png'),
+  'intel': require('@assets/icons/hdd_logos_transparent/Intel.png'),
+};
+
 const LAPTOP_BRANDS = toBrands([
   'Apple', 'HP', 'Lenovo', 'Asus', 'Acer', 'Dell', 'MSI', 'Microsoft', 'Sony',
   'Toshiba', 'Samsung', 'Fujitsu', 'GIGABYTE', 'Panasonic', 'Packard Bell', 'HTC', 'HCL', 'LG',
-]);
+]).map((brand) => ({ ...brand, image: laptopLogoMap[brand.id] }));
 
 const MONITOR_BRANDS = toBrands([
   'Alienware', 'AOC', 'AOPEN', 'ASUS', 'Acer', 'BenQ', 'Cooler Master', 'CRUA', 'Daewoo', 'Dahua',
@@ -128,15 +187,15 @@ const MONITOR_BRANDS = toBrands([
 
 const CASE_BRANDS = toBrands([
   'HP', 'Lenovo', 'Dell', 'Asus', 'Acer', 'MSI', 'GIGABYTE', 'Green', 'TSCO', 'مونتاژ ایرانی',
-]);
+]).map((brand) => ({ ...brand, image: caseLogoMap[brand.id] }));
 
 const PRINTER_BRANDS = toBrands([
   'HP', 'Canon', 'Epson', 'Brother', 'Samsung', 'Xerox', 'Ricoh', 'Sharp', 'Konica Minolta', 'Pantum',
-]);
+]).map((brand) => ({ ...brand, image: printerLogoMap[brand.id] }));
 
 const HDD_BRANDS = toBrands([
   'Western Digital', 'Seagate', 'Samsung', 'Toshiba', 'Kingston', 'ADATA', 'Crucial', 'SanDisk', 'Intel',
-]);
+]).map((brand) => ({ ...brand, image: hddLogoMap[brand.id] }));
 
 // ---------------------------------------------------------------------------
 // گزینه‌های مشترک بین چند دسته
