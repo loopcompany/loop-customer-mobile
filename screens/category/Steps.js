@@ -1,5 +1,5 @@
 import { View, FlatList, BackHandler, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Image } from 'expo-image';
 import { useFocusEffect } from '@react-navigation/native';
@@ -41,9 +41,33 @@ function Steps({ navigation, route }) {
     const categoryId = route?.params?.categoryId;
     const categoryTitle = route?.params?.categoryTitle;
     const token = useSelector(state => state?.auth?.token);
+    const userType = useSelector(state => state?.auth?.userType);
+
+    // کاربر سازمانی برای دسته‌هایی که مسیر مستندشده‌ی «انتخاب سیستماتیک» دارند باید
+    // همان stepper مستند (org/SystematicDeviceScreen) را ببیند، نه مراحل API که برای
+    // کاربر فردی تعریف شده‌اند. این گارد ورودهای قدیمی به این صفحه را هم پوشش می‌دهد:
+    // کاشی FolderScreen، SubCategories و باز کردن مستقیم /steps در وب.
+    // کاربر فردی دست‌نخورده باقی می‌ماند و همان مراحل API را می‌بیند.
+    const systematicRedirect = useMemo(() => {
+        if (userType !== 'organization' || !categoryId) return null;
+        // lazy require تا کاربر فردی هزینه‌ی بارگذاری کاتالوگ آیکون‌های سازمانی را ندهد
+        const { resolveSystematicCategoryId, getFlow } = require('@org/systematicFlows');
+        const systematicId = resolveSystematicCategoryId({ id: categoryId, title: categoryTitle });
+        return systematicId && getFlow(systematicId).length ? systematicId : null;
+    }, [userType, categoryId, categoryTitle]);
+
+    useEffect(() => {
+        if (!systematicRedirect) return;
+        const go = navigation.replace || navigation.navigate;
+        go.call(navigation, 'SystematicDeviceScreen', {
+            categoryId: systematicRedirect,
+            categoryTitle,
+        });
+    }, [systematicRedirect, categoryTitle, navigation]);
 
     // بازیابی داده‌ها در صورت ریلود صفحه در وب
     useEffect(() => {
+        if (systematicRedirect) return;
 
         // اگر در وب هستیم و داده‌ها خالی است (بعد از ریلود)، دوباره fetchSteps را صدا بزنیم
         if (Platform.OS === 'web' && (!steps?.data || steps.data.length === 0) && categoryId) {
@@ -203,6 +227,11 @@ function Steps({ navigation, route }) {
             setTimeValidationError(false);
         }
     }, [selectedDate, selectedTime]);
+
+    // در حال انتقال به stepper سیستماتیک - مراحل API لحظه‌ای نمایش داده نشوند
+    if (systematicRedirect) {
+        return <View style={NewStyles.container} />;
+    }
 
     return (
         <View style={NewStyles.container}>

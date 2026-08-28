@@ -22,6 +22,7 @@ import {
   HardwareCard,
   ProcurementCard,
   DescriptionInput,
+  PhotoNoteInput,
   SummaryBox,
   OrderActionButtons,
 } from '@components/OrgSelectionKit';
@@ -53,6 +54,10 @@ const isStepFilled = (step, value) => {
       return step.multi ? Boolean(value?.selected?.length) : Boolean(value?.selected);
     case 'checklist':
       return Boolean(value?.selected?.length);
+    case 'note':
+      return Boolean((value?.note || '').trim());
+    case 'photo':
+      return Boolean(value?.photos?.length || (value?.note || '').trim());
     case 'procurement':
       return Object.values(value || {}).some((entry) => entry.new > 0 || entry.used > 0);
     case 'hardwareCounters':
@@ -109,6 +114,17 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           break;
         case 'checklist':
           lines.push({ label: step.title, value: value.selected.length });
+          break;
+        case 'note':
+          lines.push({ label: step.title, value: value.note });
+          break;
+        case 'photo':
+          if (value.photos?.length) {
+            lines.push({ label: `${step.title} - عکس`, value: value.photos.length });
+          }
+          if ((value.note || '').trim()) {
+            lines.push({ label: step.title, value: value.note });
+          }
           break;
         case 'procurement':
           Object.entries(value).forEach(([itemId, entry]) => {
@@ -319,7 +335,28 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           );
         });
 
+      case 'note':
+        return (
+          <DescriptionInput
+            value={value?.note || ''}
+            onChangeText={(note) => setAnswer(step.id, { note })}
+            placeholder={step.notePlaceholder || 'توضیحات...'}
+          />
+        );
+
+      case 'photo':
+        return (
+          <PhotoNoteInput
+            photos={value?.photos || []}
+            note={value?.note || ''}
+            onChangePhotos={(photos) => setAnswer(step.id, { photos })}
+            onChangeNote={(note) => setAnswer(step.id, { note })}
+            notePlaceholder={step.notePlaceholder}
+          />
+        );
+
       case 'technician':
+      case 'comingSoon':
         return (
           <View style={{ alignItems: 'center', paddingVertical: spacing.lg }}>
             <Ionicons name="time-outline" size={28} color={themeColor10.bgColor(0.4)} />

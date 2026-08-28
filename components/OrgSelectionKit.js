@@ -6,7 +6,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import * as ImagePicker from 'expo-image-picker';
 import HintBadge from './HintBadge';
+import { showToastOrAlert } from '@helpers/Common';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
@@ -318,6 +320,110 @@ export const DescriptionInput = ({ value, onChangeText, placeholder = 'توضی�
     ]}
   />
 );
+
+// بارگذاری عکس مرتبط با سفارش + فیلد توضیحات - مطابق بخش «وضعیت لپ تاپ / مانیتور»
+// در طرح (یک ردیف بارگذاری از گالری، یک ردیف گرفتن عکس با دوربین، سپس توضیحات).
+export const PhotoNoteInput = ({
+  photos = [],
+  note = '',
+  onChangePhotos,
+  onChangeNote,
+  notePlaceholder = 'توضیحات دیگری دارید بنویسید...',
+}) => {
+  const addPhotos = async (fromCamera) => {
+    try {
+      if (fromCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          showToastOrAlert('برای گرفتن عکس، دسترسی به دوربین لازم است');
+          return;
+        }
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          showToastOrAlert('برای انتخاب عکس، دسترسی به گالری لازم است');
+          return;
+        }
+      }
+
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            quality: 0.7,
+            allowsMultipleSelection: true,
+          });
+
+      if (!result.canceled && result.assets?.length) {
+        onChangePhotos([...photos, ...result.assets.map((asset) => asset.uri)]);
+      }
+    } catch (error) {
+      console.warn('PhotoNoteInput image error:', error);
+      showToastOrAlert('خطا در انتخاب عکس');
+    }
+  };
+
+  const removePhoto = (uri) => onChangePhotos(photos.filter((item) => item !== uri));
+
+  const row = {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: colors.surface.bgColor(0.92),
+    borderWidth: 1,
+    borderColor: colors.border.bgColor(1),
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.sm,
+  };
+  const rowText = {
+    fontFamily: 'VazirBold',
+    fontSize: fontSize.xs,
+    color: colors.textPrimary.color,
+    marginRight: spacing.sm,
+  };
+
+  return (
+    <View>
+      <TouchableOpacity onPress={() => addPhotos(false)} style={row} activeOpacity={0.75}>
+        <Ionicons name="cloud-upload-outline" size={20} color={colors.primary.color} />
+        <Text style={rowText}>بارگزاری عکس مرتبط با سفارش</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => addPhotos(true)} style={row} activeOpacity={0.75}>
+        <Ionicons name="camera-outline" size={20} color={colors.primary.color} />
+        <Text style={rowText}>عکس از گالری و دوربین</Text>
+      </TouchableOpacity>
+
+      {photos.length ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm }}>
+          {photos.map((uri) => (
+            <View key={uri} style={{ marginLeft: spacing.sm, marginBottom: spacing.sm }}>
+              <Image source={{ uri }} style={{ width: 64, height: 64, borderRadius: radius.sm }} />
+              <TouchableOpacity
+                onPress={() => removePhoto(uri)}
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: colors.error.bgColor(1),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Ionicons name="close" size={12} color={colors.textInverse.color} />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      <DescriptionInput value={note} onChangeText={onChangeNote} placeholder={notePlaceholder} />
+    </View>
+  );
+};
 
 // کارت خدمات سخت‌افزاری: ردیف اول = تصویر (چپ) + شمارشگر (وسط) + عنوان (راست)، ردیف دوم = توضیحات
 export const HardwareCard = ({ image, title, count, desc, onIncrement, onDecrement, onDescChange }) => (

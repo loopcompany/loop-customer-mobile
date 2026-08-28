@@ -193,7 +193,6 @@ const SystematicCategoryScreen = ({ navigation }) => {
             .filter((entry) => {
               const categoryId = resolveSystematicCategoryId(entry.apiItem);
               const isComprehensive = entry.apiItem?.id === 'comprehensive' ||
-                                     entry.apiItem?.id === 1 || // API might return numeric ID
                                      entry.title === 'انتخاب جامع' ||
                                      entry.title === 'Comprehensive Selection';
               return categoryId !== 'user_account' && !isComprehensive;

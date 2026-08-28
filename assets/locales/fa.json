@@ -1424,7 +1424,7 @@
   "Product password": "رمز محصول",
   "To place an order, first complete your information in the account section.": "برای ثبت سفارش، ابتدا اطلاعات خود را در قسمت حساب کاربری تکمیل کنید",
   "Message to Loop technician": "پیام به تکنسین لوپ",
-  "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)": "همراه لوپ عزیز، جمع رسید بیش از {{price}} تومان، هزینه ایاب و ذهاب و کارشناسی را مهمان لوپ هستید)",
+  "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)": "همراه لوپ عزیز، هزینه کارشناسی، عیب یابی، ایاب ذهاب در صورت صدور رسید موفق، از هزینه رسید کسر می گردد.",
   "Auto-login enabled": "ورود خودکار فعال شد",
   "Auto-login disabled": "ورود خودکار غیرفعال شد",
   "Please enter your name.": "لطفا نام خود را وارد کنید",

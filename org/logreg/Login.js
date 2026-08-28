@@ -305,41 +305,34 @@ const Login = ({ navigation }) => {
             {/* ذخیره رمز عبور - Checkbox */}
             <TouchableOpacity
               onPress={() => setRememberPassword(!rememberPassword)}
+              activeOpacity={0.7}
               style={{
+                flexDirection: 'row-reverse',
+                gap: 8,
                 alignItems: 'center',
                 marginBottom: 12,
-                alignSelf: 'flex-end'
+                alignSelf: 'flex-end',
+                paddingVertical: 4
               }}
             >
+              <Text style={{
+                fontSize: 12,
+                color: '#555',
+                fontFamily: 'VazirLight'
+              }}>{t('Remember password')}</Text>
               <View style={{
-                backgroundColor: '#ffeb3b',
-                borderRadius: 6,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                flexDirection: 'row-reverse',
-                gap: 10,
-                alignItems: 'center'
+                width: 18,
+                height: 18,
+                borderWidth: 1.5,
+                borderColor: rememberPassword ? '#1976d2' : '#bbb',
+                borderRadius: 4,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: rememberPassword ? '#1976d2' : 'transparent'
               }}>
-                <Text style={{
-                  fontSize: 12,
-                  color: '#333',
-                  fontFamily: 'VazirBold',
-                  marginRight: 4
-                }}>{t('Remember password')}</Text>
-                <View style={{
-                  width: 16,
-                  height: 16,
-                  borderWidth: 1.5,
-                  borderColor: '#333',
-                  borderRadius: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: rememberPassword ? '#333' : 'transparent'
-                }}>
-                  {rememberPassword && (
-                    <Text style={{ fontSize: 10, color: '#fff', fontWeight: 'bold' }}>✓</Text>
-                  )}
-                </View>
+                {rememberPassword && (
+                  <Ionicons name="checkmark" size={13} color="#fff" />
+                )}
               </View>
             </TouchableOpacity>
 

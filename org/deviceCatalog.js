@@ -65,8 +65,11 @@ export const SOFTWARE_ITEMS = [
   { id: 'other', title: 'نرم‌افزارهای دیگر' },
 ];
 
+// بازه‌های دو ساعته مطابق طرح «بازه زمانی / رزرو» (صفحات لپ تاپ و مانیتور طرح).
 export const TIME_SLOT_OPTIONS = [
-  { id: 'from_10', title: '۱۰ صبح به بعد' },
-  { id: 'from_12', title: '۱۲ ظهر به بعد' },
-  { id: 'afternoon_14_18', title: '۱۴ الی ۱۸ عصر' },
+  { id: 'slot_10_12', title: '۱۰ الی ۱۲' },
+  { id: 'slot_12_14', title: '۱۲ الی ۱۴' },
+  { id: 'slot_14_16', title: '۱۴ الی ۱۶' },
+  { id: 'slot_16_18', title: '۱۶ الی ۱۸' },
+  { id: 'slot_18_20', title: '۱۸ الی ۲۰' },
 ];
