@@ -242,54 +242,246 @@ export const CounterRow = ({ title, count, onIncrement, onDecrement }) => (
   </View>
 );
 
-// شمارشگر فشرده دایره‌ای (⊖ عدد ⊕) - برای شبکه‌ی آیکون‌های سیستم عامل و ردیف انتخاب تعداد دستگاه
-export const MiniCounter = ({ count, onIncrement, onDecrement }) => (
-  <View
-    style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: themeColor4.bgColor(1),
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: colors.primary.bgColor(0.4),
-      paddingHorizontal: 3,
-      paddingVertical: 3,
-    }}
-  >
-    <TouchableOpacity
-      onPress={onDecrement}
-      style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary.bgColor(1), alignItems: 'center', justifyContent: 'center' }}
+// شمارشگر فشرده دایره‌ای (⊖ عدد ⊕) - برای شبکه‌ی آیکون‌های سیستم عامل و ردیف انتخاب تعداد دستگاه.
+// وقتی شمارش صفر است دکمه‌ی کم‌کردن خاموش (خاکستری) و غیرفعال می‌شود تا حالت
+// خالی/انتخاب‌شده از روی خود شمارشگر هم قابل تشخیص باشد.
+export const MiniCounter = ({ count, onIncrement, onDecrement, size = 'sm' }) => {
+  const btn = size === 'md' ? 28 : 22;
+  const icon = size === 'md' ? 16 : 14;
+  const active = count > 0;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface.bgColor(1),
+        borderRadius: radius.pill,
+        borderWidth: 1,
+        borderColor: active ? colors.primary.bgColor(0.45) : colors.border.bgColor(1),
+        paddingHorizontal: 4,
+        paddingVertical: 4,
+        ...shadow.sm,
+      }}
     >
-      <Ionicons name="remove" size={14} color={themeColor4.bgColor(1)} />
-    </TouchableOpacity>
-    <Text style={{ minWidth: 26, textAlign: 'center', fontFamily: 'VazirBold', fontSize: 13, color: themeColor10.bgColor(1) }}>
-      {count}
-    </Text>
-    <TouchableOpacity
-      onPress={onIncrement}
-      style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary.bgColor(1), alignItems: 'center', justifyContent: 'center' }}
+      <TouchableOpacity
+        onPress={onDecrement}
+        disabled={!active}
+        activeOpacity={0.75}
+        style={{
+          width: btn,
+          height: btn,
+          borderRadius: btn / 2,
+          backgroundColor: active ? colors.primary.bgColor(0.1) : colors.border.bgColor(0.35),
+          borderWidth: 1,
+          borderColor: active ? colors.primary.bgColor(0.3) : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Ionicons
+          name="remove"
+          size={icon}
+          color={active ? colors.primary.color : colors.textMuted.color}
+        />
+      </TouchableOpacity>
+      <Text
+        style={{
+          minWidth: size === 'md' ? 30 : 24,
+          textAlign: 'center',
+          fontFamily: 'VazirBold',
+          fontSize: size === 'md' ? fontSize.sm : fontSize.xs + 1,
+          color: active ? colors.primary.color : colors.textMuted.color,
+        }}
+      >
+        {count}
+      </Text>
+      <TouchableOpacity
+        onPress={onIncrement}
+        activeOpacity={0.75}
+        style={{
+          width: btn,
+          height: btn,
+          borderRadius: btn / 2,
+          backgroundColor: colors.primary.bgColor(1),
+          alignItems: 'center',
+          justifyContent: 'center',
+          ...shadow.sm,
+        }}
+      >
+        <Ionicons name="add" size={icon} color={colors.textInverse.color} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// بنر عنوان زیربخش (نوار سرمه‌ای + پیکان رو به پایین) - برای تفکیک زیربخش‌های
+// یک آکاردئون از هم، مثل «نصب سیستم عامل» و «نصب نرم‌افزارها» در خدمات نرم‌افزاری.
+export const SubSectionBanner = ({ title, style }) => (
+  <View style={[{ position: 'relative', marginBottom: spacing.lg }, style]}>
+    <View
+      style={{
+        backgroundColor: themeColor0.bgColor(1),
+        borderRadius: radius.sm,
+        paddingVertical: spacing.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderBottomWidth: 2,
+        borderBottomColor: colors.accent.bgColor(0.9),
+        ...shadow.sm,
+      }}
     >
-      <Ionicons name="add" size={14} color={themeColor4.bgColor(1)} />
-    </TouchableOpacity>
+      <Text style={{ color: colors.textInverse.color, fontFamily: 'VazirBold', fontSize: fontSize.sm }}>
+        {title}
+      </Text>
+    </View>
+    <View
+      style={{
+        position: 'absolute',
+        bottom: -8,
+        alignSelf: 'center',
+        width: 0,
+        height: 0,
+        borderLeftWidth: 9,
+        borderRightWidth: 9,
+        borderTopWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: themeColor0.color,
+      }}
+    />
   </View>
 );
 
 // جعبه‌ی تصویر محصول واقعی (assets/icons/hardware-services|procurement)
-export const HardwareIconBox = ({ image, size = 60 }) => (
+export const HardwareIconBox = ({ image, size = 60, active = false, style }) => (
   <View
-    style={{
-      width: size,
-      height: size,
-      borderRadius: radius.sm,
-      backgroundColor: colors.primaryLight.bgColor(0.15),
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-    }}
+    style={[
+      {
+        width: size,
+        height: size,
+        borderRadius: radius.md,
+        backgroundColor: active ? colors.accent.bgColor(0.16) : colors.primaryLight.bgColor(0.12),
+        borderWidth: 1,
+        borderColor: active ? colors.accent.bgColor(0.65) : colors.primary.bgColor(0.12),
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      },
+      style,
+    ]}
   >
-    <Image source={image} style={{ width: size * 0.8, height: size * 0.8 }} resizeMode="contain" />
+    <Image source={image} style={{ width: size * 0.72, height: size * 0.72 }} resizeMode="contain" />
   </View>
 );
+
+// بج تعداد (دایره‌ی طلایی) که روی گوشه‌ی تصویر می‌نشیند - نشانه‌ی بصری «انتخاب‌شده».
+const CountBadge = ({ count }) => (
+  <View
+    style={{
+      position: 'absolute',
+      top: -6,
+      right: -6,
+      minWidth: 20,
+      height: 20,
+      paddingHorizontal: 4,
+      borderRadius: radius.pill,
+      backgroundColor: colors.accent.bgColor(1),
+      borderWidth: 1,
+      borderColor: colors.surface.bgColor(1),
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadow.sm,
+    }}
+  >
+    <Text style={{ fontFamily: 'VazirBold', fontSize: fontSize.xs - 2, color: colors.primary.color }}>
+      {count}
+    </Text>
+  </View>
+);
+
+// کارت «تصویر دستگاه + عنوان + شمارشگر» - ردیف‌های انتخاب تعداد دستگاه در
+// زیربخش‌های خدمات نرم‌افزاری (نصب سیستم عامل / نصب نرم‌افزارها).
+// وقتی تعداد بزرگ‌تر از صفر باشد کارت هایلایت می‌شود (قاب سرمه‌ای + بج طلایی).
+export const DeviceCountRow = ({ title, subtitle, image, count, onIncrement, onDecrement }) => {
+  const active = count > 0;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: active ? colors.primary.bgColor(0.05) : colors.surface.bgColor(1),
+        borderWidth: 1,
+        borderColor: active ? colors.primary.bgColor(0.45) : colors.border.bgColor(1),
+        borderRadius: radius.md,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        marginBottom: spacing.sm,
+        ...shadow.sm,
+      }}
+    >
+      <View>
+        <HardwareIconBox image={image} size={54} active={active} />
+        {active ? <CountBadge count={count} /> : null}
+      </View>
+      <View style={{ flex: 1, marginHorizontal: spacing.md }}>
+        <Text
+          style={{ fontFamily: 'VazirBold', fontSize: fontSize.sm, color: colors.textPrimary.color }}
+          numberOfLines={2}
+        >
+          {title}
+        </Text>
+        <Text
+          style={{ marginTop: 2, fontFamily: 'VazirLight', fontSize: fontSize.xs - 1, color: colors.textSecondary.color }}
+          numberOfLines={1}
+        >
+          {subtitle || 'تعداد مورد نیاز'}
+        </Text>
+      </View>
+      <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} size="md" />
+    </View>
+  );
+};
+
+// کاشی شبکه‌ای «تصویر + عنوان + شمارشگر» - نسخه‌ی عمودی DeviceCountRow برای
+// شبکه‌ی چندستونه‌ی سیستم‌عامل‌ها.
+export const DeviceCountTile = ({ title, image, count, onIncrement, onDecrement, width = '31%' }) => {
+  const active = count > 0;
+  return (
+    <View
+      style={{
+        width,
+        alignItems: 'center',
+        backgroundColor: active ? colors.primary.bgColor(0.05) : colors.surface.bgColor(1),
+        borderWidth: 1,
+        borderColor: active ? colors.primary.bgColor(0.45) : colors.border.bgColor(1),
+        borderRadius: radius.md,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.xs,
+        marginBottom: spacing.sm,
+        ...shadow.sm,
+      }}
+    >
+      <View>
+        <Image source={image} style={{ width: 56, height: 56 }} resizeMode="contain" />
+        {active ? <CountBadge count={count} /> : null}
+      </View>
+      <Text
+        style={{
+          marginTop: spacing.sm,
+          marginBottom: spacing.sm,
+          fontFamily: 'VazirBold',
+          fontSize: fontSize.xs - 1,
+          color: active ? colors.primary.color : colors.textPrimary.color,
+          textAlign: 'center',
+        }}
+        numberOfLines={1}
+      >
+        {title}
+      </Text>
+      <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} />
+    </View>
+  );
+};
 
 // فیلد توضیحات مشترک - جایگزین NewStyles.textInput عمومی که روی پس‌زمینه‌ی
 // بلور شده‌ی SectionBody کنتراست کمی داشت.
@@ -502,8 +694,20 @@ export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNew
   </View>
 );
 
+// هر مورد در قاب مستقل خودش می‌آید تا موارد نرم‌افزاری از هم تفکیک شوند
+// (قبلاً همه پشت سر هم و بدون مرز بودند و به‌هم می‌چسبیدند).
 export const CounterWithDescription = ({ title, count, desc, onIncrement, onDecrement, onDescChange }) => (
-  <View style={{ marginBottom: 10 }}>
+  <View
+    style={{
+      backgroundColor: colors.surface.bgColor(1),
+      borderWidth: 1,
+      borderColor: colors.border.bgColor(1),
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.md,
+      marginBottom: spacing.sm,
+    }}
+  >
     <CounterRow title={title} count={count} onIncrement={onIncrement} onDecrement={onDecrement} />
     <DescriptionInput value={desc} onChangeText={onDescChange} />
   </View>

@@ -9,6 +9,16 @@ export const DEVICE_TYPES = [
   { id: 'case', title: 'کیس / پی‌سی', image: require('@assets/icons/hardware-services/case-standard.png') },
 ];
 
+// دستگاه‌هایی که کاربر تعداد آن‌ها را برای «نصب نرم‌افزارها» مشخص می‌کند.
+// (زیربخش دوم «خدمات نرم‌افزاری»، جدا از نصب سیستم عامل.) آیکون شبکه/اینترنت
+// فقط در ست procurement موجود است، بقیه از ست hardware-services می‌آیند.
+export const SOFTWARE_DEVICE_TYPES = [
+  { id: 'printer_multi', title: 'پرینتر لیزری چندکاره', image: require('@assets/icons/hardware-services/printer-multi.png') },
+  { id: 'industrial_copier', title: 'دستگاه کپی صنعتی', image: require('@assets/icons/hardware-services/industrial-copier.png') },
+  { id: 'storage_drive', title: 'هارد ذخیره‌سازی', image: require('@assets/icons/hardware-services/storage-drive.png') },
+  { id: 'network_internet', title: 'شبکه و اینترنت', image: require('@assets/icons/procurement/network-internet.png') },
+];
+
 // دسته‌بندی خدمات سخت‌افزاری - مطابق ست آیکون‌های اختصاصی تحویل‌داده‌شده
 // (assets/icons/hardware-services)، هماهنگ با پالت طلایی/سرمه‌ای پروژه.
 export const HARDWARE_ITEMS = [
@@ -66,10 +76,19 @@ export const SOFTWARE_ITEMS = [
 ];
 
 // بازه‌های دو ساعته مطابق طرح «بازه زمانی / رزرو» (صفحات لپ تاپ و مانیتور طرح).
+// start/end ساعت شروع و پایان هر بازه است تا SchedulePicker بتواند بازه‌های
+// گذشته‌ی «امروز» را غیرفعال کند و کاربر زمانِ سپری‌شده را رزرو نکند.
 export const TIME_SLOT_OPTIONS = [
-  { id: 'slot_10_12', title: '۱۰ الی ۱۲' },
-  { id: 'slot_12_14', title: '۱۲ الی ۱۴' },
-  { id: 'slot_14_16', title: '۱۴ الی ۱۶' },
-  { id: 'slot_16_18', title: '۱۶ الی ۱۸' },
-  { id: 'slot_18_20', title: '۱۸ الی ۲۰' },
+  { id: 'slot_10_12', title: '۱۰ الی ۱۲', start: 10, end: 12 },
+  { id: 'slot_12_14', title: '۱۲ الی ۱۴', start: 12, end: 14 },
+  { id: 'slot_14_16', title: '۱۴ الی ۱۶', start: 14, end: 16 },
+  { id: 'slot_16_18', title: '۱۶ الی ۱۸', start: 16, end: 18 },
+  { id: 'slot_18_20', title: '۱۸ الی ۲۰', start: 18, end: 20 },
+];
+
+// «انتخاب تکنسین» - کاربر فقط جنسیت تکنسین را انتخاب می‌کند (انتخاب مستقیم
+// تکنسین هنوز فعال نیست).
+export const TECHNICIAN_GENDER_OPTIONS = [
+  { id: 'male', title: 'آقا' },
+  { id: 'female', title: 'خانم' },
 ];

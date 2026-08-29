@@ -257,7 +257,7 @@ const closingSteps = (procurementIds, afterProcurement = []) => [
   {
     id: 'technician',
     title: 'انتخاب تکنسین',
-    hint: 'این بخش برای انتخاب مستقیم تکنسین به‌زودی فعال می‌شود.',
+    hint: 'جنسیت تکنسینی که برای انجام خدمت مراجعه می‌کند را انتخاب کنید.',
     icon: sectionIcon.technician,
     type: 'technician',
   },

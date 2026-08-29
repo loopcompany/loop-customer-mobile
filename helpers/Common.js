@@ -628,3 +628,87 @@ export const showAlert = (title, message, buttons = []) => {
     /* eslint-enable no-restricted-properties */
   }
 };
+
+// ---------------------------------------------------------------------------
+// «بازه زمانی / رزرو» - کمک‌تابع‌های تاریخِ رزرو
+//
+// DatePickerModal بسته به زبان دو قالب متفاوت برمی‌گرداند: «jYYYY/jMM/jDD»
+// برای فارسی و «YYYY-MM-DD» برای انگلیسی. تابع‌های زیر هر دو قالب را
+// می‌فهمند تا نوار انتخاب سریع تاریخ و تقویم دقیقاً یک مقدار مشترک بسازند.
+// ---------------------------------------------------------------------------
+
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+// «fa-IR» هم باید فارسی حساب شود - مقایسه‌ی برابری ساده با 'fa' کافی نیست.
+const isFaLang = () => (i18n.language || 'fa').toLowerCase().startsWith('fa');
+
+export const toPersianDigits = (input) =>
+  String(input ?? '').replace(/[0-9]/g, (d) => PERSIAN_DIGITS[Number(d)]);
+
+// قالب خروجی را با چیزی که DatePickerModal تولید می‌کند یکسان نگه می‌دارد.
+export const formatDateForPicker = (date, fa = isFaLang()) => {
+  if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+  if (fa) {
+    const { jy, jm, jd } = jalaali.toJalaali(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate()
+    );
+    return `${jy}/${padZero(jm)}/${padZero(jd)}`;
+  }
+  return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
+};
+
+// رشته‌ی تاریخ (هر کدام از دو قالب) را به Date میلادی تبدیل می‌کند.
+export const parsePickerDate = (value) => {
+  if (!value) return null;
+  const text = convertToEnglish(value).trim();
+  const parts = text.split(/[/-]/).map((p) => parseInt(p, 10));
+  if (parts.length !== 3 || parts.some((n) => isNaN(n))) return null;
+  const [y, m, d] = parts;
+  // تاریخ شمسی با «/» و سال کمتر از ۱۷۰۰ شناخته می‌شود.
+  const isJalaali = text.includes('/') && y < 1700;
+  const g = isJalaali ? jalaali.toGregorian(y, m, d) : { gy: y, gm: m, gd: d };
+  const date = new Date(g.gy, g.gm - 1, g.gd);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+// برچسب خوانا برای یک تاریخ انتخاب‌شده - مثلاً «چهارشنبه» / «۸ شهریور».
+export const describePickerDate = (value) => {
+  const date = parsePickerDate(value);
+  if (!date) return null;
+  const fa = isFaLang();
+  const weekday = i18n.t(weekDaysKeys[date.getDay()]);
+  let dayLabel;
+  if (fa) {
+    const { jm, jd } = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    dayLabel = `${toPersianDigits(jd)} ${i18n.t(persianMonthsKeys[jm])}`;
+  } else {
+    const locale = (i18n.language || 'en-US').replace('_', '-');
+    dayLabel = `${date.getDate()} ${date.toLocaleString(locale, { month: 'short' })}`;
+  }
+  return { date, weekday, dayLabel };
+};
+
+// n روز آینده برای نوار انتخاب سریع تاریخ در «بازه زمانی / رزرو».
+// برخلاف getNext20DaysJalaali، مقدارِ هر روز هم‌قالب با DatePickerModal است
+// تا انتخاب از نوار و انتخاب از تقویم یکدیگر را بازتاب دهند.
+export const getBookingDays = (count = 14) => {
+  const days = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (let i = 0; i < count; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const described = describePickerDate(formatDateForPicker(date));
+    days.push({
+      id: `day_${i}`,
+      value: formatDateForPicker(date),
+      weekday: described?.weekday || '',
+      dayLabel: described?.dayLabel || '',
+      isToday: i === 0,
+      isTomorrow: i === 1,
+    });
+  }
+  return days;
+};

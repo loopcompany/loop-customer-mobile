@@ -25,7 +25,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6 } from '@theme/Color';
+import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
 import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import useLogout from '@hooks/useLogout';
@@ -38,6 +41,9 @@ import { setLanguage } from '@slices/languageSlice';
 import { langIsRTL } from '@helpers/Common';
 // Create Context
 const MenuContext = createContext();
+
+// account_type های حساب حقیقی (املای غلط 'indiviual' هم از سمت سرور می‌آید)
+const INDIVIDUAL_ACCOUNT_TYPES = ['individual', 'indiviual'];
 const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
     const idleScaleAnim = useRef(new Animated.Value(1)).current;
     const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -187,7 +193,7 @@ export const MenuProvider = ({ children }) => {
 
 
 
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -199,6 +205,35 @@ export const MenuProvider = ({ children }) => {
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.user?.data);
     const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
+
+    // نوع حساب کاربر برای نمایش در بالای منو
+    // (سازمان دولتی / سازمان نیمه‌دولتی / شرکت خصوصی / کاربر حقیقی)
+    const accountTypeLabel = useMemo(() => {
+        switch (userData?.account_type) {
+            case 'g_organization':
+                return t('Government organization');
+            case 's_g_organization':
+                return t('Semi-governmental organization');
+            case 'company':
+                return t('Private company');
+            case 'individual':
+            case 'indiviual':
+                return t('Individual user');
+            default:
+                // اگر account_type از سرور نیامده باشد، از نوع کاربر در auth استفاده می‌کنیم
+                return userType === 'organization' ? t('Organization') : t('Individual user');
+        }
+    }, [userData?.account_type, userType, t]);
+
+    const accountDisplayName = useMemo(() => {
+        const isOrganizationAccount =
+            userType === 'organization' ||
+            (!!userData?.account_type && !INDIVIDUAL_ACCOUNT_TYPES.includes(userData.account_type));
+
+        return isOrganizationAccount
+            ? userData?.organization_name
+            : userData?.name;
+    }, [userType, userData?.account_type, userData?.organization_name, userData?.name]);
 
 
     // صفحاتی که نباید Footer و Menu نمایش داده شود
@@ -324,7 +359,7 @@ export const MenuProvider = ({ children }) => {
     }, [navigation, closeMenu]);
 
     const callSupport = useCallback(() => {
-        Linking.openURL(`tel:02121164552`);
+        Linking.openURL(`tel:02191693909`);
     }, []);
 
     const handleCodePress = useCallback(() => {
@@ -464,10 +499,10 @@ export const MenuProvider = ({ children }) => {
                             ListHeaderComponent={() => {
                                 return (
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
-                                        {
-                                            userData?.account_type != 'indiviual' &&
-                                            <Text style={[NewStyles.title, { marginBottom: 10 }]}>{userData?.organization_name}</Text>
-                                        }
+                                        {!!accountDisplayName && (
+                                            <Text style={[NewStyles.title, styles.accountName]}>{accountDisplayName}</Text>
+                                        )}
+                                        <Text style={styles.accountTypeBadge}>{accountTypeLabel}</Text>
                                         <View style={[{ paddingVertical: 10, width: '90%', backgroundColor: themeColor8.bgColor(0.2), }, NewStyles.center, NewStyles.border10]}>
                                             <Text style={NewStyles.title}>{t("Your Points:")} {userData?.user_gems ?? '0'}</Text>
                                         </View>
@@ -522,7 +557,7 @@ export const useMenu = () => {
 };
 
 // Styles
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, language) => StyleSheet.create({
 
 
     footer: {
@@ -535,6 +570,21 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         zIndex: 10,
         borderTopWidth: 1.5,
         borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    accountName: {
+        marginBottom: spacing.xs,
+        textAlign: 'center',
+    },
+    accountTypeBadge: {
+        marginBottom: spacing.md,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.md,
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.12),
+        color: colors.primary.color,
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', language),
+        textAlign: 'center',
     },
     codeWrapper: {
         position: 'relative',

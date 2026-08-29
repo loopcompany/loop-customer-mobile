@@ -390,7 +390,20 @@ const HardwareSelectionScreen = ({ navigation }) => {
               shadowOpacity: 0.3,
               shadowRadius: 4
             }}
-            onPress={() => navigation.navigate('OrderSummaryScreen')}
+            onPress={() =>
+              navigation.navigate('OrderSummaryScreen', {
+                source: 'hardware',
+                orderTitle: `سفارش خدمات سخت‌افزاری - ${selectedCategory}`,
+                summaryLines: [
+                  { label: 'دسته‌بندی', value: selectedCategory },
+                  ...Object.entries(quantities)
+                    .filter(([, count]) => count > 0)
+                    .map(([condition, count]) => ({ label: condition, value: count })),
+                  ...(generalNeed.trim() ? [{ label: 'نیاز کلی', value: generalNeed }] : []),
+                  ...(description.trim() ? [{ label: 'توضیحات', value: description }] : []),
+                ],
+              })
+            }
           >
             <Text style={{
               color: '#fff',

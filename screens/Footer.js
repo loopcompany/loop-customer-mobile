@@ -129,12 +129,12 @@ export default function Footer() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => { Linking.openURL(`tel:02121164552`) }}
+            onPress={() => { Linking.openURL(`tel:02191693909`) }}
             style={styles.taskbarButton}
             activeOpacity={0.75}
           >
             <Ionicons name="call-outline" size={16} color={themeColor4.bgColor(1)} />
-            <Text style={styles.taskbarButtonText}>21164552</Text>
+            <Text style={styles.taskbarButtonText}>91693909</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.taskbarButton} activeOpacity={0.75}>

@@ -6,16 +6,15 @@
 // دقیقاً یک ظاهر داشته باشند.
 
 import React, { useMemo, useState } from 'react';
-import { View, Text, TextInput, ScrollView, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
-import DatePickerModal from '@components/DatePickerModal';
+import SchedulePicker from '@components/SchedulePicker';
 import {
   AccordionHeader,
   SectionBody,
-  RadioList,
   SelectableOptions,
   BrandGrid,
   IconOptionGrid,
@@ -26,14 +25,20 @@ import {
   SummaryBox,
   OrderActionButtons,
 } from '@components/OrgSelectionKit';
-import { HARDWARE_ITEMS, OS_ITEMS, PROCUREMENT_ITEMS, TIME_SLOT_OPTIONS } from './deviceCatalog';
+import {
+  HARDWARE_ITEMS,
+  OS_ITEMS,
+  PROCUREMENT_ITEMS,
+  TECHNICIAN_GENDER_OPTIONS,
+  TIME_SLOT_OPTIONS,
+} from './deviceCatalog';
 import { getCategory, getFlow } from './systematicFlows';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize } from '@theme/Typography';
-import { showAlert, showToastOrAlert } from '@helpers/Common';
+import { describePickerDate, showAlert, showToastOrAlert } from '@helpers/Common';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -64,6 +69,8 @@ const isStepFilled = (step, value) => {
       return Object.values(value || {}).some((entry) => entry.count > 0);
     case 'schedule':
       return Boolean(value?.date && value?.slot);
+    case 'technician':
+      return Boolean(value?.gender);
     default:
       return false;
   }
@@ -76,7 +83,6 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
 
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
-  const [datePickerFor, setDatePickerFor] = useState(null);
 
   const setAnswer = (stepId, patch) =>
     setAnswers((prev) => ({ ...prev, [stepId]: { ...prev[stepId], ...patch } }));
@@ -137,10 +143,18 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             if (entry.count > 0) lines.push({ label: titleOf(HARDWARE_ITEMS, itemId), value: entry.count });
           });
           break;
-        case 'schedule':
-          lines.push({ label: 'تاریخ مراجعه', value: value.date });
+        case 'technician':
+          lines.push({ label: step.title, value: titleOf(TECHNICIAN_GENDER_OPTIONS, value.gender) });
+          break;
+        case 'schedule': {
+          const described = describePickerDate(value.date);
+          lines.push({
+            label: 'تاریخ مراجعه',
+            value: described ? `${described.weekday} ${described.dayLabel}` : value.date,
+          });
           lines.push({ label: 'بازه ساعتی', value: titleOf(TIME_SLOT_OPTIONS, value.slot) });
           break;
+        }
         default:
           break;
       }
@@ -170,10 +184,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     }
 
     if (action === 'submit_order') {
+      // مرحله‌ی «بازه زمانی / رزرو» تاریخ و ساعت مراجعه را نگه می‌دارد.
+      const scheduleStep = steps.find((step) => step.type === 'schedule');
       navigation.navigate('OrderSummaryScreen', {
         source: 'systematic',
         categoryId,
         categoryTitle: category?.title,
+        orderTitle: category?.title ? `انتخاب سیستماتیک - ${category.title}` : undefined,
+        summaryLines,
+        schedule: scheduleStep ? answers[scheduleStep.id] : null,
         answers,
       });
       return;
@@ -356,6 +375,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         );
 
       case 'technician':
+        return (
+          <SelectableOptions
+            options={TECHNICIAN_GENDER_OPTIONS}
+            value={value?.gender || null}
+            onChange={(gender) => setAnswer(step.id, { gender })}
+            columns={2}
+          />
+        );
+
       case 'comingSoon':
         return (
           <View style={{ alignItems: 'center', paddingVertical: spacing.lg }}>
@@ -369,30 +397,17 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       case 'schedule':
         return (
           <>
-            <TouchableOpacity
-              onPress={() => setDatePickerFor(step.id)}
-              style={[NewStyles.textInput, NewStyles.border10, { justifyContent: 'center' }]}
-            >
-              <Text style={{ fontFamily: 'VazirLight', color: themeColor10.bgColor(value?.date ? 1 : 0.5) }}>
-                {value?.date || 'انتخاب تاریخ مراجعه'}
-              </Text>
-            </TouchableOpacity>
-            <View style={{ height: spacing.sm }} />
-            <RadioList
-              options={TIME_SLOT_OPTIONS}
-              value={value?.slot || null}
-              onChange={(slot) => setAnswer(step.id, { slot })}
+            <SchedulePicker
+              date={value?.date || ''}
+              onChangeDate={(date) => setAnswer(step.id, { date })}
+              slot={value?.slot || null}
+              onChangeSlot={(slot) => setAnswer(step.id, { slot })}
+              slots={TIME_SLOT_OPTIONS}
             />
             <DescriptionInput
               value={value?.note || ''}
               onChangeText={(note) => setAnswer(step.id, { note })}
               placeholder="توضیح درباره زمان مراجعه (اختیاری)"
-            />
-            <DatePickerModal
-              datePickerModal={datePickerFor === step.id}
-              setDatePickerModal={(visible) => setDatePickerFor(visible ? step.id : null)}
-              birthDate={value?.date || ''}
-              setBirthDate={(date) => setAnswer(step.id, { date })}
             />
           </>
         );

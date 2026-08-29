@@ -1,35 +1,118 @@
-// screens/OrderSummaryScreen.js
+// screens/orders/OrderSummaryScreen.js
+//
+// پیش‌نمایش نهایی ثبت سفارش.
+//
+// این صفحه هیچ داده‌ی نمونه‌ای ندارد: همه‌ی مقادیر یا از route.params می‌آیند
+// (صفحه‌ای که کاربر از آن «ثبت سفارش» را زده) یا از Redux خوانده می‌شوند.
+// قرارداد پارامترها:
+//   orderTitle    : string  - عنوان سفارش
+//   summaryLines  : [{label, value}] - خلاصه‌ی واقعی انتخاب‌های کاربر
+//   schedule      : {date, slot} - تاریخ (قالب DatePicker) و شناسه‌ی بازه‌ی ساعتی
+//   contact       : {fullName, mobile} - اطلاعات تماس واردشده در همان فرم
+//   price         : number|null - اگر مبلغ قطعی نیست null بماند تا «استعلام» نمایش داده شود
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
-import Footer from '@screens/Footer';
+import { useSelector } from 'react-redux';
 import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenTitle from '@components/ScreenTitle';
 import { notificationAPI } from '@services/NotificationService';
-import { showToastOrAlert } from '@helpers/Common';
+import { describePickerDate, showToastOrAlert } from '@helpers/Common';
+import { TIME_SLOT_OPTIONS } from '@org/deviceCatalog';
+import { colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
 
-export default function OrderSummaryScreen({ navigation }) {
+const NOT_SET = 'ثبت نشده';
+
+// آدرس ذخیره‌شده یا در حال ویرایش را به یک رشته‌ی خوانا تبدیل می‌کند.
+const formatAddress = (entry) => {
+  if (!entry) return '';
+  const parts = [
+    entry.city,
+    entry.region,
+    entry.address,
+    entry.number ? `پلاک ${entry.number}` : '',
+    entry.unit ? `واحد ${entry.unit}` : '',
+  ];
+  return parts.filter((part) => String(part || '').trim()).join('، ');
+};
+
+export default function OrderSummaryScreen({ navigation, route }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const orderDetails = {
-    type: 'سفارش نرم‌افزاری - نصب ویندوز 10',
-    date: '1403/03/01',
-    time: '14:00',
-    address: 'تهران، خیابان انقلاب، کوچه دانش، پلاک ۲',
-    phone: '09123456789',
-    status: 'در حال بررسی',
-    price: 450000,
-    currency: 'تومان',
-  };
+  const [status, setStatus] = useState(NOT_SET);
+
+  const params = route?.params || {};
+  const {
+    orderTitle,
+    categoryTitle,
+    summaryLines = [],
+    schedule,
+    contact,
+    price = null,
+    currency = 'تومان',
+  } = params;
+
+  const user = useSelector((state) => state?.user?.data);
+  const savedAddresses = useSelector((state) => state?.address?.data);
+  const addressDraft = useSelector((state) => state?.address);
+  const selectedAddressId = useSelector((state) => state?.step?.addressId);
+  const orgProfile = useSelector((state) => state?.organization?.profileData);
+
+  // تاریخ و ساعت مراجعه از همان انتخابگری که کاربر پر کرده است.
+  const scheduleDate = schedule?.date;
+  const scheduleSlot = schedule?.slot;
+
+  const visitDate = useMemo(() => {
+    if (!scheduleDate) return NOT_SET;
+    const described = describePickerDate(scheduleDate);
+    return described ? `${described.weekday} ${described.dayLabel}` : scheduleDate;
+  }, [scheduleDate]);
+
+  const visitTime = useMemo(() => {
+    if (!scheduleSlot) return NOT_SET;
+    return TIME_SLOT_OPTIONS.find((opt) => opt.id === scheduleSlot)?.title || scheduleSlot;
+  }, [scheduleSlot]);
+
+  // آدرس: آدرس انتخاب‌شده‌ی سفارش، سپس آدرس در حال ویرایش، سپس آدرس سازمان.
+  const address = useMemo(() => {
+    const picked = Array.isArray(savedAddresses)
+      ? savedAddresses.find((item) => String(item?.id) === String(selectedAddressId))
+      : null;
+    return (
+      formatAddress(picked) ||
+      formatAddress(addressDraft) ||
+      orgProfile?.address ||
+      NOT_SET
+    );
+  }, [savedAddresses, selectedAddressId, addressDraft, orgProfile?.address]);
+
+  const phone =
+    contact?.mobile ||
+    user?.mobile ||
+    user?.phone ||
+    addressDraft?.mobile ||
+    orgProfile?.phone ||
+    NOT_SET;
+
+  const customerName =
+    contact?.fullName ||
+    [user?.fname, user?.lname].filter(Boolean).join(' ') ||
+    user?.name ||
+    orgProfile?.organization_name ||
+    '';
+
+  const orderType = orderTitle || categoryTitle || NOT_SET;
 
   return (
     <ImageBackground
@@ -38,39 +121,51 @@ export default function OrderSummaryScreen({ navigation }) {
       imageStyle={{ width: '100%', height: '100%' }}
     >
       <CustomStatusBar />
-      <View style={{ padding: 10 }}>
+      <View style={{ padding: spacing.md }}>
         <ScreenTitle title={'پیش‌نمایش نهایی ثبت سفارش'} />
       </View>
       <ScrollView contentContainerStyle={styles.container}>
-
         <View style={styles.card}>
           <Text style={NewStyles.title10}>نوع سفارش:</Text>
-          <Text style={NewStyles.text10}>{orderDetails.type}</Text>
+          <Text style={NewStyles.text10}>{orderType}</Text>
 
           <Text style={NewStyles.title10}>تاریخ مراجعه:</Text>
-          <Text style={NewStyles.text10}>{orderDetails.date}</Text>
+          <Text style={NewStyles.text10}>{visitDate}</Text>
 
           <Text style={NewStyles.title10}>ساعت مراجعه:</Text>
-          <Text style={NewStyles.text10}>{orderDetails.time}</Text>
+          <Text style={NewStyles.text10}>{visitTime}</Text>
 
           <Text style={NewStyles.title10}>آدرس:</Text>
-          <Text style={NewStyles.text10}>{orderDetails.address}</Text>
+          <Text style={NewStyles.text10}>{address}</Text>
 
           <Text style={NewStyles.title10}>شماره تماس:</Text>
-          <Text style={NewStyles.text10}>{orderDetails.phone}</Text>
+          <Text style={NewStyles.text10}>{phone}</Text>
 
           <Text style={NewStyles.title10}>هزینه:</Text>
           <Text style={[NewStyles.text11, styles.priceText]}>
-            {orderDetails.price?.toLocaleString('fa-IR')} {orderDetails.currency}
+            {price > 0
+              ? `${price.toLocaleString('fa-IR')} ${currency}`
+              : 'پس از بررسی کارشناس اعلام می‌شود'}
           </Text>
 
           <Text style={NewStyles.title10}>وضعیت سفارش:</Text>
-          <Text style={[NewStyles.text11]}>
-            {orderDetails.status}
-          </Text>
+          <Text style={NewStyles.text11}>{status}</Text>
         </View>
 
-        <TouchableOpacity style={styles.editButton}>
+        {/* خلاصه‌ی واقعی انتخاب‌های کاربر در فرم قبلی */}
+        {summaryLines.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.summaryTitle}>جزئیات انتخاب‌های شما</Text>
+            {summaryLines.map((line, idx) => (
+              <View key={`${line.label}-${idx}`} style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{line.label}</Text>
+                <Text style={styles.summaryValue}>{line.value}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
           <Text style={NewStyles.text4}>ویرایش اطلاعات</Text>
         </TouchableOpacity>
 
@@ -79,25 +174,27 @@ export default function OrderSummaryScreen({ navigation }) {
           onPress={async () => {
             setIsSubmitting(true);
             try {
-              const orderNumber = '984876565';
-              const orderData = {
-                phone: orderDetails.phone,
-                type: orderDetails.type,
-                date: orderDetails.date,
-                customerName: 'مشتری',
-                price: orderDetails.price,
-              };
-
-              await notificationAPI.sendOrderConfirmation(orderNumber, orderData);
+              const orderNumber = `${Date.now()}`;
+              await notificationAPI.sendOrderConfirmation(orderNumber, {
+                phone,
+                type: orderType,
+                date: scheduleDate || '',
+                time: visitTime,
+                address,
+                customerName,
+                price,
+                items: summaryLines,
+              });
+              setStatus('در حال بررسی');
               showToastOrAlert('سفارش با موفقیت ثبت شد. پیامک تایید برای شما ارسال شد.');
 
               navigation.replace('OrderTrackingScreen', {
                 orderData: {
-                  orderNumber: orderNumber,
-                  userId: '211-5015',
-                  phone: orderDetails.phone,
-                  date: orderDetails.date,
-                }
+                  orderNumber,
+                  userId: user?.id ?? orgProfile?.id ?? null,
+                  phone,
+                  date: scheduleDate || '',
+                },
               });
             } catch (error) {
               console.error('Error submitting order:', error);
@@ -109,105 +206,73 @@ export default function OrderSummaryScreen({ navigation }) {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={colors.textInverse.color} />
           ) : (
             <Text style={NewStyles.text4}>ثبت نهایی سفارش</Text>
           )}
         </TouchableOpacity>
-
-
       </ScrollView>
-      
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
-    padding: 10,
+    padding: spacing.md,
     alignItems: 'center',
-  },
-  title: {
-    backgroundColor: '#003366',
-    color: '#00ffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 20,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 12,
-    padding: 45,
-    marginBottom: 25,
+    backgroundColor: colors.surface.bgColor(0.9),
+    borderRadius: radius.md,
+    padding: spacing.xxl,
+    marginBottom: spacing.xxl,
     width: '100%',
-
   },
-  label: {
-    color: '#000',
-    fontWeight: 'bold',
-    marginTop: 8,
-    fontSize: 14,
-    alignSelf: 'flex-end',
+  summaryTitle: {
+    fontFamily: getFontFamily('bold', 'fa'),
+    fontSize: fontSize.md,
+    color: colors.textPrimary.color,
+    marginBottom: spacing.sm,
+    textAlign: 'right',
   },
-  value: {
-    color: '#333',
-    fontSize: 14,
-    marginBottom: 4,
-    alignSelf: 'flex-end',
+  summaryRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.bgColor(0.4),
+  },
+  summaryLabel: {
+    flex: 1,
+    fontFamily: getFontFamily('light', 'fa'),
+    fontSize: fontSize.sm,
+    color: colors.textSecondary.color,
+    textAlign: 'right',
+  },
+  summaryValue: {
+    fontFamily: getFontFamily('bold', 'fa'),
+    fontSize: fontSize.sm,
+    color: colors.textPrimary.color,
+    marginRight: spacing.sm,
   },
   editButton: {
-    backgroundColor: '#ff9800',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 15,
+    backgroundColor: colors.warning.bgColor(1),
+    padding: spacing.md,
+    borderRadius: radius.sm,
+    marginBottom: spacing.lg,
     width: '100%',
     alignItems: 'center',
-
   },
   submitButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 30,
+    backgroundColor: colors.success.bgColor(1),
+    padding: spacing.md,
+    borderRadius: radius.sm,
+    marginBottom: spacing.xxxl,
     width: '100%',
     alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
-  },
-  footerLogo: {
-    width: 50,
-    height: 50,
-    resizeMode: 'contain',
-  },
-  support: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  language: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  phone: {
-    color: '#fff',
-    fontSize: 16,
   },
   priceText: {
-    color: '#2196F3',
-    fontWeight: '600',
+    color: colors.info.color,
   },
 });

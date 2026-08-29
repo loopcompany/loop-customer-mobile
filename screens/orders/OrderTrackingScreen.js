@@ -15,12 +15,14 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import { themeColor0, themeColor4 } from '@theme/Color';
 
 export default function OrderTrackingScreen({ navigation, route }) {
-  // دریافت اطلاعات سفارش از route params
-  const orderData = route?.params?.orderData || {
-    orderNumber: '984876565',
-    userId: '211-5015',
-    phone: '09123456789',
-    date: '1402/01/01',
+  // دریافت اطلاعات سفارش از route params.
+  // اگر پارامتری نبود، به جای داده‌ی نمونه، جای خالی نمایش داده می‌شود.
+  const orderData = {
+    orderNumber: '—',
+    userId: '—',
+    phone: '—',
+    date: '—',
+    ...(route?.params?.orderData || {}),
   };
 
   const handleGoToOrders = () => {

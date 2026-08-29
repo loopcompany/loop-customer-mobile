@@ -1,17 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
 import DatePickerModal from '@components/DatePickerModal';
+import SchedulePicker from '@components/SchedulePicker';
 import {
   AccordionHeader,
   SectionBody,
-  RadioList,
   SelectableOptions,
-  MiniCounter,
+  SubSectionBanner,
+  DeviceCountRow,
+  DeviceCountTile,
   HardwareCard,
   ProcurementCard,
   CounterWithDescription,
@@ -22,11 +24,14 @@ import {
   HARDWARE_ITEMS,
   PROCUREMENT_ITEMS,
   OS_ITEMS,
+  SOFTWARE_DEVICE_TYPES,
   SOFTWARE_ITEMS,
+  TECHNICIAN_GENDER_OPTIONS,
   TIME_SLOT_OPTIONS,
 } from './deviceCatalog';
 import NewStyles from '@styles/NewStyles';
-import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, themeColor14, colors } from '@theme/Color';
+import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
 import { fontSize } from '@theme/Typography';
 import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
 
@@ -124,7 +129,7 @@ const SECTIONS = [
   {
     id: 'technician',
     title: 'انتخاب تکنسین',
-    hint: 'این بخش برای انتخاب مستقیم تکنسین به‌زودی فعال می‌شود.',
+    hint: 'جنسیت تکنسینی که برای انجام خدمت مراجعه می‌کند را انتخاب کنید.',
     icon: require('@assets/icons/sections/technician.png'),
   },
   {
@@ -151,6 +156,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   const [deviceCounts, setDeviceCounts] = useState({});
   const [osCounts, setOsCounts] = useState({});
+  const [softwareDeviceCounts, setSoftwareDeviceCounts] = useState({});
   const [softwareItems, setSoftwareItems] = useState({});
 
   const [hardwareItems, setHardwareItems] = useState({});
@@ -164,12 +170,13 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState('');
   const [timeSlot, setTimeSlot] = useState(null);
   const [onceDate, setOnceDate] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [operatorInfo, setOperatorInfo] = useState({
     jobTitle: '', fullName: '', nationalId: '', mobile: '', birthDate: '',
   });
   const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
+
+  const [technicianGender, setTechnicianGender] = useState(null);
 
   const [letterFile, setLetterFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -181,6 +188,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   const changeOsCount = (id, delta) =>
     setOsCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+
+  const changeSoftwareDeviceCount = (id, delta) =>
+    setSoftwareDeviceCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
 
   const updateSoftwareItem = (id, patch) =>
     setSoftwareItems((prev) => ({ ...prev, [id]: { count: 0, desc: '', ...prev[id], ...patch } }));
@@ -229,44 +239,22 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     return true;
   };
 
-  const handleOrderAction = (action) => {
-    if (action === 'cancel_order') {
-      showAlert('لغو سفارش', 'آیا از لغو سفارش مطمئن هستید؟', [
-        { text: 'انصراف', style: 'cancel' },
-        { text: 'لغو سفارش', style: 'destructive', onPress: () => showToastOrAlert('سفارش لغو شد') },
-      ]);
-      return;
-    }
-    if (action === 'submit_order') {
-      if (!validateOperatorInfo()) {
-        showToastOrAlert('لطفاً اطلاعات اپراتور را کامل کنید.');
-        setExpanded('operator_info');
-        return;
-      }
-      navigation.navigate('OrderSummaryScreen');
-      return;
-    }
-    if (action === 'issue_receipt') {
-      showToastOrAlert('پیش‌رسید صادر شد');
-      return;
-    }
-    if (action === 'show_receipt') {
-      showToastOrAlert('نمایش پیش‌رسید');
-      return;
-    }
-  };
-
   const softwareSummaryLines = useMemo(() => {
     const lines = [];
     OS_ITEMS.forEach((os) => {
       if (osCounts[os.id] > 0) lines.push({ label: os.title, value: osCounts[os.id] });
+    });
+    SOFTWARE_DEVICE_TYPES.forEach((device) => {
+      if (softwareDeviceCounts[device.id] > 0) {
+        lines.push({ label: device.title, value: softwareDeviceCounts[device.id] });
+      }
     });
     SOFTWARE_ITEMS.forEach((item) => {
       const entry = softwareItems[item.id];
       if (entry?.count > 0) lines.push({ label: item.title, value: entry.count });
     });
     return lines;
-  }, [osCounts, softwareItems]);
+  }, [osCounts, softwareDeviceCounts, softwareItems]);
 
   const hardwareSummaryLines = useMemo(() => {
     return HARDWARE_ITEMS
@@ -283,6 +271,44 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     });
     return lines;
   }, [procurementItems]);
+
+  const handleOrderAction = (action) => {
+    if (action === 'cancel_order') {
+      showAlert('لغو سفارش', 'آیا از لغو سفارش مطمئن هستید؟', [
+        { text: 'انصراف', style: 'cancel' },
+        { text: 'لغو سفارش', style: 'destructive', onPress: () => showToastOrAlert('سفارش لغو شد') },
+      ]);
+      return;
+    }
+    if (action === 'submit_order') {
+      if (!validateOperatorInfo()) {
+        showToastOrAlert('لطفاً اطلاعات اپراتور را کامل کنید.');
+        setExpanded('operator_info');
+        return;
+      }
+      navigation.navigate('OrderSummaryScreen', {
+        source: 'comprehensive',
+        orderTitle: 'انتخاب جامع - خدمات سازمانی',
+        // هر سه بخش انتخاب‌شده در یک فهرست خلاصه‌ی واحد.
+        summaryLines: [
+          ...softwareSummaryLines,
+          ...hardwareSummaryLines,
+          ...procurementSummaryLines,
+        ],
+        schedule: { date: isOnceShort ? onceDate : startDate, slot: timeSlot },
+        contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
+      });
+      return;
+    }
+    if (action === 'issue_receipt') {
+      showToastOrAlert('پیش‌رسید صادر شد');
+      return;
+    }
+    if (action === 'show_receipt') {
+      showToastOrAlert('نمایش پیش‌رسید');
+      return;
+    }
+  };
 
   return (
     <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
@@ -320,117 +346,75 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         />
         {expanded === 'software_services' && (
           <SectionBody>
-            {/* بنر «نصب سیستم عامل» */}
-            <View style={{ position: 'relative', marginBottom: 18 }}>
-              <View
-                style={{
-                  backgroundColor: themeColor0.bgColor(1),
-                  borderRadius: 10,
-                  paddingVertical: 10,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text style={{ color: '#fff', fontFamily: 'VazirBold', fontSize: 14 }}>
-                  نصب سیستم عامل
-                </Text>
-              </View>
-              <View
-                style={{
-                  position: 'absolute',
-                  bottom: -8,
-                  alignSelf: 'center',
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 9,
-                  borderRightWidth: 9,
-                  borderTopWidth: 8,
-                  borderLeftColor: 'transparent',
-                  borderRightColor: 'transparent',
-                  borderTopColor: themeColor0.color,
-                }}
-              />
-            </View>
+            {/* زیربخش ۱: نصب سیستم عامل */}
+            <SubSectionBanner title="نصب سیستم عامل" />
 
             {/* تعداد دستگاه‌ها */}
             {DEVICE_TYPES.map((device) => (
-              <View
+              <DeviceCountRow
                 key={device.id}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingVertical: 10,
-                  borderBottomWidth: 1,
-                  borderBottomColor: themeColor10.bgColor(0.08),
-                }}
-              >
-                <Text style={{ fontFamily: 'VazirBold', fontSize: 14, color: themeColor10.bgColor(1) }}>
-                  {device.title}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MiniCounter
-                    count={deviceCounts[device.id] || 0}
-                    onIncrement={() => changeDeviceCount(device.id, 1)}
-                    onDecrement={() => changeDeviceCount(device.id, -1)}
-                  />
-                  <View
-                    style={{
-                      width: 54,
-                      height: 54,
-                      borderRadius: 12,
-                      backgroundColor: themeColor14.bgColor(1),
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginLeft: 10,
-                    }}
-                  >
-                    <Image source={device.image} style={{ width: 40, height: 40 }} resizeMode="contain" />
-                  </View>
-                </View>
-              </View>
+                title={device.title}
+                image={device.image}
+                count={deviceCounts[device.id] || 0}
+                onIncrement={() => changeDeviceCount(device.id, 1)}
+                onDecrement={() => changeDeviceCount(device.id, -1)}
+              />
             ))}
 
             {/* شبکه‌ی سه‌ستونه‌ی سیستم‌عامل‌ها */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 16 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: spacing.md }}>
               {OS_ITEMS.map((os) => (
-                <View key={os.id} style={{ width: '31%', alignItems: 'center', marginBottom: 18 }}>
-                  <Image
-                    source={os.image}
-                    style={{ width: 72, height: 72, marginBottom: 6 }}
-                    resizeMode="contain"
-                  />
-                  <Text
-                    style={{ fontFamily: 'VazirBold', fontSize: 11, color: themeColor10.bgColor(0.85), textAlign: 'center', marginBottom: 6 }}
-                    numberOfLines={1}
-                  >
-                    {os.title}
-                  </Text>
-                  <MiniCounter
-                    count={osCounts[os.id] || 0}
-                    onIncrement={() => changeOsCount(os.id, 1)}
-                    onDecrement={() => changeOsCount(os.id, -1)}
-                  />
-                </View>
+                <DeviceCountTile
+                  key={os.id}
+                  title={os.title}
+                  image={os.image}
+                  count={osCounts[os.id] || 0}
+                  onIncrement={() => changeOsCount(os.id, 1)}
+                  onDecrement={() => changeOsCount(os.id, -1)}
+                />
               ))}
             </View>
 
-            <View style={{ height: 1, backgroundColor: themeColor10.bgColor(0.1), marginVertical: 10 }} />
+            <View
+              style={{
+                height: 1,
+                backgroundColor: colors.border.bgColor(0.9),
+                marginTop: spacing.sm,
+                marginBottom: spacing.lg,
+              }}
+            />
 
-            {SOFTWARE_ITEMS.map((item) => {
-              const entry = softwareItems[item.id] || { count: 0, desc: '' };
-              return (
-                <CounterWithDescription
-                  key={item.id}
-                  title={item.title}
-                  count={entry.count}
-                  desc={entry.desc}
-                  onIncrement={() => updateSoftwareItem(item.id, { count: entry.count + 1 })}
-                  onDecrement={() => updateSoftwareItem(item.id, { count: Math.max(0, entry.count - 1) })}
-                  onDescChange={(text) => updateSoftwareItem(item.id, { desc: text })}
-                />
-              );
-            })}
+            {/* زیربخش ۲: نصب نرم‌افزارها */}
+            <SubSectionBanner title="نصب نرم‌افزارها" style={{ marginTop: spacing.sm }} />
+
+            {SOFTWARE_DEVICE_TYPES.map((device) => (
+              <DeviceCountRow
+                key={device.id}
+                title={device.title}
+                image={device.image}
+                count={softwareDeviceCounts[device.id] || 0}
+                onIncrement={() => changeSoftwareDeviceCount(device.id, 1)}
+                onDecrement={() => changeSoftwareDeviceCount(device.id, -1)}
+              />
+            ))}
+
+            {/* موارد توضیح‌دار نصب نرم‌افزار - هرکدام در قاب مستقل */}
+            <View style={{ marginTop: spacing.md }}>
+              {SOFTWARE_ITEMS.map((item) => {
+                const entry = softwareItems[item.id] || { count: 0, desc: '' };
+                return (
+                  <CounterWithDescription
+                    key={item.id}
+                    title={item.title}
+                    count={entry.count}
+                    desc={entry.desc}
+                    onIncrement={() => updateSoftwareItem(item.id, { count: entry.count + 1 })}
+                    onDecrement={() => updateSoftwareItem(item.id, { count: Math.max(0, entry.count - 1) })}
+                    onDescChange={(text) => updateSoftwareItem(item.id, { desc: text })}
+                  />
+                );
+              })}
+            </View>
 
             <SummaryBox title="خدمات نرم‌افزاری" lines={softwareSummaryLines} />
           </SectionBody>
@@ -551,43 +535,37 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           <SectionBody>
             {isOnceShort ? (
               <>
-                <Text style={{ fontFamily: 'VazirLight', fontSize: 12, color: themeColor10.bgColor(0.7), marginBottom: 8 }}>
-                  چون «کوتاه مدت / یکبار» انتخاب شده، فقط تاریخ و ساعت را انتخاب کنید.
+                <Text style={{ fontFamily: 'VazirLight', fontSize: fontSize.xs, color: themeColor10.bgColor(0.7), marginBottom: spacing.sm }}>
+                  چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.
                 </Text>
-                <TouchableOpacity
-                  onPress={() => setShowDatePicker(true)}
-                  style={[NewStyles.textInput, NewStyles.border10, { justifyContent: 'center' }]}
-                >
-                  <Text style={{ fontFamily: 'VazirLight', color: themeColor10.bgColor(onceDate ? 1 : 0.5) }}>
-                    {onceDate || 'انتخاب تاریخ'}
-                  </Text>
-                </TouchableOpacity>
-                <View style={{ height: 8 }} />
-                <RadioList options={TIME_SLOT_OPTIONS} value={timeSlot} onChange={setTimeSlot} />
+                <SchedulePicker
+                  date={onceDate}
+                  onChangeDate={setOnceDate}
+                  slot={timeSlot}
+                  onChangeSlot={setTimeSlot}
+                  slots={TIME_SLOT_OPTIONS}
+                />
               </>
             ) : (
               <>
-                <RadioList options={VISIT_FREQUENCY_OPTIONS} value={visitFrequency} onChange={setVisitFrequency} />
-                <View style={{ height: 8 }} />
-                <TouchableOpacity
-                  onPress={() => setShowDatePicker(true)}
-                  style={[NewStyles.textInput, NewStyles.border10, { justifyContent: 'center' }]}
-                >
-                  <Text style={{ fontFamily: 'VazirLight', color: themeColor10.bgColor(startDate ? 1 : 0.5) }}>
-                    {startDate || 'تاریخ شروع'}
-                  </Text>
-                </TouchableOpacity>
-                <View style={{ height: 8 }} />
-                <RadioList options={TIME_SLOT_OPTIONS} value={timeSlot} onChange={setTimeSlot} />
+                <SubSectionBanner title="تعداد بازدید" />
+                <SelectableOptions
+                  options={VISIT_FREQUENCY_OPTIONS}
+                  value={visitFrequency}
+                  onChange={setVisitFrequency}
+                  columns={2}
+                />
+                <View style={{ height: spacing.md }} />
+                <SchedulePicker
+                  date={startDate}
+                  onChangeDate={setStartDate}
+                  slot={timeSlot}
+                  onChangeSlot={setTimeSlot}
+                  slots={TIME_SLOT_OPTIONS}
+                  dateTitle="تاریخ شروع"
+                />
               </>
             )}
-
-            <DatePickerModal
-              datePickerModal={showDatePicker}
-              setDatePickerModal={setShowDatePicker}
-              birthDate={isOnceShort ? onceDate : startDate}
-              setBirthDate={isOnceShort ? setOnceDate : setStartDate}
-            />
           </SectionBody>
         )}
 
@@ -648,7 +626,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           </SectionBody>
         )}
 
-        {/* ۱۰. انتخاب تکنسین - placeholder / به زودی */}
+        {/* ۱۰. انتخاب تکنسین - فعلاً فقط انتخاب جنسیت تکنسین */}
         <AccordionHeader
           title={SECTIONS[9].title}
           hint={SECTIONS[9].hint}
@@ -658,12 +636,12 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         />
         {expanded === 'technician' && (
           <SectionBody>
-            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-              <Ionicons name="time-outline" size={28} color={themeColor10.bgColor(0.4)} />
-              <Text style={{ fontFamily: 'VazirBold', fontSize: 14, color: themeColor10.bgColor(0.5), marginTop: 8 }}>
-                به زودی
-              </Text>
-            </View>
+            <SelectableOptions
+              options={TECHNICIAN_GENDER_OPTIONS}
+              value={technicianGender}
+              onChange={setTechnicianGender}
+              columns={2}
+            />
           </SectionBody>
         )}
 

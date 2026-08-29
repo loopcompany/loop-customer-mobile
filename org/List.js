@@ -1,6 +1,7 @@
 // صفحه‌ی ورودی کاربر سازمانی - فقط دو مسیر دارد: «انتخاب جامع» و
 // «انتخاب سیستماتیک». هر دو کاشی ستونی و در مرکز صفحه چیده می‌شوند: «جامع» بالا
 // و «سیستماتیک» پایین آن، هرکدام با آیکون و عنوان کاملاً هم‌مرکز (افقی و عمودی).
+// علامت راهنما «؟» دقیقاً کنار عنوان قرار می‌گیرد و عنوان در یک خط نمایش داده می‌شود.
 import React, { useMemo } from 'react';
 import { View, Image, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { ImageBackground } from 'expo-image';
@@ -12,6 +13,8 @@ import HintBadge from '@components/HintBadge';
 import ScreenHeaders from '@components/ScreenHeaders';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { createStyles } from '@styles/NewStyles';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
 
 const entryOptions = [
   {
@@ -70,9 +73,16 @@ const List = ({ navigation }) => {
                 onPress={() => navigation.navigate(item.screen)}
               >
                 <Image source={item.image} style={styles.tileIcon} />
-                <Text style={[NewStyles.title4, styles.tileTitle]}>{item.title}</Text>
+                <View style={styles.titleRow}>
+                  <HintBadge hint={item.hint} title={item.title} size={20} />
+                  <Text
+                    style={[NewStyles.title4, styles.tileTitle]}
+                    numberOfLines={1}
+                  >
+                    {item.title}
+                  </Text>
+                </View>
               </TouchableOpacity>
-              <HintBadge hint={item.hint} title={item.title} style={styles.hintBadge} />
             </View>
           ))}
         </View>
@@ -99,7 +109,8 @@ const createLocalStyles = (NewStyles) =>
       alignItems: 'center',
     },
     tile: {
-      width: 120,
+      minWidth: 120,
+      paddingHorizontal: spacing.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -107,17 +118,17 @@ const createLocalStyles = (NewStyles) =>
       width: 80,
       height: 80,
       resizeMode: 'contain',
-      borderRadius: 20,
-      marginBottom: 10,
+      borderRadius: radius.lg,
+      marginBottom: spacing.sm,
+    },
+    // عنوان و علامت راهنما کنار هم در یک ردیف؛ عنوان در یک خط جا می‌شود.
+    titleRow: {
+      flexDirection: 'row-reverse',
+      alignItems: 'center',
+      gap: spacing.sm,
     },
     tileTitle: {
       textAlign: 'center',
-    },
-    // علامت راهنما گوشه‌ی بالای کاشی می‌نشیند تا ابعاد خود کاشی دست‌نخورده بماند.
-    hintBadge: {
-      position: 'absolute',
-      top: 10,
-      right: 0,
     },
   });
 

@@ -1399,6 +1399,8 @@
   "Automatic login (without password)": "ورود خودکار (بدون رمز)",
   "Image selected. To save, click Save Profile Information button": "تصویر انتخاب شد برای ذخیره کردن، روی دکمه ی ذخیره اطلاعات کاربر کلیک کنید.",
   "Select organization type": "نوع سازمان را انتخاب کنید",
+  "Individual user": "کاربر حقیقی",
+  "Organization": "سازمان",
   "Government organization": "سازمانی دولتی",
   "Semi-governmental organization": "سازمانی نیمه دولتی",
   "Private company": "شرکت خصوصی ",

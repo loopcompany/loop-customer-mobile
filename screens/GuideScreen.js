@@ -57,7 +57,7 @@ export default function GuideScreen({ navigation, route }) {
 
   <Text style={styles.languageText}>فا</Text>
 
-  <Text style={styles.phoneText}>21164552</Text>
+  <Text style={styles.phoneText}>91693909</Text>
 </View> */}
       <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-end' }}>
         

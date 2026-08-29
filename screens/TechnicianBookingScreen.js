@@ -116,7 +116,7 @@ export default function TechnicianBookingScreen({navigation}) {
         <Image source={require('@assets/logo.png')} style={styles.footerLogo} />
         <Text style={styles.support}>{t("Support")}</Text>
         <Text style={styles.language}>{t("FA")}</Text>
-        <Text style={styles.phone}>21164552</Text>
+        <Text style={styles.phone}>91693909</Text>
       </View>
     </ImageBackground>
   );

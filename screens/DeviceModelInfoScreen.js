@@ -211,7 +211,18 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
           {/* ✅ نمایش / ثبت / استعلام → navigation */}
           <TouchableOpacity
             style={styles.sectionButton}
-            onPress={() => navigation.replace('OrderSummaryScreen')}
+            onPress={() =>
+              navigation.replace('OrderSummaryScreen', {
+                source: 'device_model',
+                orderTitle: `بررسی دستگاه - ${category}`,
+                // '10-12' را به شناسه‌ی بازه‌ی ساعتی مشترک تبدیل می‌کند.
+                schedule: { slot: `slot_${timeSlot.replace('-', '_')}` },
+                summaryLines: [
+                  { label: 'دستگاه', value: category },
+                  { label: 'جنسیت تکنسین', value: techGender },
+                ],
+              })
+            }
           >
             <Text style={NewStyles.text4}>نمایش / استعلام / ثبت سفارش</Text>
           </TouchableOpacity>

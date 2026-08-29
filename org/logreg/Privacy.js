@@ -461,7 +461,7 @@ const Privacy = ({ navigation }) => {
               fontSize: 16,
               fontFamily: 'VazirBold',
               color: '#333'
-            }}>21164552</Text>
+            }}>91693909</Text>
           </View>
 
         </View>

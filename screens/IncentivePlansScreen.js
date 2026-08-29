@@ -30,7 +30,7 @@ export default function IncentivePlansScreen({ navigation }) {
 
         <View style={styles.footer}>
           {/* <Text style={styles.footerText}>فا</Text>
-          <Text style={styles.footerText}>21164552</Text> */}
+          <Text style={styles.footerText}>91693909</Text> */}
         </View>
       </View>
       
