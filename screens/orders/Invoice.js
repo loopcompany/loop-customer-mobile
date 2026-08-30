@@ -265,7 +265,7 @@ function Invoice({ route, navigation }) {
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
                     <View style={{ paddingHorizontal: '5%', alignItems: 'center' }}>
                         <TouchableOpacity style={{ padding: 10 }} onPress={() => {
-                            navigation.navigate("FolderScreen")
+                            navigation.navigate("List")
                         }}>
                             <Text style={NewStyles.title}> {t("Reorder")} </Text>
                         </TouchableOpacity>
