@@ -34,18 +34,18 @@ export default function OrderTrackingScreen({ navigation, route }) {
   };
 
   const handleNewOrder = () => {
-    // به صفحه اصلی برو برای ثبت سفارش جدید و stack را پاک کن
+    // به لیست برو برای ثبت سفارش جدید و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'FolderScreen' }],
+      routes: [{ name: 'List' }],
     });
   };
 
   const handleBackPress = () => {
-    // به صفحه اصلی برو و stack را پاک کن
+    // به لیست برو و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'FolderScreen' }],
+      routes: [{ name: 'List' }],
     });
   };
   return (

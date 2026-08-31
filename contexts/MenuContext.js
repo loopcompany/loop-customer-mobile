@@ -24,11 +24,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
+import { shadow } from '@theme/Shadows';
 import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import useLogout from '@hooks/useLogout';
@@ -38,7 +41,6 @@ import { createStyles } from '@styles/NewStyles';
 import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLanguage } from '@slices/languageSlice';
-import { langIsRTL } from '@helpers/Common';
 // Create Context
 const MenuContext = createContext();
 
@@ -181,6 +183,48 @@ const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
     );
 });
 
+// دکمه‌ی جمع‌وجمع شیشه‌ای داخل داک پایین — آیکون + برچسب کوتاه
+function DockAction({ icon, label, onPress, lang, accessibilityLabel }) {
+    return (
+        <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onPress}
+            style={dockStyles.action}
+            accessibilityRole="button"
+            accessibilityLabel={accessibilityLabel || label}
+        >
+            <Ionicons name={icon} size={19} color={colors.primary.color} />
+            {!!label && (
+                <Text
+                    style={[dockStyles.actionLabel, { fontFamily: getFontFamily('bold', lang) }]}
+                    numberOfLines={1}
+                >
+                    {label}
+                </Text>
+            )}
+        </TouchableOpacity>
+    );
+}
+
+const dockStyles = StyleSheet.create({
+    action: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
+        minWidth: 54,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.xs,
+        borderRadius: radius.md,
+        backgroundColor: colors.white.bgColor(0.45),
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.7),
+    },
+    actionLabel: {
+        color: colors.primary.color,
+        fontSize: fontSize.xs,
+    },
+});
+
 
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
@@ -199,6 +243,9 @@ export const MenuProvider = ({ children }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [currentRouteName, setCurrentRouteName] = useState('');
     const [showCodeHint, setShowCodeHint] = useState(false);
+    // ارتفاع واقعی نوار پایین که با onLayout اندازه‌گیری می‌شود تا محتوای صفحه
+    // زیر آن پنهان نشود (نوار position: absolute/fixed است و روی محتوا شناور می‌ماند)
+    const [footerHeight, setFooterHeight] = useState(0);
     const insets = useSafeAreaInsets();
     // Get user type and auth token from Redux
     const userType = useSelector(state => state.auth.userType);
@@ -367,6 +414,16 @@ export const MenuProvider = ({ children }) => {
         setTimeout(() => setShowCodeHint(false), 1800);
     }, []);
 
+    const handleFooterLayout = useCallback((e) => {
+        const h = e?.nativeEvent?.layout?.height ?? 0;
+        setFooterHeight((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    }, []);
+
+    // فضایی که باید زیر محتوای صفحه رزرو شود تا پشت داک پایین نرود
+    const contentBottomInset = shouldShowMenu
+        ? footerHeight + (insets?.bottom || 0) + spacing.sm + spacing.xs
+        : 0;
+
 
     const renderMenuItem = useCallback(({ item }) => (
         <TouchableOpacity
@@ -405,6 +462,8 @@ export const MenuProvider = ({ children }) => {
         navigateToScreen,
         callSupport,
         menuItems: filteredMenuItems,
+        // فاصله‌ای که یک صفحه باید ته محتوای اسکرول‌شونده‌اش بگذارد تا زیر داک شناور نرود
+        footerSpace: contentBottomInset,
     }), [
         menuVisible,
         openMenu,
@@ -412,6 +471,7 @@ export const MenuProvider = ({ children }) => {
         navigateToScreen,
         callSupport,
         filteredMenuItems,
+        contentBottomInset,
     ]);
     const changeLanguage = async (lng) => {
         await i18n.changeLanguage(lng);
@@ -438,53 +498,80 @@ export const MenuProvider = ({ children }) => {
                 {children}
 
                 {shouldShowMenu && (
-                    <View style={[styles.footer, NewStyles.rowWrapper, { bottom: insets?.bottom, flexDirection: 'row' }]}>
-                        <AnimatedFooterLogoButton
-                            onPress={openMenu}
-                            logoStyle={styles.footerLogo}
-                        />
-
-
-
-                        <TouchableOpacity
-                            style={{ padding: 5 }}
-                            onPress={() => {
-                                if (i18n.language == 'en') {
-                                    changeLanguage('fa');
-                                } else {
-                                    changeLanguage('en');
-                                }
-                            }}
-                        >
-                            <Text style={NewStyles.text4}>{t(i18n.language)}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.supportButton}
-                            onPress={() => {
-                                navigation.navigate('MessageScreen');
-                            }}
-                        >
-                            <Image
-                                source={require('@assets/images/support.png')}
-                                style={{ height: 40, width: 60, resizeMode: 'contain', }}
-                            />
-                        </TouchableOpacity>
-                        <View style={styles.codeWrapper}>
-                            {showCodeHint && (
-                                <View style={styles.codeHintBubble}>
-                                    <Text style={styles.codeHintText}>
-                                        {userType === 'organization' ? t('Organization code') : t('User code')}
-                                    </Text>
-                                </View>
-                            )}
-                            <TouchableOpacity onPress={handleCodePress}>
-                                <Text style={NewStyles.text4}>
-                                    {user?.code}
+                    <View
+                        pointerEvents="box-none"
+                        style={[styles.footerWrap, { bottom: (insets?.bottom || 0) + spacing.sm }]}
+                    >
+                        {showCodeHint && !!user?.code && (
+                            <View style={styles.codeTooltip}>
+                                <Text style={styles.codeTooltipText} numberOfLines={1}>
+                                    {userType === 'organization' ? t('Organization code') : t('User code')}
                                 </Text>
-                            </TouchableOpacity>
-                        </View>
+                            </View>
+                        )}
 
+                        <View onLayout={handleFooterLayout} style={styles.dockShadow}>
+                            {/* اپ فارسی‌محور است: لوگو همیشه سمت راست، کد سمت چپ */}
+                            <View style={styles.dock}>
+                                <BlurView
+                                    intensity={30}
+                                    tint="light"
+                                    style={StyleSheet.absoluteFill}
+                                    pointerEvents="none"
+                                />
+                                <LinearGradient
+                                    colors={[colors.white.bgColor(0.22), colors.white.bgColor(0.04)]}
+                                    style={StyleSheet.absoluteFill}
+                                    pointerEvents="none"
+                                />
+                                <View style={styles.dockTopEdge} pointerEvents="none" />
+
+                                <View style={styles.menuButton}>
+                                    <AnimatedFooterLogoButton
+                                        onPress={openMenu}
+                                        logoStyle={styles.footerLogo}
+                                    />
+                                </View>
+
+                                <DockAction
+                                    icon="globe-outline"
+                                    label={t(i18n.language)}
+                                    lang={i18n.language}
+                                    accessibilityLabel={t('Language')}
+                                    onPress={() =>
+                                        changeLanguage(i18n.language === 'en' ? 'fa' : 'en')
+                                    }
+                                />
+
+                                <DockAction
+                                    icon="headset-outline"
+                                    label={t('Support')}
+                                    lang={i18n.language}
+                                    onPress={() => navigation.navigate('MessageScreen')}
+                                />
+
+                                <TouchableOpacity
+                                    activeOpacity={0.75}
+                                    onPress={handleCodePress}
+                                    style={styles.codeChip}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        userType === 'organization'
+                                            ? t('Organization code')
+                                            : t('User code')
+                                    }
+                                >
+                                    <Ionicons
+                                        name="qr-code-outline"
+                                        size={15}
+                                        color={colors.primary.color}
+                                    />
+                                    <Text style={styles.codeChipText}>
+                                        {user?.code ?? '—'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </View>
                 )}
                 <Modal
@@ -560,16 +647,81 @@ export const useMenu = () => {
 const createLocalStyles = (NewStyles, language) => StyleSheet.create({
 
 
-    footer: {
-        backgroundColor: 'rgba(100, 180, 240, 0.4)',
-        width: "100%",
-        paddingHorizontal: 15,
+    // داک شیشه‌ای شناور پایین صفحه
+    footerWrap: {
         position: Platform.OS === 'web' ? 'fixed' : 'absolute',
-        bottom: 0,
         left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: spacing.md,
         zIndex: 10,
-        borderTopWidth: 1.5,
-        borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    dockShadow: {
+        borderRadius: radius.lg,
+        // شفاف — بلور داک، پس‌زمینه‌ی واقعی صفحه را نشان می‌دهد نه یک لایه‌ی سفید
+        backgroundColor: colors.white.bgColor(0.06),
+        ...shadow.lg,
+    },
+    dock: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing.xs,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderRadius: radius.lg,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.6),
+    },
+    dockTopEdge: {
+        position: 'absolute',
+        top: 0,
+        left: spacing.lg,
+        right: spacing.lg,
+        height: 1,
+        backgroundColor: colors.white.bgColor(0.85),
+    },
+    menuButton: {
+        width: 52,
+        height: 52,
+        borderRadius: radius.pill,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.primary.bgColor(0.1),
+        borderWidth: 1,
+        borderColor: colors.primary.bgColor(0.22),
+    },
+    codeChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.sm,
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.1),
+        borderWidth: 1,
+        borderColor: colors.primary.bgColor(0.22),
+        flexShrink: 0,
+    },
+    codeChipText: {
+        color: colors.primary.color,
+        fontSize: fontSize.sm,
+        fontFamily: getFontFamily('bold', language),
+    },
+    codeTooltip: {
+        alignSelf: 'center',
+        marginBottom: spacing.xs,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.md,
+        borderRadius: radius.sm,
+        backgroundColor: colors.primary.bgColor(0.96),
+        ...shadow.md,
+    },
+    codeTooltipText: {
+        color: colors.white.color,
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', language),
     },
     accountName: {
         marginBottom: spacing.xs,
@@ -586,35 +738,10 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         fontFamily: getFontFamily('bold', language),
         textAlign: 'center',
     },
-    codeWrapper: {
-        position: 'relative',
-        alignItems: 'center',
-    },
-    codeHintBubble: {
-        position: 'absolute',
-        bottom: '100%',
-        marginBottom: 8,
-        backgroundColor: themeColor0.bgColor(0.95),
-        borderRadius: 8,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-    },
-    codeHintText: {
-        color: '#fff',
-        fontSize: 11,
-        fontFamily: 'VazirBold',
-    },
     footerLogo: {
-        width: 50,
-        height: 50,
+        width: 34,
+        height: 34,
         resizeMode: "contain",
-    },
-    supportButton: {
-        paddingVertical: 5,
     },
     list: {
         paddingTop: 20,
