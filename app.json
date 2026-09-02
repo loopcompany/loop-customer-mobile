@@ -22,7 +22,9 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -68,6 +70,12 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "eb67af04-814c-4099-9bc0-243754cc4c4d"
+      }
+    },
+    "owner": "mehrdadtorki"
   }
 }
