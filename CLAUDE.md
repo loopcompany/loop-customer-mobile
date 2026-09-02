@@ -176,6 +176,31 @@ the order-creation wizard state.
 **Before touching order submission, read the actual call site in
 `screens/category/Preview.js`, not the docs** — the docs disagree with each other.
 
+## Push notifications (Firebase Cloud Messaging)
+
+`services/notifications/` owns the FCM client flow (backend contract:
+`FIREBASE_NOTIFICATIONS.md`, app write-up: `docs/FIREBASE_NOTIFICATIONS_APP.md`).
+Shape:
+
+- `services/notifications/index.js` — the only entry point the app calls
+  (`registerForPushNotifications` / `unregisterForPushNotifications` /
+  `attachNotificationListeners`). Every call no-ops where push isn't supported
+  (Expo Go, simulators, web without config) — callers don't need their own guards.
+- `messaging.native.js` / `messaging.web.js` — platform transport, resolved by
+  Metro. Import `./messaging`, never the suffixed file. `@react-native-firebase/*`
+  must stay out of the web bundle and `firebase/*` out of the native bundle — the
+  split file is what keeps that true.
+- `notificationRouting.js` — pure `data.type`/`data.screen` → route mapping.
+  Extend the maps here for new event kinds; never spread the raw push payload into
+  route params.
+- Lifecycle is driven by `hooks/usePushNotifications.js` (mounted via
+  `components/PushNotificationProvider.js` in `App.js`) watching `state.auth.token`.
+  Logout cleanup is in `TokenManager.clearAuthData()`.
+
+Firebase config files (`google-services.json`, `GoogleService-Info.plist`) and the
+web config are **not committed** — see `docs/FIREBASE_NOTIFICATIONS_APP.md` for
+setup. FCM needs a dev-client / production build; it will not work in Expo Go.
+
 ## Organization access control (security-sensitive — read before editing)
 
 There is a dedicated access-control system gating what an "organization" account can do

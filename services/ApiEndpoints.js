@@ -4,7 +4,7 @@ import { uri } from './URL';
 export const API_ENDPOINTS = {
   // Base URL (from URL.js)
   BASE_URL: uri, // http://192.168.21.123:8000/api
-  
+
   // Auth endpoints (all prefixed with /auth)
   AUTH: {
     REGISTER: '/auth/register',
@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
     VERIFY_RESET_CODE: '/auth/verify-reset-code',
     RESEND_RESET_CODE: '/auth/resend-reset-code',
   },
-  
+
   // User endpoints
   USER: {
     PROFILE: '/profile',
@@ -29,16 +29,21 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: '/profile/password',
     UPLOAD_AVATAR: '/user/avatar',
   },
-  
+
   // Orders endpoints
   ORDERS: {
     LIST: '/orders',
-    CREATE: '/orders/',  // ✅ POST /api/orders/ (با / در انتها)
+    CREATE: '/orders/', // ✅ POST /api/orders/ (با / در انتها)
     DETAILS: '/orders/{id}',
     CANCEL: '/orders/{id}/cancel',
     TRACK: '/orders/{id}/track',
   },
-  
+
+  // Push notifications (FCM device tokens) — see services/notifications/
+  NOTIFICATIONS: {
+    DEVICE_TOKEN: '/notifications/device-token', // POST register / DELETE remove
+  },
+
   // Technician endpoints
   TECHNICIANS: {
     LIST: '/technicians',
@@ -46,7 +51,7 @@ export const API_ENDPOINTS = {
     BOOK: '/technicians/book',
     AVAILABILITY: '/technicians/{id}/availability',
   },
-  
+
   // Services endpoints
   SERVICES: {
     CATEGORIES: '/services/categories',
@@ -59,7 +64,7 @@ export const API_ENDPOINTS = {
   // Info endpoints (Public APIs)
   INFO: {
     FAQS: '/info/faqs',
-    TERMS: '/info/terms', 
+    TERMS: '/info/terms',
     PRIVACY: '/info/privacy',
     ORGANIZATION_TERMS: '/info/organization-terms',
     WARRANTY: '/info/warranties',
@@ -75,7 +80,7 @@ export const API_ENDPOINTS = {
     LOGOUT: '/organization/logout',
     LOGOUT_ALL: '/organization/logout-all',
     WARRANTY: '/info/warranties',
-  }
+  },
 };
 
 // Helper function to build full URL
@@ -86,7 +91,7 @@ export const buildApiUrl = (endpoint) => {
 // Helper function to replace path parameters
 export const buildEndpointWithParams = (endpoint, params = {}) => {
   let url = endpoint;
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     url = url.replace(`{${key}}`, params[key]);
   });
   return url;

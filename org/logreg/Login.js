@@ -84,10 +84,11 @@ const Login = ({ navigation }) => {
 
       if (response.data.status === 'success') {
 
-        // Save token and user data
-        if (rememberPassword) {
-          await AsyncStorage.setItem('userToken', response.data.data.token);
-        }
+        // Save token and user data — the token must always be persisted so the
+        // axios interceptors (which read AsyncStorage 'userToken', not Redux) can
+        // authenticate subsequent requests. `rememberPassword` only controls
+        // whether the org code is pre-filled on the next launch.
+        await AsyncStorage.setItem('userToken', response.data.data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
 
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));

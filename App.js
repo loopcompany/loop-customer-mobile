@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 
 import AuthInitializer from '@components/AuthInitializer';
+import PushNotificationProvider from '@components/PushNotificationProvider';
 import { MenuProvider } from '@contexts/MenuContext';
 import { setNavigationRef } from '@services/axiosConfig';
 
@@ -67,9 +68,11 @@ const App = () => {
             fallback={<NavigationFallback />}
           >
             <AuthInitializer>
-              <MenuProvider>
-                <RootNavigator />
-              </MenuProvider>
+              <PushNotificationProvider>
+                <MenuProvider>
+                  <RootNavigator />
+                </MenuProvider>
+              </PushNotificationProvider>
             </AuthInitializer>
           </NavigationContainer>
         </SafeAreaProvider>

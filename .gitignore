@@ -83,6 +83,13 @@ Desktop.ini
 # Linux
 *~
 
+# Firebase client config — keep the real per-project files out of git.
+# (These are client config, not the secret backend service-account key, but
+#  committing the wrong project's file is a common footgun. Use the .example
+#  files as templates; supply the real ones locally or as EAS file secrets.)
+google-services.json
+GoogleService-Info.plist
+
 # local env files - never commit secrets
 .env
 .env.local
