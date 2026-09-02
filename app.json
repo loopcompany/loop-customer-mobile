@@ -68,11 +68,6 @@
           }
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "64d61ca0-dccf-46d4-a697-482c018ea29e"
-      }
-    }
+    ]
   }
 }

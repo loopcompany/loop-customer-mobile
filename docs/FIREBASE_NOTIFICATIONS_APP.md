@@ -42,8 +42,9 @@ extend the two maps there when the backend adds event kinds. Only whitelisted
 ## One-time setup before the first native build
 
 The config plugins need real Firebase files — the build fails without them (by
-design). None of this is committed (`.gitignore`), use the `.example` files as
-templates.
+design). `google-services.json` / `GoogleService-Info.plist` are Firebase
+**client** config (not the secret backend key) and are committed so EAS cloud
+builds include them; the `.example` files are templates showing the shape.
 
 ### 1. Firebase project
 
