@@ -1,0 +1,61 @@
+# Runs the EAS build from GitHub's runners instead of a local machine.
+#
+# Why this exists: `eas build` uploads the project tarball to
+# storage.googleapis.com. From a sanctioned/geo-blocked network that upload is
+# rejected with HTTP 403 (or fails DNS), so the build never gets queued. A
+# GitHub runner is not geo-blocked, so the upload succeeds from here.
+#
+# Setup (one time):
+#   1. https://expo.dev/settings/access-tokens -> "Create token"
+#   2. GitHub repo -> Settings -> Secrets and variables -> Actions -> New secret
+#      Name: EXPO_TOKEN   Value: <the token>
+#   3. Actions tab -> "EAS Build" -> Run workflow
+
+name: EAS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        type: choice
+        default: android
+        options: [android, ios, all]
+      profile:
+        description: eas.json build profile
+        type: choice
+        default: preview
+        options: [preview, development, production]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Verify EAS authentication
+        run: eas whoami
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: >-
+          eas build
+          --platform ${{ inputs.platform }}
+          --profile ${{ inputs.profile }}
+          --non-interactive
+          --no-wait

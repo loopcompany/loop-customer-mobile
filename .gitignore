@@ -109,8 +109,6 @@ Desktop.ini
 *.temp
 .cache/
 
-# EAS
-.easignore
 
 # Sentry / source maps
 *.map

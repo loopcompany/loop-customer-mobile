@@ -1,0 +1,48 @@
+# Files excluded from the EAS Build project archive.
+# Keeps the upload small — the tarball has to travel to Google Cloud Storage,
+# which is the slowest/most failure-prone step on a constrained connection.
+#
+# NOTE: .easignore REPLACES .gitignore for EAS uploads, so anything that must
+# stay out of the archive has to be repeated here.
+
+# --- normally covered by .gitignore ---
+node_modules/
+.expo/
+dist/
+web-build/
+android/
+ios/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.env*.local
+.env.production
+*.tsbuildinfo
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+*.temp
+.cache/
+*.map
+graphify-out/
+
+# --- not needed by a build ---
+docs/
+.github/
+scripts/
+coverage/
+__tests__/
+**/__tests__/
+**/*.test.js
+jest.config.js
+jest.setup.js
+eslint.config.js
+.prettierrc.json
+.prettierignore
+*.md
+!README.md
