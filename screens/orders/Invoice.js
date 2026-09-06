@@ -17,10 +17,13 @@ import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
 import { createStyles } from '@styles/NewStyles';
+import { useMenu } from '@contexts/MenuContext';
 function Invoice({ route, navigation }) {
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
+    // فضای رزرو شده زیر محتوا تا دکمه‌های پرداخت زیر داک شناور پنهان نشوند
+    const { footerSpace } = useMenu();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
@@ -275,7 +278,7 @@ function Invoice({ route, navigation }) {
                 </View>
             </ScrollView>
 
-            {(data?.started_at || ((data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at))) && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
+            {(data?.started_at || ((data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at))) && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center', marginBottom: footerSpace }]}>
                 {data?.payment_status > 0 ?
                     <View style={[{ flex: 1 }, NewStyles.center]}>
 

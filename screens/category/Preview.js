@@ -10,6 +10,7 @@ import { formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
 import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
 import Button from '@components/Button';
 import { imageUri, uri } from '@services/URL';
+import { API_ENDPOINTS } from '@services/ApiEndpoints';
 import { fetchOrders } from '@slices/orderSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { emptyCategory } from '@slices/categorySlice';
@@ -20,8 +21,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMenu } from '@contexts/MenuContext';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
+    // فضای رزرو شده زیر محتوا تا دکمه ثبت نهایی زیر داک شناور پنهان نشود
+    const { footerSpace } = useMenu();
     // const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
     const { t, i18n } = useTranslation();
@@ -207,8 +211,8 @@ function Preview({ navigation }) {
             } else {
             }
 
-            // ✅ Route صحیح: POST /api/orders/ (با / در انتها)
-            const response = await axios.post(`${uri}/orders/submit`, payload, {
+            // Route صحیح: POST /api/orders/ (با / در انتها) — services/ApiEndpoints.js
+            const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, payload, {
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -522,7 +526,7 @@ function Preview({ navigation }) {
                     />
                 </View>
             </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: 10 }]}>
+            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: footerSpace }]}>
                 <View style={{ flex: 1, alignItems: 'center' }}>
                     <Button title={t('Final Order Submission')} textStyle={{ color: themeColor4.bgColor(1) }} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>

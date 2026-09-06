@@ -34,6 +34,7 @@ import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, colo
 import { spacing } from '@theme/Spacing';
 import { fontSize } from '@theme/Typography';
 import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
+import { useMenu } from '@contexts/MenuContext';
 
 const DELIVERY_MODE_OPTIONS = [
   { id: 'once_short', title: 'کوتاه مدت / یکبار' },
@@ -150,6 +151,8 @@ const SECTIONS = [
 // ------------------------------------------------------------------------------------------
 
 const ComprehensiveSelectionScreen = ({ navigation }) => {
+  // فضای رزرو شده زیر محتوا تا آخرین بخش (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
+  const { footerSpace } = useMenu();
   const [expanded, setExpanded] = useState('delivery_mode');
 
   const [deliveryMode, setDeliveryMode] = useState([]);
@@ -320,7 +323,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         style={{ borderBottomWidth: 3, borderBottomColor: colors.accent.color }}
       />
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
 
         {/* ۱. نحوه ارائه خدمات */}
         <AccordionHeader

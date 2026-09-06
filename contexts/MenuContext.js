@@ -25,7 +25,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -193,7 +192,7 @@ function DockAction({ icon, label, onPress, lang, accessibilityLabel }) {
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel || label}
         >
-            <Ionicons name={icon} size={19} color={colors.primary.color} />
+            <Ionicons name={icon} size={19} color={colors.white.color} />
             {!!label && (
                 <Text
                     style={[dockStyles.actionLabel, { fontFamily: getFontFamily('bold', lang) }]}
@@ -220,7 +219,7 @@ const dockStyles = StyleSheet.create({
         borderColor: colors.white.bgColor(0.7),
     },
     actionLabel: {
-        color: colors.primary.color,
+        color: colors.white.color,
         fontSize: fontSize.xs,
     },
 });
@@ -512,15 +511,12 @@ export const MenuProvider = ({ children }) => {
 
                         <View onLayout={handleFooterLayout} style={styles.dockShadow}>
                             {/* اپ فارسی‌محور است: لوگو همیشه سمت راست، کد سمت چپ */}
+                            {/* داک پس‌زمینه‌ی رنگی خودش را ندارد — پس‌زمینه‌ی صفحه (مثلاً moon.jpg) از زیرش دیده می‌شود،
+                                فقط کمی بلور می‌خورد تا آیکون‌ها و متن روی داک همیشه خوانا بمانند */}
                             <View style={styles.dock}>
                                 <BlurView
-                                    intensity={30}
-                                    tint="light"
-                                    style={StyleSheet.absoluteFill}
-                                    pointerEvents="none"
-                                />
-                                <LinearGradient
-                                    colors={[colors.white.bgColor(0.22), colors.white.bgColor(0.04)]}
+                                    intensity={35}
+                                    tint="default"
                                     style={StyleSheet.absoluteFill}
                                     pointerEvents="none"
                                 />
@@ -564,7 +560,7 @@ export const MenuProvider = ({ children }) => {
                                     <Ionicons
                                         name="qr-code-outline"
                                         size={15}
-                                        color={colors.primary.color}
+                                        color={colors.white.color}
                                     />
                                     <Text style={styles.codeChipText}>
                                         {user?.code ?? '—'}
@@ -658,8 +654,7 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
     },
     dockShadow: {
         borderRadius: radius.lg,
-        // شفاف — بلور داک، پس‌زمینه‌ی واقعی صفحه را نشان می‌دهد نه یک لایه‌ی سفید
-        backgroundColor: colors.white.bgColor(0.06),
+        backgroundColor: 'transparent',
         ...shadow.lg,
     },
     dock: {
@@ -671,6 +666,7 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         paddingVertical: spacing.sm,
         borderRadius: radius.lg,
         overflow: 'hidden',
+        backgroundColor: 'transparent',
         borderWidth: 1,
         borderColor: colors.white.bgColor(0.6),
     },
@@ -705,7 +701,7 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         flexShrink: 0,
     },
     codeChipText: {
-        color: colors.primary.color,
+        color: colors.white.color,
         fontSize: fontSize.sm,
         fontFamily: getFontFamily('bold', language),
     },

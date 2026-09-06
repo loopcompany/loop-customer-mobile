@@ -13,10 +13,13 @@ import { convertToEnglish, showToastOrAlert } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { createStyles } from '@styles/NewStyles';
+import { useMenu } from '@contexts/MenuContext';
 export default function AddNewAddress({ navigation }) {
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
+    // فضای رزرو شده زیر محتوا تا دکمه زیر داک شناور پنهان نشود
+    const { footerSpace } = useMenu();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
@@ -216,7 +219,7 @@ export default function AddNewAddress({ navigation }) {
                         multiline
                     />
                 </ScrollView>
-                <View style={[NewStyles.row, NewStyles.nav, { alignItems: 'center', justifyContent: 'center', }]}>
+                <View style={[NewStyles.row, NewStyles.nav, { alignItems: 'center', justifyContent: 'center', marginBottom: footerSpace }]}>
                     <Button title={t('Next Step')} onPress={() => {
                         if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address || !address?.unit || !address?.number || !address?.floor) {
                             showToastOrAlert(t('Please fill in all the required fields.'))
