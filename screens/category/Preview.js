@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStyles } from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
-import { formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
+import { formatDate, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
 import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
 import Button from '@components/Button';
 import { imageUri, uri } from '@services/URL';
@@ -353,7 +353,7 @@ function Preview({ navigation }) {
                             ]}
                         >
                             <Ionicons name={'ticket-outline'} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
+                            <TextInput style={[styles.textInput, NewStyles.text10, { flex: 1, textAlign: langIsRTL(lang) ? 'right' : 'left', writingDirection: langIsRTL(lang) ? 'rtl' : 'ltr' }]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
                         </View>
                         <Pressable
                             style={[

@@ -15,6 +15,7 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import { createStyles } from '@styles/NewStyles';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
+import { L } from './orgI18n';
 
 const entryOptions = [
   {
@@ -57,7 +58,7 @@ const List = ({ navigation }) => {
         contentFit={'cover'}
       >
         <CustomStatusBar />
-        <ScreenHeaders title={organizationName || 'سازمانی / دولتی'} />
+        <ScreenHeaders title={organizationName || L('سازمانی / دولتی')} />
 
         <View style={styles.logoWrapper}>
           <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
@@ -74,12 +75,12 @@ const List = ({ navigation }) => {
               >
                 <Image source={item.image} style={styles.tileIcon} />
                 <View style={styles.titleRow}>
-                  <HintBadge hint={item.hint} title={item.title} size={20} />
+                  <HintBadge hint={L(item.hint)} title={L(item.title)} size={20} />
                   <Text
                     style={[NewStyles.title4, styles.tileTitle]}
                     numberOfLines={1}
                   >
-                    {item.title}
+                    {L(item.title)}
                   </Text>
                 </View>
               </TouchableOpacity>

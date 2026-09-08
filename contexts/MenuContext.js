@@ -182,8 +182,8 @@ const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
     );
 });
 
-// دکمه‌ی جمع‌وجمع شیشه‌ای داخل داک پایین — آیکون + برچسب کوتاه
-function DockAction({ icon, label, onPress, lang, accessibilityLabel }) {
+// دکمه‌ی جمع‌وجمع شیشه‌ای داخل داک پایین — آیکون (یا تصویر) + برچسب کوتاه
+function DockAction({ icon, image, imageStyle, label, onPress, lang, accessibilityLabel }) {
     return (
         <TouchableOpacity
             activeOpacity={0.75}
@@ -192,7 +192,14 @@ function DockAction({ icon, label, onPress, lang, accessibilityLabel }) {
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel || label}
         >
-            <Ionicons name={icon} size={19} color={colors.white.color} />
+            {image ? (
+                <Image
+                    source={image}
+                    style={[dockStyles.actionImage, imageStyle]}
+                />
+            ) : (
+                <Ionicons name={icon} size={19} color={colors.white.color} />
+            )}
             {!!label && (
                 <Text
                     style={[dockStyles.actionLabel, { fontFamily: getFontFamily('bold', lang) }]}
@@ -204,6 +211,60 @@ function DockAction({ icon, label, onPress, lang, accessibilityLabel }) {
         </TouchableOpacity>
     );
 }
+
+// سوییچ زبان — یک کلید کشویی دو‌بخشی به‌جای یک آیکون کره‌ی زمین بی‌روح.
+// هر دو زبان همیشه با خط بومی خودشان دیده می‌شوند («EN» / «فا») و بخش فعال با
+// یک قرص سفید براق زیرش هایلایت می‌شود که هنگام تعویض زبان نرم سُر می‌خورد.
+const LanguageSwitch = React.memo(({ language, onToggle }) => {
+    const isFa = language === 'fa';
+    const slide = useRef(new Animated.Value(isFa ? 1 : 0)).current;
+
+    useEffect(() => {
+        Animated.spring(slide, {
+            toValue: isFa ? 1 : 0,
+            useNativeDriver: true,
+            friction: 7,
+            tension: 90,
+        }).start();
+    }, [isFa, slide]);
+
+    const translateX = slide.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, LANG_SEG_WIDTH],
+    });
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onToggle}
+            style={dockStyles.action}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: isFa }}
+            accessibilityLabel="Language / زبان"
+        >
+            <View style={langStyles.track}>
+                <Animated.View
+                    style={[langStyles.thumb, { transform: [{ translateX }] }]}
+                    pointerEvents="none"
+                />
+                <View style={langStyles.seg}>
+                    <Text style={[langStyles.segText, !isFa && langStyles.segTextActive]}>EN</Text>
+                </View>
+                <View style={langStyles.seg}>
+                    <Text
+                        style={[
+                            langStyles.segText,
+                            { fontFamily: getFontFamily('bold', 'fa') },
+                            isFa && langStyles.segTextActive,
+                        ]}
+                    >
+                        فا
+                    </Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+});
 
 const dockStyles = StyleSheet.create({
     action: {
@@ -218,9 +279,57 @@ const dockStyles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.white.bgColor(0.7),
     },
+    actionImage: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+    },
+    actionImageLarge: {
+        width: 38,
+        height: 38,
+    },
     actionLabel: {
         color: colors.white.color,
         fontSize: fontSize.xs,
+    },
+});
+
+// عرض هر بخش از سوییچ زبان (قرص هایلایت هم به همین اندازه سُر می‌خورد)
+const LANG_SEG_WIDTH = 26;
+
+const langStyles = StyleSheet.create({
+    track: {
+        flexDirection: 'row',
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.16),
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.6),
+        padding: 2,
+        overflow: 'hidden',
+    },
+    thumb: {
+        position: 'absolute',
+        top: 2,
+        left: 2,
+        width: LANG_SEG_WIDTH,
+        bottom: 2,
+        borderRadius: radius.pill,
+        backgroundColor: colors.white.bgColor(0.95),
+        ...shadow.sm,
+    },
+    seg: {
+        width: LANG_SEG_WIDTH,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 3,
+    },
+    segText: {
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', 'en'),
+        color: colors.white.color,
+    },
+    segTextActive: {
+        color: colors.primary.color,
     },
 });
 
@@ -511,8 +620,9 @@ export const MenuProvider = ({ children }) => {
 
                         <View onLayout={handleFooterLayout} style={styles.dockShadow}>
                             {/* اپ فارسی‌محور است: لوگو همیشه سمت راست، کد سمت چپ */}
-                            {/* داک پس‌زمینه‌ی رنگی خودش را ندارد — پس‌زمینه‌ی صفحه (مثلاً moon.jpg) از زیرش دیده می‌شود،
-                                فقط کمی بلور می‌خورد تا آیکون‌ها و متن روی داک همیشه خوانا بمانند */}
+                            {/* داک = بلورِ پس‌زمینه‌ی صفحه + یک اسکریمِ نیمه‌شفافِ آبیِ برند روی آن.
+                                اسکریم لازم است چون محتوای داک همه سفید است و بدون آن روی
+                                صفحات روشن/سفید خوانا نمی‌ماند (styles.dockScrim) */}
                             <View style={styles.dock}>
                                 <BlurView
                                     intensity={35}
@@ -520,6 +630,9 @@ export const MenuProvider = ({ children }) => {
                                     style={StyleSheet.absoluteFill}
                                     pointerEvents="none"
                                 />
+                                {/* اسکریم برند روی بلور — تضمین می‌کند متن/آیکون‌های سفید داک
+                                    روی هر پس‌زمینه‌ای (صفحه‌ی روشن یا تیره) خوانا بمانند */}
+                                <View style={styles.dockScrim} pointerEvents="none" />
                                 <View style={styles.dockTopEdge} pointerEvents="none" />
 
                                 <View style={styles.menuButton}>
@@ -529,20 +642,18 @@ export const MenuProvider = ({ children }) => {
                                     />
                                 </View>
 
-                                <DockAction
-                                    icon="globe-outline"
-                                    label={t(i18n.language)}
-                                    lang={i18n.language}
-                                    accessibilityLabel={t('Language')}
-                                    onPress={() =>
+                                <LanguageSwitch
+                                    language={i18n.language}
+                                    onToggle={() =>
                                         changeLanguage(i18n.language === 'en' ? 'fa' : 'en')
                                     }
                                 />
 
                                 <DockAction
-                                    icon="headset-outline"
-                                    label={t('Support')}
+                                    image={require('@assets/images/support-nobg.png')}
+                                    imageStyle={dockStyles.actionImageLarge}
                                     lang={i18n.language}
+                                    accessibilityLabel={t('Support')}
                                     onPress={() => navigation.navigate('MessageScreen')}
                                 />
 
@@ -669,6 +780,10 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         backgroundColor: 'transparent',
         borderWidth: 1,
         borderColor: colors.white.bgColor(0.6),
+    },
+    dockScrim: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: colors.primary.bgColor(0.58),
     },
     dockTopEdge: {
         position: 'absolute',

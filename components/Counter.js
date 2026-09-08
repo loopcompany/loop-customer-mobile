@@ -205,7 +205,7 @@ export default function Counter({ step, data }) {
                                             <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
                                         </Pressable>
                                         <View style={[styles.valueContainer]}>
-                                            <Text style={[NewStyles.text3, NewStyles.text4, { textAlign: 'center' }]}>{item.value}</Text>
+                                            <Text allowFontScaling={false} style={[NewStyles.text3, NewStyles.text4, { textAlign: 'center' }]}>{item.value}</Text>
                                         </View>
                                         <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
                                             <Ionicons name='remove' size={24} color={themeColor4.bgColor(1)} />
@@ -232,8 +232,8 @@ export default function Counter({ step, data }) {
                                             style={{ height: 100, width: 100 }}
                                         />}
                                     <View style={[{ flex: 1 }, NewStyles.center]}>
-                                        <View style={[NewStyles.row, { gap: 8, marginBottom: 10 }]}>
-                                            <Text style={[NewStyles.title10, { fontSize: 14 }]}>{item.title}</Text>
+                                        <View style={[NewStyles.row, { gap: 8, marginBottom: 10, alignSelf: 'stretch' }]}>
+                                            <Text style={[NewStyles.title10, { fontSize: 14, flex: 1 }]}>{item.title}</Text>
                                             <HintBadge hint={item?.des} title={item?.title} size={22} />
                                         </View>
 
@@ -243,7 +243,7 @@ export default function Counter({ step, data }) {
                                                 <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
                                             </Pressable>
                                             <View style={[{ borderWidth: 1, borderColor: themeColor0.bgColor(1), paddingHorizontal: 10 }, NewStyles.border5]}>
-                                                <Text style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
+                                                <Text allowFontScaling={false} style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
                                             </View>
                                             <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
                                                 <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
@@ -260,7 +260,7 @@ export default function Counter({ step, data }) {
                                             <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
                                         </View>
                                         <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth: 2, borderColor: themeColor8.bgColor(1), borderStyle: 'dotted' }]}>
-                                            <TextInput style={[NewStyles.text10, { flex: 1, }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
+                                            <TextInput style={[NewStyles.text10, { flex: 1, textAlign: langIsRTL(lang) ? 'right' : 'left', writingDirection: langIsRTL(lang) ? 'rtl' : 'ltr' }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
                                         </View>
                                     </View>
                                 }

@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
@@ -39,6 +40,8 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize } from '@theme/Typography';
 import { describePickerDate, showAlert, showToastOrAlert } from '@helpers/Common';
+import { useMenu } from '@contexts/MenuContext';
+import { L, LO } from './orgI18n';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -77,6 +80,9 @@ const isStepFilled = (step, value) => {
 };
 
 const SystematicDeviceScreen = ({ navigation, route }) => {
+  useTranslation(); // subscribe to runtime language switches so L()/LO() re-evaluate
+  // فضای رزرو شده زیر محتوا تا آخرین مرحله (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
+  const { footerSpace } = useMenu();
   const categoryId = route?.params?.categoryId;
   const category = getCategory(categoryId);
   const steps = getFlow(categoryId);
@@ -102,57 +108,57 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       if (!isStepFilled(step, value)) return;
       switch (step.type) {
         case 'brands':
-          lines.push({ label: step.title, value: value.brand ? titleOf(step.brands, value.brand) : value.other });
+          lines.push({ label: L(step.title), value: value.brand ? titleOf(LO(step.brands), value.brand) : value.other });
           break;
         case 'fields':
-          lines.push({ label: step.title, value: value[step.fields[0].id] });
+          lines.push({ label: L(step.title), value: value[step.fields[0].id] });
           break;
         case 'osGrid':
-          lines.push({ label: step.title, value: titleOf(OS_ITEMS, value) });
+          lines.push({ label: L(step.title), value: titleOf(LO(OS_ITEMS), value) });
           break;
         case 'options':
           lines.push({
-            label: step.title,
+            label: L(step.title),
             value: step.multi
               ? value.selected.length
-              : titleOf(step.options, value.selected),
+              : titleOf(LO(step.options), value.selected),
           });
           break;
         case 'checklist':
-          lines.push({ label: step.title, value: value.selected.length });
+          lines.push({ label: L(step.title), value: value.selected.length });
           break;
         case 'note':
-          lines.push({ label: step.title, value: value.note });
+          lines.push({ label: L(step.title), value: value.note });
           break;
         case 'photo':
           if (value.photos?.length) {
-            lines.push({ label: `${step.title} - عکس`, value: value.photos.length });
+            lines.push({ label: `${L(step.title)} - ${L('عکس')}`, value: value.photos.length });
           }
           if ((value.note || '').trim()) {
-            lines.push({ label: step.title, value: value.note });
+            lines.push({ label: L(step.title), value: value.note });
           }
           break;
         case 'procurement':
           Object.entries(value).forEach(([itemId, entry]) => {
-            if (entry.new > 0) lines.push({ label: `${titleOf(PROCUREMENT_ITEMS, itemId)} / آکبند`, value: entry.new });
-            if (entry.used > 0) lines.push({ label: `${titleOf(PROCUREMENT_ITEMS, itemId)} / کارکرده`, value: entry.used });
+            if (entry.new > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('آکبند')}`, value: entry.new });
+            if (entry.used > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('کارکرده')}`, value: entry.used });
           });
           break;
         case 'hardwareCounters':
           Object.entries(value).forEach(([itemId, entry]) => {
-            if (entry.count > 0) lines.push({ label: titleOf(HARDWARE_ITEMS, itemId), value: entry.count });
+            if (entry.count > 0) lines.push({ label: titleOf(LO(HARDWARE_ITEMS), itemId), value: entry.count });
           });
           break;
         case 'technician':
-          lines.push({ label: step.title, value: titleOf(TECHNICIAN_GENDER_OPTIONS, value.gender) });
+          lines.push({ label: L(step.title), value: titleOf(LO(TECHNICIAN_GENDER_OPTIONS), value.gender) });
           break;
         case 'schedule': {
           const described = describePickerDate(value.date);
           lines.push({
-            label: 'تاریخ مراجعه',
+            label: L('تاریخ مراجعه'),
             value: described ? `${described.weekday} ${described.dayLabel}` : value.date,
           });
-          lines.push({ label: 'بازه ساعتی', value: titleOf(TIME_SLOT_OPTIONS, value.slot) });
+          lines.push({ label: L('بازه ساعتی'), value: titleOf(LO(TIME_SLOT_OPTIONS), value.slot) });
           break;
         }
         default:
@@ -167,9 +173,9 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
 
   const handleOrderAction = (action) => {
     if (action === 'cancel_order') {
-      showAlert('لغو سفارش', 'آیا از لغو سفارش مطمئن هستید؟', [
-        { text: 'انصراف', style: 'cancel' },
-        { text: 'لغو سفارش', style: 'destructive', onPress: () => showToastOrAlert('سفارش لغو شد') },
+      showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
+        { text: L('انصراف'), style: 'cancel' },
+        { text: L('لغو سفارش'), style: 'destructive', onPress: () => showToastOrAlert(L('سفارش لغو شد')) },
       ]);
       return;
     }
@@ -177,7 +183,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     const missing = firstMissingStep();
     if (action === 'submit_order' || action === 'issue_receipt') {
       if (missing) {
-        showToastOrAlert(`لطفاً «${missing.title}» را تکمیل کنید.`);
+        showToastOrAlert(`${L(missing.title)} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
         setExpanded(missing.id);
         return;
       }
@@ -190,7 +196,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         source: 'systematic',
         categoryId,
         categoryTitle: category?.title,
-        orderTitle: category?.title ? `انتخاب سیستماتیک - ${category.title}` : undefined,
+        orderTitle: category?.title ? `${L('انتخاب سیستماتیک')} - ${L(category.title)}` : undefined,
         summaryLines,
         schedule: scheduleStep ? answers[scheduleStep.id] : null,
         answers,
@@ -198,11 +204,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       return;
     }
     if (action === 'issue_receipt') {
-      showToastOrAlert('پیش‌رسید صادر شد');
+      showToastOrAlert(L('پیش‌رسید صادر شد'));
       return;
     }
     if (action === 'show_receipt') {
-      showToastOrAlert('نمایش پیش‌رسید');
+      showToastOrAlert(L('نمایش پیش‌رسید'));
     }
   };
 
@@ -210,11 +216,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     return (
       <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
         <CustomStatusBar />
-        <ScreenHeaders title="انتخاب سیستماتیک" />
+        <ScreenHeaders title={L('انتخاب سیستماتیک')} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl }}>
           <Ionicons name="alert-circle-outline" size={40} color={colors.textInverse.color} />
           <Text style={{ fontFamily: 'VazirBold', fontSize: fontSize.md, color: colors.textInverse.color, marginTop: spacing.md, textAlign: 'center' }}>
-            مراحل این دسته هنوز تعریف نشده است.
+            {L('مراحل این دسته هنوز تعریف نشده است.')}
           </Text>
         </View>
       </ImageBackground>
@@ -229,14 +235,14 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         return (
           <>
             <BrandGrid
-              brands={step.brands}
+              brands={LO(step.brands)}
               value={value?.brand || null}
               onChange={(brand) => setAnswer(step.id, { brand })}
             />
             <DescriptionInput
               value={value?.other || ''}
               onChangeText={(other) => setAnswer(step.id, { other })}
-              placeholder="برند دیگر (اگر در فهرست بالا نیست)"
+              placeholder={L('برند دیگر (اگر در فهرست بالا نیست)')}
             />
           </>
         );
@@ -249,7 +255,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
                 key={field.id}
                 value={value?.[field.id] || ''}
                 onChangeText={(text) => setAnswer(step.id, { [field.id]: text })}
-                placeholder={field.placeholder}
+                placeholder={L(field.placeholder)}
                 placeholderTextColor={themeColor10.bgColor(0.4)}
                 keyboardType={field.keyboardType}
                 style={[NewStyles.textInput, NewStyles.border10, { marginBottom: spacing.sm }]}
@@ -261,7 +267,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       case 'osGrid':
         return (
           <IconOptionGrid
-            options={OS_ITEMS}
+            options={LO(OS_ITEMS)}
             value={value || null}
             onChange={(os) => setAnswers((prev) => ({ ...prev, [step.id]: os }))}
           />
@@ -271,7 +277,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         return (
           <>
             <SelectableOptions
-              options={step.options}
+              options={LO(step.options)}
               value={step.multi ? value?.selected || [] : value?.selected || null}
               onChange={(selected) => setAnswer(step.id, { selected })}
               multi={step.multi}
@@ -279,9 +285,9 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             />
             {step.extra ? (
               <>
-                <Text style={styles.subLabel}>{step.extra.title}</Text>
+                <Text style={styles.subLabel}>{L(step.extra.title)}</Text>
                 <SelectableOptions
-                  options={step.extra.options}
+                  options={LO(step.extra.options)}
                   value={value?.[step.extra.id] || null}
                   onChange={(selected) => setAnswer(step.id, { [step.extra.id]: selected })}
                   columns={step.extra.columns || 2}
@@ -292,7 +298,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               <DescriptionInput
                 value={value?.note || ''}
                 onChangeText={(note) => setAnswer(step.id, { note })}
-                placeholder={step.notePlaceholder}
+                placeholder={L(step.notePlaceholder)}
               />
             ) : null}
           </>
@@ -302,7 +308,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         return (
           <>
             <SelectableOptions
-              options={step.options}
+              options={LO(step.options)}
               value={value?.selected || []}
               onChange={(selected) => setAnswer(step.id, { selected })}
               multi
@@ -311,7 +317,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             <DescriptionInput
               value={value?.note || ''}
               onChangeText={(note) => setAnswer(step.id, { note })}
-              placeholder="درخواست دیگری دارید بنویسید..."
+              placeholder={L('درخواست دیگری دارید بنویسید...')}
             />
           </>
         );
@@ -323,7 +329,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             <HardwareCard
               key={item.id}
               image={item.image}
-              title={item.title}
+              title={L(item.title)}
               count={entry.count}
               desc={entry.desc}
               onIncrement={() => setAnswer(step.id, { [item.id]: { ...entry, count: entry.count + 1 } })}
@@ -341,7 +347,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             <ProcurementCard
               key={item.id}
               image={item.image}
-              title={item.title}
+              title={L(item.title)}
               newCount={entry.new}
               usedCount={entry.used}
               desc={entry.desc}
@@ -359,7 +365,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           <DescriptionInput
             value={value?.note || ''}
             onChangeText={(note) => setAnswer(step.id, { note })}
-            placeholder={step.notePlaceholder || 'توضیحات...'}
+            placeholder={L(step.notePlaceholder) || L('توضیحات...')}
           />
         );
 
@@ -377,7 +383,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       case 'technician':
         return (
           <SelectableOptions
-            options={TECHNICIAN_GENDER_OPTIONS}
+            options={LO(TECHNICIAN_GENDER_OPTIONS)}
             value={value?.gender || null}
             onChange={(gender) => setAnswer(step.id, { gender })}
             columns={2}
@@ -389,7 +395,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           <View style={{ alignItems: 'center', paddingVertical: spacing.lg }}>
             <Ionicons name="time-outline" size={28} color={themeColor10.bgColor(0.4)} />
             <Text style={{ fontFamily: 'VazirBold', fontSize: 14, color: themeColor10.bgColor(0.5), marginTop: spacing.sm }}>
-              به زودی
+              {L('به زودی')}
             </Text>
           </View>
         );
@@ -402,12 +408,12 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               onChangeDate={(date) => setAnswer(step.id, { date })}
               slot={value?.slot || null}
               onChangeSlot={(slot) => setAnswer(step.id, { slot })}
-              slots={TIME_SLOT_OPTIONS}
+              slots={LO(TIME_SLOT_OPTIONS)}
             />
             <DescriptionInput
               value={value?.note || ''}
               onChangeText={(note) => setAnswer(step.id, { note })}
-              placeholder="توضیح درباره زمان مراجعه (اختیاری)"
+              placeholder={L('توضیح درباره زمان مراجعه (اختیاری)')}
             />
           </>
         );
@@ -421,7 +427,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               onSubmit={() => handleOrderAction('submit_order')}
               onCancel={() => handleOrderAction('cancel_order')}
             />
-            <SummaryBox title={`خلاصه سفارش - ${category.title}`} lines={summaryLines} />
+            <SummaryBox title={`${L('خلاصه سفارش')} - ${L(category.title)}`} lines={summaryLines} />
           </>
         );
 
@@ -433,28 +439,28 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   return (
     <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
-      <ScreenHeaders title={category.title} />
+      <ScreenHeaders title={L(category.title)} />
       <ScreenTitle
-        title="انتخاب سیستماتیک"
+        title={L('انتخاب سیستماتیک')}
         textStyle={{ fontSize: fontSize.xl, letterSpacing: 0.5 }}
         style={{ borderBottomWidth: 3, borderBottomColor: colors.accent.color }}
       />
 
       <View style={styles.progressRow}>
         <Text style={styles.progressText}>
-          {`${filledCount} از ${steps.length} مرحله تکمیل شده`}
+          {L('{n} از {total} مرحله تکمیل شده').replace('{n}', filledCount).replace('{total}', steps.length)}
         </Text>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${(filledCount / steps.length) * 100}%` }]} />
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
         {steps.map((step, index) => (
           <View key={step.id}>
             <AccordionHeader
-              title={step.title}
-              hint={step.hint}
+              title={L(step.title)}
+              hint={L(step.hint)}
               icon={step.icon}
               step={index + 1}
               done={isStepFilled(step, answers[step.id])}

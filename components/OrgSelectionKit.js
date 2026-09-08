@@ -14,6 +14,7 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize } from '@theme/Typography';
 import { shadow } from '@theme/Shadows';
+import { L } from '@org/orgI18n';
 
 // سربرگ آکاردئونی هر بخش. با پاس‌دادن step، شماره‌ی مرحله در سمت راست عنوان
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).
@@ -434,7 +435,7 @@ export const DeviceCountRow = ({ title, subtitle, image, count, onIncrement, onD
           style={{ marginTop: 2, fontFamily: 'VazirLight', fontSize: fontSize.xs - 1, color: colors.textSecondary.color }}
           numberOfLines={1}
         >
-          {subtitle || 'تعداد مورد نیاز'}
+          {subtitle || L('تعداد مورد نیاز')}
         </Text>
       </View>
       <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} size="md" />
@@ -485,7 +486,7 @@ export const DeviceCountTile = ({ title, image, count, onIncrement, onDecrement,
 
 // فیلد توضیحات مشترک - جایگزین NewStyles.textInput عمومی که روی پس‌زمینه‌ی
 // بلور شده‌ی SectionBody کنتراست کمی داشت.
-export const DescriptionInput = ({ value, onChangeText, placeholder = 'توضیحات (اختیاری)', style }) => (
+export const DescriptionInput = ({ value, onChangeText, placeholder = L('توضیحات (اختیاری)'), style }) => (
   <TextInput
     value={value}
     onChangeText={onChangeText}
@@ -520,20 +521,20 @@ export const PhotoNoteInput = ({
   note = '',
   onChangePhotos,
   onChangeNote,
-  notePlaceholder = 'توضیحات دیگری دارید بنویسید...',
+  notePlaceholder = L('توضیحات دیگری دارید بنویسید...'),
 }) => {
   const addPhotos = async (fromCamera) => {
     try {
       if (fromCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          showToastOrAlert('برای گرفتن عکس، دسترسی به دوربین لازم است');
+          showToastOrAlert(L('برای گرفتن عکس، دسترسی به دوربین لازم است'));
           return;
         }
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          showToastOrAlert('برای انتخاب عکس، دسترسی به گالری لازم است');
+          showToastOrAlert(L('برای انتخاب عکس، دسترسی به گالری لازم است'));
           return;
         }
       }
@@ -551,7 +552,7 @@ export const PhotoNoteInput = ({
       }
     } catch (error) {
       console.warn('PhotoNoteInput image error:', error);
-      showToastOrAlert('خطا در انتخاب عکس');
+      showToastOrAlert(L('خطا در انتخاب عکس'));
     }
   };
 
@@ -579,11 +580,11 @@ export const PhotoNoteInput = ({
     <View>
       <TouchableOpacity onPress={() => addPhotos(false)} style={row} activeOpacity={0.75}>
         <Ionicons name="cloud-upload-outline" size={20} color={colors.primary.color} />
-        <Text style={rowText}>بارگزاری عکس مرتبط با سفارش</Text>
+        <Text style={rowText}>{L('بارگزاری عکس مرتبط با سفارش')}</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => addPhotos(true)} style={row} activeOpacity={0.75}>
         <Ionicons name="camera-outline" size={20} color={colors.primary.color} />
-        <Text style={rowText}>عکس از گالری و دوربین</Text>
+        <Text style={rowText}>{L('عکس از گالری و دوربین')}</Text>
       </TouchableOpacity>
 
       {photos.length ? (
@@ -683,8 +684,8 @@ export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNew
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <HardwareIconBox image={image} />
       <View style={{ flex: 1, marginHorizontal: spacing.sm }}>
-        <LabeledCounterRow label="آکبند" count={newCount} onIncrement={onNewInc} onDecrement={onNewDec} />
-        <LabeledCounterRow label="کارکرده" count={usedCount} onIncrement={onUsedInc} onDecrement={onUsedDec} />
+        <LabeledCounterRow label={L('آکبند')} count={newCount} onIncrement={onNewInc} onDecrement={onNewDec} />
+        <LabeledCounterRow label={L('کارکرده')} count={usedCount} onIncrement={onUsedInc} onDecrement={onUsedDec} />
       </View>
       <Text style={{ fontFamily: 'VazirBold', fontSize: 14, color: colors.textPrimary.color }} numberOfLines={2}>
         {title}
@@ -854,10 +855,10 @@ export const IconOptionGrid = ({ options, value, onChange, columns = 3, imageSiz
 // دکمه‌های «نمایش / استعلام / ثبت سفارش» - همان چهار دکمه‌ی پایانی هر دو مسیر.
 export const OrderActionButtons = ({ onIssueReceipt, onShowReceipt, onSubmit, onCancel }) => (
   <View>
-    <ActionButton title="صدور پیش‌رسید" color={colors.success} onPress={onIssueReceipt} />
-    <ActionButton title="نمایش پیش‌رسید" color={colors.primary} onPress={onShowReceipt} />
-    <ActionButton title="ثبت سفارش" color={colors.success} onPress={onSubmit} />
-    <ActionButton title="لغو سفارش" color={colors.warning} onPress={onCancel} last />
+    <ActionButton title={L('صدور پیش‌رسید')} color={colors.success} onPress={onIssueReceipt} />
+    <ActionButton title={L('نمایش پیش‌رسید')} color={colors.primary} onPress={onShowReceipt} />
+    <ActionButton title={L('ثبت سفارش')} color={colors.success} onPress={onSubmit} />
+    <ActionButton title={L('لغو سفارش')} color={colors.warning} onPress={onCancel} last />
   </View>
 );
 

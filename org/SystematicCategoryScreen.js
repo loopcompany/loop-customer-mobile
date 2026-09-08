@@ -32,6 +32,7 @@ import { imageUri } from '@services/URL';
 import { fetchSteps } from '@slices/stepSlice';
 import { setCategory } from '@slices/categorySlice';
 import { showToastOrAlert } from '@helpers/Common';
+import { useMenu } from '@contexts/MenuContext';
 import { createStyles } from '@styles/NewStyles';
 import { colors } from '@theme/Color';
 import {
@@ -39,9 +40,12 @@ import {
   getFlow,
   resolveSystematicCategoryId,
 } from './systematicFlows';
+import { L } from './orgI18n';
 
 const SystematicCategoryScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
+  // فضای رزرو شده زیر شبکه‌ی کاشی‌ها تا ردیف آخر زیر داک شناور پایین پنهان نشود
+  const { footerSpace } = useMenu();
   const NewStyles = useMemo(() => createStyles(i18n.language), [i18n.language]);
   const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
 
@@ -61,7 +65,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
       setFolders(categories);
     } catch (err) {
       console.error('Failed to load categories:', err);
-      showToastOrAlert('خطا در دریافت دسته‌ها');
+      showToastOrAlert(L('خطا در دریافت دسته‌ها'));
       setFolders([]);
     } finally {
       setRefreshing(false);
@@ -160,12 +164,12 @@ const SystematicCategoryScreen = ({ navigation }) => {
             ? require('@assets/loopbackground.webp')
             : require('@assets/moon.jpg')
         }
-        style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]}
+        style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 + footerSpace }]}
         contentPosition={'center'}
         contentFit={'cover'}
       >
         <CustomStatusBar />
-        <ScreenHeaders title="انتخاب سیستماتیک" />
+        <ScreenHeaders title={L('انتخاب سیستماتیک')} />
 
         <View>
           <ScrollView
@@ -184,7 +188,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
         <View style={styles.grid}>
           {/* کاشی حساب کاربری - مثل قبل بالای شبکه و با همان آیکون سروری */}
           <Folder
-            title="User Account"
+            title={L('حساب کاربری')}
             imageSource={{ uri: `${imageUri}/userfolder/Profile.png` }}
             onPress={() => navigation.navigate('Profile')}
           />
@@ -200,7 +204,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
             .map((entry) => (
               <Folder
                 key={entry.key}
-                title={entry.title}
+                title={L(entry.title)}
                 image={entry.image}
                 imageSource={entry.imageSource}
                 icon={

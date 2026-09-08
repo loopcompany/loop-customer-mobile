@@ -29,6 +29,7 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { shadow } from '@theme/Shadows';
+import { L } from '@org/orgI18n';
 
 const MAX_MONTHS_AHEAD = 6;
 
@@ -53,8 +54,8 @@ const SchedulePicker = ({
   onChangeSlot,
   slots = [],
   dayCount = 14,
-  dateTitle = 'تاریخ مراجعه',
-  slotTitle = 'بازه ساعتی',
+  dateTitle = L('تاریخ مراجعه'),
+  slotTitle = L('بازه ساعتی'),
 }) => {
   const { i18n } = useTranslation();
   const lang = i18n.resolvedLanguage ?? i18n.language ?? 'fa';
@@ -120,9 +121,9 @@ const SchedulePicker = ({
   const complete = Boolean(date && slot);
 
   const summaryText = (() => {
-    if (complete) return `${described?.weekday} ${described?.dayLabel} · ساعت ${selectedSlot?.title}`;
-    if (date) return `${described?.weekday} ${described?.dayLabel} - بازه ساعتی را انتخاب کنید`;
-    return 'ابتدا روز مراجعه، سپس بازه ساعتی را انتخاب کنید';
+    if (complete) return `${described?.weekday} ${described?.dayLabel} · ${L('ساعت')} ${L(selectedSlot?.title)}`;
+    if (date) return `${described?.weekday} ${described?.dayLabel} - ${L('بازه ساعتی را انتخاب کنید')}`;
+    return L('ابتدا روز مراجعه، سپس بازه ساعتی را انتخاب کنید');
   })();
 
   const renderDay = ({ item }) => {
@@ -137,7 +138,7 @@ const SchedulePicker = ({
           numberOfLines={1}
           style={[styles.dayWeekday, { fontFamily: bold }, active && styles.dayTextActive]}
         >
-          {item.isToday ? 'امروز' : item.isTomorrow ? 'فردا' : item.weekday}
+          {item.isToday ? L('امروز') : item.isTomorrow ? L('فردا') : item.weekday}
         </Text>
         <Text
           numberOfLines={1}
@@ -178,7 +179,7 @@ const SchedulePicker = ({
           style={[styles.calendarTile, Boolean(date) && styles.calendarTileFilled]}
         >
           <Ionicons name="calendar-outline" size={20} color={colors.primary.color} />
-          <Text style={[styles.calendarLabel, { fontFamily: light }]}>تقویم</Text>
+          <Text style={[styles.calendarLabel, { fontFamily: light }]}>{L('تقویم')}</Text>
         </TouchableOpacity>
         <FlatList
           data={days}

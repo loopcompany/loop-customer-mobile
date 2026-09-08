@@ -16,6 +16,7 @@ import { showToastOrAlert } from '@helpers/Common';
 import { radius } from '@theme/Radius';
 import { spacing } from '@theme/Spacing';
 import { fontSize, getFontFamily } from '@theme/Typography';
+import { L } from './orgI18n';
 
 // رنگ‌های فهرست سازمانی قبلی. این دو مقدار در theme/Color.js نیستند و عمداً
 // عیناً حفظ شده‌اند تا ظاهر صفحه با نسخه‌ی قبلی List.js یکی باشد.
@@ -57,7 +58,7 @@ const SystematicDeviceMenuScreen = ({ navigation, route }) => {
   return (
     <View style={[NewStyles.container, styles.screen]}>
       <CustomStatusBar />
-      <ScreenHeaders title={categoryTitle || 'سازمانی / دولتی'} />
+      <ScreenHeaders title={L(categoryTitle) || L('سازمانی / دولتی')} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.menuWrapper}>
@@ -67,7 +68,7 @@ const SystematicDeviceMenuScreen = ({ navigation, route }) => {
               onPress={() => handleNavigation(item)}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>{item.title}</Text>
+              <Text style={styles.buttonText}>{L(item.title)}</Text>
             </TouchableOpacity>
           ))}
         </View>

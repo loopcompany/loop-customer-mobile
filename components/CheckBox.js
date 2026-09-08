@@ -7,8 +7,9 @@ import { useDispatch } from 'react-redux';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor8 } from '@theme/Color';
 import { decrement, increment, setCounterInputValue, updateCheckbox } from '@slices/stepSlice';
-import { formatPrice } from '@helpers/Common';
+import { formatPrice, langIsRTL } from '@helpers/Common';
 import { imageUri } from '@services/URL';
+import i18n from 'i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import HintBadge from './HintBadge';
 
@@ -16,6 +17,7 @@ export default function CheckBox({ step, data }) {
 
     const dispatch = useDispatch();
     const [show, setShow] = useState(false)
+    const isRTL = langIsRTL(i18n.resolvedLanguage ?? i18n.language)
     const renderPrice = (item) => {
         if (item.price > 0 && item.show_price == 1 && item?.value) {
             const total = item.has_counter ? item.price * item.value : item.price;
@@ -35,7 +37,7 @@ export default function CheckBox({ step, data }) {
                     <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
                 </Pressable>
                 <View style={[{ borderWidth: 1, borderColor: themeColor0.bgColor(1), paddingHorizontal: 10 }, NewStyles.border5]}>
-                    <Text style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
+                    <Text allowFontScaling={false} style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
                 </View>
                 <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
                     <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
@@ -94,7 +96,7 @@ export default function CheckBox({ step, data }) {
                                     />
                                 </View>
                             }
-                            <Text style={[NewStyles.text10, (item?.value > 0 && item?.has_counter != 1) && NewStyles.text4]}>{item.title}</Text>
+                            <Text style={[NewStyles.text10, { flex: 1 }, (item?.value > 0 && item?.has_counter != 1) && NewStyles.text4]}>{item.title}</Text>
                             <HintBadge hint={item?.des} title={item?.title} size={22} />
                         </TouchableOpacity>
                         {
@@ -106,7 +108,7 @@ export default function CheckBox({ step, data }) {
                                     <Text style={[NewStyles.text, { flex: 1 }]}>توضیحات </Text>
                                 </View>
                                 <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1), borderWidth: 2, borderColor: themeColor8.bgColor(1), borderStyle: 'dotted' }]}>
-                                    <TextInput style={[NewStyles.text10, { flex: 1, }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
+                                    <TextInput style={[NewStyles.text10, { flex: 1, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]} multiline textAlignVertical='top' verticalAlign='top' keyboardType='default' maxLength={191} value={item?.user_descriptions} onChangeText={(text) => { dispatch(setCounterInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
                                 </View>
                             </View>
                         }

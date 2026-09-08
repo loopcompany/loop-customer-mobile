@@ -94,6 +94,12 @@ apiClient.interceptors.response.use(
       message: error.response?.data?.message
     });
 
+    // بعضی از درخواست‌ها background و best-effort هستند و خودشان خطا را
+    // مدیریت می‌کنند؛ نباید interceptor برایشان alert سراسری نشان بدهد.
+    if (isSilentAPI(error.config?.url)) {
+      return Promise.reject(error);
+    }
+
     // اگر navigation reference وجود داره، از error handler استفاده کن
     if (navigationRef?.current) {
       const navigation = navigationRef.current;

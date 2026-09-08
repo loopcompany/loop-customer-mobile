@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import ScreenHeaders from '@components/ScreenHeaders';
@@ -35,6 +36,7 @@ import { spacing } from '@theme/Spacing';
 import { fontSize } from '@theme/Typography';
 import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
+import { L, LO } from './orgI18n';
 
 const DELIVERY_MODE_OPTIONS = [
   { id: 'once_short', title: 'کوتاه مدت / یکبار' },
@@ -151,8 +153,14 @@ const SECTIONS = [
 // ------------------------------------------------------------------------------------------
 
 const ComprehensiveSelectionScreen = ({ navigation }) => {
+  // useTranslation subscribes the screen to runtime language switches so L()/LO() re-evaluate.
+  const { i18n } = useTranslation();
   // فضای رزرو شده زیر محتوا تا آخرین بخش (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
   const { footerSpace } = useMenu();
+  const SEC = useMemo(
+    () => SECTIONS.map((s) => ({ ...s, title: L(s.title), hint: L(s.hint) })),
+    [i18n.language]
+  );
   const [expanded, setExpanded] = useState('delivery_mode');
 
   const [deliveryMode, setDeliveryMode] = useState([]);
@@ -227,7 +235,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       setUploading(false);
     } catch (e) {
       setUploading(false);
-      showToastOrAlert('خطا در بارگذاری فایل');
+      showToastOrAlert(L('خطا در بارگذاری فایل'));
     }
   };
 
@@ -245,16 +253,16 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const softwareSummaryLines = useMemo(() => {
     const lines = [];
     OS_ITEMS.forEach((os) => {
-      if (osCounts[os.id] > 0) lines.push({ label: os.title, value: osCounts[os.id] });
+      if (osCounts[os.id] > 0) lines.push({ label: L(os.title), value: osCounts[os.id] });
     });
     SOFTWARE_DEVICE_TYPES.forEach((device) => {
       if (softwareDeviceCounts[device.id] > 0) {
-        lines.push({ label: device.title, value: softwareDeviceCounts[device.id] });
+        lines.push({ label: L(device.title), value: softwareDeviceCounts[device.id] });
       }
     });
     SOFTWARE_ITEMS.forEach((item) => {
       const entry = softwareItems[item.id];
-      if (entry?.count > 0) lines.push({ label: item.title, value: entry.count });
+      if (entry?.count > 0) lines.push({ label: L(item.title), value: entry.count });
     });
     return lines;
   }, [osCounts, softwareDeviceCounts, softwareItems]);
@@ -262,36 +270,36 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const hardwareSummaryLines = useMemo(() => {
     return HARDWARE_ITEMS
       .filter((item) => hardwareItems[item.id]?.count > 0)
-      .map((item) => ({ label: item.title, value: hardwareItems[item.id].count }));
+      .map((item) => ({ label: L(item.title), value: hardwareItems[item.id].count }));
   }, [hardwareItems]);
 
   const procurementSummaryLines = useMemo(() => {
     const lines = [];
     PROCUREMENT_ITEMS.forEach((item) => {
       const entry = procurementItems[item.id];
-      if (entry?.new > 0) lines.push({ label: `${item.title} / آکبند`, value: entry.new });
-      if (entry?.used > 0) lines.push({ label: `${item.title} / کارکرده`, value: entry.used });
+      if (entry?.new > 0) lines.push({ label: `${L(item.title)} / ${L('آکبند')}`, value: entry.new });
+      if (entry?.used > 0) lines.push({ label: `${L(item.title)} / ${L('کارکرده')}`, value: entry.used });
     });
     return lines;
   }, [procurementItems]);
 
   const handleOrderAction = (action) => {
     if (action === 'cancel_order') {
-      showAlert('لغو سفارش', 'آیا از لغو سفارش مطمئن هستید؟', [
-        { text: 'انصراف', style: 'cancel' },
-        { text: 'لغو سفارش', style: 'destructive', onPress: () => showToastOrAlert('سفارش لغو شد') },
+      showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
+        { text: L('انصراف'), style: 'cancel' },
+        { text: L('لغو سفارش'), style: 'destructive', onPress: () => showToastOrAlert(L('سفارش لغو شد')) },
       ]);
       return;
     }
     if (action === 'submit_order') {
       if (!validateOperatorInfo()) {
-        showToastOrAlert('لطفاً اطلاعات اپراتور را کامل کنید.');
+        showToastOrAlert(L('لطفاً اطلاعات اپراتور را کامل کنید.'));
         setExpanded('operator_info');
         return;
       }
       navigation.navigate('OrderSummaryScreen', {
         source: 'comprehensive',
-        orderTitle: 'انتخاب جامع - خدمات سازمانی',
+        orderTitle: L('انتخاب جامع - خدمات سازمانی'),
         // هر سه بخش انتخاب‌شده در یک فهرست خلاصه‌ی واحد.
         summaryLines: [
           ...softwareSummaryLines,
@@ -304,11 +312,11 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       return;
     }
     if (action === 'issue_receipt') {
-      showToastOrAlert('پیش‌رسید صادر شد');
+      showToastOrAlert(L('پیش‌رسید صادر شد'));
       return;
     }
     if (action === 'show_receipt') {
-      showToastOrAlert('نمایش پیش‌رسید');
+      showToastOrAlert(L('نمایش پیش‌رسید'));
       return;
     }
   };
@@ -316,9 +324,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   return (
     <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
-      <ScreenHeaders title="سازمانی / دولتی" />
+      <ScreenHeaders title={L('سازمانی / دولتی')} />
       <ScreenTitle
-        title="انتخاب جامع"
+        title={L('انتخاب جامع')}
         textStyle={{ fontSize: fontSize.xl, letterSpacing: 0.5 }}
         style={{ borderBottomWidth: 3, borderBottomColor: colors.accent.color }}
       />
@@ -327,36 +335,36 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* ۱. نحوه ارائه خدمات */}
         <AccordionHeader
-          title={SECTIONS[0].title}
-          hint={SECTIONS[0].hint}
-          icon={SECTIONS[0].icon}
+          title={SEC[0].title}
+          hint={SEC[0].hint}
+          icon={SEC[0].icon}
           expanded={expanded === 'delivery_mode'}
           onPress={() => toggleSection('delivery_mode')}
         />
         {expanded === 'delivery_mode' && (
           <SectionBody>
-            <SelectableOptions options={DELIVERY_MODE_OPTIONS} value={deliveryMode} onChange={setDeliveryMode} multi columns={2} />
+            <SelectableOptions options={LO(DELIVERY_MODE_OPTIONS)} value={deliveryMode} onChange={setDeliveryMode} multi columns={2} />
           </SectionBody>
         )}
 
         {/* ۲. خدمات نرم‌افزاری */}
         <AccordionHeader
-          title={SECTIONS[1].title}
-          hint={SECTIONS[1].hint}
-          icon={SECTIONS[1].icon}
+          title={SEC[1].title}
+          hint={SEC[1].hint}
+          icon={SEC[1].icon}
           expanded={expanded === 'software_services'}
           onPress={() => toggleSection('software_services')}
         />
         {expanded === 'software_services' && (
           <SectionBody>
             {/* زیربخش ۱: نصب سیستم عامل */}
-            <SubSectionBanner title="نصب سیستم عامل" />
+            <SubSectionBanner title={L('نصب سیستم عامل')} />
 
             {/* تعداد دستگاه‌ها */}
             {DEVICE_TYPES.map((device) => (
               <DeviceCountRow
                 key={device.id}
-                title={device.title}
+                title={L(device.title)}
                 image={device.image}
                 count={deviceCounts[device.id] || 0}
                 onIncrement={() => changeDeviceCount(device.id, 1)}
@@ -369,7 +377,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               {OS_ITEMS.map((os) => (
                 <DeviceCountTile
                   key={os.id}
-                  title={os.title}
+                  title={L(os.title)}
                   image={os.image}
                   count={osCounts[os.id] || 0}
                   onIncrement={() => changeOsCount(os.id, 1)}
@@ -388,12 +396,12 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             />
 
             {/* زیربخش ۲: نصب نرم‌افزارها */}
-            <SubSectionBanner title="نصب نرم‌افزارها" style={{ marginTop: spacing.sm }} />
+            <SubSectionBanner title={L('نصب نرم‌افزارها')} style={{ marginTop: spacing.sm }} />
 
             {SOFTWARE_DEVICE_TYPES.map((device) => (
               <DeviceCountRow
                 key={device.id}
-                title={device.title}
+                title={L(device.title)}
                 image={device.image}
                 count={softwareDeviceCounts[device.id] || 0}
                 onIncrement={() => changeSoftwareDeviceCount(device.id, 1)}
@@ -408,7 +416,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 return (
                   <CounterWithDescription
                     key={item.id}
-                    title={item.title}
+                    title={L(item.title)}
                     count={entry.count}
                     desc={entry.desc}
                     onIncrement={() => updateSoftwareItem(item.id, { count: entry.count + 1 })}
@@ -419,15 +427,15 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               })}
             </View>
 
-            <SummaryBox title="خدمات نرم‌افزاری" lines={softwareSummaryLines} />
+            <SummaryBox title={L('خدمات نرم‌افزاری')} lines={softwareSummaryLines} />
           </SectionBody>
         )}
 
         {/* ۳. خدمات سخت‌افزاری */}
         <AccordionHeader
-          title={SECTIONS[2].title}
-          hint={SECTIONS[2].hint}
-          icon={SECTIONS[2].icon}
+          title={SEC[2].title}
+          hint={SEC[2].hint}
+          icon={SEC[2].icon}
           expanded={expanded === 'hardware_services'}
           onPress={() => toggleSection('hardware_services')}
         />
@@ -439,7 +447,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 <HardwareCard
                   key={item.id}
                   image={item.image}
-                  title={item.title}
+                  title={L(item.title)}
                   count={entry.count}
                   desc={entry.desc}
                   onIncrement={() => updateHardwareItem(item.id, { count: entry.count + 1 })}
@@ -448,15 +456,15 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 />
               );
             })}
-            <SummaryBox title="خدمات سخت‌افزاری" lines={hardwareSummaryLines} />
+            <SummaryBox title={L('خدمات سخت‌افزاری')} lines={hardwareSummaryLines} />
           </SectionBody>
         )}
 
         {/* ۴. تامین تجهیزات / کالا */}
         <AccordionHeader
-          title={SECTIONS[3].title}
-          hint={SECTIONS[3].hint}
-          icon={SECTIONS[3].icon}
+          title={SEC[3].title}
+          hint={SEC[3].hint}
+          icon={SEC[3].icon}
           expanded={expanded === 'procurement'}
           onPress={() => toggleSection('procurement')}
         />
@@ -468,7 +476,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 <ProcurementCard
                   key={item.id}
                   image={item.image}
-                  title={item.title}
+                  title={L(item.title)}
                   newCount={entry.new}
                   usedCount={entry.used}
                   desc={entry.desc}
@@ -480,57 +488,57 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 />
               );
             })}
-            <SummaryBox title="تامین تجهیزات / کالا" lines={procurementSummaryLines} />
+            <SummaryBox title={L('تامین تجهیزات / کالا')} lines={procurementSummaryLines} />
           </SectionBody>
         )}
 
         {/* ۵. وضعیت فعلی تجهیزات */}
         <AccordionHeader
-          title={SECTIONS[4].title}
-          hint={SECTIONS[4].hint}
-          icon={SECTIONS[4].icon}
+          title={SEC[4].title}
+          hint={SEC[4].hint}
+          icon={SEC[4].icon}
           expanded={expanded === 'equipment_status'}
           onPress={() => toggleSection('equipment_status')}
         />
         {expanded === 'equipment_status' && (
           <SectionBody>
-            <SelectableOptions options={EQUIPMENT_STATUS_OPTIONS} value={equipmentStatus} onChange={setEquipmentStatus} multi columns={2} />
+            <SelectableOptions options={LO(EQUIPMENT_STATUS_OPTIONS)} value={equipmentStatus} onChange={setEquipmentStatus} multi columns={2} />
           </SectionBody>
         )}
 
         {/* ۶. زیر ساخت‌های حیاتی */}
         <AccordionHeader
-          title={SECTIONS[5].title}
-          hint={SECTIONS[5].hint}
-          icon={SECTIONS[5].icon}
+          title={SEC[5].title}
+          hint={SEC[5].hint}
+          icon={SEC[5].icon}
           expanded={expanded === 'critical_infra'}
           onPress={() => toggleSection('critical_infra')}
         />
         {expanded === 'critical_infra' && (
           <SectionBody>
-            <SelectableOptions options={CRITICAL_INFRA_OPTIONS} value={criticalInfra} onChange={setCriticalInfra} columns={3} />
+            <SelectableOptions options={LO(CRITICAL_INFRA_OPTIONS)} value={criticalInfra} onChange={setCriticalInfra} columns={3} />
           </SectionBody>
         )}
 
         {/* ۷. سطح خدمات و تامین تجهیزات */}
         <AccordionHeader
-          title={SECTIONS[6].title}
-          hint={SECTIONS[6].hint}
-          icon={SECTIONS[6].icon}
+          title={SEC[6].title}
+          hint={SEC[6].hint}
+          icon={SEC[6].icon}
           expanded={expanded === 'service_level'}
           onPress={() => toggleSection('service_level')}
         />
         {expanded === 'service_level' && (
           <SectionBody>
-            <SelectableOptions options={SERVICE_LEVEL_OPTIONS} value={serviceLevel} onChange={setServiceLevel} columns={3} />
+            <SelectableOptions options={LO(SERVICE_LEVEL_OPTIONS)} value={serviceLevel} onChange={setServiceLevel} columns={3} />
           </SectionBody>
         )}
 
         {/* ۸. بازه زمانی / رزرو - شرطی به «نحوه ارائه خدمات» */}
         <AccordionHeader
-          title={SECTIONS[7].title}
-          hint={SECTIONS[7].hint}
-          icon={SECTIONS[7].icon}
+          title={SEC[7].title}
+          hint={SEC[7].hint}
+          icon={SEC[7].icon}
           expanded={expanded === 'time_range'}
           onPress={() => toggleSection('time_range')}
         />
@@ -539,21 +547,21 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             {isOnceShort ? (
               <>
                 <Text style={{ fontFamily: 'VazirLight', fontSize: fontSize.xs, color: themeColor10.bgColor(0.7), marginBottom: spacing.sm }}>
-                  چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.
+                  {L('چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.')}
                 </Text>
                 <SchedulePicker
                   date={onceDate}
                   onChangeDate={setOnceDate}
                   slot={timeSlot}
                   onChangeSlot={setTimeSlot}
-                  slots={TIME_SLOT_OPTIONS}
+                  slots={LO(TIME_SLOT_OPTIONS)}
                 />
               </>
             ) : (
               <>
-                <SubSectionBanner title="تعداد بازدید" />
+                <SubSectionBanner title={L('تعداد بازدید')} />
                 <SelectableOptions
-                  options={VISIT_FREQUENCY_OPTIONS}
+                  options={LO(VISIT_FREQUENCY_OPTIONS)}
                   value={visitFrequency}
                   onChange={setVisitFrequency}
                   columns={2}
@@ -564,8 +572,8 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                   onChangeDate={setStartDate}
                   slot={timeSlot}
                   onChangeSlot={setTimeSlot}
-                  slots={TIME_SLOT_OPTIONS}
-                  dateTitle="تاریخ شروع"
+                  slots={LO(TIME_SLOT_OPTIONS)}
+                  dateTitle={L('تاریخ شروع')}
                 />
               </>
             )}
@@ -574,9 +582,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* ۹. اطلاعات اپراتور */}
         <AccordionHeader
-          title={SECTIONS[8].title}
-          hint={SECTIONS[8].hint}
-          icon={SECTIONS[8].icon}
+          title={SEC[8].title}
+          hint={SEC[8].hint}
+          icon={SEC[8].icon}
           expanded={expanded === 'operator_info'}
           onPress={() => toggleSection('operator_info')}
         />
@@ -585,21 +593,21 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             <TextInput
               value={operatorInfo.jobTitle}
               onChangeText={(t) => setOperatorInfo((p) => ({ ...p, jobTitle: t }))}
-              placeholder="عنوان شغلی اپراتور"
+              placeholder={L('عنوان شغلی اپراتور')}
               placeholderTextColor={themeColor10.bgColor(0.4)}
               style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
             />
             <TextInput
               value={operatorInfo.fullName}
               onChangeText={(t) => setOperatorInfo((p) => ({ ...p, fullName: t }))}
-              placeholder="نام و نام خانوادگی اپراتور"
+              placeholder={L('نام و نام خانوادگی اپراتور')}
               placeholderTextColor={themeColor10.bgColor(0.4)}
               style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
             />
             <TextInput
               value={operatorInfo.nationalId}
               onChangeText={(t) => setOperatorInfo((p) => ({ ...p, nationalId: t }))}
-              placeholder="شماره ملی اپراتور"
+              placeholder={L('شماره ملی اپراتور')}
               placeholderTextColor={themeColor10.bgColor(0.4)}
               keyboardType="number-pad"
               style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
@@ -607,7 +615,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             <TextInput
               value={operatorInfo.mobile}
               onChangeText={(t) => setOperatorInfo((p) => ({ ...p, mobile: t }))}
-              placeholder="شماره تلفن موبایل اپراتور"
+              placeholder={L('شماره تلفن موبایل اپراتور')}
               placeholderTextColor={themeColor10.bgColor(0.4)}
               keyboardType="phone-pad"
               style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
@@ -617,7 +625,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               style={[NewStyles.textInput, NewStyles.border10, { justifyContent: 'center' }]}
             >
               <Text style={{ fontFamily: 'VazirLight', color: themeColor10.bgColor(operatorInfo.birthDate ? 1 : 0.5) }}>
-                {operatorInfo.birthDate || 'تاریخ تولد (روز/ماه/سال)'}
+                {operatorInfo.birthDate || L('تاریخ تولد (روز/ماه/سال)')}
               </Text>
             </TouchableOpacity>
             <DatePickerModal
@@ -631,16 +639,16 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* ۱۰. انتخاب تکنسین - فعلاً فقط انتخاب جنسیت تکنسین */}
         <AccordionHeader
-          title={SECTIONS[9].title}
-          hint={SECTIONS[9].hint}
-          icon={SECTIONS[9].icon}
+          title={SEC[9].title}
+          hint={SEC[9].hint}
+          icon={SEC[9].icon}
           expanded={expanded === 'technician'}
           onPress={() => toggleSection('technician')}
         />
         {expanded === 'technician' && (
           <SectionBody>
             <SelectableOptions
-              options={TECHNICIAN_GENDER_OPTIONS}
+              options={LO(TECHNICIAN_GENDER_OPTIONS)}
               value={technicianGender}
               onChange={setTechnicianGender}
               columns={2}
@@ -650,9 +658,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* ۱۱. بارگزاری نامه / درخواست - اختیاری، باکس آپلود بزرگ */}
         <AccordionHeader
-          title={SECTIONS[10].title}
-          hint={SECTIONS[10].hint}
-          icon={SECTIONS[10].icon}
+          title={SEC[10].title}
+          hint={SEC[10].hint}
+          icon={SEC[10].icon}
           expanded={expanded === 'letter_upload'}
           onPress={() => toggleSection('letter_upload')}
         />
@@ -674,7 +682,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
             >
               <Ionicons name="cloud-upload-outline" size={32} color={themeColor0.bgColor(0.8)} />
               <Text style={{ fontFamily: 'VazirBold', fontSize: 13, color: themeColor10.bgColor(0.8), marginTop: 8 }}>
-                {letterFile ? letterFile.name : 'بارگزاری نامه (اختیاری)'}
+                {letterFile ? letterFile.name : L('بارگزاری نامه (اختیاری)')}
               </Text>
             </TouchableOpacity>
           </SectionBody>
@@ -682,9 +690,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
         {/* ۱۲. نمایش / استعلام / ثبت سفارش */}
         <AccordionHeader
-          title={SECTIONS[11].title}
-          hint={SECTIONS[11].hint}
-          icon={SECTIONS[11].icon}
+          title={SEC[11].title}
+          hint={SEC[11].hint}
+          icon={SEC[11].icon}
           expanded={expanded === 'order_actions'}
           onPress={() => toggleSection('order_actions')}
         />
@@ -694,25 +702,25 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               onPress={() => handleOrderAction('issue_receipt')}
               style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
-              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>صدور پیش‌رسید</Text>
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('صدور پیش‌رسید')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleOrderAction('show_receipt')}
               style={{ backgroundColor: themeColor0.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
-              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>نمایش پیش‌رسید</Text>
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('نمایش پیش‌رسید')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleOrderAction('submit_order')}
               style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
-              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>ثبت سفارش</Text>
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('ثبت سفارش')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleOrderAction('cancel_order')}
               style={{ backgroundColor: themeColor11.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
             >
-              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>لغو سفارش</Text>
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('لغو سفارش')}</Text>
             </TouchableOpacity>
           </SectionBody>
         )}

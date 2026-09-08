@@ -85,7 +85,7 @@ const RadioOptionItem = React.memo(
           )}
 
           {!isColumn && (
-            <Text style={[NewStyles.text10, selected && NewStyles.text4]}>
+            <Text style={[NewStyles.text10, { flex: 1 }, selected && NewStyles.text4]}>
               {item.title}
             </Text>
           )}
@@ -112,7 +112,7 @@ const RadioOptionItem = React.memo(
                   />
                 </Pressable>
 
-                <Text style={[NewStyles.text10, { textAlign: 'center' }]}>
+                <Text allowFontScaling={false} style={[NewStyles.text10, { textAlign: 'center', minWidth: 20 }]}>
                   {item.value}
                 </Text>
 
