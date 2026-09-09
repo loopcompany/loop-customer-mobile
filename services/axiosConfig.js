@@ -158,7 +158,10 @@ const isSilentAPI = (url) => {
   if (!url) return false;
 
   const silentAPIs = [
-    '/notifications/device-token',
+    // کل خانواده‌ی /notifications/ بهترین-تلاش است: ثبت device-token و پیامک‌های
+    // تاییدیه. صدازننده خودش خطا را مدیریت می‌کند، پس interceptor نباید alert
+    // دوم نشان بدهد یا کاربر را وسط ثبت سفارش به صفحه‌ی دیگری بفرستد.
+    '/notifications/',
   ];
 
   return silentAPIs.some(api => url.includes(api));

@@ -1,4 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
+import { isRunningInExpoGo } from 'expo';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
@@ -32,7 +33,9 @@ const FONTS = {
 };
 
 SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({ duration: 2000, fade: true });
+// Splash-screen customisation needs a development build; calling it in Expo Go
+// only logs a warning on every start.
+if (!isRunningInExpoGo()) SplashScreen.setOptions({ duration: 2000, fade: true });
 
 const documentTitle = {
   formatter: (options, route) => `لوپ - ${route?.name ?? 'خانه'}`,

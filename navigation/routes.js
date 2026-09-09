@@ -474,7 +474,11 @@ export const routes = [
 /** The route the app opens on. */
 export const INITIAL_ROUTE = 'Landing';
 
-/** Routes on which the Android back button should offer to exit the app. */
-export const ROOT_ROUTES = ['Landing', 'Welcome', 'FolderScreen'];
+/**
+ * Routes on which the Android back button should offer to exit the app.
+ * `List` is the home page every cold start lands on, so it belongs here —
+ * otherwise back from home pops to an empty stack.
+ */
+export const ROOT_ROUTES = ['Landing', 'Welcome', 'FolderScreen', 'List'];
 
 export default routes;

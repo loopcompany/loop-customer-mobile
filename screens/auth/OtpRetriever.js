@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 
 let isListening = false;
 let pendingOtp = '';
@@ -15,10 +15,43 @@ export const extractOtp = message => {
   return match?.[1] || '';
 };
 
+/**
+ * `react-native-otp-verify` is a native module with no Expo Go support: when it
+ * isn't linked, its entry point builds a `NativeEventEmitter` over a Proxy that
+ * throws on *any* property access ("The package 'react-native-otp-verify'
+ * doesn't seem to be linked"). So probe `NativeModules.OtpVerify` first and
+ * never require the package unless the native side is actually there — merely
+ * importing it is what blew up on startup in Expo Go.
+ *
+ * SMS auto-fill therefore silently does nothing in Expo Go; the user types the
+ * code by hand. It works in a dev-client / release build.
+ */
 const getOtpVerifyModule = () => {
   if (Platform.OS !== 'android') return null;
+  if (!NativeModules.OtpVerify) return null;
 
   return require('react-native-otp-verify');
+};
+
+/** True when SMS auto-fill can actually run on this build. */
+export const isOtpRetrieverAvailable = () => getOtpVerifyModule() !== null;
+
+/**
+ * The app's SMS Retriever hashes — the backend embeds one in the OTP text so
+ * Android hands the message to us. Resolves to `[]` where unavailable rather
+ * than throwing, since a missing hash only costs auto-fill.
+ */
+export const getSmsHash = async () => {
+  const otpVerify = getOtpVerifyModule();
+
+  if (!otpVerify?.getHash) return [];
+
+  try {
+    return (await otpVerify.getHash()) ?? [];
+  } catch (error) {
+    console.warn('[otp] could not read the SMS retriever hash', error?.message ?? error);
+    return [];
+  }
 };
 
 const publishOtp = otp => {
@@ -39,9 +72,8 @@ export const startOtpRetriever = async () => {
 
   const otpVerify = getOtpVerifyModule();
 
-  if (!otpVerify?.startOtpListener) {
-    throw new Error('react-native-otp-verify is not available');
-  }
+  // Not linked (Expo Go): auto-fill is simply off, not an error worth throwing.
+  if (!otpVerify?.startOtpListener) return false;
 
   try {
     await otpVerify.startOtpListener(message => {

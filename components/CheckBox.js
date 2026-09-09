@@ -12,6 +12,7 @@ import { imageUri } from '@services/URL';
 import i18n from 'i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import HintBadge from './HintBadge';
+import QuantityStepper from './QuantityStepper';
 
 export default function CheckBox({ step, data }) {
 
@@ -28,22 +29,15 @@ export default function CheckBox({ step, data }) {
         return null;
     };
 
+    // شمارشگر حالا در همان ردیف «تصویر + عنوان» و در انتهای آن می‌نشیند، پس
+    // فقط قیمت زیر ردیف باقی می‌ماند.
     const renderCounter = (item) => (
-        <View style={[NewStyles.rowWrapper, { alignSelf: 'flex-start' }]}>
-            {renderPrice(item)}
-            <View style={[NewStyles.rowWrapper, { width: 120, borderWidth: 1, borderColor: themeColor0.bgColor(1), padding: 5 }, NewStyles.border5]}>
-                <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
-                    style={NewStyles.add}>
-                    <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
-                </Pressable>
-                <View style={[{ borderWidth: 1, borderColor: themeColor0.bgColor(1), paddingHorizontal: 10 }, NewStyles.border5]}>
-                    <Text allowFontScaling={false} style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
-                </View>
-                <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
-                    <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
-                </Pressable>
-            </View>
-        </View>
+        <QuantityStepper
+            size="sm"
+            value={item.value}
+            onIncrement={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
+            onDecrement={() => { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
+        />
     );
 
     return (
@@ -89,18 +83,18 @@ export default function CheckBox({ step, data }) {
                             {
                                 item?.image_path &&
 
-                                <View style={[{ height: 60, width: 60, backgroundColor: themeColor4.bgColor(1), borderWidth: 3, borderColor: themeColor1.bgColor(1) }, NewStyles.border100, NewStyles.center, item?.has_counter == 1 && { height: 100, width: 100, borderWidth: 0, borderRadius: 0 }]}>
+                                <View style={[{ height: 60, width: 60, backgroundColor: themeColor4.bgColor(1), borderWidth: 3, borderColor: themeColor1.bgColor(1) }, NewStyles.border100, NewStyles.center, item?.has_counter == 1 && { height: 72, width: 72, borderWidth: 0, borderRadius: 0 }]}>
                                     <Image
                                         source={{ uri: `${imageUri}/${item?.image_path}` }}
-                                        style={[{ height: 50, width: 50, resizeMode: 'contain', backgroundColor: themeColor4.bgColor(1) }, NewStyles.border100, item?.has_counter == 1 && { height: 100, width: 100, borderWidth: 0, borderRadius: 0 }]}
+                                        style={[{ height: 50, width: 50, resizeMode: 'contain', backgroundColor: themeColor4.bgColor(1) }, NewStyles.border100, item?.has_counter == 1 && { height: 72, width: 72, borderWidth: 0, borderRadius: 0 }]}
                                     />
                                 </View>
                             }
                             <Text style={[NewStyles.text10, { flex: 1 }, (item?.value > 0 && item?.has_counter != 1) && NewStyles.text4]}>{item.title}</Text>
                             <HintBadge hint={item?.des} title={item?.title} size={22} />
+                            {item.has_counter == 1 ? renderCounter(item) : null}
                         </TouchableOpacity>
-                        {
-                            item.has_counter == 1 ? renderCounter(item) : renderPrice(item)}
+                        {renderPrice(item)}
                         {
                             data?.has_user_descriptions == 1 &&
                             <View style={{}}>

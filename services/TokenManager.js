@@ -116,7 +116,10 @@ export class TokenManager {
         };
       }
 
-      return { valid: false, error: 'Validation failed' };
+      // No response at all (timeout / offline / DNS) or a 5xx is *not* evidence
+      // that the token is bad. Flag it so callers keep the session instead of
+      // logging the user out every time the network hiccups.
+      return { valid: false, error: 'Validation failed', networkError: true };
     }
   }
 
@@ -141,6 +144,18 @@ export class TokenManager {
           user: validation.user,
           tokenInfo: validation.tokenInfo,
         };
+      } else if (validation.networkError) {
+        // Couldn't reach the server. Trust the stored token for this launch —
+        // the axios interceptor will still bounce the user to Login if the
+        // token turns out to be dead on the first real request. Clearing here
+        // meant every cold start on a bad connection looked like a logout.
+        console.log('📴 Token could not be verified (offline) — keeping session');
+        return {
+          authenticated: true,
+          token,
+          user: await this.getUserData(),
+          offline: true,
+        };
       } else {
         console.log('❌ Token is invalid, removing from storage');
         await this.clearAuthData();
@@ -152,7 +167,8 @@ export class TokenManager {
       }
     } catch (error) {
       console.error('❌ Authentication check failed:', error);
-      await this.clearAuthData();
+      // Same reasoning as above: an unexpected failure in *our* code is not a
+      // reason to destroy the user's credentials.
       return { authenticated: false, reason: 'check_failed' };
     }
   }
@@ -177,6 +193,8 @@ export class TokenManager {
         'userType', // Clear user type
         'organizationData', // Clear organization data
         'organizationCode', // Clear organization code
+        'savedOrganizationCode', // Clear org "ذخیره رمز عبور" credentials
+        'savedOrganizationPassword',
       ]);
       console.log('🗑️ All authentication data and auto-login settings cleared');
       return true;

@@ -203,8 +203,48 @@ export const handleOrganizationApiError = (error, navigation, options = {}) => {
 };
 
 /**
+ * یک پیامِ خطای *قابلِ نمایش* از خطای axios بیرون می‌کشد.
+ *
+ * الگوی درون‌خطیِ قبلی در صفحه‌ها این بود:
+ *   error?.response ? (error?.response?.status ? error.response.data.message : ...) : ...
+ * که وقتی سرور بدنه‌ی JSON با کلید `message` برنمی‌گرداند (خطای ۵۰۰ با صفحه‌ی
+ * HTML، یا ۴۲۲ که فقط `errors` دارد) به `undefined` می‌رسید و کاربر یک هشدارِ
+ * خالی می‌دید. اینجا همیشه یک رشته‌ی معنادار برمی‌گردد.
+ *
+ * @param {Object} error - خطای axios
+ * @param {(key: string) => string} [t] - تابعِ ترجمه
+ * @returns {string}
+ */
+export const describeApiError = (error, t = (key) => key) => {
+  if (!error?.response) {
+    return t('Network error!');
+  }
+
+  const { status, data } = error.response;
+
+  // خطاهای اعتبارسنجیِ Laravel: { errors: { field: ["..."] } }
+  if (data?.errors && typeof data.errors === 'object') {
+    const first = Object.values(data.errors)[0];
+    const message = Array.isArray(first) ? first[0] : first;
+    if (message) return String(message);
+  }
+
+  if (typeof data?.message === 'string' && data.message.trim()) {
+    return data.message;
+  }
+
+  // بعضی endpointها متنِ ساده برمی‌گردانند؛ ولی صفحه‌ی HTML خطا را نشان ندهیم.
+  if (typeof data === 'string' && data.trim() && !data.trim().startsWith('<')) {
+    return data.trim();
+  }
+
+  // کدِ وضعیت را نگه می‌داریم چون تنها سرنخِ کاربر برای گزارشِ مشکل است.
+  return `${t('An unexpected error occurred!')} (${status})`;
+};
+
+/**
  * Helper function برای تشخیص نوع خطا
- * 
+ *
  * @param {Object} error - خطای axios
  * @returns {string} - نوع خطا
  */

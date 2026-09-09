@@ -63,14 +63,28 @@ const SystematicCategoryScreen = ({ navigation }) => {
   const [loader, setLoader] = useState(true);
 
   const loadCategories = async () => {
+    // ‎/categories یک endpoint احراز هویت‌شده است. توکن را AuthInitializer به صورت
+    // async از AsyncStorage بازیابی می‌کند، پس در اولین render هنوز null است و
+    // درخواست قطعاً 401 می‌گیرد. تا آمدن توکن درخواست نفرست؛ این effect با تغییر
+    // توکن دوباره اجرا می‌شود. تا آن موقع کاشی‌های محلی نمایش داده می‌شوند.
+    if (!token) {
+      setRefreshing(false);
+      setLoader(false);
+      return;
+    }
+
     try {
-      const res = await categoriesAPI.getCategories(token);
+      const res = await categoriesAPI.getCategories();
       // شکل پاسخ API: { success: true, data: [...] }
       const categories = Array.isArray(res.data) ? res.data : res.data || res.data?.data || [];
       setFolders(categories);
     } catch (err) {
       console.error('Failed to load categories:', err);
-      showToastOrAlert(L('خطا در دریافت دسته‌ها'));
+      // 401 یعنی نشست منقضی شده و interceptor خودش هشدار «ورود مجدد» را
+      // نشان می‌دهد؛ پیام دوم ندهیم.
+      if (err?.response?.status !== 401) {
+        showToastOrAlert(L('خطا در دریافت دسته‌ها'));
+      }
       setFolders([]);
     } finally {
       setRefreshing(false);
@@ -80,7 +94,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [token]);
 
   const handleRefresh = () => {
     setRefreshing(true);

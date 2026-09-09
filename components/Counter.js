@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { imageUri } from '@services/URL';
 import { useTranslation } from 'react-i18next';
 import HintBadge from './HintBadge';
+import QuantityStepper from './QuantityStepper';
 
 const pad2 = value => String(value).padStart(2, '0');
 
@@ -224,33 +225,22 @@ export default function Counter({ step, data }) {
 
                             <LinearGradient colors={[themeColor4.bgColor(1), themeColor8.bgColor(0.5)]} style={[{ gap: 10, padding: 10, width: '100%' }, NewStyles.border10]}>
 
-                                <View style={[{ width: '100%', gap: 20 }, NewStyles.row]}>
+                                <View style={[{ width: '100%', gap: 10 }, NewStyles.row]}>
                                     {
                                         item?.image_path &&
                                         <Image
                                             source={{ uri: `${imageUri}/${item?.image_path}` }}
                                             style={{ height: 100, width: 100 }}
                                         />}
-                                    <View style={[{ flex: 1 }, NewStyles.center]}>
-                                        <View style={[NewStyles.row, { gap: 8, marginBottom: 10, alignSelf: 'stretch' }]}>
-                                            <Text style={[NewStyles.title10, { fontSize: 14, flex: 1 }]}>{item.title}</Text>
-                                            <HintBadge hint={item?.des} title={item?.title} size={22} />
-                                        </View>
-
-                                        <View style={[NewStyles.rowWrapper, { width: 120, borderWidth: 1, borderColor: themeColor0.bgColor(1), padding: 5 }, NewStyles.border5]}>
-                                            <Pressable onPress={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
-                                                style={NewStyles.add}>
-                                                <Ionicons name='add' size={24} color={themeColor4.bgColor(1)} />
-                                            </Pressable>
-                                            <View style={[{ borderWidth: 1, borderColor: themeColor0.bgColor(1), paddingHorizontal: 10 }, NewStyles.border5]}>
-                                                <Text allowFontScaling={false} style={[NewStyles.title10, { textAlign: 'center' }]}>{item.value}</Text>
-                                            </View>
-                                            <Pressable onPress={() => { if (item.value > 0) { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) } }} style={NewStyles.remove}>
-                                                <Ionicons name='remove' size={24} color={themeColor0.bgColor(1)} />
-                                            </Pressable>
-                                        </View>
-
+                                    <View style={[NewStyles.row, { flex: 1, gap: 8 }]}>
+                                        <Text style={[NewStyles.title10, { fontSize: 14, flex: 1 }]}>{item.title}</Text>
+                                        <HintBadge hint={item?.des} title={item?.title} size={22} />
                                     </View>
+                                    <QuantityStepper
+                                        value={item.value}
+                                        onIncrement={() => { dispatch(increment({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
+                                        onDecrement={() => { dispatch(decrement({ fieldId: data?.id, fieldDetailId: item.id, step })) }}
+                                    />
                                 </View>
 
                                 {

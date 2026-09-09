@@ -7,6 +7,15 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// jest-expo mocks every native module, including the one `isRunningInExpoGo()`
+// probes — so under Jest the app looks like it is running inside Expo Go and
+// the push adapter would short-circuit to its no-op path. Tests exercise the
+// dev-build path, so report a real build here.
+jest.mock('expo', () => ({
+  ...jest.requireActual('expo'),
+  isRunningInExpoGo: jest.fn(() => false),
+}));
+
 // @react-native-firebase/messaging v26 — modular API only (no default export).
 jest.mock('@react-native-firebase/messaging', () => ({
   __esModule: true,

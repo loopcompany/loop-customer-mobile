@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +14,7 @@ import axios from 'axios';
 
 import { imageUri, uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 import {
   themeColor0,
   themeColor1,
@@ -28,9 +28,10 @@ import {
   increment,
   updateRadioButton,
 } from '@slices/stepSlice';
-import { formatPrice, langIsRTL } from '@helpers/Common';
+import { formatPrice } from '@helpers/Common';
 import i18n from 'i18next';
 import { LinearGradient } from 'expo-linear-gradient';
+import QuantityStepper from './QuantityStepper';
 
 const RadioOptionItem = React.memo(
   function RadioOptionItem({
@@ -51,45 +52,79 @@ const RadioOptionItem = React.memo(
       return null;
     }, [item.price, item.show_price, item.value, item.has_counter]);
 
+    const showCounter = item.has_counter == 1 && !!item.value;
+
+    const counter = (
+      <QuantityStepper
+        size="sm"
+        value={item.value}
+        onIncrement={() => onIncrement(item.id)}
+        onDecrement={() => onDecrement(item.id)}
+      />
+    );
+
+    const selectable = (
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => onSelect(item.id)}
+        style={
+          isColumn
+            ? [
+                styles.columnButton,
+                selected && styles.selectedButton,
+                { borderRadius: Number(borderRadius) },
+              ]
+            : styles.rowTouchable
+        }
+      >
+        {!!item?.image_path && (
+          <View
+            style={[
+              styles.imageBox,
+              isColumn && styles.imageBoxColumn,
+              selected && isColumn && styles.imageBoxSelected,
+              { borderRadius: Number(borderRadius) },
+            ]}
+          >
+            <Image
+              source={{ uri: `${imageUri}/${item.image_path}` }}
+              style={[
+                styles.image,
+                isColumn && styles.imageColumn,
+                { borderRadius: Number(borderRadius) }
+              ]}
+              resizeMode="contain"
+              resizeMethod="resize"
+            />
+          </View>
+        )}
+
+        {!isColumn && (
+          <Text style={[NewStyles.text10, { flex: 1 }, selected && NewStyles.text4]}>
+            {item.title}
+          </Text>
+        )}
+      </TouchableOpacity>
+    );
+
     return (
       <View style={isColumn ? styles.columnItem : styles.rowItem}>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => onSelect(item.id)}
-          style={[
-            isColumn ? styles.columnButton : styles.rowButton,
-            selected && styles.selectedButton,
-            { borderRadius: Number(borderRadius) }
-          ]}
-        >
-          {!!item?.image_path && (
-            <View
-              style={[
-                styles.imageBox,
-                isColumn && styles.imageBoxColumn,
-                selected && isColumn && styles.imageBoxSelected,
-                { borderRadius: Number(borderRadius) },
-              ]}
-            >
-              <Image
-                source={{ uri: `${imageUri}/${item.image_path}` }}
-                style={[
-                  styles.image,
-                  isColumn && styles.imageColumn,
-                  { borderRadius: Number(borderRadius) }
-                ]}
-                resizeMode="contain"
-                resizeMethod="resize"
-              />
-            </View>
-          )}
-
-          {!isColumn && (
-            <Text style={[NewStyles.text10, { flex: 1 }, selected && NewStyles.text4]}>
-              {item.title}
-            </Text>
-          )}
-        </TouchableOpacity>
+        {/* ردیف افقی: تصویر (ابتدای ردیف) + عنوان + شمارشگر (انتهای ردیف).
+            در حالت شبکه‌ای جا برای شمارشگر کنار عنوان نیست و زیر کاشی می‌آید. */}
+        {isColumn ? (
+          selectable
+        ) : (
+          <View
+            style={[
+              styles.rowButton,
+              selected && styles.selectedButton,
+              { borderRadius: Number(borderRadius) },
+            ]}
+          >
+            {selectable}
+            {showCounter ? counter : null}
+          </View>
+        )}
 
         {!!totalPrice && (
           <Text style={NewStyles.text}>
@@ -97,43 +132,7 @@ const RadioOptionItem = React.memo(
           </Text>
         )}
 
-        {item.has_counter == 1 && item.value ? (
-          <View style={NewStyles.rowWrapper}>
-            <View style={{ flex: 1 }}>
-              <View style={[NewStyles.rowWrapper, { width: 100 }]}>
-                <Pressable
-                  style={NewStyles.add}
-                  onPress={() => onIncrement(item.id)}
-                >
-                  <Ionicons
-                    name="add"
-                    size={24}
-                    color={themeColor4.bgColor(1)}
-                  />
-                </Pressable>
-
-                <Text allowFontScaling={false} style={[NewStyles.text10, { textAlign: 'center', minWidth: 20 }]}>
-                  {item.value}
-                </Text>
-
-                <Pressable
-                  style={NewStyles.remove}
-                  onPress={() => {
-                    if (item.value > 0) {
-                      onDecrement(item.id);
-                    }
-                  }}
-                >
-                  <Ionicons
-                    name="remove"
-                    size={24}
-                    color={themeColor0.bgColor(1)}
-                  />
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        ) : null}
+        {isColumn && showCounter ? counter : null}
 
         {!!item?.des && !isColumn && (
 
@@ -175,7 +174,6 @@ export default function RadioButton({ step, data, setLoading }) {
   const [show, setShow] = useState(false);
 
   const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
-  const isRTL = useMemo(() => langIsRTL(lang), [lang]);
 
   const isColumn = data?.is_column == 1;
   const borderRadius = Number(data?.border_radius);
@@ -341,7 +339,9 @@ export default function RadioButton({ step, data, setLoading }) {
   );
 }
 
-const styles = StyleSheet.create({
+// جهت ردیف‌ها باید هنگام رندر از زبان جاری خوانده شود؛ یک StyleSheet.create در
+// سطح ماژول مقدار 'row-reverse' را روی زبانِ لحظه‌ی import قفل می‌کرد.
+const styles = createDirectionalStyles((isRTL) => ({
   header: {
     backgroundColor: themeColor0.bgColor(1),
     paddingVertical: 10,
@@ -376,7 +376,17 @@ const styles = StyleSheet.create({
     padding: 10,
     gap: 10,
     ...NewStyles.border5,
-    ...NewStyles.row,
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
+  },
+
+  // بخش قابل انتخاب ردیف (تصویر + عنوان). شمارشگر بیرون از آن و در انتهای ردیف
+  // می‌نشیند تا لمس دکمه‌های +/− گزینه را انتخاب نکند.
+  rowTouchable: {
+    flex: 1,
+    gap: 10,
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
   },
 
   columnButton: {
@@ -430,4 +440,4 @@ const styles = StyleSheet.create({
     padding: 10,
     ...NewStyles.border5,
   },
-});
+}));

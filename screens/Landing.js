@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform, SafeAreaView, } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '@slices/authSlice';
@@ -19,12 +20,24 @@ import { fetchMinPrice } from '@slices/minPriceSlice';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEvent } from 'expo';
-import { getHash } from 'react-native-otp-verify';
+import { getSmsHash } from '@screens/auth/OtpRetriever';
 import { setHashApp } from '@slices/hashAppSlice';
+
+// اگر ویدیوی اسپلش پخش نشود (کدک، شبکه، یا نرسیدن رویداد playToEnd روی دستگاه)
+// کاربر برای همیشه روی صفحه‌ی سیاه می‌ماند. این سقف زمانی تضمین می‌کند که در هر
+// شرایطی وارد اپ می‌شود.
+const SPLASH_TIMEOUT_MS = 6000;
+
+// سقفِ مطلق: حتی اگر بررسیِ توکن هم گیر کند (شبکه‌ی کند، تایم‌اوتِ ۱۰ ثانیه‌ای
+// axios)، کاربر بعد از این مدت به هر حال وارد صفحه‌ی خانه می‌شود.
+const SPLASH_MAX_MS = 15000;
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
   const [checking, setChecking] = useState(true);
+  // نگهبان‌های تک‌بار-بودن: هم playToEnd و هم تایم‌اوت می‌توانند مسیر را ادامه دهند.
+  const startedRef = React.useRef(false);
+  const settledRef = React.useRef(false);
   const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
     console.log("player ready");
     if (Platform.OS === 'web') {
@@ -45,17 +58,18 @@ export default function Landing({ navigation }) {
   useEffect(() => {
     if (Platform.OS !== 'android') return;
 
-    getHash()
-      .then(hashes => {
-        dispatch(setHashApp(hashes))
-        console.log('SMS hashes:', hashes);
-      })
-      .catch(error => {
-        console.log('Hash error:', error);
-      });
+    // getSmsHash() resolves to [] where the native module isn't linked
+    // (Expo Go) instead of throwing, so no guard is needed here.
+    getSmsHash().then(hashes => {
+      dispatch(setHashApp(hashes))
+      console.log('SMS hashes:', hashes);
+    });
   }, []);
 
   const checkAuthenticationStatus = async () => {
+    // هم رویداد پایان ویدیو و هم تایم‌اوت می‌توانند این را صدا بزنند؛ فقط یک بار اجرا شود.
+    if (startedRef.current) return;
+    startedRef.current = true;
     try {
       // Use TokenManager to check authentication
       const authStatus = await TokenManager.isAuthenticated();
@@ -94,23 +108,26 @@ export default function Landing({ navigation }) {
     }
   };
 
-  // Navigate to Welcome screen (auth flow)
-  const navigateToWelcome = () => {
+  // `List` is the app's home page (web: /list). Every cold start lands there,
+  // signed in or not, so closing and reopening the app always returns to the
+  // same place. Screens reachable from List that need a session send the user
+  // to Login themselves.
+  const goHome = () => {
+    if (settledRef.current) return;
+    settledRef.current = true;
     setChecking(false);
-    navigation.replace('Welcome');
+    navigation.replace('List');
   };
 
-  // Navigate to main app (FolderScreen)
-  const navigateToMainApp = () => {
-    setChecking(false);
-    navigation.replace('FolderScreen');
-  };
+  // Kept as separate names so the auth branches below stay readable; both
+  // destinations are now the same home page.
+  const navigateToWelcome = goHome;
+  const navigateToMainApp = goHome;
 
 
   useEffect(() => {
     const subscription = player.addListener('playToEnd', () => {
       // ۲. بعد از اتمام ویدیو به صفحه بعد بروید
-      // navigation.replace('Welcome');
       checkAuthenticationStatus();
     });
 
@@ -118,6 +135,31 @@ export default function Landing({ navigation }) {
       subscription.remove();
     };
   }, [player]);
+
+  // Fallback: never let a video that refuses to play (or never emits
+  // `playToEnd`) strand the user on the splash screen.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!settledRef.current) {
+        console.warn('[Landing] splash video did not finish in time — continuing');
+        checkAuthenticationStatus();
+      }
+    }, SPLASH_TIMEOUT_MS);
+
+    // goHome() با settledRef محافظت شده، پس اگر بررسیِ توکن زودتر تمام شود این
+    // فراخوانی بی‌اثر است.
+    const hardTimer = setTimeout(() => {
+      if (!settledRef.current) {
+        console.warn('[Landing] auth check exceeded budget — entering app anyway');
+        goHome();
+      }
+    }, SPLASH_MAX_MS);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(hardTimer);
+    };
+  }, []);
 
   useEffect(() => {
     const subscription = player.addListener('statusChange', ({ status, error }) => {

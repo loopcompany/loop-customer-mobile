@@ -137,16 +137,26 @@ const Login = ({ navigation }) => {
         dispatch(fetchAddresses(response.data.data.token));
         console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
 
-        // Persist (or clear) what the "Remember password" box controls, so the
-        // next visit can pre-fill the form.
+        // Persist (or clear) what the "Remember password" box controls. Besides
+        // pre-filling the form, ticking it opts the account into the same
+        // auto-login flags the customer login uses — without them the next cold
+        // start dropped straight back to the login page, which is what made the
+        // checkbox look like it did nothing.
         if (rememberPassword) {
           await AsyncStorage.multiSet([
             [SAVED_ORG_CODE_KEY, organizationCode],
             [SAVED_ORG_PASSWORD_KEY, password],
+            ['rememberLogin', 'true'],
+            ['autoLoginEnabled', 'true'],
           ]);
           console.log('💾 [Login] savedOrganizationCode ذخیره شد');
         } else {
-          await AsyncStorage.multiRemove([SAVED_ORG_CODE_KEY, SAVED_ORG_PASSWORD_KEY]);
+          await AsyncStorage.multiRemove([
+            SAVED_ORG_CODE_KEY,
+            SAVED_ORG_PASSWORD_KEY,
+            'rememberLogin',
+            'autoLoginEnabled',
+          ]);
         }
 
         console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');

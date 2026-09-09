@@ -8,7 +8,9 @@ export const fetchContacts = createAsyncThunk('contact/fetchContacts', async () 
         .then(response => {
             return response.data;
         })
-        .catch(error => { console.log(error); })
+        // بلعیده می‌شود چون شماره‌ی تماس اختیاری است و نبودش نباید اپ را متوقف کند —
+        // ولی باید معلوم باشد *کدام* درخواست شکست خورده است.
+        .catch(error => { console.warn('[contactSlice] GET /contact/phone failed:', error?.message); })
 })
 
 const contactSlice = createSlice({

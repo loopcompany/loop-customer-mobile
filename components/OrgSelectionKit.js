@@ -226,7 +226,16 @@ export const CounterRow = ({ title, count, onIncrement, onDecrement }) => (
       paddingVertical: 8,
     }}
   >
-    <Text style={{ fontFamily: 'VazirLight', fontSize: 13, color: themeColor10.bgColor(1), flex: 1 }}>
+    <Text
+      style={{
+        fontFamily: 'VazirLight',
+        fontSize: 13,
+        color: themeColor10.bgColor(1),
+        flex: 1,
+        textAlign: rtl() ? 'right' : 'left',
+        writingDirection: rtl() ? 'rtl' : 'ltr',
+      }}
+    >
       {title}
     </Text>
     <View style={{ flexDirection: rtl() ? 'row-reverse' : 'row', alignItems: 'center' }}>
@@ -387,7 +396,7 @@ const CountBadge = ({ count }) => (
     style={{
       position: 'absolute',
       top: -6,
-      right: -6,
+      [rtl() ? 'left' : 'right']: -6,
       minWidth: 20,
       height: 20,
       paddingHorizontal: 4,
@@ -414,7 +423,7 @@ export const DeviceCountRow = ({ title, subtitle, image, count, onIncrement, onD
   return (
     <View
       style={{
-        flexDirection: 'row',
+        flexDirection: rtl() ? 'row-reverse' : 'row',
         alignItems: 'center',
         backgroundColor: active ? colors.primary.bgColor(0.05) : colors.surface.bgColor(1),
         borderWidth: 1,
@@ -432,13 +441,26 @@ export const DeviceCountRow = ({ title, subtitle, image, count, onIncrement, onD
       </View>
       <View style={{ flex: 1, marginHorizontal: spacing.md }}>
         <Text
-          style={{ fontFamily: 'VazirBold', fontSize: fontSize.sm, color: colors.textPrimary.color }}
+          style={{
+            fontFamily: 'VazirBold',
+            fontSize: fontSize.sm,
+            color: colors.textPrimary.color,
+            textAlign: rtl() ? 'right' : 'left',
+            writingDirection: rtl() ? 'rtl' : 'ltr',
+          }}
           numberOfLines={2}
         >
           {title}
         </Text>
         <Text
-          style={{ marginTop: 2, fontFamily: 'VazirLight', fontSize: fontSize.xs - 1, color: colors.textSecondary.color }}
+          style={{
+            marginTop: 2,
+            fontFamily: 'VazirLight',
+            fontSize: fontSize.xs - 1,
+            color: colors.textSecondary.color,
+            textAlign: rtl() ? 'right' : 'left',
+            writingDirection: rtl() ? 'rtl' : 'ltr',
+          }}
           numberOfLines={1}
         >
           {subtitle || L('تعداد مورد نیاز')}
@@ -624,7 +646,9 @@ export const PhotoNoteInput = ({
   );
 };
 
-// کارت خدمات سخت‌افزاری: ردیف اول = تصویر (چپ) + شمارشگر (وسط) + عنوان (راست)، ردیف دوم = توضیحات
+// کارت خدمات سخت‌افزاری: ردیف اول = تصویر (ابتدای ردیف) + عنوان + شمارشگر
+// (انتهای ردیف)، ردیف دوم = توضیحات. در فارسی ابتدای ردیف سمت راست است، پس
+// تصویر راست، عنوان کنارش و شمارشگر در انتهای چپ می‌نشیند؛ در انگلیسی برعکس.
 export const HardwareCard = ({ image, title, count, desc, onIncrement, onDecrement, onDescChange }) => (
   <View
     style={{
@@ -636,16 +660,23 @@ export const HardwareCard = ({ image, title, count, desc, onIncrement, onDecreme
       marginBottom: spacing.sm,
     }}
   >
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View style={{ flexDirection: rtl() ? 'row-reverse' : 'row', alignItems: 'center' }}>
       <HardwareIconBox image={image} />
-      <View style={{ width: spacing.sm }} />
-      <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} />
       <Text
-        style={{ flex: 1, marginLeft: spacing.sm, fontFamily: 'VazirBold', fontSize: 14, color: colors.textPrimary.color }}
+        style={{
+          flex: 1,
+          marginHorizontal: spacing.sm,
+          fontFamily: 'VazirBold',
+          fontSize: 14,
+          color: colors.textPrimary.color,
+          textAlign: rtl() ? 'right' : 'left',
+          writingDirection: rtl() ? 'rtl' : 'ltr',
+        }}
         numberOfLines={2}
       >
         {title}
       </Text>
+      <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} />
     </View>
     <DescriptionInput value={desc} onChangeText={onDescChange} />
   </View>
@@ -656,7 +687,7 @@ export const HardwareCard = ({ image, title, count, desc, onIncrement, onDecreme
 export const LabeledCounterRow = ({ label, count, onIncrement, onDecrement }) => (
   <View
     style={{
-      flexDirection: 'row',
+      flexDirection: rtl() ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: colors.primaryLight.bgColor(0.08),
@@ -668,14 +699,24 @@ export const LabeledCounterRow = ({ label, count, onIncrement, onDecrement }) =>
       marginBottom: spacing.xs,
     }}
   >
-    <Text style={{ fontFamily: 'VazirLight', fontSize: 12, color: colors.textSecondary.color }}>
+    <Text
+      style={{
+        fontFamily: 'VazirLight',
+        fontSize: 12,
+        color: colors.textSecondary.color,
+        textAlign: rtl() ? 'right' : 'left',
+        writingDirection: rtl() ? 'rtl' : 'ltr',
+      }}
+      numberOfLines={1}
+    >
       {label}
     </Text>
     <MiniCounter count={count} onIncrement={onIncrement} onDecrement={onDecrement} />
   </View>
 );
 
-// کارت تامین تجهیزات/کالا: ردیف اول = تصویر (چپ) + دو شمارشگر آکبند/کارکرده (وسط) + عنوان (راست)، ردیف دوم = توضیحات
+// کارت تامین تجهیزات/کالا: ردیف اول = تصویر (ابتدای ردیف) + عنوان + دو شمارشگر
+// آکبند/کارکرده (انتهای ردیف)، ردیف دوم = توضیحات.
 export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNewInc, onNewDec, onUsedInc, onUsedDec, onDescChange }) => (
   <View
     style={{
@@ -687,15 +728,26 @@ export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNew
       marginBottom: spacing.sm,
     }}
   >
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View style={{ flexDirection: rtl() ? 'row-reverse' : 'row', alignItems: 'center' }}>
       <HardwareIconBox image={image} />
-      <View style={{ flex: 1, marginHorizontal: spacing.sm }}>
+      <Text
+        style={{
+          flex: 1,
+          marginHorizontal: spacing.sm,
+          fontFamily: 'VazirBold',
+          fontSize: 14,
+          color: colors.textPrimary.color,
+          textAlign: rtl() ? 'right' : 'left',
+          writingDirection: rtl() ? 'rtl' : 'ltr',
+        }}
+        numberOfLines={2}
+      >
+        {title}
+      </Text>
+      <View style={{ width: 150 }}>
         <LabeledCounterRow label={L('آکبند')} count={newCount} onIncrement={onNewInc} onDecrement={onNewDec} />
         <LabeledCounterRow label={L('کارکرده')} count={usedCount} onIncrement={onUsedInc} onDecrement={onUsedDec} />
       </View>
-      <Text style={{ fontFamily: 'VazirBold', fontSize: 14, color: colors.textPrimary.color }} numberOfLines={2}>
-        {title}
-      </Text>
     </View>
     <DescriptionInput value={desc} onChangeText={onDescChange} />
   </View>

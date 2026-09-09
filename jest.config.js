@@ -1,7 +1,9 @@
 /**
  * Jest config for unit tests of non-UI logic (notification routing, device-token
- * API, push orchestration). Uses the `jest-expo` preset so Expo/RN modules
- * resolve, with the `@alias` table mirrored from `babel.config.js`.
+ * API, push orchestration) plus a few render tests that pin down layout rules
+ * which are easy to regress (see `components/__tests__/counterBoxDirection`).
+ * Uses the `jest-expo` preset so Expo/RN modules resolve, with the `@alias`
+ * table mirrored from `babel.config.js`.
  */
 module.exports = {
   preset: 'jest-expo',

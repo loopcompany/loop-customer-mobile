@@ -166,8 +166,13 @@ export default function OrderSummaryScreen({ navigation, route }) {
           style={[styles.submitButton, isSubmitting && { opacity: 0.6 }]}
           onPress={async () => {
             setIsSubmitting(true);
+            const orderNumber = `${Date.now()}`;
+
+            // پیامک تاییدیه «بهترین-تلاش» است و نباید ثبت سفارش را شکست بدهد.
+            // پیش‌تر یک throw از اینجا کل مسیر را به «خطا در ثبت سفارش» می‌برد،
+            // که روی موبایل همیشه اتفاق می‌افتاد چون آدرس درخواست خراب بود.
+            let smsSent = true;
             try {
-              const orderNumber = `${Date.now()}`;
               await notificationAPI.sendOrderConfirmation(orderNumber, {
                 phone,
                 type: orderType,
@@ -178,23 +183,27 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 price,
                 items: summaryLines,
               });
-              setStatus('در حال بررسی');
-              showToastOrAlert('سفارش با موفقیت ثبت شد. پیامک تایید برای شما ارسال شد.');
-
-              navigation.replace('OrderTrackingScreen', {
-                orderData: {
-                  orderNumber,
-                  userId: user?.id ?? orgProfile?.id ?? null,
-                  phone,
-                  date: scheduleDate || '',
-                },
-              });
             } catch (error) {
-              console.error('Error submitting order:', error);
-              showToastOrAlert('خطا در ثبت سفارش. لطفا دوباره تلاش کنید.');
-            } finally {
-              setIsSubmitting(false);
+              smsSent = false;
+              console.warn('Order confirmation SMS failed (order still submitted):', error?.message);
             }
+
+            setStatus('در حال بررسی');
+            showToastOrAlert(
+              smsSent
+                ? 'سفارش با موفقیت ثبت شد. پیامک تایید برای شما ارسال شد.'
+                : 'سفارش با موفقیت ثبت شد. ارسال پیامک تایید با تاخیر انجام می‌شود.'
+            );
+
+            navigation.replace('OrderTrackingScreen', {
+              orderData: {
+                orderNumber,
+                userId: user?.id ?? orgProfile?.id ?? null,
+                phone,
+                date: scheduleDate || '',
+              },
+            });
+            setIsSubmitting(false);
           }}
           disabled={isSubmitting}
         >

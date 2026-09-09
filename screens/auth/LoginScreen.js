@@ -261,10 +261,13 @@ export default function LoginScreen({ navigation }) {
         // First check if auto-login is explicitly enabled by user
         const autoLoginEnabled = await AsyncStorage.getItem('autoLoginEnabled');
 
-        // If auto-login is not explicitly enabled, clear any existing tokens
+        // Auto-login off simply means "don't sign the user in automatically".
+        // It must NOT destroy an existing session: this screen is reachable from
+        // the menu and from the org flow, so calling clearAuthData() here logged
+        // the user out just for *looking* at the login page — which is exactly
+        // the "ذخیره رمز عبور / ذخیره اطلاعات ورود tick logs me out" symptom.
         if (autoLoginEnabled !== 'true') {
-          console.log('Auto-login not enabled by user, clearing tokens');
-          await TokenManager.clearAuthData();
+          console.log('Auto-login not enabled by user, skipping automatic sign-in');
           return;
         }
 
@@ -296,9 +299,17 @@ export default function LoginScreen({ navigation }) {
               return;
             }
           } catch (error) {
-            console.log('Token validation failed, clearing auto-login:', error);
-            // Clear invalid token and auto-login flag
-            await TokenManager.clearAuthData();
+            // Only a definitive "this token is dead" answer from the server may
+            // clear the session. A timeout or an offline device is not proof the
+            // token is bad, and wiping it there logged people out on a flaky
+            // connection.
+            const status = error?.response?.status;
+            if (status === 401 || status === 403) {
+              console.log('Token rejected by server, clearing auto-login:', status);
+              await TokenManager.clearAuthData();
+            } else {
+              console.log('Token validation unreachable, keeping session:', error?.message);
+            }
           }
         } else {
           console.log('No token found, clearing auto-login flag');

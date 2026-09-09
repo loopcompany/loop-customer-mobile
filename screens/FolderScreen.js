@@ -38,8 +38,17 @@ function FolderScreen({ navigation }) {
   const user = useSelector(state => state?.user?.data);
   const token = useSelector(state => state?.auth?.token);
   const loadCategories = async () => {
+    // ‎/categories احراز هویت می‌خواهد و توکن به صورت async توسط AuthInitializer
+    // بازیابی می‌شود، پس در اولین render هنوز null است. تا آمدن توکن درخواست
+    // نفرست — این effect با تغییر توکن دوباره اجرا می‌شود.
+    if (!token) {
+      setRefreshing(false);
+      setLoader(false);
+      return;
+    }
+
     try {
-      const res = await categoriesAPI.getCategories(token);
+      const res = await categoriesAPI.getCategories();
       // API shape: { success: true, data: [...] }
       const categories = Array.isArray(res.data)
         ? res.data
@@ -47,7 +56,10 @@ function FolderScreen({ navigation }) {
       setFolders(categories);
     } catch (err) {
       console.error("Failed to load categories:", err);
-      showToastOrAlert("خطا در دریافت دسته‌ها");
+      // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
+      if (err?.response?.status !== 401) {
+        showToastOrAlert("خطا در دریافت دسته‌ها");
+      }
     } finally {
       setRefreshing(false);
       setLoader(false);
@@ -56,7 +68,7 @@ function FolderScreen({ navigation }) {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [token]);
 
   const handleRefresh = () => {
     setRefreshing(true);

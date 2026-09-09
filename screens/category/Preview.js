@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStyles } from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
 import { formatDate, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { describeApiError } from '@utils/apiErrorHandler';
 import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
 import Button from '@components/Button';
 import { imageUri, uri } from '@services/URL';
@@ -231,7 +232,7 @@ function Preview({ navigation }) {
                 navigation.replace('OrdersScreen');
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
+            const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
             setLoading(false);
@@ -251,7 +252,7 @@ function Preview({ navigation }) {
                 showToastOrAlert(response?.data?.message)
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
+            const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
             setPending(false);

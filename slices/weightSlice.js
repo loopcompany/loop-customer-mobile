@@ -7,7 +7,7 @@ export const fetchUserWeights = createAsyncThunk('items/fetchUserWeights', async
     return await axios
         .get(`${uri}/fetchUserWeights`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
         .then(response => response?.data)
-        .catch(error => { console.log(error); })
+        .catch(error => { console.warn('[weightSlice] GET /fetchUserWeights failed:', error?.message); })
 })
 
 export const weightSlice = createSlice({

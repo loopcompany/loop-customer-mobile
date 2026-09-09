@@ -40,7 +40,6 @@ import { createStyles } from '@styles/NewStyles';
 import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLanguage } from '@slices/languageSlice';
-import { langIsRTL } from '@helpers/Common';
 // Create Context
 const MenuContext = createContext();
 
@@ -268,6 +267,7 @@ const LanguageSwitch = React.memo(({ language, onToggle }) => {
 });
 
 const dockStyles = StyleSheet.create({
+    // ویندوز ۷: آیکون‌های نوار وظیفه بدون حاشیه و بدون پلاک پس‌زمینه‌اند
     action: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -276,9 +276,7 @@ const dockStyles = StyleSheet.create({
         paddingVertical: spacing.xs,
         paddingHorizontal: spacing.xs,
         borderRadius: radius.md,
-        backgroundColor: colors.white.bgColor(0.45),
-        borderWidth: 1,
-        borderColor: colors.white.bgColor(0.7),
+        backgroundColor: 'transparent',
     },
     actionImage: {
         width: 30,
@@ -338,7 +336,6 @@ const langStyles = StyleSheet.create({
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
     const { t, i18n } = useTranslation();
-    const isRTL = langIsRTL(i18n.language);
     const userData = useSelector((state) => state.user?.data);
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
@@ -347,7 +344,7 @@ export const MenuProvider = ({ children }) => {
 
 
 
-    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language, isRTL), [NewStyles, i18n.language, isRTL]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -753,7 +750,7 @@ export const useMenu = () => {
 };
 
 // Styles
-const createLocalStyles = (NewStyles, language, isRTL) => StyleSheet.create({
+const createLocalStyles = (NewStyles, language) => StyleSheet.create({
 
 
     // داک شیشه‌ای شناور پایین صفحه
@@ -771,7 +768,8 @@ const createLocalStyles = (NewStyles, language, isRTL) => StyleSheet.create({
         ...shadow.lg,
     },
     dock: {
-        flexDirection: isRTL ? 'row-reverse' : 'row',
+        // چیدمان داک به زبان وابسته نیست: دکمه‌ی استارت (لوگوی لوپ) همیشه سمت چپ می‌ماند
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: spacing.xs,
@@ -801,9 +799,7 @@ const createLocalStyles = (NewStyles, language, isRTL) => StyleSheet.create({
         borderRadius: radius.pill,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.primary.bgColor(0.1),
-        borderWidth: 1,
-        borderColor: colors.primary.bgColor(0.22),
+        backgroundColor: 'transparent',
     },
     codeChip: {
         flexDirection: 'row',

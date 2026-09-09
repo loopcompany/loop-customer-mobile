@@ -109,6 +109,15 @@ module.exports = defineConfig([
   {
     // Config and build files run in Node and legitimately log.
     files: ['*.config.js', 'scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        module: 'writable',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
     rules: { 'no-console': 'off', 'no-restricted-imports': 'off' },
   },
 
