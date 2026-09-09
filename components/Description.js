@@ -1,9 +1,10 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 import { useState } from 'react'
 
-import NewStyles from '../styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
 import Filters from './Filters';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
+import HintBadge from './HintBadge';
 
 export default function Description({ data }) {
 
@@ -14,7 +15,12 @@ export default function Description({ data }) {
             <Filters data={data?.field_details} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
             {data?.field_details?.[activeIndex]?.field_charts?.length > 0 ?
                 <View style={NewStyles.seperator1}>
-                    {data?.field_details?.[activeIndex]?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}><Text style={NewStyles.text3}>{data?.field_details?.[activeIndex]?.des}</Text></View>}
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <HintBadge
+                            hint={data?.field_details?.[activeIndex]?.des}
+                            title={data?.field_details?.[activeIndex]?.title}
+                        />
+                    </View>
                     <FlatList
                         style={{ gap: 50 }}
                         showsVerticalScrollIndicator={false}
@@ -27,7 +33,7 @@ export default function Description({ data }) {
                                         <Text style={[NewStyles.title4, { textAlign: 'center' }]}>{item?.title}</Text>
                                     </View>
                                     <View style={[{ padding: '5%' }, NewStyles.rowWrapper]}>
-                                        {item?.first_column ? <Text style={[NewStyles.text, { flex: 1, textAlign: 'right' }]}>{item?.first_column}</Text> : null}
+                                        {item?.first_column ? <Text style={[NewStyles.text, { flex: 1 }]}>{item?.first_column}</Text> : null}
                                         {item?.second_column ? <Text style={[NewStyles.text10, { flex: 1, textAlign: item?.third_column ? 'center' : 'left' }]}>{item?.second_column}</Text> : null}
                                         {item?.third_column ? <Text style={[NewStyles.text10, { flex: 1, textAlign: 'left' }]}>{item?.third_column}</Text> : null}
                                     </View>
@@ -39,7 +45,7 @@ export default function Description({ data }) {
                                         renderItem={({ item: subItem, index }) => {
                                             return (
                                                 <View style={[{ padding: '5%' }, NewStyles.rowWrapper, (index % 2 == 0) ? { backgroundColor: themeColor0.bgColor(0.08) } : { backgroundColor: themeColor3.bgColor(0.08) }]}>
-                                                    {subItem?.first ? <Text style={[NewStyles.text, { flex: 1, textAlign: 'right' }]} >{subItem?.first}</Text> : null}
+                                                    {subItem?.first ? <Text style={[NewStyles.text, { flex: 1 }]} >{subItem?.first}</Text> : null}
                                                     {subItem?.second ? <Text style={[NewStyles.text10, { flex: 1, textAlign: subItem?.third ? 'center' : 'left' }]} >{subItem?.second}</Text> : null}
                                                     {subItem?.third ? <Text style={[NewStyles.text10, { flex: 1, textAlign: 'left' }]} >{subItem?.third}</Text> : null}
                                                 </View>

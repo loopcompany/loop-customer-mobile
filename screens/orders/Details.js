@@ -6,27 +6,27 @@ import * as Linking from "expo-linking";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
-import { imageUri, uri } from '../../services/URL';
-import NewStyles from '../../styles/NewStyles'
-import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '../../theme/Color';
-import Loader from '../../components/Loader';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles'
+import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8, themeColor14 } from '@theme/Color';
+import Loader from '@components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import TechnicianDetailsComponent from '../../components/TechnicianDetailsComponent';
-import Button from '../../components/Button';
+import ScreenHeaders from '@components/ScreenHeaders';
+import TechnicianDetailsComponent from '@components/TechnicianDetailsComponent';
+import Button from '@components/Button';
 import OrderExtraServices from './OrderExtraServices';
 import OrderReviewSection from './OrderReviewSection';
 import OrderReviewRatingSection from './OrderReviewRatingSection';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
-import AccordionHeader from '../../components/AccordionHeader';
-import { fetchUser } from '../../slices/userSlice';
-import { fetchOrders } from '../../slices/orderSlice';
-import { createStyles } from '../../styles/NewStyles';
-import ShowMapDetailComponent from '../../components/ShowMapDetailComponent';
+import AccordionHeader from '@components/AccordionHeader';
+import { fetchUser } from '@slices/userSlice';
+import { fetchOrders } from '@slices/orderSlice';
+import { createStyles } from '@styles/NewStyles';
+import ShowMapDetailComponent from '@components/ShowMapDetailComponent';
 
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
     let is_package = 0
@@ -591,7 +591,7 @@ function Details({ route, navigation }) {
                                             </View>
                                         </View>
                                         <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.border10]}>
-                                            <Text style={[NewStyles.text10, { textAlign: 'right', lineHeight: 24 }]}>
+                                            <Text style={[NewStyles.text10, { lineHeight: 24 }]}>
                                                 {data?.technician_cancel_reason}
                                             </Text>
                                         </View>
@@ -669,7 +669,7 @@ function Details({ route, navigation }) {
                     {
                         (data?.done_in_place && data?.admin_in_place_description && showDoneInPlace) &&
                         <View style={styles.contentSection}>
-                            <View style={[styles.infoCard, { backgroundColor: themeColor1.bgColor(1) }]}>
+                            <View style={[styles.infoCard, { backgroundColor: themeColor14.bgColor(1) }]}>
                                 <View style={[NewStyles.row, { gap: 10, alignItems: 'center' }]}>
                                     <Ionicons name="checkmark-circle" size={24} color={themeColor0.bgColor(1)} />
                                     <Text style={[NewStyles.text10]}>
@@ -1016,7 +1016,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         padding: 10
     },
     noticeBox: {
-        backgroundColor: themeColor1.bgColor(1),
+        backgroundColor: themeColor14.bgColor(1),
         padding: 10,
         ...NewStyles.border10,
         marginBottom: 12,

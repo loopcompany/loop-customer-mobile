@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from 'i18next';
 

@@ -662,6 +662,7 @@
   "Login to account": "Login to account",
   "Organization code": "Organization code",
   "Organization code *": "Organization code *",
+  "User code": "User code",
   "Password": "Password",
   "Password * (at least 8 characters)": "Password * (at least 8 characters)",
   "Password (at least 6 characters)": "Password (at least 6 characters)",
@@ -1399,6 +1400,8 @@
   "Automatic login (without password)": "Automatic login (without password)",
   "Image selected. To save, click Save Profile Information button": "Image selected. To save, click Save Profile Information button",
   "Select organization type": "Select organization type",
+  "Individual user": "Individual user",
+  "Organization": "Organization",
   "Government organization": "Government organization",
   "Semi-governmental organization": "Semi-governmental organization",
   "Private company": "Private company",
@@ -1554,5 +1557,6 @@
   "انتخاب جامع": "Enterprise Service",
   "Edit request": "Edit request",
   "Verification code": "Verification code",
-  "Recovery code sent": "Recovery code sent"
+  "Recovery code sent": "Recovery code sent",
+  "Guide": "Guide"
 }

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import i18next from 'i18next';
 
 export const fetchOrders = createAsyncThunk('orders/orders', async (token) => {
@@ -10,7 +10,7 @@ export const fetchOrders = createAsyncThunk('orders/orders', async (token) => {
                 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': i18next.language || 'en'  } })
                     .then(response => response?.data)
                     .catch(error => {
-                        console.log(error);
+                        console.warn('[orderSlice] GET /orders failed:', error?.message);
                         throw new Error(error.response?.data?.message || error.message);
                     })
             })

@@ -8,17 +8,19 @@ import DatePicker from 'react-native-modern-datepicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
 
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { fetchOrders } from '../../slices/ordersSlice';
-import { themeColor0 } from '../../theme/Color';
-import OrderItem from '../../components/OrderItem';
-import BlankScreen from '../../components/BlankScreen';
-import Loader from './../../components/Loader';
-import { createStyles } from '../../styles/NewStyles';
-import Button from '../../components/Button';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { fetchOrders } from '@slices/ordersSlice';
+import { themeColor0 } from '@theme/Color';
+import OrderItem from '@components/OrderItem';
+import BlankScreen from '@components/BlankScreen';
+import Loader from '@components/Loader';
+import { createStyles } from '@styles/NewStyles';
+import Button from '@components/Button';
+import { langIsRTL } from '@helpers/Common';
 
 function OrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
   const orderLoader = useSelector(state => state.orders?.loading);
@@ -28,7 +30,7 @@ function OrdersScreen({ navigation }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const [refreshing, setRefreshing] = useState(false);
 
   // فیلتر تاریخ و وضعیت
@@ -386,7 +388,7 @@ function OrdersScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   filterContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -436,7 +438,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     fontSize: 14,
     fontFamily: 'VazirBold',
     color: themeColor0.bgColor(1),
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   activeFilterBadge: {
     ...NewStyles.row,
@@ -568,7 +570,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontFamily: 'VazirBold',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
 });
 

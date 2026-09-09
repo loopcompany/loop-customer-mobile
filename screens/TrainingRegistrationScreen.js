@@ -15,12 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import DatePicker from "react-native-modern-datepicker";
 import moment from "moment-jalaali";
 
-import ScreenHeaders from "../components/ScreenHeaders";
-import { themeColor0, themeColor1, themeColor4 } from "../theme/Color";
-import { educationRegistrationAPI } from "../services/Api";
-import { showToastOrAlert } from "../helpers/Common";
-import Button from "../components/Button";
-import { createStyles } from "../styles/NewStyles";
+import ScreenHeaders from "@components/ScreenHeaders";
+import { themeColor0, themeColor1, themeColor4 } from "@theme/Color";
+import { educationRegistrationAPI } from "@services/Api";
+import { showToastOrAlert } from "@helpers/Common";
+import Button from "@components/Button";
+import { createStyles } from "@styles/NewStyles";
 import { Ionicons } from "@expo/vector-icons";
 
 const COURSE_OPTIONS = [

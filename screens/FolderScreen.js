@@ -9,19 +9,19 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import Folder from "../components/Folder";
-import CustomStatusBar from "./../components/CustomStatusBar";
-import { handleError, showToastOrAlert } from "./../helpers/Common";
+import Folder from "@components/Folder";
+import CustomStatusBar from "@components/CustomStatusBar";
+import { handleError, showToastOrAlert } from "@helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
-import categoriesAPI from "../services/CategoriesApi";
+import categoriesAPI from "@services/CategoriesApi";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSteps } from "../slices/stepSlice";
-import { setCategory } from "../slices/categorySlice";
-import Loader from "../components/Loader";
+import { fetchSteps } from "@slices/stepSlice";
+import { setCategory } from "@slices/categorySlice";
+import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { createStyles } from "../styles/NewStyles";
-import { imageUri } from "../services/URL";
+import { createStyles } from "@styles/NewStyles";
+import { imageUri } from "@services/URL";
 import { Text } from "react-native";
 
 function FolderScreen({ navigation }) {
@@ -38,8 +38,17 @@ function FolderScreen({ navigation }) {
   const user = useSelector(state => state?.user?.data);
   const token = useSelector(state => state?.auth?.token);
   const loadCategories = async () => {
+    // ‎/categories احراز هویت می‌خواهد و توکن به صورت async توسط AuthInitializer
+    // بازیابی می‌شود، پس در اولین render هنوز null است. تا آمدن توکن درخواست
+    // نفرست — این effect با تغییر توکن دوباره اجرا می‌شود.
+    if (!token) {
+      setRefreshing(false);
+      setLoader(false);
+      return;
+    }
+
     try {
-      const res = await categoriesAPI.getCategories(token);
+      const res = await categoriesAPI.getCategories();
       // API shape: { success: true, data: [...] }
       const categories = Array.isArray(res.data)
         ? res.data
@@ -47,7 +56,10 @@ function FolderScreen({ navigation }) {
       setFolders(categories);
     } catch (err) {
       console.error("Failed to load categories:", err);
-      showToastOrAlert("خطا در دریافت دسته‌ها");
+      // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
+      if (err?.response?.status !== 401) {
+        showToastOrAlert("خطا در دریافت دسته‌ها");
+      }
     } finally {
       setRefreshing(false);
       setLoader(false);
@@ -56,7 +68,7 @@ function FolderScreen({ navigation }) {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [token]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -72,7 +84,7 @@ function FolderScreen({ navigation }) {
       style={NewStyles.container}
       edges={{ top: "off", bottom: "off" }}
     >
-      <ImageBackground cachePolicy={'memory-disk'} imageStyle={{ opacity: 0.8, }} source={Platform.OS === 'web' ? require('../assets/loopbackground.webp') : require("../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} imageStyle={{ opacity: 0.8, }} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]} contentPosition={'center'} contentFit={"cover"}>
         <CustomStatusBar />
         <View>
           <ScrollView style={{ height: 140, width: '100%' }} refreshControl={
@@ -83,7 +95,7 @@ function FolderScreen({ navigation }) {
           } contentContainerStyle={{ height: 140 }}>
             <View style={styles.logoWrapper}>
               <Image
-                source={require("../assets/logo.png")}
+                source={require("@assets/logo.png")}
                 style={NewStyles.logo}
               />
             </View>
@@ -184,8 +196,6 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     flex: 1,
   },
   folderItem: {
-    width: 80,
-    alignItems: "center",
     margin: 12,
     // flexDirection: 'row-reverse',
     alignItems: "center",

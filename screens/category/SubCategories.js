@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, FlatList, RefreshControl, Platform } from "react-native";
-import Folder from "../../components/Folder";
-import NewStyles from "../../styles/NewStyles";
-import CustomStatusBar from '../../components/CustomStatusBar';
-import { handleError, showToastOrAlert } from '../../helpers/Common';
+import Folder from "@components/Folder";
+import NewStyles from "@styles/NewStyles";
+import CustomStatusBar from '@components/CustomStatusBar';
+import { handleError, showToastOrAlert } from '@helpers/Common';
 import { SafeAreaView } from "react-native-safe-area-context";
-import categoriesAPI from '../../services/CategoriesApi';
+import categoriesAPI from '@services/CategoriesApi';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSteps } from '../../slices/stepSlice';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { setCategory } from "../../slices/categorySlice";
-import Loader from "../../components/Loader";
+import { fetchSteps } from '@slices/stepSlice';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { setCategory } from "@slices/categorySlice";
+import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
 
 const SubCategories = ({ navigation, route }) => {
@@ -52,7 +52,7 @@ const SubCategories = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: "off", bottom: "off" }}>
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
 
         <CustomStatusBar />
         <View style={{ flex: 1 }}>
@@ -65,7 +65,7 @@ const SubCategories = ({ navigation, route }) => {
 
           {/* لوگو بالا */}
           <View style={styles.logoWrapper}>
-            <Image source={require("../../assets/logo.png")} style={NewStyles.logo} />
+            <Image source={require("@assets/logo.png")} style={NewStyles.logo} />
           </View>
 
           <FlatList
@@ -121,8 +121,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   folderItem: {
-    width: 80,
-    alignItems: "center",
     margin: 12,
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.2)",

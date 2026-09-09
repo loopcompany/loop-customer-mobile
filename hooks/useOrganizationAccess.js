@@ -2,20 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import { 
   setAccessStatus, 
   setAccessLoading,
   updateProfileStatus,
   updateContractStatus,
   clearAccessData
-} from '../slices/organizationSlice';
-import { setUserType } from '../slices/authSlice';
+} from '@slices/organizationSlice';
+import { setUserType } from '@slices/authSlice';
 import { 
   useDebouncedCallback, 
   organizationAccessCache,
   PERFORMANCE_CONFIGS 
-} from '../utils/performanceOptimization';
+} from '@utils/performanceOptimization';
 import { useTranslation } from 'react-i18next';
 
 /**

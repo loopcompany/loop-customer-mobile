@@ -1,7 +1,7 @@
 import { View, Modal, StyleSheet, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { createStyles, deviceHeight } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4 } from '../theme/Color';
+import { createStyles, deviceHeight } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4 } from '@theme/Color';
 import { useMemo } from 'react';
 
 export default function ConfirmationModal({ title, message, action, confirmationModal, setConfirmationModal }) {

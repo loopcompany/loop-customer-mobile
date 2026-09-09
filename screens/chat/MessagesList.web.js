@@ -1,9 +1,9 @@
 import { FlatList, Platform, RefreshControl, StyleSheet } from 'react-native';
-import MessegeItem from './MessegeItem';
-import { themeColor1 } from '../../theme/Color';
+import MessageItem from './MessageItem';
+import { themeColor1 } from '@theme/Color';
 import { memo, useMemo } from 'react';
 
-function MessagesList({ messeges, onRefresh, refreshing }) {
+function MessagesList({ messages, onRefresh, refreshing }) {
     function toTimestamp(value) {
         if (!value) return 0;
         const timestamp = Date.parse(value);
@@ -26,15 +26,15 @@ function MessagesList({ messeges, onRefresh, refreshing }) {
     }
 
     const items = useMemo(() => {
-        if (!Array.isArray(messeges) || messeges.length === 0) return [];
-        return sortForWebChat(messeges);
-    }, [messeges]);
+        if (!Array.isArray(messages) || messages.length === 0) return [];
+        return sortForWebChat(messages);
+    }, [messages]);
 
     return (
         <div style={styles.wrapper}>
             {items.map((item, index) => (
                 <div key={index}>
-                    <MessegeItem messege={item} />
+                    <MessageItem message={item} />
                 </div>
             ))}
         </div>

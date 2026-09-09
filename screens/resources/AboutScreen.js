@@ -3,16 +3,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import Footer from '../Footer';
-import { themeColor0, themeColor1, themeColor4, themeColor10 } from '../../theme/Color';
-import { infoAPI } from '../../services/Api';
-import { showToastOrAlert } from '../../helpers/Common';
-import BlankScreen from '../../components/BlankScreen';
+import ScreenHeaders from '@components/ScreenHeaders';
+import Footer from '@screens/Footer';
+import { themeColor0, themeColor1, themeColor4, themeColor10 } from '@theme/Color';
+import { infoAPI } from '@services/Api';
+import { showToastOrAlert } from '@helpers/Common';
+import BlankScreen from '@components/BlankScreen';
 import { RefreshControl } from 'react-native';
-import Loader from '../../components/Loader';
-import AccardeonComponent from '../../components/AccardeonComponent';
-import { createStyles } from '../../styles/NewStyles';
+import Loader from '@components/Loader';
+import AccordionItem from '@components/AccordionItem';
+import { createStyles } from '@styles/NewStyles';
 
 export default function AboutScreen() {
   const [terms, setTerms] = useState([]);
@@ -55,7 +55,7 @@ export default function AboutScreen() {
 
   const renderTermItem = ({ item }) => {
     return (
-      <AccardeonComponent item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
+      <AccordionItem item={item} expandedItems={expandedItems} setExpandedItems={setExpandedItems} />
     );
   };
   if (isLoading) {

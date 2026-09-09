@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native'
+import { Text, View, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
@@ -7,13 +7,14 @@ import jalaali from 'jalaali-js'
 import moment from 'moment-jalaali'
 import { useTranslation } from 'react-i18next'
 
-import { uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatDate, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
-import Button from '../../components/Button'
-import ConfirmationModal from '../../components/ConfirmationModal'
+import { uri } from '@services/URL'
+import NewStyles from '@styles/NewStyles'
+import { formatDate, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor7 } from '@theme/Color'
+import Button from '@components/Button'
+import ConfirmationModal from '@components/ConfirmationModal'
 import i18n from 'i18next'
+import { createDirectionalStyles } from '@styles/directionalStyles';
 const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
     const { t } = useTranslation()
     const token = useSelector((state) => state?.auth?.token)
@@ -252,7 +253,7 @@ const OrderReturnTimeSection = ({ data, orderId, onUpdate }) => {
 
 export default OrderReturnTimeSection
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
     noticeBox: {
         backgroundColor: themeColor1.bgColor(1),
         padding: 10,
@@ -292,6 +293,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'VazirLight',
         color: themeColor0.bgColor(1),
-        textAlign: 'right',
+        textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     },
-})
+}))

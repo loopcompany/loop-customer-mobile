@@ -4,13 +4,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { createStyles } from '../../styles/NewStyles';
-import { uri } from '../../services/URL';
-import { handleError, showToastOrAlert } from '../../helpers/Common';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6 } from '../../theme/Color';
+import { createStyles } from '@styles/NewStyles';
+import { uri } from '@services/URL';
+import { handleError, showToastOrAlert } from '@helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6 } from '@theme/Color';
 import MessagesList from './MessagesList';
-import ScreenHeaders from '../../components/ScreenHeaders';
+import ScreenHeaders from '@components/ScreenHeaders';
 
 export default function ChatRoom({ route }) {
 
@@ -123,7 +123,7 @@ export default function ChatRoom({ route }) {
         }]}>
             <ScreenHeaders title={t('Message to Loop technician')} />
             <KeyboardAvoidingView behavior={'padding'} keyboardVerticalOffset={Platform.OS == 'ios' ? 90 : 0} style={{ flex: 1 }} >
-                <MessagesList messeges={data} refreshing={refreshing} onRefresh={() => { fetchData() }} />
+                <MessagesList messages={data} refreshing={refreshing} onRefresh={() => { fetchData() }} />
                 {!isClosed ?
                     <View style={[{ paddingBottom: Platform.OS === 'web' ? 100 : 70, borderTopColor: themeColor1.bgColor(1), borderTopWidth: 1, }]}>
                         <View style={[NewStyles.rowWrapper, { paddingRight: 10 }]}>

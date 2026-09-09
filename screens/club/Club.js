@@ -4,23 +4,23 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment-jalaali';
-import { createStyles } from '../../styles/NewStyles';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor4, themeColor5 } from '../../theme/Color';
-import { imageUri, mainUri, uri } from '../../services/URL';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor14 } from '@theme/Color';
+import { imageUri, mainUri, uri } from '@services/URL';
 import OfferItem from './OfferItem';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import Filters from '../../components/Filters';
+import Filters from '@components/Filters';
 import DiscountItem from './DiscountItem';
-import Loader from '../../components/Loader';
+import Loader from '@components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LuckyWheel from '../../components/LuckyWheel';
-import WinnerModal from '../../components/WinnerModal';
-import { getGemActions, spinWheel, canPlayWheel } from '../../services/GemApi';
-import { showToastOrAlert } from '../../helpers/Common';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { langIsRTL } from '../../helpers/Common';
+import LuckyWheel from '@components/LuckyWheel';
+import WinnerModal from '@components/WinnerModal';
+import { getGemActions, spinWheel, canPlayWheel } from '@services/GemApi';
+import { showToastOrAlert } from '@helpers/Common';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { langIsRTL } from '@helpers/Common';
 export default function Club({ navigation }) {
 
   const { t, i18n } = useTranslation();
@@ -306,14 +306,14 @@ export default function Club({ navigation }) {
                     <View style={{
                       marginTop: 20,
                       padding: 15,
-                      backgroundColor: '#fff3cd',
+                      backgroundColor: themeColor14.bgColor(1),
                       borderRadius: 10,
                       alignItems: 'center'
                     }}>
-                      <Text style={[NewStyles.text10, { textAlign: 'center', color: '#856404' }]}>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', color: themeColor0.color }]}>
                         {t('You have participated this week! 🎉')}
                       </Text>
-                      <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: '#856404' }]}>
+                      <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 5, fontSize: 12, color: themeColor0.color }]}>
                         {t('Next participation:')} {moment(nextPlayDate).format('jYYYY/jMM/jDD')}
                       </Text>
                     </View>

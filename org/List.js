@@ -1,77 +1,138 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
-import CustomStatusBar from '../components/CustomStatusBar';
+// صفحه‌ی ورودی کاربر سازمانی - فقط دو مسیر دارد: «انتخاب جامع» و
+// «انتخاب سیستماتیک». هر دو کاشی ستونی و در مرکز صفحه چیده می‌شوند: «جامع» بالا
+// و «سیستماتیک» پایین آن، هرکدام با آیکون و عنوان کاملاً هم‌مرکز (افقی و عمودی).
+// علامت راهنما «؟» دقیقاً کنار عنوان قرار می‌گیرد و عنوان در یک خط نمایش داده می‌شود.
+import React, { useMemo } from 'react';
+import { View, Image, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import { ImageBackground } from 'expo-image';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+
+import HintBadge from '@components/HintBadge';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { createStyles } from '@styles/NewStyles';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { L } from './orgI18n';
+import { langIsRTL } from '@helpers/Common';
+
+const entryOptions = [
+  {
+    id: 'comprehensive',
+    title: 'انتخاب جامع',
+    image: require('@assets/jame.jpg'),
+    screen: 'ComprehensiveSelectionScreen',
+    hint: 'در «انتخاب جامع» تمام خدمات نرم‌افزاری، سخت‌افزاری و تامین تجهیزات سازمان را یکجا در یک فرم کامل ثبت می‌کنید.',
+  },
+  {
+    id: 'systematic',
+    title: 'انتخاب سیستماتیک',
+    image: require('@assets/systematic.png'),
+    screen: 'SystematicCategoryScreen',
+    hint: 'در «انتخاب سیستماتیک» دسته‌بندی مورد نظر (کیس، لپ‌تاپ، پرینتر و ...) را جداگانه انتخاب و سفارش می‌دهید.',
+  },
+];
 
 const List = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
+  const NewStyles = useMemo(() => createStyles(i18n.language), [i18n.language]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
 
-  const handleNavigation = (screenName) => {
-    // Navigate to respective screen
-    navigation.navigate(screenName);
-  };
-
-  const menuItems = [
-    { id: 1, title: 'توافق نامه', screen: 'ContractScreen' },
-    { id: 2, title: 'انتخاب جامع', screen: 'ComprehensiveSelectionScreen' },
-    { id: 3, title: 'تامین قطعات / کالا', screen: 'HardwareSelectionScreen' },
-    { id: 4, title: 'رزرو / مراجعه تکنسین', screen: 'TechnicianVisitScreen' },
-    { id: 5, title: 'انتخاب تکنسین', screen: 'Choosingatechnician' },
-    { id: 6, title: 'تخفیف پنل / کد تخفیف', screen: 'DiscountCodeScreen' },
-    { id: 7, title: 'اطلاعات اپراتور', screen: 'OperatorInfoScreen' },
-    { id: 8, title: 'نمایش / استعلام / ثبت سفارش', screen: 'OrderMenuScreen' }
-  ];
+  const organizationName = useSelector(
+    (state) => state?.organization?.profile?.company_name
+  );
 
   return (
-    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}> 
-      <CustomStatusBar />
-      <ScreenHeaders
-        title="سازمانی / دولتی"
-      />
-      
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
-        
-        {/* Menu Items */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 20 }}>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => handleNavigation(item.screen)}
-              style={{ 
-                width: '100%',
-                backgroundColor: '#1976d2', 
-                borderRadius: 12, 
-                paddingVertical: 15, 
-                marginBottom: 12, 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                elevation: 4,
-                shadowColor: '#1976d2',
-                shadowOpacity: 0.3,
-                shadowRadius: 5,
-                position: 'relative'
-              }}
-            >
-              <Text style={{ 
-                color: '#fff', 
-                fontSize: 16, 
-                fontWeight: 'bold', 
-                fontFamily: 'VazirBold',
-                textAlign: 'center' 
-              }}>{item.title}</Text>
-              
-              {/* Yellow arrow down */}
+    <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>
+      <ImageBackground
+        cachePolicy={'memory-disk'}
+        imageStyle={{ opacity: 0.8 }}
+        source={
+          Platform.OS === 'web'
+            ? require('@assets/loopbackground.webp')
+            : require('@assets/moon.jpg')
+        }
+        style={[NewStyles.container, { backgroundColor: '#020305', paddingBottom: 30 }]}
+        contentPosition={'center'}
+        contentFit={'cover'}
+      >
+        <CustomStatusBar />
+        <ScreenHeaders title={organizationName || L('سازمانی / دولتی')} />
 
-            </TouchableOpacity>
-          ))}
+        <View style={styles.logoWrapper}>
+          <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
         </View>
 
-      </ScrollView>
-      
-    </View>
+        {/* کاشی «جامع» بالا و «سیستماتیک» پایین آن، هر دو در مرکز صفحه */}
+        <View style={styles.grid}>
+          {entryOptions.map((item) => (
+            <View key={item.id} style={styles.optionWrapper}>
+              <TouchableOpacity
+                style={styles.tile}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate(item.screen)}
+              >
+                <Image source={item.image} style={styles.tileIcon} />
+                <View style={styles.titleRow}>
+                  <HintBadge hint={L(item.hint)} title={L(item.title)} size={20} />
+                  <Text
+                    style={[NewStyles.title4, styles.tileTitle]}
+                    numberOfLines={1}
+                  >
+                    {L(item.title)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
+
+const createLocalStyles = (NewStyles, isRTL) =>
+  StyleSheet.create({
+    logoWrapper: {
+      alignItems: 'center',
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    grid: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 28,
+    },
+    optionWrapper: {
+      position: 'relative',
+      alignItems: 'center',
+    },
+    tile: {
+      minWidth: 120,
+      paddingHorizontal: spacing.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tileIcon: {
+      width: 80,
+      height: 80,
+      resizeMode: 'contain',
+      borderRadius: radius.lg,
+      marginBottom: spacing.sm,
+    },
+    // عنوان و علامت راهنما کنار هم در یک ردیف؛ عنوان در یک خط جا می‌شود.
+    titleRow: {
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    tileTitle: {
+      textAlign: 'center',
+    },
+  });
 
 export default List;

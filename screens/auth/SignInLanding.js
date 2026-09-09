@@ -1,20 +1,20 @@
 import { StyleSheet, Image, Platform, Linking } from "react-native";
-import Button from "../../components/Button";
-import NewStyles from "../../styles/NewStyles";
+import Button from "@components/Button";
+import NewStyles from "@styles/NewStyles";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import TransparentButton from './../../components/TransparentButton';
-import { imageUri, mainUri } from './../../services/URL';
-import { themeColor0, themeColor4 } from "../../theme/Color";
+import TransparentButton from '@components/TransparentButton';
+import { imageUri, mainUri } from '@services/URL';
+import { themeColor0, themeColor4 } from "@theme/Color";
 import { useSelector } from "react-redux";
 
 export default function SignInLanding({ navigation }) {
   const { t } = useTranslation();
   const pdf = useSelector(state => state.pdf?.data)
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
 
-      <Image source={require("../../assets/logo.png")} style={NewStyles.logo} resizeMode="contain" />
+      <Image source={require("@assets/logo.png")} style={NewStyles.logo} resizeMode="contain" />
       <Button
         style={{ width: "70%" }}
         title={t("Log in")}

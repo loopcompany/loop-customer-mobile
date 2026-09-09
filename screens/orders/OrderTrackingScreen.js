@@ -9,18 +9,20 @@ import {
   ScrollView,
   ImageBackground,
 } from 'react-native';
-import NewStyles from '../../styles/NewStyles';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { themeColor0, themeColor4 } from '../../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import CustomStatusBar from '@components/CustomStatusBar';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { themeColor0, themeColor4 } from '@theme/Color';
 
 export default function OrderTrackingScreen({ navigation, route }) {
-  // دریافت اطلاعات سفارش از route params
-  const orderData = route?.params?.orderData || {
-    orderNumber: '984876565',
-    userId: '211-5015',
-    phone: '09123456789',
-    date: '1402/01/01',
+  // دریافت اطلاعات سفارش از route params.
+  // اگر پارامتری نبود، به جای داده‌ی نمونه، جای خالی نمایش داده می‌شود.
+  const orderData = {
+    orderNumber: '—',
+    userId: '—',
+    phone: '—',
+    date: '—',
+    ...(route?.params?.orderData || {}),
   };
 
   const handleGoToOrders = () => {
@@ -32,24 +34,25 @@ export default function OrderTrackingScreen({ navigation, route }) {
   };
 
   const handleNewOrder = () => {
-    // به صفحه اصلی برو برای ثبت سفارش جدید و stack را پاک کن
+    // به لیست برو برای ثبت سفارش جدید و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'FolderScreen' }],
+      routes: [{ name: 'List' }],
     });
   };
 
   const handleBackPress = () => {
-    // به صفحه اصلی برو و stack را پاک کن
+    // به لیست برو و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'FolderScreen' }],
+      routes: [{ name: 'List' }],
     });
   };
   return (
     <ImageBackground
-      source={require('../../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={NewStyles.container}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <CustomStatusBar backgroundColor={themeColor4.bgColor(1)} />
       <ScreenHeaders 

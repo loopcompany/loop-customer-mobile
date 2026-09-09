@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleApiError, handleOrganizationApiError } from '../utils/apiErrorHandler';
+import { handleApiError, handleOrganizationApiError } from '@utils/apiErrorHandler';
 import i18next from 'i18next';
 
 /**
@@ -94,6 +94,12 @@ apiClient.interceptors.response.use(
       message: error.response?.data?.message
     });
 
+    // بعضی از درخواست‌ها background و best-effort هستند و خودشان خطا را
+    // مدیریت می‌کنند؛ نباید interceptor برایشان alert سراسری نشان بدهد.
+    if (isSilentAPI(error.config?.url)) {
+      return Promise.reject(error);
+    }
+
     // اگر navigation reference وجود داره، از error handler استفاده کن
     if (navigationRef?.current) {
       const navigation = navigationRef.current;
@@ -137,6 +143,28 @@ const isOrganizationRelatedAPI = (url) => {
   ];
 
   return organizationAPIs.some(api => url.includes(api));
+};
+
+/**
+ * تشخیص API هایی که background / best-effort هستند: خطای آن‌ها نباید در
+ * interceptor باعث alert یا navigation سراسری شود، چون خود صدازننده خطا را
+ * مدیریت می‌کند (مثلاً ثبت device-token برای نوتیفیکیشن که در نبود پشتیبانی
+ * no-op می‌شود).
+ *
+ * @param {string} url - URL درخواست
+ * @returns {boolean} - آیا درخواست silent است یا نه
+ */
+const isSilentAPI = (url) => {
+  if (!url) return false;
+
+  const silentAPIs = [
+    // کل خانواده‌ی /notifications/ بهترین-تلاش است: ثبت device-token و پیامک‌های
+    // تاییدیه. صدازننده خودش خطا را مدیریت می‌کند، پس interceptor نباید alert
+    // دوم نشان بدهد یا کاربر را وسط ثبت سفارش به صفحه‌ی دیگری بفرستد.
+    '/notifications/',
+  ];
+
+  return silentAPIs.some(api => url.includes(api));
 };
 
 /**

@@ -16,19 +16,19 @@ import {
 } from 'react-native-confirmation-code-field';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { showAlert } from '../../helpers/Common';
+import { showAlert } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
 
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor10 } from '../../theme/Color';
-import Button from '../../components/Button';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { authAPI } from '../../services/Api';
-import TokenManager from '../../services/TokenManager';
-import { setToken } from '../../slices/authSlice';
-import { fetchUser } from '../../slices/userSlice';
-import { showToastOrAlert, formatTime } from '../../helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor10 } from '@theme/Color';
+import Button from '@components/Button';
+import CustomStatusBar from '@components/CustomStatusBar';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { authAPI } from '@services/Api';
+import TokenManager from '@services/TokenManager';
+import { setToken } from '@slices/authSlice';
+import { fetchUser } from '@slices/userSlice';
+import { showToastOrAlert, formatTime } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground } from 'expo-image';
 import {
@@ -245,7 +245,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
         title={t('Verify mobile number')}
         showLeftIcon={true}
       />
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit={"cover"}>
 
         <CustomStatusBar />
         <KeyboardAvoidingView

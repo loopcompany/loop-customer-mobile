@@ -13,19 +13,18 @@ import {
     Linking,
 } from "react-native";
 // CodeField imports removed - using InviteCodeInput component instead
-import Button from "../../components/Button";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "../../theme/Color";
-import { authAPI } from "../../services/Api";
-import { showToastOrAlert } from "../../helpers/Common";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import InviteCodeInput from "../../components/InviteCodeInput";
-import LocationPicker from "../../components/LocationPicker";
+import Button from "@components/Button";
+import NewStyles from "@styles/NewStyles";
+import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "@theme/Color";
+import { authAPI } from "@services/Api";
+import { showToastOrAlert, langIsRTL } from "@helpers/Common";
+import CustomStatusBar from "@components/CustomStatusBar";
+import InviteCodeInput from "@components/InviteCodeInput";
+import LocationPicker from "@components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
-import { createStyles } from '../../styles/NewStyles';
-import { langIsRTL } from '../../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
 import { useSelector } from "react-redux";
 const initialState = {
@@ -85,7 +84,7 @@ export default function MainSignIn({ navigation }) {
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, isRtl), [NewStyles, isRtl]);
     const isRtl = langIsRTL(i18n.language)
 
     // Form validation
@@ -213,7 +212,7 @@ export default function MainSignIn({ navigation }) {
     };
 
     return (
-        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+        <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
             <CustomStatusBar />
             <KeyboardAvoidingView
                 behavior={'padding'}
@@ -221,7 +220,7 @@ export default function MainSignIn({ navigation }) {
             >
                 <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                     <View style={[styles.card, NewStyles.center]}>
-                        <Image source={require("../../assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
+                        <Image source={require("@assets/logo.png")} style={styles.logoSmall} resizeMode="contain" />
 
                         {/* General Error Message */}
                         {state.errors.general && (
@@ -237,7 +236,7 @@ export default function MainSignIn({ navigation }) {
                                         NewStyles.textInput,
                                         NewStyles.text10,
                                         NewStyles.border10,
-                                        { width: '100%', textAlign: 'right' },
+                                        { width: '100%', textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr' },
                                         state.errors.melicode && styles.inputError
                                     ]}
                                     placeholder={t("National ID")}
@@ -264,7 +263,7 @@ export default function MainSignIn({ navigation }) {
                                         NewStyles.textInput,
                                         NewStyles.text10,
                                         NewStyles.border10,
-                                        { width: '100%', textAlign: 'right' },
+                                        { width: '100%', textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr' },
                                         state.errors.phone && styles.inputError
                                     ]}
                                     placeholder={t("Mobile number: 09XXXXXXXXX")}
@@ -300,7 +299,7 @@ export default function MainSignIn({ navigation }) {
                                         NewStyles.textInput,
                                         NewStyles.text10,
                                         NewStyles.border10,
-                                        { width: '100%', textAlign: 'right' },
+                                        { width: '100%', textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr' },
                                         state.errors.email && styles.inputError
                                     ]}
                                     placeholder={t("Email address*")}
@@ -344,7 +343,7 @@ export default function MainSignIn({ navigation }) {
                                         NewStyles.textInput,
                                         NewStyles.text10,
                                         NewStyles.border10,
-                                        { width: '50%', textAlign: 'right' },
+                                        { width: '50%', textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr' },
                                         state.errors.captchaInput && styles.inputError
                                     ]}
                                     placeholderTextColor={themeColor10.bgColor(0.6)}
@@ -427,7 +426,7 @@ export default function MainSignIn({ navigation }) {
     );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRtl) => StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",
@@ -461,17 +460,6 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         width: "100%",
         fontSize: 16,
         textAlign: "right",
-    },
-    submitButton: {
-        backgroundColor: "#3366ff",
-        borderRadius: 30,
-        paddingVertical: 14,
-        paddingHorizontal: 50,
-        marginTop: 30,
-        shadowColor: "#00f",
-        shadowOpacity: 0.8,
-        shadowRadius: 12,
-        elevation: 5,
     },
     submitButtonText: {
         color: "#fff",
@@ -536,7 +524,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     // inviteCodeCell styles moved to InviteCodeInput component
     mobileInput: {
         flex: 1,
-        textAlign: 'right'
+        textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr'
     },
     inputContainer: {
         width: '100%',
@@ -560,7 +548,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         color: '#ff4444',
         fontFamily: 'VazirLight',
         fontSize: 12,
-        textAlign: 'right',
+        textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr',
         marginTop: 5,
     },
     submitButton: {

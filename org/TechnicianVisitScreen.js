@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
-import CustomStatusBar from '../components/CustomStatusBar';
+import Footer from '@screens/Footer';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const TechnicianVisitScreen = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedLetter, setSelectedLetter] = useState(null);
   
@@ -108,46 +113,33 @@ const TechnicianVisitScreen = ({ navigation }) => {
           }} />
 
           {/* زمان نگهداری و سرویس (کوتاه مدت) - repeated */}
-          <View style={{ 
+          <View style={{
             backgroundColor: '#c8e6c9',
-            borderRadius: 12, 
-            paddingVertical: 12, 
-            marginBottom: 8, 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            borderWidth: 1, 
+            borderRadius: 12,
+            paddingVertical: 12,
+            marginBottom: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
             borderColor: '#81c784',
             elevation: 2,
             shadowColor: '#4caf50',
             shadowOpacity: 0.3,
-            shadowRadius: 4
+            shadowRadius: 4,
+            position: 'relative'
           }}>
-            <Text style={{ 
-              fontSize: 16, 
-              fontWeight: 'bold', 
-              color: '#2e7d32', 
-              fontFamily: 'VazirBold', 
-              textAlign: 'center' 
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#2e7d32',
+              fontFamily: 'VazirBold',
+              textAlign: 'center'
             }}>زمان نگهداری و سرویس (کوتاه مدت)</Text>
-          </View>
-
-          {/* Yellow note */}
-          <View style={{ 
-            backgroundColor: '#ffeb3b', 
-            borderRadius: 8, 
-            paddingVertical: 8, 
-            paddingHorizontal: 12, 
-            marginBottom: 12,
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: '#ffc107'
-          }}>
-            <Text style={{ 
-              fontSize: 12, 
-              color: '#333', 
-              fontFamily: 'VazirLight', 
-              textAlign: 'center' 
-            }}>راهنمای زمان نگهداری کوتاه مدت</Text>
+            <HintBadge
+              hint="راهنمای زمان نگهداری کوتاه مدت"
+              title="زمان نگهداری و سرویس (کوتاه مدت)"
+              style={{ position: 'absolute', top: 8, left: 10 }}
+            />
           </View>
         </View>
 
@@ -173,7 +165,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
           </View>
 
           {/* Time slots */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 8 }}>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: 8 }}>
             {timeSlots.map((slot) => (
               <TouchableOpacity
                 key={slot.id}
@@ -260,7 +252,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
               fontSize: 11, 
               color: '#666', 
               fontFamily: 'VazirLight', 
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               lineHeight: 16
             }}>
               بین مراجعه داشتن / اطلاعات تکنیکی در درخواست قویت با تاسیسات، تیم و ایمنی هنده

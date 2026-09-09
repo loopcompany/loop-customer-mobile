@@ -3,7 +3,7 @@ import React from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigationState } from '@react-navigation/native';
 
-import { themeColor0, themeColor5 } from '../theme/Color';
+import { themeColor0, themeColor5 } from '@theme/Color';
 
 export default function CustomStatusBar() {
 

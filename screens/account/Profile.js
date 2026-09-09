@@ -5,30 +5,31 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import NewStyles from '../../styles/NewStyles';
-import Button from '../../components/Button';
-import useLogout from '../../hooks/useLogout';
-import { themeColor0, themeColor1, themeColor10, themeColor4, themeColor6 } from '../../theme/Color';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import Footer from '../Footer';
-import { userAPI } from '../../services/Api';
-import TokenManager from '../../services/TokenManager';
-import { isLocalUri, showToastOrAlert } from '../../helpers/Common';
-import DatePickerModal from '../../components/DatePickerModal';
+import NewStyles from '@styles/NewStyles';
+import Button from '@components/Button';
+import useLogout from '@hooks/useLogout';
+import { themeColor0, themeColor1, themeColor10, themeColor4, themeColor6 } from '@theme/Color';
+import ScreenHeaders from '@components/ScreenHeaders';
+import Footer from '@screens/Footer';
+import { userAPI } from '@services/Api';
+import TokenManager from '@services/TokenManager';
+import { isLocalUri, showToastOrAlert, langIsRTL } from '@helpers/Common';
+import DatePickerModal from '@components/DatePickerModal';
 import { Ionicons } from '@expo/vector-icons';
 import OrganizationProfile from './OrganizationProfile';
 import * as ImagePicker from 'expo-image-picker';
-import { imageUri } from '../../services/URL';
-import { createStyles } from '../../styles/NewStyles';
-import LocationPicker from '../../components/LocationPicker';
-import { fetchUser } from '../../slices/userSlice';
+import { imageUri } from '@services/URL';
+import { createStyles } from '@styles/NewStyles';
+import LocationPicker from '@components/LocationPicker';
+import { fetchUser } from '@slices/userSlice';
 export default function Profile() {
     const { t, i18n } = useTranslation();
+    const isRTL = langIsRTL(i18n.language);
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles])
+    const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL])
     const navigation = useNavigation();
     const { logoutWithConfirmation, logoutFromAllDevicesWithConfirmation, isLoggingOut } = useLogout();
     const [datePickerModal, setDatePickerModal] = useState(false);
@@ -795,7 +796,7 @@ export default function Profile() {
                         <View style={{ flex: 1 }}>
                             <Text style={NewStyles.text10}>{t('Current Password')}</Text>
                             <TextInput
-                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 placeholder={t('Current Password')}
                                 secureTextEntry
@@ -807,13 +808,13 @@ export default function Profile() {
                                 }}
                             />
                             {passwordErrors.currentPassword ? (
-                                <Text style={{ ...NewStyles.text6, fontSize: 12, marginTop: 6, textAlign: 'right' }}>{passwordErrors.currentPassword}</Text>
+                                <Text style={{ ...NewStyles.text6, fontSize: 12, marginTop: 6, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>{passwordErrors.currentPassword}</Text>
                             ) : null}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={NewStyles.text10}>{t('New Password')}</Text>
                             <TextInput
-                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: 'right' }]}
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 placeholder={t('New Password')}
                                 secureTextEntry
@@ -825,7 +826,7 @@ export default function Profile() {
                                 }}
                             />
                             {passwordErrors.newPassword ? (
-                                <Text style={{ ...NewStyles.text6, fontSize: 12, marginTop: 6, textAlign: 'right' }}>{passwordErrors.newPassword}</Text>
+                                <Text style={{ ...NewStyles.text6, fontSize: 12, marginTop: 6, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>{passwordErrors.newPassword}</Text>
                             ) : null}
                         </View>
                     </View>
@@ -833,7 +834,7 @@ export default function Profile() {
                         <View style={{ flex: 1 }}>
                             <Text style={NewStyles.text10}>{t('Security Code')}</Text>
                             <TextInput
-                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: 'right' }]}
+                                style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { width: '100%', textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}
                                 placeholderTextColor={themeColor10.bgColor(0.6)}
                                 placeholder={t('Security Code')}
                                 value={captchaInput}
@@ -871,7 +872,7 @@ export default function Profile() {
                                 }
                             />
                         </TouchableOpacity>
-                        <Text style={[NewStyles.text10, { flex: 1, textAlign: 'right', marginRight: 10 }]}>
+                        <Text style={[NewStyles.text10, { flex: 1, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr', marginRight: 10 }]}>
                             {t('Automatic login (without password)')}
                         </Text>
                     </View>
@@ -905,7 +906,7 @@ export default function Profile() {
     );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     container: {
         padding: 20,
         backgroundColor: '#e0f0ff',
@@ -916,7 +917,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         paddingBottom: 100
     },
     header: {
-        flexDirection: 'row-reverse',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 20,
@@ -939,10 +940,10 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         paddingHorizontal: 15,
         borderRadius: 10,
         marginBottom: 10,
-        textAlign: 'right',
+        textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     row: {
-        flexDirection: 'row-reverse',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         gap: 10,
         marginBottom: 10,
     },
@@ -977,7 +978,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     },
     footer: {
         marginTop: 30,
-        flexDirection: 'row-reverse',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
@@ -994,7 +995,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     dateText: {
         color: '#005b9f',
         fontSize: 16,
-        textAlign: 'right',
+        textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     }
     ,
     captchaBox: {

@@ -1,13 +1,14 @@
 import { View, Text, FlatList, Pressable, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { getNext20DaysJalaali, langIsRTL } from '../helpers/Common';
-import { selectDate, setGeneralData, updateServiceScheduleField } from '../slices/stepSlice';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { getNext20DaysJalaali, langIsRTL } from '@helpers/Common';
+import { selectDate, setGeneralData, updateServiceScheduleField } from '@slices/stepSlice';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { imageUri } from '../services/URL';
+import { imageUri } from '@services/URL';
+import HintBadge from './HintBadge';
 
 export default function Date({ step, data, isServiceSchedule }) {
 
@@ -93,12 +94,10 @@ export default function Date({ step, data, isServiceSchedule }) {
                         />
                     }
                     <Text style={NewStyles.title4}> {data?.title} {data?.is_required == 1 && <Text style={NewStyles.title6}>*</Text>}</Text>
+                    <HintBadge hint={data?.des} title={data?.title} size={22} />
                 </View>
                 <Ionicons name={'chevron-down'} color={themeColor1.bgColor(1)} size={20} />
             </Pressable>
-            {show && data?.des && <View style={{ backgroundColor: themeColor1.bgColor(1), padding: 10, ...NewStyles.border5 }}>
-                <Text style={NewStyles.text10}>{data?.des}</Text>
-            </View>}
             {show && <FlatList
                 contentContainerStyle={{ gap: 10 }}
                 horizontal inverted showsHorizontalScrollIndicator={false}

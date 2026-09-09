@@ -74,6 +74,16 @@ const palate = [
     color: "#d1e9ff",
     bgColor: (opacity) => `rgba(209, 233, 255, ${opacity})`,
   },
+  {
+    // 15 - divider/border gray
+    color: "#CCCCCC",
+    bgColor: (opacity) => `rgba(204, 204, 204, ${opacity})`,
+  },
+  {
+    // 16 - secondary text gray
+    color: "#666666",
+    bgColor: (opacity) => `rgba(102, 102, 102, ${opacity})`,
+  },
 ];
 
 export const themeColor0 = {
@@ -149,4 +159,46 @@ export const themeColor13 = {
 export const themeColor14 = {
   //light blue
   ...palate[14],
+};
+
+export const themeColor15 = {
+  //divider/border gray
+  ...palate[15],
+};
+
+export const themeColor16 = {
+  //secondary text gray
+  ...palate[16],
+};
+
+// Semantic color tokens — the single source of truth for "what color means
+// what" across the app. Prefer these over reaching for themeColorN by index
+// or hardcoding a hex value. Each entry is a { color, bgColor(opacity) }
+// object, same shape as themeColor0..16, e.g. colors.primary.bgColor(1) or
+// colors.textPrimary.color.
+export const colors = {
+  primary: themeColor0,
+  primaryLight: themeColor8,
+  accent: themeColor1,
+
+  success: themeColor7,
+  error: themeColor6,
+  warning: themeColor11,
+  info: themeColor8,
+
+  white: themeColor4,
+  black: themeColor10,
+  background: themeColor5,
+  surface: themeColor4,
+
+  border: themeColor15,
+  divider: themeColor15,
+
+  textPrimary: themeColor12,
+  textSecondary: themeColor16,
+  textMuted: themeColor3,
+  textInverse: themeColor4,
+
+  overlay: themeColor10,
+  disabled: themeColor3,
 };

@@ -1,11 +1,12 @@
 // screens/IncentivePlansScreen.js
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from './Footer';
-import ScreenHeaders from "../components/ScreenHeaders";
+import ScreenHeaders from "@components/ScreenHeaders";
 import { ScreenStackHeaderBackButtonImage } from 'react-native-screens';
-import NewStyles from '../styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 export default function IncentivePlansScreen({ navigation }) {
   return (
     <SafeAreaView style={[NewStyles.container, styles.mainContainer]} edges={{ top: 'off', bottom: 'additive' }}>
@@ -30,7 +31,7 @@ export default function IncentivePlansScreen({ navigation }) {
 
         <View style={styles.footer}>
           {/* <Text style={styles.footerText}>فا</Text>
-          <Text style={styles.footerText}>21164552</Text> */}
+          <Text style={styles.footerText}>91693909</Text> */}
         </View>
       </View>
       
@@ -39,7 +40,7 @@ export default function IncentivePlansScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   mainContainer: {
     flex: 1,
     backgroundColor: '#d1e9ff',
@@ -78,15 +79,15 @@ const styles = StyleSheet.create({
   },
   description: {
     color: '#333',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     lineHeight: 24,
   },
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
   },
   footerText: {
     fontWeight: 'bold',
     color: '#003366',
   },
-});
+}));

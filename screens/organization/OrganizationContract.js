@@ -20,17 +20,17 @@ import axios from 'axios';
 import moment from 'moment';
 import jalaali from 'jalaali-js';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateContractStatus } from '../../slices/organizationSlice';
-import { useOrganizationAccess } from '../../hooks/useOrganizationAccess';
+import { updateContractStatus } from '@slices/organizationSlice';
+import { useOrganizationAccess } from '@hooks/useOrganizationAccess';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import NewStyles from '../../styles/NewStyles';
-import { handleError, showAlert, showToastOrAlert } from '../../helpers/Common';
-import { themeColor0, themeColor1, themeColor10, themeColor11, themeColor12, themeColor13, themeColor14, themeColor2, themeColor3, themeColor4, themeColor6 } from '../../theme/Color';
-import { imageUri, uri } from '../../services/URL';
-import Button from './../../components/Button';
+import { createStyles } from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import CustomStatusBar from '@components/CustomStatusBar';
+import NewStyles from '@styles/NewStyles';
+import { handleError, showAlert, showToastOrAlert } from '@helpers/Common';
+import { themeColor0, themeColor1, themeColor10, themeColor11, themeColor12, themeColor13, themeColor14, themeColor2, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { imageUri, uri } from '@services/URL';
+import Button from '@components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -491,7 +491,7 @@ const OrganizationContract = ({ navigation }) => {
           <View style={[{ width: '100%', backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, marginBottom: 10 }, NewStyles.border10, NewStyles.center]}>
             <View style={[NewStyles.row, { gap: 10 }]}>
               <Image
-                source={require('../../assets/images/upload.png')}
+                source={require('@assets/images/upload.png')}
                 style={{ width: 40, height: 40, }}
               />
               <Text style={NewStyles.title4}>{t("Organization contract")}</Text>

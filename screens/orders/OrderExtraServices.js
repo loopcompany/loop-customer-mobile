@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
-import { createStyles } from '../../styles/NewStyles';
-import { mainUri, uri } from '../../services/URL'
-import NewStyles from '../../styles/NewStyles'
-import { formatPrice, showToastOrAlert } from '../../helpers/Common'
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor7 } from '../../theme/Color'
-import Button from '../../components/Button'
+import { createStyles } from '@styles/NewStyles';
+import { mainUri, uri } from '@services/URL'
+import NewStyles from '@styles/NewStyles'
+import { formatPrice, showToastOrAlert } from '@helpers/Common'
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor7 } from '@theme/Color'
+import Button from '@components/Button'
 
 const OrderExtraServices = ({ orderId, navigation }) => {
     const { t, i18n } = useTranslation();

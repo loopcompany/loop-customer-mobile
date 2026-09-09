@@ -13,21 +13,22 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from "../../components/ScreenHeaders";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../../theme/Color";
-import { addressAPI } from "../../services/Api";
-import { showToastOrAlert, showAlert } from "../../helpers/Common";
-import Button from "../../components/Button";
-import { createStyles } from '../../styles/NewStyles';
-import ShowMapDetailComponent from "../../components/ShowMapDetailComponent";
+import ScreenHeaders from "@components/ScreenHeaders";
+import NewStyles from "@styles/NewStyles";
+import { themeColor1, themeColor4, themeColor0, themeColor3 } from "@theme/Color";
+import { addressAPI } from "@services/Api";
+import { showToastOrAlert, showAlert, langIsRTL } from "@helpers/Common";
+import Button from "@components/Button";
+import { createStyles } from '@styles/NewStyles';
+import ShowMapDetailComponent from "@components/ShowMapDetailComponent";
 export default function AddressScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -218,7 +219,7 @@ export default function AddressScreen({ route, navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -263,7 +264,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
   },
   addBtn: {
     backgroundColor: themeColor1.bgColor(1),
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 15,

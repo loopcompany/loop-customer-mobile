@@ -3,12 +3,12 @@ import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import NewStyles, { deviceWidth } from '../../styles/NewStyles';
-import { imageUri } from '../../services/URL';
-import { themeColor0, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
-import { formatDate, showToastOrAlert } from '../../helpers/Common';
-import {langIsRTL} from'../../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles, { deviceWidth } from '@styles/NewStyles';
+import { imageUri } from '@services/URL';
+import { themeColor0, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
+import { formatDate, showToastOrAlert } from '@helpers/Common';
+import {langIsRTL} from'@helpers/Common';
 export default function UserDiscountItem({ item, navigation }) {
 
   const { t, i18n } = useTranslation();

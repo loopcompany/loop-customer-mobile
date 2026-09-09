@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import BlankScreen from '../components/BlankScreen';
+import BlankScreen from '@components/BlankScreen';
 import { Platform } from 'react-native';
 
 // نمونه صفحه خالی برای تست

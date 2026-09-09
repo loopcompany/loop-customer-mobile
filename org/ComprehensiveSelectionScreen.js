@@ -1,938 +1,732 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, I18nManager } from 'react-native';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4 } from '../theme/Color';
-import ScreenTitle from '../components/ScreenTitle';
-import CustomStatusBar from '../components/CustomStatusBar';
+import React, { useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import ScreenHeaders from '@components/ScreenHeaders';
+import ScreenTitle from '@components/ScreenTitle';
+import CustomStatusBar from '@components/CustomStatusBar';
+import DatePickerModal from '@components/DatePickerModal';
+import SchedulePicker from '@components/SchedulePicker';
+import {
+  AccordionHeader,
+  SectionBody,
+  SelectableOptions,
+  SubSectionBanner,
+  DeviceCountRow,
+  DeviceCountTile,
+  HardwareCard,
+  ProcurementCard,
+  CounterWithDescription,
+  SummaryBox,
+} from '@components/OrgSelectionKit';
+import {
+  DEVICE_TYPES,
+  HARDWARE_ITEMS,
+  PROCUREMENT_ITEMS,
+  OS_ITEMS,
+  SOFTWARE_DEVICE_TYPES,
+  SOFTWARE_ITEMS,
+  TECHNICIAN_GENDER_OPTIONS,
+  TIME_SLOT_OPTIONS,
+} from './deviceCatalog';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { fontSize } from '@theme/Typography';
+import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
+import { useMenu } from '@contexts/MenuContext';
+import { L, LO } from './orgI18n';
+
+const DELIVERY_MODE_OPTIONS = [
+  { id: 'once_short', title: 'کوتاه مدت / یکبار' },
+  { id: 'monthly_short', title: 'کوتاه مدت / ماهانه' },
+  { id: 'yearly_long', title: 'بلند مدت / سالیانه' },
+  { id: 'project', title: 'پروژه‌ای' },
+];
+
+const EQUIPMENT_STATUS_OPTIONS = [
+  { id: 'needs_software_review', title: 'نیاز به بررسی نرم‌افزاری' },
+  { id: 'needs_hardware_review', title: 'نیاز به بررسی سخت‌افزاری' },
+  { id: 'supply_technical_review', title: 'تامین کالا / بررسی فنی' },
+  { id: 'no_equipment_supply', title: 'فاقد تجهیزات / تامین کالا' },
+];
+
+const CRITICAL_INFRA_OPTIONS = [
+  { id: 'org_software', title: 'نرم‌افزارهای سازمانی' },
+  { id: 'network_internet', title: 'شبکه / اینترنت' },
+  { id: 'hardware', title: 'سخت‌افزار' },
+];
+
+const SERVICE_LEVEL_OPTIONS = [
+  { id: 'standard', title: 'استاندارد' },
+  { id: 'priority', title: 'اولویت‌دار' },
+  { id: 'emergency', title: 'اضطراری' },
+];
+
+const VISIT_FREQUENCY_OPTIONS = [
+  { id: 'visits_2', title: '۲ بازدید در ماه' },
+  { id: 'visits_4', title: '۴ بازدید در ماه' },
+  { id: 'visits_6', title: '۶ بازدید در ماه' },
+  { id: 'per_agreement', title: 'طبق توافق‌نامه' },
+  { id: 'per_presence', title: 'برحسب زمان حضور' },
+  { id: 'project_delivery', title: 'فروش تحویل پروژه' },
+  { id: 'project_progress', title: 'طبق پیشرفت پروژه' },
+];
+
+const SECTIONS = [
+  {
+    id: 'delivery_mode',
+    title: 'نحوه ارائه خدمات',
+    hint: 'مشخص کنید خدمات به چه شکل و در چه بازه‌ای ارائه شود: کوتاه‌مدت/یکبار، ماهانه، سالیانه یا پروژه‌ای.',
+    icon: require('@assets/icons/sections/delivery-mode.png'),
+  },
+  {
+    id: 'software_services',
+    title: 'خدمات نرم‌افزاری',
+    hint: 'تعداد سیستم‌عامل‌ها و نرم‌افزارهای مورد نیاز برای نصب را برای هر مورد مشخص کنید.',
+    icon: require('@assets/icons/sections/software-services.png'),
+  },
+  {
+    id: 'hardware_services',
+    title: 'خدمات سخت‌افزاری',
+    hint: 'تعداد و توضیحات مربوط به سرویس سخت‌افزاری هر دسته از تجهیزات (لپ‌تاپ، کیس، مانیتور و ...) را وارد کنید.',
+    icon: require('@assets/icons/sections/hardware-services.png'),
+  },
+  {
+    id: 'procurement',
+    title: 'تامین تجهیزات / کالا',
+    hint: 'تعداد تجهیزات آکبند یا کارکرده‌ای که نیاز به تامین دارید را برای هر دسته وارد کنید.',
+    icon: require('@assets/icons/sections/procurement.png'),
+  },
+  {
+    id: 'equipment_status',
+    title: 'وضعیت فعلی تجهیزات',
+    hint: 'وضعیت کنونی تجهیزات سازمان را از نظر نیاز به بررسی نرم‌افزاری، سخت‌افزاری یا تامین کالا مشخص کنید.',
+    icon: require('@assets/icons/sections/equipment-status.png'),
+  },
+  {
+    id: 'critical_infra',
+    title: 'زیر ساخت‌های حیاتی',
+    hint: 'مهم‌ترین زیرساخت سازمان (نرم‌افزار سازمانی، شبکه/اینترنت یا سخت‌افزار) را انتخاب کنید تا در اولویت بررسی قرار گیرد.',
+    icon: require('@assets/icons/sections/critical-infra.png'),
+  },
+  {
+    id: 'service_level',
+    title: 'سطح خدمات و تامین تجهیزات',
+    hint: 'سطح اولویت ارائه خدمت (استاندارد، اولویت‌دار یا اضطراری) را انتخاب کنید.',
+    icon: require('@assets/icons/sections/service-level.png'),
+  },
+  {
+    id: 'time_range',
+    title: 'بازه زمانی / رزرو',
+    hint: 'بسته به نحوه ارائه خدمات انتخابی، تاریخ، بازه زمانی و تعداد بازدید مورد نیاز را تعیین کنید.',
+    icon: require('@assets/icons/sections/time-range.png'),
+  },
+  {
+    id: 'operator_info',
+    title: 'اطلاعات اپراتور',
+    hint: 'مشخصات فردی که به عنوان اپراتور/رابط سازمان با تکنسین در ارتباط خواهد بود را وارد کنید.',
+    icon: require('@assets/icons/sections/operator-info.png'),
+  },
+  {
+    id: 'technician',
+    title: 'انتخاب تکنسین',
+    hint: 'جنسیت تکنسینی که برای انجام خدمت مراجعه می‌کند را انتخاب کنید.',
+    icon: require('@assets/icons/sections/technician.png'),
+  },
+  {
+    id: 'letter_upload',
+    title: 'بارگزاری نامه / درخواست',
+    hint: 'در صورت نیاز، نامه یا درخواست رسمی سازمان را به‌صورت فایل بارگذاری کنید (اختیاری).',
+    icon: require('@assets/icons/sections/letter-upload.png'),
+  },
+  {
+    id: 'order_actions',
+    title: 'نمایش / استعلام / ثبت سفارش',
+    hint: 'پیش از ثبت نهایی می‌توانید پیش‌رسید را صادر یا مشاهده کنید و در نهایت سفارش را ثبت یا لغو نمایید.',
+    icon: require('@assets/icons/sections/order-actions.png'),
+  },
+];
+
+
+// ------------------------------------------------------------------------------------------
 
 const ComprehensiveSelectionScreen = ({ navigation }) => {
-  const [counts, setCounts] = useState({
-    software: 2,
-    hardware: 2,
-    network: 2,
-    monitor: 2,
-    printer: 2,
-    industrial: 2
-  });
+  // useTranslation subscribes the screen to runtime language switches so L()/LO() re-evaluate.
+  const { i18n } = useTranslation();
+  // فضای رزرو شده زیر محتوا تا آخرین بخش (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
+  const { footerSpace } = useMenu();
+  const SEC = useMemo(
+    () => SECTIONS.map((s) => ({ ...s, title: L(s.title), hint: L(s.hint) })),
+    [i18n.language]
+  );
+  const [expanded, setExpanded] = useState('delivery_mode');
 
-  const updateCount = (type, increment) => {
-    setCounts(prev => ({
-      ...prev,
-      [type]: Math.max(0, prev[type] + increment)
-    }));
+  const [deliveryMode, setDeliveryMode] = useState([]);
+
+  const [deviceCounts, setDeviceCounts] = useState({});
+  const [osCounts, setOsCounts] = useState({});
+  const [softwareDeviceCounts, setSoftwareDeviceCounts] = useState({});
+  const [softwareItems, setSoftwareItems] = useState({});
+
+  const [hardwareItems, setHardwareItems] = useState({});
+  const [procurementItems, setProcurementItems] = useState({});
+
+  const [equipmentStatus, setEquipmentStatus] = useState([]);
+  const [criticalInfra, setCriticalInfra] = useState(null);
+  const [serviceLevel, setServiceLevel] = useState(null);
+
+  const [visitFrequency, setVisitFrequency] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [timeSlot, setTimeSlot] = useState(null);
+  const [onceDate, setOnceDate] = useState('');
+
+  const [operatorInfo, setOperatorInfo] = useState({
+    jobTitle: '', fullName: '', nationalId: '', mobile: '', birthDate: '',
+  });
+  const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
+
+  const [technicianGender, setTechnicianGender] = useState(null);
+
+  const [letterFile, setLetterFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const toggleSection = (id) => setExpanded((prev) => (prev === id ? null : id));
+
+  const changeDeviceCount = (id, delta) =>
+    setDeviceCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+
+  const changeOsCount = (id, delta) =>
+    setOsCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+
+  const changeSoftwareDeviceCount = (id, delta) =>
+    setSoftwareDeviceCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+
+  const updateSoftwareItem = (id, patch) =>
+    setSoftwareItems((prev) => ({ ...prev, [id]: { count: 0, desc: '', ...prev[id], ...patch } }));
+
+  const updateHardwareItem = (id, patch) =>
+    setHardwareItems((prev) => ({ ...prev, [id]: { count: 0, desc: '', ...prev[id], ...patch } }));
+
+  const updateProcurementItem = (id, key, delta) =>
+    setProcurementItems((prev) => {
+      const current = prev[id] || { new: 0, used: 0, desc: '' };
+      return { ...prev, [id]: { ...current, [key]: Math.max(0, current[key] + delta) } };
+    });
+
+  const updateProcurementDesc = (id, desc) =>
+    setProcurementItems((prev) => ({ ...prev, [id]: { new: 0, used: 0, ...prev[id], desc } }));
+
+  // «بازه زمانی/رزرو» شرطیه: اگر «کوتاه‌مدت/یکبار» جزو حالت‌های انتخاب‌شده باشد
+  // (نحوه ارائه خدمات چندانتخابی است)، فقط تاریخ+ساعت نمایش داده می‌شود.
+  const isOnceShort = deliveryMode.includes('once_short');
+
+  const handleUploadLetter = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+      setUploading(true);
+      setLetterFile(result.assets[0]);
+      setUploading(false);
+    } catch (e) {
+      setUploading(false);
+      showToastOrAlert(L('خطا در بارگذاری فایل'));
+    }
+  };
+
+  const validateOperatorInfo = () => {
+    if (!operatorInfo.jobTitle || !operatorInfo.fullName || !operatorInfo.mobile) {
+      return false;
+    }
+    if (operatorInfo.nationalId) {
+      const { isValid } = validateMelicode(operatorInfo.nationalId);
+      if (!isValid) return false;
+    }
+    return true;
+  };
+
+  const softwareSummaryLines = useMemo(() => {
+    const lines = [];
+    OS_ITEMS.forEach((os) => {
+      if (osCounts[os.id] > 0) lines.push({ label: L(os.title), value: osCounts[os.id] });
+    });
+    SOFTWARE_DEVICE_TYPES.forEach((device) => {
+      if (softwareDeviceCounts[device.id] > 0) {
+        lines.push({ label: L(device.title), value: softwareDeviceCounts[device.id] });
+      }
+    });
+    SOFTWARE_ITEMS.forEach((item) => {
+      const entry = softwareItems[item.id];
+      if (entry?.count > 0) lines.push({ label: L(item.title), value: entry.count });
+    });
+    return lines;
+  }, [osCounts, softwareDeviceCounts, softwareItems]);
+
+  const hardwareSummaryLines = useMemo(() => {
+    return HARDWARE_ITEMS
+      .filter((item) => hardwareItems[item.id]?.count > 0)
+      .map((item) => ({ label: L(item.title), value: hardwareItems[item.id].count }));
+  }, [hardwareItems]);
+
+  const procurementSummaryLines = useMemo(() => {
+    const lines = [];
+    PROCUREMENT_ITEMS.forEach((item) => {
+      const entry = procurementItems[item.id];
+      if (entry?.new > 0) lines.push({ label: `${L(item.title)} / ${L('آکبند')}`, value: entry.new });
+      if (entry?.used > 0) lines.push({ label: `${L(item.title)} / ${L('کارکرده')}`, value: entry.used });
+    });
+    return lines;
+  }, [procurementItems]);
+
+  const handleOrderAction = (action) => {
+    if (action === 'cancel_order') {
+      showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
+        { text: L('انصراف'), style: 'cancel' },
+        { text: L('لغو سفارش'), style: 'destructive', onPress: () => showToastOrAlert(L('سفارش لغو شد')) },
+      ]);
+      return;
+    }
+    if (action === 'submit_order') {
+      if (!validateOperatorInfo()) {
+        showToastOrAlert(L('لطفاً اطلاعات اپراتور را کامل کنید.'));
+        setExpanded('operator_info');
+        return;
+      }
+      navigation.navigate('OrderSummaryScreen', {
+        source: 'comprehensive',
+        orderTitle: L('انتخاب جامع - خدمات سازمانی'),
+        // هر سه بخش انتخاب‌شده در یک فهرست خلاصه‌ی واحد.
+        summaryLines: [
+          ...softwareSummaryLines,
+          ...hardwareSummaryLines,
+          ...procurementSummaryLines,
+        ],
+        schedule: { date: isOnceShort ? onceDate : startDate, slot: timeSlot },
+        contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
+      });
+      return;
+    }
+    if (action === 'issue_receipt') {
+      showToastOrAlert(L('پیش‌رسید صادر شد'));
+      return;
+    }
+    if (action === 'show_receipt') {
+      showToastOrAlert(L('نمایش پیش‌رسید'));
+      return;
+    }
   };
 
   return (
-    <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}>
+    <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
       <CustomStatusBar />
-      <ScreenHeaders
-        title="سازمانی / دولتی"
+      <ScreenHeaders title={L('سازمانی / دولتی')} />
+      <ScreenTitle
+        title={L('انتخاب جامع')}
+        textStyle={{ fontSize: fontSize.xl, letterSpacing: 0.5 }}
+        style={{ borderBottomWidth: 3, borderBottomColor: colors.accent.color }}
       />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
 
-        {/* انتخاب جامع Header */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            backgroundColor: '#1976d2',
-            borderRadius: 12,
-            paddingVertical: 14,
-            alignItems: 'center',
-            justifyContent: 'center',
-            elevation: 3,
-            shadowColor: '#1976d2',
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: '#fff',
-              fontSize: 18,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>انتخاب جامع</Text>
-            {/* Yellow arrow down */}
-            <View style={{
-              position: 'absolute',
-              bottom: 5,
-              alignSelf: 'center',
-              width: 0,
-              height: 0,
-              borderLeftWidth: 10,
-              borderRightWidth: 10,
-              borderTopWidth: 8,
-              borderLeftColor: 'transparent',
-              borderRightColor: 'transparent',
-              borderTopColor: '#ffeb3b'
-            }} />
-          </View>
-        </View>
+        {/* ۱. نحوه ارائه خدمات */}
+        <AccordionHeader
+          title={SEC[0].title}
+          hint={SEC[0].hint}
+          icon={SEC[0].icon}
+          expanded={expanded === 'delivery_mode'}
+          onPress={() => toggleSection('delivery_mode')}
+        />
+        {expanded === 'delivery_mode' && (
+          <SectionBody>
+            <SelectableOptions options={LO(DELIVERY_MODE_OPTIONS)} value={deliveryMode} onChange={setDeliveryMode} multi columns={2} />
+          </SectionBody>
+        )}
 
-        {/* لپ تاپ Section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: themeColor4.bgColor(1),
-            borderRadius: 12,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: themeColor10.bgColor(1),
-            elevation: 2,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: themeColor10,
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لپ تاپ</Text>
-            {/* Yellow arrow down */}
-          </View>
-        </View>
+        {/* ۲. خدمات نرم‌افزاری */}
+        <AccordionHeader
+          title={SEC[1].title}
+          hint={SEC[1].hint}
+          icon={SEC[1].icon}
+          expanded={expanded === 'software_services'}
+          onPress={() => toggleSection('software_services')}
+        />
+        {expanded === 'software_services' && (
+          <SectionBody>
+            {/* زیربخش ۱: نصب سیستم عامل */}
+            <SubSectionBanner title={L('نصب سیستم عامل')} />
 
-        {/* نرم افزاری */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
+            {/* تعداد دستگاه‌ها */}
+            {DEVICE_TYPES.map((device) => (
+              <DeviceCountRow
+                key={device.id}
+                title={L(device.title)}
+                image={device.image}
+                count={deviceCounts[device.id] || 0}
+                onIncrement={() => changeDeviceCount(device.id, 1)}
+                onDecrement={() => changeDeviceCount(device.id, -1)}
+              />
+            ))}
 
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
+            {/* شبکه‌ی سه‌ستونه‌ی سیستم‌عامل‌ها */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: spacing.md }}>
+              {OS_ITEMS.map((os) => (
+                <DeviceCountTile
+                  key={os.id}
+                  title={L(os.title)}
+                  image={os.image}
+                  count={osCounts[os.id] || 0}
+                  onIncrement={() => changeOsCount(os.id, 1)}
+                  onDecrement={() => changeOsCount(os.id, -1)}
+                />
+              ))}
             </View>
-            <View style={{ flex: 1 }} />
 
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
-            </TouchableOpacity>
-          </View>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: colors.border.bgColor(0.9),
+                marginTop: spacing.sm,
+                marginBottom: spacing.lg,
+              }}
+            />
 
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
+            {/* زیربخش ۲: نصب نرم‌افزارها */}
+            <SubSectionBanner title={L('نصب نرم‌افزارها')} style={{ marginTop: spacing.sm }} />
 
-        {/* سخت افزاری */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
+            {SOFTWARE_DEVICE_TYPES.map((device) => (
+              <DeviceCountRow
+                key={device.id}
+                title={L(device.title)}
+                image={device.image}
+                count={softwareDeviceCounts[device.id] || 0}
+                onIncrement={() => changeSoftwareDeviceCount(device.id, 1)}
+                onDecrement={() => changeSoftwareDeviceCount(device.id, -1)}
+              />
+            ))}
 
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
+            {/* موارد توضیح‌دار نصب نرم‌افزار - هرکدام در قاب مستقل */}
+            <View style={{ marginTop: spacing.md }}>
+              {SOFTWARE_ITEMS.map((item) => {
+                const entry = softwareItems[item.id] || { count: 0, desc: '' };
+                return (
+                  <CounterWithDescription
+                    key={item.id}
+                    title={L(item.title)}
+                    count={entry.count}
+                    desc={entry.desc}
+                    onIncrement={() => updateSoftwareItem(item.id, { count: entry.count + 1 })}
+                    onDecrement={() => updateSoftwareItem(item.id, { count: Math.max(0, entry.count - 1) })}
+                    onDescChange={(text) => updateSoftwareItem(item.id, { desc: text })}
+                  />
+                );
+              })}
             </View>
-            <View style={{ flex: 1 }} />
 
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+            <SummaryBox title={L('خدمات نرم‌افزاری')} lines={softwareSummaryLines} />
+          </SectionBody>
+        )}
+
+        {/* ۳. خدمات سخت‌افزاری */}
+        <AccordionHeader
+          title={SEC[2].title}
+          hint={SEC[2].hint}
+          icon={SEC[2].icon}
+          expanded={expanded === 'hardware_services'}
+          onPress={() => toggleSection('hardware_services')}
+        />
+        {expanded === 'hardware_services' && (
+          <SectionBody>
+            {HARDWARE_ITEMS.map((item) => {
+              const entry = hardwareItems[item.id] || { count: 0, desc: '' };
+              return (
+                <HardwareCard
+                  key={item.id}
+                  image={item.image}
+                  title={L(item.title)}
+                  count={entry.count}
+                  desc={entry.desc}
+                  onIncrement={() => updateHardwareItem(item.id, { count: entry.count + 1 })}
+                  onDecrement={() => updateHardwareItem(item.id, { count: Math.max(0, entry.count - 1) })}
+                  onDescChange={(text) => updateHardwareItem(item.id, { desc: text })}
+                />
+              );
+            })}
+            <SummaryBox title={L('خدمات سخت‌افزاری')} lines={hardwareSummaryLines} />
+          </SectionBody>
+        )}
+
+        {/* ۴. تامین تجهیزات / کالا */}
+        <AccordionHeader
+          title={SEC[3].title}
+          hint={SEC[3].hint}
+          icon={SEC[3].icon}
+          expanded={expanded === 'procurement'}
+          onPress={() => toggleSection('procurement')}
+        />
+        {expanded === 'procurement' && (
+          <SectionBody>
+            {PROCUREMENT_ITEMS.map((item) => {
+              const entry = procurementItems[item.id] || { new: 0, used: 0, desc: '' };
+              return (
+                <ProcurementCard
+                  key={item.id}
+                  image={item.image}
+                  title={L(item.title)}
+                  newCount={entry.new}
+                  usedCount={entry.used}
+                  desc={entry.desc}
+                  onNewInc={() => updateProcurementItem(item.id, 'new', 1)}
+                  onNewDec={() => updateProcurementItem(item.id, 'new', -1)}
+                  onUsedInc={() => updateProcurementItem(item.id, 'used', 1)}
+                  onUsedDec={() => updateProcurementItem(item.id, 'used', -1)}
+                  onDescChange={(text) => updateProcurementDesc(item.id, text)}
+                />
+              );
+            })}
+            <SummaryBox title={L('تامین تجهیزات / کالا')} lines={procurementSummaryLines} />
+          </SectionBody>
+        )}
+
+        {/* ۵. وضعیت فعلی تجهیزات */}
+        <AccordionHeader
+          title={SEC[4].title}
+          hint={SEC[4].hint}
+          icon={SEC[4].icon}
+          expanded={expanded === 'equipment_status'}
+          onPress={() => toggleSection('equipment_status')}
+        />
+        {expanded === 'equipment_status' && (
+          <SectionBody>
+            <SelectableOptions options={LO(EQUIPMENT_STATUS_OPTIONS)} value={equipmentStatus} onChange={setEquipmentStatus} multi columns={2} />
+          </SectionBody>
+        )}
+
+        {/* ۶. زیر ساخت‌های حیاتی */}
+        <AccordionHeader
+          title={SEC[5].title}
+          hint={SEC[5].hint}
+          icon={SEC[5].icon}
+          expanded={expanded === 'critical_infra'}
+          onPress={() => toggleSection('critical_infra')}
+        />
+        {expanded === 'critical_infra' && (
+          <SectionBody>
+            <SelectableOptions options={LO(CRITICAL_INFRA_OPTIONS)} value={criticalInfra} onChange={setCriticalInfra} columns={3} />
+          </SectionBody>
+        )}
+
+        {/* ۷. سطح خدمات و تامین تجهیزات */}
+        <AccordionHeader
+          title={SEC[6].title}
+          hint={SEC[6].hint}
+          icon={SEC[6].icon}
+          expanded={expanded === 'service_level'}
+          onPress={() => toggleSection('service_level')}
+        />
+        {expanded === 'service_level' && (
+          <SectionBody>
+            <SelectableOptions options={LO(SERVICE_LEVEL_OPTIONS)} value={serviceLevel} onChange={setServiceLevel} columns={3} />
+          </SectionBody>
+        )}
+
+        {/* ۸. بازه زمانی / رزرو - شرطی به «نحوه ارائه خدمات» */}
+        <AccordionHeader
+          title={SEC[7].title}
+          hint={SEC[7].hint}
+          icon={SEC[7].icon}
+          expanded={expanded === 'time_range'}
+          onPress={() => toggleSection('time_range')}
+        />
+        {expanded === 'time_range' && (
+          <SectionBody>
+            {isOnceShort ? (
+              <>
+                <Text style={{ fontFamily: 'VazirLight', fontSize: fontSize.xs, color: themeColor10.bgColor(0.7), marginBottom: spacing.sm }}>
+                  {L('چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.')}
+                </Text>
+                <SchedulePicker
+                  date={onceDate}
+                  onChangeDate={setOnceDate}
+                  slot={timeSlot}
+                  onChangeSlot={setTimeSlot}
+                  slots={LO(TIME_SLOT_OPTIONS)}
+                />
+              </>
+            ) : (
+              <>
+                <SubSectionBanner title={L('تعداد بازدید')} />
+                <SelectableOptions
+                  options={LO(VISIT_FREQUENCY_OPTIONS)}
+                  value={visitFrequency}
+                  onChange={setVisitFrequency}
+                  columns={2}
+                />
+                <View style={{ height: spacing.md }} />
+                <SchedulePicker
+                  date={startDate}
+                  onChangeDate={setStartDate}
+                  slot={timeSlot}
+                  onChangeSlot={setTimeSlot}
+                  slots={LO(TIME_SLOT_OPTIONS)}
+                  dateTitle={L('تاریخ شروع')}
+                />
+              </>
+            )}
+          </SectionBody>
+        )}
+
+        {/* ۹. اطلاعات اپراتور */}
+        <AccordionHeader
+          title={SEC[8].title}
+          hint={SEC[8].hint}
+          icon={SEC[8].icon}
+          expanded={expanded === 'operator_info'}
+          onPress={() => toggleSection('operator_info')}
+        />
+        {expanded === 'operator_info' && (
+          <SectionBody>
+            <TextInput
+              value={operatorInfo.jobTitle}
+              onChangeText={(t) => setOperatorInfo((p) => ({ ...p, jobTitle: t }))}
+              placeholder={L('عنوان شغلی اپراتور')}
+              placeholderTextColor={themeColor10.bgColor(0.4)}
+              style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
+            />
+            <TextInput
+              value={operatorInfo.fullName}
+              onChangeText={(t) => setOperatorInfo((p) => ({ ...p, fullName: t }))}
+              placeholder={L('نام و نام خانوادگی اپراتور')}
+              placeholderTextColor={themeColor10.bgColor(0.4)}
+              style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
+            />
+            <TextInput
+              value={operatorInfo.nationalId}
+              onChangeText={(t) => setOperatorInfo((p) => ({ ...p, nationalId: t }))}
+              placeholder={L('شماره ملی اپراتور')}
+              placeholderTextColor={themeColor10.bgColor(0.4)}
+              keyboardType="number-pad"
+              style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
+            />
+            <TextInput
+              value={operatorInfo.mobile}
+              onChangeText={(t) => setOperatorInfo((p) => ({ ...p, mobile: t }))}
+              placeholder={L('شماره تلفن موبایل اپراتور')}
+              placeholderTextColor={themeColor10.bgColor(0.4)}
+              keyboardType="phone-pad"
+              style={[NewStyles.textInput, NewStyles.border10, { marginBottom: 8 }]}
+            />
+            <TouchableOpacity
+              onPress={() => setShowBirthDatePicker(true)}
+              style={[NewStyles.textInput, NewStyles.border10, { justifyContent: 'center' }]}
+            >
+              <Text style={{ fontFamily: 'VazirLight', color: themeColor10.bgColor(operatorInfo.birthDate ? 1 : 0.5) }}>
+                {operatorInfo.birthDate || L('تاریخ تولد (روز/ماه/سال)')}
+              </Text>
             </TouchableOpacity>
-          </View>
+            <DatePickerModal
+              datePickerModal={showBirthDatePicker}
+              setDatePickerModal={setShowBirthDatePicker}
+              birthDate={operatorInfo.birthDate}
+              setBirthDate={(d) => setOperatorInfo((p) => ({ ...p, birthDate: d }))}
+            />
+          </SectionBody>
+        )}
 
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
+        {/* ۱۰. انتخاب تکنسین - فعلاً فقط انتخاب جنسیت تکنسین */}
+        <AccordionHeader
+          title={SEC[9].title}
+          hint={SEC[9].hint}
+          icon={SEC[9].icon}
+          expanded={expanded === 'technician'}
+          onPress={() => toggleSection('technician')}
+        />
+        {expanded === 'technician' && (
+          <SectionBody>
+            <SelectableOptions
+              options={LO(TECHNICIAN_GENDER_OPTIONS)}
+              value={technicianGender}
+              onChange={setTechnicianGender}
+              columns={2}
+            />
+          </SectionBody>
+        )}
 
-
-        {/* شبکه / اتصال چند محصول */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+        {/* ۱۱. بارگزاری نامه / درخواست - اختیاری، باکس آپلود بزرگ */}
+        <AccordionHeader
+          title={SEC[10].title}
+          hint={SEC[10].hint}
+          icon={SEC[10].icon}
+          expanded={expanded === 'letter_upload'}
+          onPress={() => toggleSection('letter_upload')}
+        />
+        {expanded === 'letter_upload' && (
+          <SectionBody>
+            <TouchableOpacity
+              onPress={handleUploadLetter}
+              disabled={uploading}
+              style={{
+                borderWidth: 2,
+                borderStyle: 'dashed',
+                borderColor: themeColor0.bgColor(0.5),
+                borderRadius: 12,
+                paddingVertical: 30,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: themeColor0.bgColor(0.04),
+              }}
+            >
+              <Ionicons name="cloud-upload-outline" size={32} color={themeColor0.bgColor(0.8)} />
+              <Text style={{ fontFamily: 'VazirBold', fontSize: 13, color: themeColor10.bgColor(0.8), marginTop: 8 }}>
+                {letterFile ? letterFile.name : L('بارگزاری نامه (اختیاری)')}
+              </Text>
             </TouchableOpacity>
-          </View>
+          </SectionBody>
+        )}
 
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* هارد دیسک Section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: themeColor4.bgColor(1),
-            borderRadius: 12,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: themeColor10.bgColor(1),
-            elevation: 2,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: themeColor10,
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لپ تاپ</Text>
-            {/* Yellow arrow down */}
-          </View>
-        </View>
-        {/* اکسترنال */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+        {/* ۱۲. نمایش / استعلام / ثبت سفارش */}
+        <AccordionHeader
+          title={SEC[11].title}
+          hint={SEC[11].hint}
+          icon={SEC[11].icon}
+          expanded={expanded === 'order_actions'}
+          onPress={() => toggleSection('order_actions')}
+        />
+        {expanded === 'order_actions' && (
+          <SectionBody>
+            <TouchableOpacity
+              onPress={() => handleOrderAction('issue_receipt')}
+              style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+            >
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('صدور پیش‌رسید')}</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* اینترنال */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+            <TouchableOpacity
+              onPress={() => handleOrderAction('show_receipt')}
+              style={{ backgroundColor: themeColor0.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+            >
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('نمایش پیش‌رسید')}</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* دوربین مدار بسته Section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: themeColor4.bgColor(1),
-            borderRadius: 12,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: themeColor10.bgColor(1),
-            elevation: 2,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: themeColor10,
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لپ تاپ</Text>
-            {/* Yellow arrow down */}
-          </View>
-        </View>
-
-
-        {/* دستگاه / DVR */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+            <TouchableOpacity
+              onPress={() => handleOrderAction('submit_order')}
+              style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+            >
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('ثبت سفارش')}</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* دوربین */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
+            <TouchableOpacity
+              onPress={() => handleOrderAction('cancel_order')}
+              style={{ backgroundColor: themeColor11.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
+            >
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('لغو سفارش')}</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* مانیتور Section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: themeColor4.bgColor(1),
-            borderRadius: 12,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: themeColor10.bgColor(1),
-            elevation: 2,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: themeColor10,
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لپ تاپ</Text>
-            {/* Yellow arrow down */}
-          </View>
-        </View>
-
-
-        {/* سخت افزاری - مانیتور */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* چاپگر Section */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: themeColor4.bgColor(1),
-            borderRadius: 12,
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: themeColor10.bgColor(1),
-            elevation: 2,
-            position: 'relative'
-          }}>
-            <Text style={{
-              color: themeColor10,
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لپ تاپ</Text>
-            {/* Yellow arrow down */}
-          </View>
-        </View>
-
-        {/* پرینتر لیزری */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
-
-
-        {/* کپی صنعتی */}
-        <View style={{ width: '90%', alignSelf: 'center', marginBottom: 8 }}>
-          <View style={{
-            flexDirection: 'row',
-            padding: 8,
-            alignItems: 'center',
-          }}>
-            {/* Count Controls */}
-
-            <Text style={{
-              fontSize: 16,
-              color: themeColor10.bgColor(0.5),
-              fontFamily: 'VazirBold',
-              backgroundColor: themeColor4.bgColor(1),
-              borderRadius: 4,
-              borderColor: themeColor10.bgColor(1),
-              borderWidth: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-              marginLeft: 8,
-              minWidth: 24,
-              textAlign: 'center'
-            }}>{counts.software}</Text>
-            <View style={{
-              borderRadius: 6,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              marginLeft: 8
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: themeColor10.bgColor(1),
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>تعداد محصول</Text>
-            </View>
-            <View style={{ flex: 1 }} />
-
-            {/* Category Label */}
-            <TouchableOpacity style={{
-              backgroundColor: '#ffeb3b',
-              borderRadius: 6,
-              paddingHorizontal: 12,
-              paddingVertical: 6
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#333',
-                fontFamily: 'VazirBold',
-                textAlign: 'center'
-              }}>نرم افزاری</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Description */}
-          <View style={{
-            backgroundColor: '#f5f5f5',
-            borderRadius: 6,
-            padding: 8,
-            marginTop: 4,
-            borderWidth: 1,
-            borderColor: '#e0e0e0'
-          }}>
-            <Text style={{
-              fontSize: 12,
-              color: '#666',
-              fontFamily: 'VazirLight',
-              textAlign: 'right',
-              lineHeight: 18
-            }}>مثال: نصب ویندوز و برنامه های کاربردی و عمومی و درایورها</Text>
-          </View>
-        </View>
+          </SectionBody>
+        )}
 
       </ScrollView>
-
-    </View>
+    </ImageBackground>
   );
 };
 

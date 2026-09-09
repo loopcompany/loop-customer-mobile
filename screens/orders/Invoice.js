@@ -4,22 +4,26 @@ import axios from 'axios';
 import * as Linking from "expo-linking";
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '../../theme/Color';
-import { formatDateTime, formatPrice, showToastOrAlert } from '../../helpers/Common';
-import Button from '../../components/Button';
-import { imageUri, mainUri, uri } from '../../services/URL';
-import { fetchUser } from '../../slices/userSlice';
-import { fetchOrders } from '../../slices/orderSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, } from '@theme/Color';
+import { formatDateTime, formatPrice, showToastOrAlert } from '@helpers/Common';
+import Button from '@components/Button';
+import { imageUri, mainUri, uri } from '@services/URL';
+import { fetchUser } from '@slices/userSlice';
+import { fetchOrders } from '@slices/orderSlice';
 
-import Loader from '../../components/Loader';
+import Loader from '@components/Loader';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
+import { createStyles } from '@styles/NewStyles';
+import { useMenu } from '@contexts/MenuContext';
 function Invoice({ route, navigation }) {
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
+    // فضای رزرو شده زیر محتوا تا دکمه‌های پرداخت زیر داک شناور پنهان نشوند
+    const { footerSpace } = useMenu();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
@@ -254,14 +258,17 @@ function Invoice({ route, navigation }) {
                         )}
 
                     </View>
-                    <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                        <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
+                    <View style={{ width: '90%', alignSelf: 'center', marginVertical: 10, alignItems: 'flex-end' }}>
+                        <HintBadge
+                            hint={t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}
+                            title={t('Invoice')}
+                        />
                     </View>
                     <Text style={NewStyles.title7}>{t('Thank you for your trust:')}</Text>
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
                     <View style={{ paddingHorizontal: '5%', alignItems: 'center' }}>
                         <TouchableOpacity style={{ padding: 10 }} onPress={() => {
-                            navigation.navigate("FolderScreen")
+                            navigation.navigate("List")
                         }}>
                             <Text style={NewStyles.title}> {t("Reorder")} </Text>
                         </TouchableOpacity>
@@ -271,7 +278,7 @@ function Invoice({ route, navigation }) {
                 </View>
             </ScrollView>
 
-            {(data?.started_at || ((data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at))) && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
+            {(data?.started_at || ((data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at))) && <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: themeColor4.bgColor(0), gap: 10, maxWidth: 900, width: '100%', alignSelf: 'center', marginBottom: footerSpace }]}>
                 {data?.payment_status > 0 ?
                     <View style={[{ flex: 1 }, NewStyles.center]}>
 

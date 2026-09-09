@@ -4,19 +4,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { cleanText, formatPrice, handleError, showToastOrAlert } from '../../helpers/Common';
-import { imageUri, uri } from '../../services/URL';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor5 } from '../../theme/Color';
-import Button from '../../components/Button';
+import { cleanText, formatPrice, handleError, showToastOrAlert } from '@helpers/Common';
+import { imageUri, uri } from '@services/URL';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor3, themeColor5 } from '@theme/Color';
+import Button from '@components/Button';
 import { useTranslation } from 'react-i18next';
 import DiscountModal from './DiscountModal';
-import { fetchUser } from '../../slices/userSlice';
+import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import { createStyles } from '@styles/NewStyles';
+import { useMenu } from '@contexts/MenuContext';
 export default function DiscountDetail({ route, navigation }) {
     const { t, i18n } = useTranslation();
+    // فضای رزرو شده زیر محتوا تا دکمه زیر داک شناور پنهان نشود
+    const { footerSpace } = useMenu();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
@@ -152,7 +155,7 @@ export default function DiscountDetail({ route, navigation }) {
                 </View>
             </ScrollView>
 
-            <View style={[NewStyles.row, NewStyles.nav]}>
+            <View style={[NewStyles.row, NewStyles.nav, { marginBottom: footerSpace }]}>
                 <View style={[NewStyles.row, { gap: 5 }]}>
                     <Text style={NewStyles.title}>{data?.gems} <Text style={NewStyles.title}>{t("Required Points")}</Text></Text>
                 </View>

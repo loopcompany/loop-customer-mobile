@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 
 export const fetchAddresses = createAsyncThunk('addresses/addresses', async (token) => {
     return await axios

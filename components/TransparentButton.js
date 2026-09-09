@@ -1,8 +1,8 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import React from 'react';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0 } from '@theme/Color';
 
 export default function TransparentButton({ title, onPress, loading , customStyle, customTextStyle}) {
     return (

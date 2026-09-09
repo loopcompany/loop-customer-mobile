@@ -1,21 +1,23 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NewStyles from '../../styles/NewStyles';
-import ScreenHeaders from '../../components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchOrders } from '../../slices/ordersSlice';
+import { fetchOrders } from '@slices/ordersSlice';
 import { useFocusEffect } from '@react-navigation/native';
-import OrderItem from '../../components/OrderItem';
-import { createStyles } from '../../styles/NewStyles';
+import OrderItem from '@components/OrderItem';
+import { createStyles } from '@styles/NewStyles';
+import { langIsRTL } from '@helpers/Common';
 function CanceledOrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const dispatch = useDispatch();
   const orders = useSelector(state => state.orders?.data);
   const user = useSelector(state => state.user?.data);
@@ -67,7 +69,7 @@ function CanceledOrdersScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#e0f0ff',
@@ -100,7 +102,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     fontSize: 14,
     color: '#444',
     marginBottom: 4,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   value: {
     fontWeight: 'bold',

@@ -2,10 +2,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 
-import NewStyles, { deviceWidth } from '../styles/NewStyles';
-import { themeColor5 } from '../theme/Color';
-import { formatDateTime } from '../helpers/Common';
-import { createStyles } from '../styles/NewStyles';
+import NewStyles, { deviceWidth } from '@styles/NewStyles';
+import { themeColor5 } from '@theme/Color';
+import { formatDateTime } from '@helpers/Common';
+import { createStyles } from '@styles/NewStyles';
 export default function GemTransactionItem({ item }) {
 
   const { t, i18n } = useTranslation();

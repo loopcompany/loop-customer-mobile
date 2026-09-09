@@ -1,0 +1,23 @@
+{
+  "_comment": "Copy this file to google-services.json and replace every value with the ones from your Firebase project (Project settings > Your apps > Android app). google-services.json is client config (not the secret backend service-account key) but is git-ignored here so a wrong project's config can't be committed by accident.",
+  "project_info": {
+    "project_number": "REPLACE_SENDER_ID",
+    "project_id": "REPLACE_PROJECT_ID",
+    "storage_bucket": "REPLACE_PROJECT_ID.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:REPLACE_SENDER_ID:android:REPLACE_HASH",
+        "android_client_info": {
+          "package_name": "com.clpiran.loop"
+        }
+      },
+      "api_key": [{ "current_key": "REPLACE_WITH_ANDROID_API_KEY" }],
+      "services": {
+        "appinvite_service": { "other_platform_oauth_client": [] }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

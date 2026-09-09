@@ -2,15 +2,15 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import { uri } from '../../services/URL';
-import { showToastOrAlert } from '../../helpers/Common';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor5 } from '../../theme/Color';
-import GemTransactionItem from '../../components/GemTransactionItem';
+import { uri } from '@services/URL';
+import { showToastOrAlert } from '@helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor5 } from '@theme/Color';
+import GemTransactionItem from '@components/GemTransactionItem';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUser } from '../../slices/userSlice';
+import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
+import ScreenHeaders from '@components/ScreenHeaders';
 import i18n from 'i18next';
 export default function GemTransactions() {
 

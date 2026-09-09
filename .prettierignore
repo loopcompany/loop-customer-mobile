@@ -1,0 +1,8 @@
+node_modules
+dist
+web-build
+.expo
+graphify-out
+package-lock.json
+assets
+public

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "265545563500",
+    "project_id": "loop-1efb6",
+    "storage_bucket": "loop-1efb6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265545563500:android:7263a7804a3e1b68bdc749",
+        "android_client_info": {
+          "package_name": "com.clpiran.loop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo_deMgqt9ek9hbzqMEZrTlx6Gypboh84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

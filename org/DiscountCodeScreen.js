@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import Footer from '../screens/Footer';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../theme/Color';
-import CustomStatusBar from '../components/CustomStatusBar';
+import Footer from '@screens/Footer';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const DiscountCodeScreen = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [discountCode, setDiscountCode] = useState('');
   const [operatorInfo, setOperatorInfo] = useState({
     title: '',
@@ -46,7 +51,11 @@ const DiscountCodeScreen = ({ navigation }) => {
               fontFamily: 'VazirBold',
               textAlign: 'center' 
             }}>تخفیف پنل / کد تخفیف</Text>
-            {/* Yellow arrow down */}
+            <HintBadge
+              hint="راهنمای احتساب درصد تخفیف پنل / کد تخفیف ۱"
+              title="تخفیف پنل / کد تخفیف"
+              style={{ position: 'absolute', top: 10, left: 10 }}
+            />
             <View style={{
               position: 'absolute',
               bottom: -8,
@@ -58,37 +67,9 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderTopWidth: 8,
               borderLeftColor: 'transparent',
               borderRightColor: 'transparent',
-              borderTopColor: '#ffeb3b'
+              borderTopColor: themeColor0.color
             }} />
           </View>
-        </View>
-
-        {/* راهنمای احتساب - Yellow Banner */}
-        <View style={{ 
-          width: '100%',
-          backgroundColor: '#ffeb3b',
-          paddingVertical: 8,
-          marginBottom: 15,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 10
-        }}>
-          {/* Dotted line */}
-          <View style={{
-            flex: 1,
-            borderTopWidth: 2,
-            borderTopColor: '#000',
-            borderStyle: 'dotted',
-            marginRight: 10
-          }} />
-          <Text style={{
-            fontSize: 12,
-            fontFamily: 'VazirBold',
-            color: '#000',
-            textAlign: 'center'
-          }}>
-            راهنمای احتساب درصد تخفیف پنل / کد تخفیف ۱
-          </Text>
         </View>
 
         {/* احتساب درصد تخفیف پنل */}
@@ -125,7 +106,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={discountCode}
@@ -156,7 +137,11 @@ const DiscountCodeScreen = ({ navigation }) => {
               fontFamily: 'VazirBold',
               textAlign: 'center' 
             }}>اطلاعات اپراتور</Text>
-            {/* Yellow arrow down */}
+            <HintBadge
+              hint="راهنمای اطلاعات اپراتور ۱"
+              title="اطلاعات اپراتور"
+              style={{ position: 'absolute', top: 10, left: 10 }}
+            />
             <View style={{
               position: 'absolute',
               bottom: -8,
@@ -168,37 +153,9 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderTopWidth: 8,
               borderLeftColor: 'transparent',
               borderRightColor: 'transparent',
-              borderTopColor: '#ffeb3b'
+              borderTopColor: themeColor0.color
             }} />
           </View>
-        </View>
-
-        {/* راهنمای اطلاعات اپراتور - Yellow Banner */}
-        <View style={{ 
-          width: '100%',
-          backgroundColor: '#ffeb3b',
-          paddingVertical: 8,
-          marginBottom: 15,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 10
-        }}>
-          {/* Dotted line */}
-          <View style={{
-            flex: 1,
-            borderTopWidth: 2,
-            borderTopColor: '#000',
-            borderStyle: 'dotted',
-            marginRight: 10
-          }} />
-          <Text style={{
-            fontSize: 12,
-            fontFamily: 'VazirBold',
-            color: '#000',
-            textAlign: 'center'
-          }}>
-            راهنمای اطلاعات اپراتور ۱
-          </Text>
         </View>
 
         {/* فیلدهای ورودی */}
@@ -213,7 +170,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.title}
@@ -234,7 +191,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.name}
@@ -255,7 +212,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.nationalId}
@@ -277,7 +234,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.mobileNumber}
@@ -299,7 +256,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.birthDate}

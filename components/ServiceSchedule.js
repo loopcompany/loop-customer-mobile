@@ -3,14 +3,14 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5 } from '../theme/Color';
-import { updateRadioButton } from '../slices/stepSlice';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
+import { updateRadioButton } from '@slices/stepSlice';
 import Date from './Date';
 import Time from './Time';
 import File from './File';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../styles/NewStyles';
-import { imageUri } from '../services/URL';
+import { createStyles } from '@styles/NewStyles';
+import { imageUri } from '@services/URL';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ServiceSchedule({ step, data }) {

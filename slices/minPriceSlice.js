@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authAPI } from '../services/Api';
+import { authAPI } from '@services/Api';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 
 export const fetchMinPrice = createAsyncThunk('user/fetchMinPrice', async (token, { rejectWithValue }) => {
     try {

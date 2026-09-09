@@ -4,9 +4,9 @@ import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor10, themeColor3, themeColor4, } from '../../theme/Color';
-import { showToastOrAlert } from '../../helpers/Common';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor10, themeColor3, themeColor4, } from '@theme/Color';
+import { showToastOrAlert } from '@helpers/Common';
 import { Image } from 'expo-image';
 
 export default function DiscountModal({ discountModal, setDiscountModal, code }) {
@@ -33,7 +33,7 @@ export default function DiscountModal({ discountModal, setDiscountModal, code })
                         </View>
                         <View style={{ borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor3.bgColor(1) }} />
                         <View style={NewStyles.center}>
-                            <Image style={{ aspectRatio: 1, width: '50%' }} contentFit="contain" source={require('../../assets/images/emojies/Party.png')} />
+                            <Image style={{ aspectRatio: 1, width: '50%' }} contentFit="contain" source={require('@assets/images/emojies/Party.png')} />
                         </View>
                         <Text style={NewStyles.text10}>{t('View your promotional codes in the received codes section.')}</Text>
 

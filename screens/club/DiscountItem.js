@@ -2,11 +2,11 @@ import { View, Text, Pressable, Image, StyleSheet, Platform } from 'react-native
 import React, { useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import NewStyles, { deviceWidth } from '../../styles/NewStyles';
-import { imageUri } from '../../services/URL';
-import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from '../../theme/Color';
-import { langIsRTL } from '../../helpers/Common';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles, { deviceWidth } from '@styles/NewStyles';
+import { imageUri } from '@services/URL';
+import { themeColor0, themeColor10, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
+import { langIsRTL } from '@helpers/Common';
 export default function DiscountItem({ item, navigation }) {
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

@@ -3,8 +3,8 @@ import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor1, themeColor10, themeColor4, themeColor6 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { themeColor1, themeColor10, themeColor4, themeColor6 } from '@theme/Color';
 import Button from './Button';
 import i18n from 'i18next'
 import { Ionicons } from '@expo/vector-icons';

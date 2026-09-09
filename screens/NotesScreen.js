@@ -9,17 +9,18 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from "../components/ScreenHeaders";
-import NewStyles from "../styles/NewStyles";
-import { themeColor1, themeColor4, themeColor0, themeColor3 } from "../theme/Color";
-import { notesAPI } from "../services/Api";
-import { showToastOrAlert, showAlert, formatDate, formatDateTime } from "../helpers/Common";
-import Button from "../components/Button";
+import ScreenHeaders from "@components/ScreenHeaders";
+import NewStyles from "@styles/NewStyles";
+import { themeColor1, themeColor4, themeColor0, themeColor3 } from "@theme/Color";
+import { notesAPI } from "@services/Api";
+import { showToastOrAlert, showAlert, formatDate, formatDateTime, langIsRTL } from "@helpers/Common";
+import Button from "@components/Button";
 import moment from "moment-jalaali";
-import { createStyles } from '../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function NotesScreen({ route, navigation }) {
 const { t, i18n } = useTranslation();
+const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -99,7 +100,7 @@ const { t, i18n } = useTranslation();
   };
 
  
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const renderNoteCard = ({ item }) => {
     return (
       <View style={[styles.noteCard, NewStyles.border10]}>
@@ -191,7 +192,7 @@ const { t, i18n } = useTranslation();
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
 
   listContent: {
     padding: 16,
@@ -204,7 +205,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     borderRadius: 10,
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
@@ -213,11 +214,11 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     borderBottomColor: themeColor3.bgColor(0.2),
   },
   dateContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
   },
   actionButtons: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     gap: 10,
   },
   iconBtn: {

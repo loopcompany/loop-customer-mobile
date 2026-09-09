@@ -8,22 +8,21 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import ScreenHeaders from '../components/ScreenHeaders';
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '../theme/Color';
-import CustomStatusBar from '../components/CustomStatusBar';
-import { getTicketsList, sendTicketMessage } from '../services/Api';
-import { formatDate, formatDateTime } from '../helpers/Common';
-import Button from '../components/Button';
+import ScreenHeaders from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
+import { getTicketsList, sendTicketMessage } from '@services/Api';
+import { formatDate, formatDateTime, showAlert } from '@helpers/Common';
+import Button from '@components/Button';
 import { useSelector } from 'react-redux';
-import { createStyles } from '../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 export default function MessageScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -57,7 +56,7 @@ export default function MessageScreen({ navigation }) {
       }
     } catch (error) {
       console.error(t('Error retrieving messages'), error);
-      Alert.alert(t('Error'), t('Error retrieving messages'));
+      showAlert(t('Error'), t('Error retrieving messages'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -78,12 +77,12 @@ export default function MessageScreen({ navigation }) {
   // ارسال پیام جدید
   const handleSendMessage = async () => {
     if (!messageText.trim()) {
-      Alert.alert(t('Warning'), t('Please enter the message text'));
+      showAlert(t('Warning'), t('Please enter the message text'));
       return;
     }
 
     if (messageText.length > 5000) {
-      Alert.alert(t('Warning'), t('Message text should not exceed 5000 characters'));
+      showAlert(t('Warning'), t('Message text should not exceed 5000 characters'));
       return;
     }
 
@@ -92,13 +91,13 @@ export default function MessageScreen({ navigation }) {
       const response = await sendTicketMessage(messageText);
 
       if (response.success) {
-        Alert.alert(t('Successful'), t('Your message was sent successfully'));
+        showAlert(t('Successful'), t('Your message was sent successfully'));
         setMessageText('');
         // به‌روزرسانی لیست پیام‌ها
         await fetchMessages();
       }
     } catch (error) {
-      Alert.alert(t('Error'), error.message || t('Error sending message'));
+      showAlert(t('Error'), error.message || t('Error sending message'));
     } finally {
       setSending(false);
     }

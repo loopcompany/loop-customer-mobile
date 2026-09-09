@@ -70,7 +70,7 @@ const store = configureStore({
     minPrice: minPriceSlice,
     hashApp: hashAppSlice,
   },
-  preloadedState
+  preloadedState,
 });
 
 // Subscribe to store changes and save state automatically on web

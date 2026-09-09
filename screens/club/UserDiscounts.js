@@ -2,15 +2,15 @@ import { FlatList, View } from 'react-native';
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import { uri } from '../../services/URL';
-import { showToastOrAlert } from '../../helpers/Common';
-import NewStyles from '../../styles/NewStyles';
+import { uri } from '@services/URL';
+import { showToastOrAlert } from '@helpers/Common';
+import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
 import UserDiscountItem from './UserDiscountItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import BlankScreen from './../../components/BlankScreen';
-import { createStyles } from '../../styles/NewStyles';
+import ScreenHeaders from '@components/ScreenHeaders';
+import BlankScreen from '@components/BlankScreen';
+import { createStyles } from '@styles/NewStyles';
 export default function UserDiscounts({ navigation }) {
 
     const { t, i18n } = useTranslation();

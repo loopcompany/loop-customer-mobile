@@ -16,24 +16,46 @@ This is an **Expo-managed React Native app** (v0.79.6) using the new architectur
 ## Project Structure Pattern
 
 ```
-/screens/          # Main application screens
+App.js             # Providers only (~80 lines) — screens are NOT registered here
+/navigation/       # routes.js = single source of truth for all 85 screens
+/i18n/             # i18next bootstrap
+/screens/          # Customer screens, grouped by domain into subdirectories
 /org/              # Organization-specific screens and auth flows
   /logreg/         # Login/registration components
 /components/       # Reusable UI components (Button, CheckBox, etc.)
+/contexts/         # React contexts (MenuContext)
 /slices/           # Redux Toolkit slices
 /services/         # API configuration and utilities
-/styles/           # StyleSheet definitions (Styles.js, NewStyles.js)
-/theme/            # Color definitions and theming
+/styles/           # NewStyles.js — the only shared stylesheet
+/theme/            # Design tokens: Color, Spacing, Radius, Typography, Shadows
 /helpers/          # Utility functions (Common.js)
 /assets/           # Static assets including localization files
 ```
 
+### Import paths — always use an `@alias`
+
+```javascript
+import Button from '@components/Button';
+import { colors } from '@theme/Color';
+```
+
+Aliases: `@assets @components @contexts @helpers @hooks @i18n @navigation @org @screens
+@services @slices @store @styles @theme @utils`. A parent-relative `../` import is an
+ESLint **error**. The table lives in `babel.config.js`, mirrored in `jsconfig.json` and
+`eslint.config.js`.
+
+Run `npm run lint` before finishing. It must stay at **0 errors**.
+
 ## Key Development Patterns
 
 ### Navigation Structure
-- Main entry: `App.js` contains a single `Stack.Navigator` with ~40+ screens
-- No nested navigators in main file - all screens are flat in the stack
-- Navigation pattern: `navigation.navigate('ScreenName')`
+- One flat `Stack.Navigator`, no nested navigators. `navigation.navigate('ScreenName')`.
+- **`navigation/routes.js` is the single source of truth.** `RootNavigator.js` (the stack)
+  and `linking.js` (web deep links) are both generated from it, so a screen cannot be
+  registered on one and forgotten on the other.
+- Screens are loaded via `getComponent: () => require('@screens/X').default`, which keeps
+  them out of the startup path. Do not switch a route to a static `component={X}` import.
+- `headerShown: false` is the navigator-wide default — never repeat it per screen.
 
 ### Redux State Management
 Store configured in `store.js` with slices:
@@ -44,10 +66,16 @@ const token = useSelector(state => state.auth.token);
 ```
 
 ### Styling System
-- **Two style files**: `Styles.js` (legacy) and `NewStyles.js` (current)
-- **Color theming**: Use `theme/Color.js` with indexed colors (`themeColor0`, `themeColor1`, etc.)
+- **One style file**: `NewStyles.js`. (`Styles.js` has been deleted.)
+- **Color theming**: prefer the semantic `colors` object from `theme/Color.js`
+  (`colors.primary`, `colors.error`, ...) over indexed `themeColorN`. No raw hex literals.
+- **Tokens**: `theme/Spacing.js`, `theme/Radius.js`, `theme/Typography.js`, `theme/Shadows.js`.
 - **Responsive utilities**: `getColumnsCount()`, `getImageSize()` in `helpers/Common.js`
-- **RTL Support**: Uses Persian fonts (Vazir-Bold, Vazir-Light) but forces LTR layout
+- **RTL Support**: Persian fonts on a deliberately LTR layout. Use `getFontFamily()` from
+  `theme/Typography.js` — the registered families are `VazirBold`/`VazirLight`/`VazirBoldFD`/
+  `VazirLightFD`; a hyphenated `'Vazir-Bold'` silently falls back to the system font.
+- **Alerts**: `showAlert()`/`showToastOrAlert()` from `@helpers/Common`. Bare `Alert.alert()`
+  is a no-op on web and is an ESLint error.
 
 ### Component Patterns
 - Custom components in `/components/`: `Button`, `ScreenHeaders`, `CustomStatusBar`
@@ -162,7 +190,8 @@ onStateChange={(state) => {
 
 **Adding a new screen**: 
 1. Create in `/screens/` or `/org/` (for org-specific)
-2. Import and add to Stack.Navigator in `App.js`
+2. Add **one entry to `navigation/routes.js`** — this registers it on the navigator and
+   gives it a web URL. Nothing in `App.js` needs to change.
 3. Use `CustomStatusBar`, `ScreenHeaders`, and `Footer` components
 
 **Adding Redux state**:
@@ -170,7 +199,7 @@ onStateChange={(state) => {
 2. Add to store configuration in `store.js`
 
 **Styling**: 
-- Use `NewStyles.js` for new components
+- Compose from `theme/*` tokens; use `NewStyles.js` for shared composites
 - Reference theme colors via `theme/Color.js`
 - Responsive utilities available in `helpers/Common.js`
 

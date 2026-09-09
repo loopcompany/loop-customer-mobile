@@ -662,6 +662,7 @@
   "Login to account": "ورود به حساب کاربری",
   "Organization code": "کد سازمانی",
   "Organization code *": "کد سازمانی",
+  "User code": "کد کاربری",
   "Password": "رمز عبور",
   "Password * (at least 8 characters)": "رمز عبور * (حداقل 8 کاراکتر)",
   "Password (at least 6 characters)": "رمز عبور (حداقل 6 کاراکتر)",
@@ -1398,6 +1399,8 @@
   "Automatic login (without password)": "ورود خودکار (بدون رمز)",
   "Image selected. To save, click Save Profile Information button": "تصویر انتخاب شد برای ذخیره کردن، روی دکمه ی ذخیره اطلاعات کاربر کلیک کنید.",
   "Select organization type": "نوع سازمان را انتخاب کنید",
+  "Individual user": "کاربر حقیقی",
+  "Organization": "سازمان",
   "Government organization": "سازمانی دولتی",
   "Semi-governmental organization": "سازمانی نیمه دولتی",
   "Private company": "شرکت خصوصی ",
@@ -1423,7 +1426,7 @@
   "Product password": "رمز محصول",
   "To place an order, first complete your information in the account section.": "برای ثبت سفارش، ابتدا اطلاعات خود را در قسمت حساب کاربری تکمیل کنید",
   "Message to Loop technician": "پیام به تکنسین لوپ",
-  "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)": "همراه لوپ عزیز، جمع رسید بیش از {{price}} تومان، هزینه ایاب و ذهاب و کارشناسی را مهمان لوپ هستید)",
+  "Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)": "همراه لوپ عزیز، هزینه کارشناسی، عیب یابی، ایاب ذهاب در صورت صدور رسید موفق، از هزینه رسید کسر می گردد.",
   "Auto-login enabled": "ورود خودکار فعال شد",
   "Auto-login disabled": "ورود خودکار غیرفعال شد",
   "Please enter your name.": "لطفا نام خود را وارد کنید",
@@ -1555,5 +1558,6 @@
   "Edit request": "درخواست ویرایش",
   "Awaiting review of changes": "در انتظار بررسی تغییرات",
   "Verification code": "کدبازیابی",
-  "Recovery code sent": "کدبازیابی ارسال شد"
+  "Recovery code sent": "کدبازیابی ارسال شد",
+  "Guide": "راهنما"
 }

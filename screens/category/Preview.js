@@ -4,23 +4,29 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createStyles } from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '../../theme/Color';
-import { formatDate, formatPrice, showToastOrAlert } from '../../helpers/Common';
-import { emptySteps, selectTotalPrice } from '../../slices/stepSlice';
-import Button from '../../components/Button';
-import { imageUri, uri } from '../../services/URL';
-import { fetchOrders } from '../../slices/orderSlice';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
+import { formatDate, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { describeApiError } from '@utils/apiErrorHandler';
+import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
+import Button from '@components/Button';
+import { imageUri, uri } from '@services/URL';
+import { API_ENDPOINTS } from '@services/ApiEndpoints';
+import { fetchOrders } from '@slices/orderSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { emptyCategory } from '../../slices/categorySlice';
-import ProgressBar from '../../components/ProgressBar';
-import { emptyAddress } from '../../slices/addressSlice';
-import Loader from '../../components/Loader';
+import { emptyCategory } from '@slices/categorySlice';
+import ProgressBar from '@components/ProgressBar';
+import { emptyAddress } from '@slices/addressSlice';
+import Loader from '@components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScreenHeaders from '../../components/ScreenHeaders';
+import ScreenHeaders from '@components/ScreenHeaders';
+import HintBadge from '@components/HintBadge';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMenu } from '@contexts/MenuContext';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
+    // فضای رزرو شده زیر محتوا تا دکمه ثبت نهایی زیر داک شناور پنهان نشود
+    const { footerSpace } = useMenu();
     // const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
     const { t, i18n } = useTranslation();
@@ -206,8 +212,8 @@ function Preview({ navigation }) {
             } else {
             }
 
-            // ✅ Route صحیح: POST /api/orders/ (با / در انتها)
-            const response = await axios.post(`${uri}/orders/submit`, payload, {
+            // Route صحیح: POST /api/orders/ (با / در انتها) — services/ApiEndpoints.js
+            const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, payload, {
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -226,7 +232,7 @@ function Preview({ navigation }) {
                 navigation.replace('OrdersScreen');
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
+            const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
             setLoading(false);
@@ -246,7 +252,7 @@ function Preview({ navigation }) {
                 showToastOrAlert(response?.data?.message)
             }
         } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
+            const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
             setPending(false);
@@ -288,7 +294,7 @@ function Preview({ navigation }) {
                             >
                                 <View style={[NewStyles.row, { gap: 10 }]}>
                                     <Image
-                                        source={require('../../assets/images/price.png')}
+                                        source={require('@assets/images/price.png')}
                                         style={{ height: 60, width: 60, resizeMode: 'contain' }}
                                     />
                                     <Text style={NewStyles.title4}> {isFixed == 1 ? t('Loop Fixed Amount') : t('Loop Base Amount')} </Text>
@@ -322,7 +328,7 @@ function Preview({ navigation }) {
                     >
                         <View style={[NewStyles.row, { gap: 10 }]}>
                             <Image
-                                source={require('../../assets/images/discount.png')}
+                                source={require('@assets/images/discount.png')}
                                 style={{ height: 60, width: 60, resizeMode: 'contain' }}
                             />
                             <Text style={NewStyles.title4}> {t('Discount Code')} </Text>
@@ -348,7 +354,7 @@ function Preview({ navigation }) {
                             ]}
                         >
                             <Ionicons name={'ticket-outline'} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[styles.textInput, NewStyles.text10]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
+                            <TextInput style={[styles.textInput, NewStyles.text10, { flex: 1, textAlign: langIsRTL(lang) ? 'right' : 'left', writingDirection: langIsRTL(lang) ? 'rtl' : 'ltr' }]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
                         </View>
                         <Pressable
                             style={[
@@ -514,11 +520,14 @@ function Preview({ navigation }) {
                     </View>
                 </View>}
                 {imagePath && <Image style={[{ height: 250, margin: '5%', resizeMode: 'contain' }, NewStyles.border10]} source={{ uri: `${imageUri}/${imagePath}` }} />}
-                <View style={[{ backgroundColor: themeColor1.bgColor(1), padding: 10, width: '90%', alignSelf: 'center', marginVertical: 10 }, NewStyles.border10]}>
-                    <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}</Text>
+                <View style={{ width: '90%', alignSelf: 'center', marginVertical: 10, alignItems: 'flex-end' }}>
+                    <HintBadge
+                        hint={t("Dear Loop, the total receipt is more than {{price}} tomans, you are a guest of Loop (travel and examination expenses are covered)", { price: formatPrice(minPrice?.price) })}
+                        title={t('Preview')}
+                    />
                 </View>
             </ScrollView>
-            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: 10 }]}>
+            <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: footerSpace }]}>
                 <View style={{ flex: 1, alignItems: 'center' }}>
                     <Button title={t('Final Order Submission')} textStyle={{ color: themeColor4.bgColor(1) }} style={{ backgroundColor: themeColor7.bgColor(1) }} loading={loading} onPress={() => submitOrder()} />
                 </View>

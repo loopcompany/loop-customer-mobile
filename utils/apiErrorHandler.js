@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { showAlert } from '@helpers/Common';
 
 /**
  * مدیریت خطاهای API مربوط به کنترل دسترسی کاربران سازمانی
@@ -17,7 +17,7 @@ export const handleApiError = (error, navigation) => {
 
   if (!error?.response) {
     // خطای شبکه یا عدم دسترسی به سرور
-    Alert.alert(
+    showAlert(
       'خطای ارتباط',
       'اتصال به سرور برقرار نیست. لطفا اتصال اینترنت خود را بررسی کنید.',
       [{ text: 'متوجه شدم', style: 'default' }]
@@ -49,7 +49,7 @@ export const handleApiError = (error, navigation) => {
           });
         } else {
           // اگر navigation نداریم، فقط alert نشون بدیم
-          Alert.alert(
+          showAlert(
             'دسترسی محدود',
             data.message || 'لطفا منتظر تایید ادمین باشید',
             [{ text: 'متوجه شدم', style: 'default' }]
@@ -59,7 +59,7 @@ export const handleApiError = (error, navigation) => {
       }
       
       // سایر خطاهای 403
-      Alert.alert(
+      showAlert(
         'عدم دسترسی',
         'شما مجوز انجام این عمل را ندارید',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -71,7 +71,7 @@ export const handleApiError = (error, navigation) => {
       // خطای احراز هویت - token منقضی شده
       console.log('🔐 Authentication error detected');
       
-      Alert.alert(
+      showAlert(
         'خطای احراز هویت',
         'نشست شما منقضی شده است. لطفا مجددا وارد شوید.',
         [
@@ -99,7 +99,7 @@ export const handleApiError = (error, navigation) => {
       const firstError = Object.values(validationErrors)[0];
       const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
       
-      Alert.alert(
+      showAlert(
         'خطای اعتبارسنجی',
         errorMessage || data.message || 'اطلاعات وارد شده نامعتبر است',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -109,7 +109,7 @@ export const handleApiError = (error, navigation) => {
     
     case 429: {
       // خطای محدودیت درخواست
-      Alert.alert(
+      showAlert(
         'درخواست‌های زیاد',
         'شما درخواست‌های زیادی ارسال کرده‌اید. لطفا کمی صبر کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -119,7 +119,7 @@ export const handleApiError = (error, navigation) => {
     
     case 500: {
       // خطای سرور
-      Alert.alert(
+      showAlert(
         'خطای سرور',
         'مشکلی در سرور پیش آمده است. لطفا چند دقیقه دیگر مجددا تلاش کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -129,7 +129,7 @@ export const handleApiError = (error, navigation) => {
     
     case 503: {
       // سرویس در دسترس نیست
-      Alert.alert(
+      showAlert(
         'سرویس در دسترس نیست',
         'سرویس موقتاً در دسترس نیست. لطفا بعداً مجددا تلاش کنید.',
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -140,7 +140,7 @@ export const handleApiError = (error, navigation) => {
     default: {
       // سایر خطاها
       const message = data.message || 'خطای غیرمنتظره‌ای رخ داده است';
-      Alert.alert(
+      showAlert(
         'خطا',
         message,
         [{ text: 'متوجه شدم', style: 'default' }]
@@ -203,8 +203,48 @@ export const handleOrganizationApiError = (error, navigation, options = {}) => {
 };
 
 /**
+ * یک پیامِ خطای *قابلِ نمایش* از خطای axios بیرون می‌کشد.
+ *
+ * الگوی درون‌خطیِ قبلی در صفحه‌ها این بود:
+ *   error?.response ? (error?.response?.status ? error.response.data.message : ...) : ...
+ * که وقتی سرور بدنه‌ی JSON با کلید `message` برنمی‌گرداند (خطای ۵۰۰ با صفحه‌ی
+ * HTML، یا ۴۲۲ که فقط `errors` دارد) به `undefined` می‌رسید و کاربر یک هشدارِ
+ * خالی می‌دید. اینجا همیشه یک رشته‌ی معنادار برمی‌گردد.
+ *
+ * @param {Object} error - خطای axios
+ * @param {(key: string) => string} [t] - تابعِ ترجمه
+ * @returns {string}
+ */
+export const describeApiError = (error, t = (key) => key) => {
+  if (!error?.response) {
+    return t('Network error!');
+  }
+
+  const { status, data } = error.response;
+
+  // خطاهای اعتبارسنجیِ Laravel: { errors: { field: ["..."] } }
+  if (data?.errors && typeof data.errors === 'object') {
+    const first = Object.values(data.errors)[0];
+    const message = Array.isArray(first) ? first[0] : first;
+    if (message) return String(message);
+  }
+
+  if (typeof data?.message === 'string' && data.message.trim()) {
+    return data.message;
+  }
+
+  // بعضی endpointها متنِ ساده برمی‌گردانند؛ ولی صفحه‌ی HTML خطا را نشان ندهیم.
+  if (typeof data === 'string' && data.trim() && !data.trim().startsWith('<')) {
+    return data.trim();
+  }
+
+  // کدِ وضعیت را نگه می‌داریم چون تنها سرنخِ کاربر برای گزارشِ مشکل است.
+  return `${t('An unexpected error occurred!')} (${status})`;
+};
+
+/**
  * Helper function برای تشخیص نوع خطا
- * 
+ *
  * @param {Object} error - خطای axios
  * @returns {string} - نوع خطا
  */

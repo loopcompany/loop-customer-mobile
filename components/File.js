@@ -7,12 +7,12 @@ import { Image } from 'expo-image';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { createStyles } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { removeFile, setFile } from '../slices/stepSlice';
-import { imageUri, uri } from '../services/URL';
+import { createStyles } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { removeFile, setFile } from '@slices/stepSlice';
+import { imageUri, uri } from '@services/URL';
 import { useTranslation } from 'react-i18next';
-import { handleError, showToastOrAlert } from '../helpers/Common';
+import { handleError, showToastOrAlert } from '@helpers/Common';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function FileStep({ step, data }) {

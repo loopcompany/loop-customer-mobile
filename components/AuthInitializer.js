@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setToken, setUserType } from '../slices/authSlice';
+import { setToken, setUserType } from '@slices/authSlice';
 
 /**
  * Component برای بازیابی token و userType از AsyncStorage در هنگام راه‌اندازی اپلیکیشن

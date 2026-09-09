@@ -1,8 +1,8 @@
 import { Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor3, themeColor5 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor3, themeColor5 } from '@theme/Color';
 
 export default function FilterItem({ item, index, activeIndex, setActiveIndex }) {
 

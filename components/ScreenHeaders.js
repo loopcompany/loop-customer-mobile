@@ -1,8 +1,8 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, StatusBar, Platform } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View, StatusBar, Platform } from "react-native";
 import React from "react";
 import { useTranslation } from 'react-i18next';
-import NewStyles from "../styles/NewStyles";
-import { themeColor4 } from "../theme/Color";
+import NewStyles from "@styles/NewStyles";
+import { themeColor4 } from "@theme/Color";
 import { useNavigation } from "@react-navigation/native";
 
 const ScreenHeaders = ({
@@ -14,7 +14,6 @@ const ScreenHeaders = ({
   onBackPress
 }) => {
   const { t } = useTranslation();
-  const { width } = Dimensions.get('window');
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
   const navigation = useNavigation();
 
@@ -29,7 +28,6 @@ const ScreenHeaders = ({
 
   return (
     <View style={[styles.header, NewStyles.rowWrapper, {
-      width: width,
       paddingTop: statusBarHeight,
       height: 50 + statusBarHeight
     }]}>
@@ -46,7 +44,7 @@ const ScreenHeaders = ({
         onPress={handleBack}
         style={[styles.iconContainer, NewStyles.row]}
       >
-         <Image source={require("../assets/gif/prev.gif")} style={styles.arrow} />
+         <Image source={require("@assets/gif/prev.gif")} style={styles.arrow} />
         <Text style={[NewStyles.title10, styles.titleText]}>{t("Back")}</Text>
       </TouchableOpacity>
     </View>
@@ -60,29 +58,37 @@ const styles = StyleSheet.create({
     backgroundColor: themeColor4.bgColor(1),
     height: 50,
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
   iconContainer: {
-    minWidth: 60,
+    minWidth: 56,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 5,
+    paddingHorizontal: 8,
+    borderRadius: 4,
   },
   arrow: {
-    width: 50,
-    height: 50,
+    width: 24,
+    height: 24,
     resizeMode: "contain",
   },
   titleContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
   },
   titleText: {
     textAlign: "center",
     fontSize: 12,
-    // fontFamily: 'VazirBold',
+    marginRight: 4,
   },
 });

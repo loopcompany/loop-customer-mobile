@@ -1,20 +1,13 @@
 // screens/TechnicianBookingScreen.js
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import HintBadge from '@components/HintBadge';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 export default function TechnicianBookingScreen({navigation}) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [timeSlot, setTimeSlot] = useState('10-12');
   const [gender, setGender] = useState('Male');
 
@@ -23,8 +16,9 @@ export default function TechnicianBookingScreen({navigation}) {
 
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={styles.background}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{t("Technician Visit Booking")}</Text>
@@ -95,10 +89,13 @@ export default function TechnicianBookingScreen({navigation}) {
           <Text style={styles.actionText}>{t("Printer Software")}</Text>
         </TouchableOpacity>
 
-        {/* متن هشدار زرد */}
-        <Text style={styles.notice}>
-          {t("(Connect to Printer Software section)")}
-        </Text>
+        {/* راهنمای اتصال به بخش نرم‌افزار چاپگر */}
+        <View style={{ alignItems: 'flex-end' }}>
+          <HintBadge
+            hint={t("(Connect to Printer Software section)")}
+            title={t('Printer Software')}
+          />
+        </View>
 
         {/* دکمه ثبت نهایی */}
         <TouchableOpacity style={styles.submitButton}>
@@ -108,16 +105,16 @@ export default function TechnicianBookingScreen({navigation}) {
 
       {/* فوتر */}
       <View style={styles.footer}>
-        <Image source={require('../assets/logo.png')} style={styles.footerLogo} />
+        <Image source={require('@assets/logo.png')} style={styles.footerLogo} />
         <Text style={styles.support}>{t("Support")}</Text>
         <Text style={styles.language}>{t("FA")}</Text>
-        <Text style={styles.phone}>21164552</Text>
+        <Text style={styles.phone}>91693909</Text>
       </View>
     </ImageBackground>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   background: { flex: 1 },
   container: {
     padding: 40,
@@ -134,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timeRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginBottom: 15,
@@ -162,10 +159,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginBottom: 12,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   genderRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 12,
@@ -196,11 +193,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  notice: {
-    marginTop: 10,
-    color: '#ffeb3b',
-    fontWeight: 'bold',
-  },
   submitButton: {
     backgroundColor: '#2196f3',
     padding: 14,
@@ -219,7 +211,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     backgroundColor: 'rgba(0,0,0,0.6)',
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 10,
@@ -241,4 +233,4 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-});
+}));

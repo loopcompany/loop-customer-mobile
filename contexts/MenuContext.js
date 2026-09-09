@@ -24,20 +24,27 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
-import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6 } from '../theme/Color';
-import { deviceHeight } from '../styles/NewStyles';
+import { themeColor0, themeColor10, themeColor13, themeColor4, themeColor1, themeColor12, themeColor8, themeColor6, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
+import { shadow } from '@theme/Shadows';
+import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import useLogout from '../hooks/useLogout';
-import { fetchContacts } from '../slices/contactSlice';
-import { fetchUser } from '../slices/userSlice';
-import { createStyles } from '../styles/NewStyles';
-import { imageUri, mainUri } from '../services/URL';
+import useLogout from '@hooks/useLogout';
+import { fetchContacts } from '@slices/contactSlice';
+import { fetchUser } from '@slices/userSlice';
+import { createStyles } from '@styles/NewStyles';
+import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setLanguage } from '../slices/languageSlice';
-import { langIsRTL } from '../helpers/Common';
+import { setLanguage } from '@slices/languageSlice';
 // Create Context
 const MenuContext = createContext();
+
+// account_type های حساب حقیقی (املای غلط 'indiviual' هم از سمت سرور می‌آید)
+const INDIVIDUAL_ACCOUNT_TYPES = ['individual', 'indiviual'];
 const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
     const idleScaleAnim = useRef(new Animated.Value(1)).current;
     const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -165,7 +172,7 @@ const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
                         }}
                     >
                         <Image
-                            source={require("../assets/images/start.png")}
+                            source={require("@assets/images/start.png")}
                             style={logoStyle}
                         />
                     </Animated.View>
@@ -173,6 +180,156 @@ const AnimatedFooterLogoButton = React.memo(({ onPress, logoStyle }) => {
             </Animated.View>
         </TouchableOpacity>
     );
+});
+
+// دکمه‌ی جمع‌وجمع شیشه‌ای داخل داک پایین — آیکون (یا تصویر) + برچسب کوتاه
+function DockAction({ icon, image, imageStyle, label, onPress, lang, accessibilityLabel }) {
+    return (
+        <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onPress}
+            style={dockStyles.action}
+            accessibilityRole="button"
+            accessibilityLabel={accessibilityLabel || label}
+        >
+            {image ? (
+                <Image
+                    source={image}
+                    style={[dockStyles.actionImage, imageStyle]}
+                />
+            ) : (
+                <Ionicons name={icon} size={19} color={colors.white.color} />
+            )}
+            {!!label && (
+                <Text
+                    style={[dockStyles.actionLabel, { fontFamily: getFontFamily('bold', lang) }]}
+                    numberOfLines={1}
+                >
+                    {label}
+                </Text>
+            )}
+        </TouchableOpacity>
+    );
+}
+
+// سوییچ زبان — یک کلید کشویی دو‌بخشی به‌جای یک آیکون کره‌ی زمین بی‌روح.
+// هر دو زبان همیشه با خط بومی خودشان دیده می‌شوند («EN» / «فا») و بخش فعال با
+// یک قرص سفید براق زیرش هایلایت می‌شود که هنگام تعویض زبان نرم سُر می‌خورد.
+const LanguageSwitch = React.memo(({ language, onToggle }) => {
+    const isFa = language === 'fa';
+    const slide = useRef(new Animated.Value(isFa ? 1 : 0)).current;
+
+    useEffect(() => {
+        Animated.spring(slide, {
+            toValue: isFa ? 1 : 0,
+            useNativeDriver: true,
+            friction: 7,
+            tension: 90,
+        }).start();
+    }, [isFa, slide]);
+
+    const translateX = slide.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, LANG_SEG_WIDTH],
+    });
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onToggle}
+            style={dockStyles.action}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: isFa }}
+            accessibilityLabel="Language / زبان"
+        >
+            <View style={langStyles.track}>
+                <Animated.View
+                    style={[langStyles.thumb, { transform: [{ translateX }] }]}
+                    pointerEvents="none"
+                />
+                <View style={langStyles.seg}>
+                    <Text style={[langStyles.segText, !isFa && langStyles.segTextActive]}>EN</Text>
+                </View>
+                <View style={langStyles.seg}>
+                    <Text
+                        style={[
+                            langStyles.segText,
+                            { fontFamily: getFontFamily('bold', 'fa') },
+                            isFa && langStyles.segTextActive,
+                        ]}
+                    >
+                        فا
+                    </Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+});
+
+const dockStyles = StyleSheet.create({
+    // ویندوز ۷: آیکون‌های نوار وظیفه بدون حاشیه و بدون پلاک پس‌زمینه‌اند
+    action: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
+        minWidth: 54,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.xs,
+        borderRadius: radius.md,
+        backgroundColor: 'transparent',
+    },
+    actionImage: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+    },
+    actionImageLarge: {
+        width: 38,
+        height: 38,
+    },
+    actionLabel: {
+        color: colors.white.color,
+        fontSize: fontSize.xs,
+    },
+});
+
+// عرض هر بخش از سوییچ زبان (قرص هایلایت هم به همین اندازه سُر می‌خورد)
+const LANG_SEG_WIDTH = 26;
+
+const langStyles = StyleSheet.create({
+    track: {
+        flexDirection: 'row',
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.16),
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.6),
+        padding: 2,
+        overflow: 'hidden',
+    },
+    thumb: {
+        position: 'absolute',
+        top: 2,
+        left: 2,
+        width: LANG_SEG_WIDTH,
+        bottom: 2,
+        borderRadius: radius.pill,
+        backgroundColor: colors.white.bgColor(0.95),
+        ...shadow.sm,
+    },
+    seg: {
+        width: LANG_SEG_WIDTH,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 3,
+    },
+    segText: {
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', 'en'),
+        color: colors.white.color,
+    },
+    segTextActive: {
+        color: colors.primary.color,
+    },
 });
 
 
@@ -187,17 +344,50 @@ export const MenuProvider = ({ children }) => {
 
 
 
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
     const [currentRouteName, setCurrentRouteName] = useState('');
+    const [showCodeHint, setShowCodeHint] = useState(false);
+    // ارتفاع واقعی نوار پایین که با onLayout اندازه‌گیری می‌شود تا محتوای صفحه
+    // زیر آن پنهان نشود (نوار position: absolute/fixed است و روی محتوا شناور می‌ماند)
+    const [footerHeight, setFooterHeight] = useState(0);
     const insets = useSafeAreaInsets();
     // Get user type and auth token from Redux
     const userType = useSelector(state => state.auth.userType);
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.user?.data);
     const isLoggedIn = !!token; // کاربر لاگین کرده است اگر token داشته باشد
+
+    // نوع حساب کاربر برای نمایش در بالای منو
+    // (سازمان دولتی / سازمان نیمه‌دولتی / شرکت خصوصی / کاربر حقیقی)
+    const accountTypeLabel = useMemo(() => {
+        switch (userData?.account_type) {
+            case 'g_organization':
+                return t('Government organization');
+            case 's_g_organization':
+                return t('Semi-governmental organization');
+            case 'company':
+                return t('Private company');
+            case 'individual':
+            case 'indiviual':
+                return t('Individual user');
+            default:
+                // اگر account_type از سرور نیامده باشد، از نوع کاربر در auth استفاده می‌کنیم
+                return userType === 'organization' ? t('Organization') : t('Individual user');
+        }
+    }, [userData?.account_type, userType, t]);
+
+    const accountDisplayName = useMemo(() => {
+        const isOrganizationAccount =
+            userType === 'organization' ||
+            (!!userData?.account_type && !INDIVIDUAL_ACCOUNT_TYPES.includes(userData.account_type));
+
+        return isOrganizationAccount
+            ? userData?.organization_name
+            : userData?.name;
+    }, [userType, userData?.account_type, userData?.organization_name, userData?.name]);
 
 
     // صفحاتی که نباید Footer و Menu نمایش داده شود
@@ -323,8 +513,23 @@ export const MenuProvider = ({ children }) => {
     }, [navigation, closeMenu]);
 
     const callSupport = useCallback(() => {
-        Linking.openURL(`tel:02121164552`);
+        Linking.openURL(`tel:02191693909`);
     }, []);
+
+    const handleCodePress = useCallback(() => {
+        setShowCodeHint(true);
+        setTimeout(() => setShowCodeHint(false), 1800);
+    }, []);
+
+    const handleFooterLayout = useCallback((e) => {
+        const h = e?.nativeEvent?.layout?.height ?? 0;
+        setFooterHeight((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    }, []);
+
+    // فضایی که باید زیر محتوای صفحه رزرو شود تا پشت داک پایین نرود
+    const contentBottomInset = shouldShowMenu
+        ? footerHeight + (insets?.bottom || 0) + spacing.sm + spacing.xs
+        : 0;
 
 
     const renderMenuItem = useCallback(({ item }) => (
@@ -364,6 +569,8 @@ export const MenuProvider = ({ children }) => {
         navigateToScreen,
         callSupport,
         menuItems: filteredMenuItems,
+        // فاصله‌ای که یک صفحه باید ته محتوای اسکرول‌شونده‌اش بگذارد تا زیر داک شناور نرود
+        footerSpace: contentBottomInset,
     }), [
         menuVisible,
         openMenu,
@@ -371,6 +578,7 @@ export const MenuProvider = ({ children }) => {
         navigateToScreen,
         callSupport,
         filteredMenuItems,
+        contentBottomInset,
     ]);
     const changeLanguage = async (lng) => {
         await i18n.changeLanguage(lng);
@@ -397,44 +605,79 @@ export const MenuProvider = ({ children }) => {
                 {children}
 
                 {shouldShowMenu && (
-                    <View style={[styles.footer, NewStyles.rowWrapper, { bottom: insets?.bottom, flexDirection: 'row' }]}>
-                        <AnimatedFooterLogoButton
-                            onPress={openMenu}
-                            logoStyle={styles.footerLogo}
-                        />
+                    <View
+                        pointerEvents="box-none"
+                        style={[styles.footerWrap, { bottom: (insets?.bottom || 0) + spacing.sm }]}
+                    >
+                        {showCodeHint && !!user?.code && (
+                            <View style={styles.codeTooltip}>
+                                <Text style={styles.codeTooltipText} numberOfLines={1}>
+                                    {userType === 'organization' ? t('Organization code') : t('User code')}
+                                </Text>
+                            </View>
+                        )}
 
+                        <View onLayout={handleFooterLayout} style={styles.dockShadow}>
+                            {/* اپ فارسی‌محور است: لوگو همیشه سمت راست، کد سمت چپ */}
+                            {/* داک = بلورِ پس‌زمینه‌ی صفحه + یک اسکریمِ نیمه‌شفافِ آبیِ برند روی آن.
+                                اسکریم لازم است چون محتوای داک همه سفید است و بدون آن روی
+                                صفحات روشن/سفید خوانا نمی‌ماند (styles.dockScrim) */}
+                            <View style={styles.dock}>
+                                <BlurView
+                                    intensity={35}
+                                    tint="default"
+                                    style={StyleSheet.absoluteFill}
+                                    pointerEvents="none"
+                                />
+                                {/* اسکریم برند روی بلور — تضمین می‌کند متن/آیکون‌های سفید داک
+                                    روی هر پس‌زمینه‌ای (صفحه‌ی روشن یا تیره) خوانا بمانند */}
+                                <View style={styles.dockScrim} pointerEvents="none" />
+                                <View style={styles.dockTopEdge} pointerEvents="none" />
 
+                                <View style={styles.menuButton}>
+                                    <AnimatedFooterLogoButton
+                                        onPress={openMenu}
+                                        logoStyle={styles.footerLogo}
+                                    />
+                                </View>
 
-                        <TouchableOpacity
-                            style={{ padding: 5 }}
-                            onPress={() => {
-                                if (i18n.language == 'en') {
-                                    changeLanguage('fa');
-                                } else {
-                                    changeLanguage('en');
-                                }
-                            }}
-                        >
-                            <Text style={NewStyles.text4}>{t(i18n.language)}</Text>
-                        </TouchableOpacity>
+                                <LanguageSwitch
+                                    language={i18n.language}
+                                    onToggle={() =>
+                                        changeLanguage(i18n.language === 'en' ? 'fa' : 'en')
+                                    }
+                                />
 
-                        <TouchableOpacity
-                            style={styles.supportButton}
-                            onPress={() => {
-                                navigation.navigate('MessageScreen');
-                            }}
-                        >
-                            <Image
-                                source={require('../assets/images/support.png')}
-                                style={{ height: 40, width: 60, resizeMode: 'contain', }}
-                            />
-                        </TouchableOpacity>
-                        <View>
-                            <Text style={NewStyles.text4}>
-                                {user?.code}
-                            </Text>
+                                <DockAction
+                                    image={require('@assets/images/support-nobg.png')}
+                                    imageStyle={dockStyles.actionImageLarge}
+                                    lang={i18n.language}
+                                    accessibilityLabel={t('Support')}
+                                    onPress={() => navigation.navigate('MessageScreen')}
+                                />
+
+                                <TouchableOpacity
+                                    activeOpacity={0.75}
+                                    onPress={handleCodePress}
+                                    style={styles.codeChip}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        userType === 'organization'
+                                            ? t('Organization code')
+                                            : t('User code')
+                                    }
+                                >
+                                    <Ionicons
+                                        name="qr-code-outline"
+                                        size={15}
+                                        color={colors.white.color}
+                                    />
+                                    <Text style={styles.codeChipText}>
+                                        {user?.code ?? '—'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-
                     </View>
                 )}
                 <Modal
@@ -449,10 +692,10 @@ export const MenuProvider = ({ children }) => {
                             ListHeaderComponent={() => {
                                 return (
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
-                                        {
-                                            userData?.account_type != 'indiviual' &&
-                                            <Text style={[NewStyles.title, { marginBottom: 10 }]}>{userData?.organization_name}</Text>
-                                        }
+                                        {!!accountDisplayName && (
+                                            <Text style={[NewStyles.title, styles.accountName]}>{accountDisplayName}</Text>
+                                        )}
+                                        <Text style={styles.accountTypeBadge}>{accountTypeLabel}</Text>
                                         <View style={[{ paddingVertical: 10, width: '90%', backgroundColor: themeColor8.bgColor(0.2), }, NewStyles.center, NewStyles.border10]}>
                                             <Text style={NewStyles.title}>{t("Your Points:")} {userData?.user_gems ?? '0'}</Text>
                                         </View>
@@ -507,25 +750,107 @@ export const useMenu = () => {
 };
 
 // Styles
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, language) => StyleSheet.create({
 
 
-    footer: {
-        backgroundColor: 'rgba(100, 180, 240, 0.4)',
-        width: "100%",
-        paddingHorizontal: 15,
-        position: 'absolute',
+    // داک شیشه‌ای شناور پایین صفحه
+    footerWrap: {
+        position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+        left: 0,
+        right: 0,
         bottom: 0,
-        borderTopWidth: 1.5,
-        borderTopColor: 'rgba(255, 255, 255, 0.5)',
+        paddingHorizontal: spacing.md,
+        zIndex: 10,
+    },
+    dockShadow: {
+        borderRadius: radius.lg,
+        backgroundColor: 'transparent',
+        ...shadow.lg,
+    },
+    dock: {
+        // چیدمان داک به زبان وابسته نیست: دکمه‌ی استارت (لوگوی لوپ) همیشه سمت چپ می‌ماند
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing.xs,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderRadius: radius.lg,
+        overflow: 'hidden',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.6),
+    },
+    dockScrim: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: colors.primary.bgColor(0.58),
+    },
+    dockTopEdge: {
+        position: 'absolute',
+        top: 0,
+        left: spacing.lg,
+        right: spacing.lg,
+        height: 1,
+        backgroundColor: colors.white.bgColor(0.85),
+    },
+    menuButton: {
+        width: 52,
+        height: 52,
+        borderRadius: radius.pill,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparent',
+    },
+    codeChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.sm,
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.1),
+        borderWidth: 1,
+        borderColor: colors.primary.bgColor(0.22),
+        flexShrink: 0,
+    },
+    codeChipText: {
+        color: colors.white.color,
+        fontSize: fontSize.sm,
+        fontFamily: getFontFamily('bold', language),
+    },
+    codeTooltip: {
+        alignSelf: 'center',
+        marginBottom: spacing.xs,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.md,
+        borderRadius: radius.sm,
+        backgroundColor: colors.primary.bgColor(0.96),
+        ...shadow.md,
+    },
+    codeTooltipText: {
+        color: colors.white.color,
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', language),
+    },
+    accountName: {
+        marginBottom: spacing.xs,
+        textAlign: 'center',
+    },
+    accountTypeBadge: {
+        marginBottom: spacing.md,
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.md,
+        borderRadius: radius.pill,
+        backgroundColor: colors.primary.bgColor(0.12),
+        color: colors.primary.color,
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', language),
+        textAlign: 'center',
     },
     footerLogo: {
-        width: 50,
-        height: 50,
+        width: 34,
+        height: 34,
         resizeMode: "contain",
-    },
-    supportButton: {
-        paddingVertical: 5,
     },
     list: {
         paddingTop: 20,

@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 
-import NewStyles from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '../theme/Color';
-import { setInputValue } from '../slices/stepSlice';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor6 } from '@theme/Color';
+import { setInputValue } from '@slices/stepSlice';
+import { imageUri } from '@services/URL';
+import { langIsRTL } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -14,6 +16,7 @@ export default function Input({ step, data }) {
     const dispatch = useDispatch();
     const [show, setShow] = useState(true)
     const { t, i18n } = useTranslation()
+    const isRTL = langIsRTL(i18n.resolvedLanguage ?? i18n.language)
     return (
         <View style={NewStyles.seperator1}>
             <Pressable style={[{ backgroundColor: themeColor0.bgColor(1), paddingVertical: 10, ...NewStyles.border10, ...NewStyles.center }]} onPress={() => { setShow(pre => !pre) }}>
@@ -46,11 +49,19 @@ export default function Input({ step, data }) {
                 contentContainerStyle={[Platform.OS === 'web' && { gap: 20 }]}
                 renderItem={({ item }) =>
                     <View style={{ gap: 10 }}>
-                        <Text style={[NewStyles.text, { flex: 1 }]}>{item?.title} {item?.is_required == 1 && <Text style={NewStyles.title6}> * </Text>}</Text>
+                        <Text style={[NewStyles.text, { flexShrink: 1 }]}>{item?.title} {item?.is_required == 1 && <Text style={NewStyles.title6}> * </Text>}</Text>
 
                         <View style={[NewStyles.textInput, NewStyles.row, NewStyles.border10, { gap: 5, paddingVertical: 0, backgroundColor: themeColor4.bgColor(1) }]}>
                             <Ionicons name={item?.icon_name} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[NewStyles.text10, { flex: 1, }]} keyboardType='default' placeholder={item?.des ? `${item?.des}` : ""} placeholderTextColor={themeColor3.bgColor(1)} maxLength={150} value={item?.value} onChangeText={(text) => { dispatch(setInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }} />
+                            <TextInput
+                                style={[NewStyles.text10, { flex: 1, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}
+                                keyboardType='default'
+                                placeholder={item?.des ? `${item?.des}` : ""}
+                                placeholderTextColor={themeColor3.bgColor(1)}
+                                maxLength={150}
+                                value={item?.value}
+                                onChangeText={(text) => { dispatch(setInputValue({ fieldId: data?.id, fieldDetailId: item.id, value: text, step })) }}
+                            />
                         </View>
                     </View>
                 }

@@ -1,21 +1,26 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { setToken, setUserType } from '../../slices/authSlice';
-import { setOrganizationData } from '../../slices/organizationSlice';
-import { fetchAddresses } from '../../slices/addressSlice';
-import Footer from '../../screens/Footer';
-import ScreenHeaders from '../../components/ScreenHeaders';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3 } from '../../theme/Color';
-import CustomStatusBar from '../../components/CustomStatusBar';
-import { uri } from '../../services/URL';
-import { showAlert } from '../../helpers/Common';
+import { setToken, setUserType } from '@slices/authSlice';
+import { setOrganizationData } from '@slices/organizationSlice';
+import { fetchAddresses } from '@slices/addressSlice';
+import Footer from '@screens/Footer';
+import ScreenHeaders from '@components/ScreenHeaders';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor3 } from '@theme/Color';
+import CustomStatusBar from '@components/CustomStatusBar';
+import HintBadge from '@components/HintBadge';
+import { uri } from '@services/URL';
+import { showAlert, langIsRTL } from '@helpers/Common';
+import { getFontFamily } from '@theme/Typography';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
+const SAVED_ORG_CODE_KEY = 'savedOrganizationCode';
+const SAVED_ORG_PASSWORD_KEY = 'savedOrganizationPassword';
+
 const Login = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -28,6 +33,7 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
+  const isRTL = langIsRTL(i18n.language);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [securityCode, setSecurityCode] = useState('');
@@ -43,6 +49,30 @@ const Login = ({ navigation }) => {
   };
 
   const [displayedCaptcha, setDisplayedCaptcha] = useState(generateCaptcha());
+
+  // "Remember password": restore the saved credentials so the form comes back
+  // pre-filled. Nothing read these keys before, which is why ticking the box
+  // appeared to do nothing.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [savedCode, savedPassword] = await Promise.all([
+          AsyncStorage.getItem(SAVED_ORG_CODE_KEY),
+          AsyncStorage.getItem(SAVED_ORG_PASSWORD_KEY),
+        ]);
+        if (cancelled || !savedCode) return;
+        setOrganizationCode(savedCode);
+        if (savedPassword) setPassword(savedPassword);
+        setRememberPassword(true);
+      } catch (error) {
+        console.warn('[Login] could not restore saved credentials', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLogin = async () => {
     // Clear previous errors
@@ -83,10 +113,11 @@ const Login = ({ navigation }) => {
 
       if (response.data.status === 'success') {
 
-        // Save token and user data
-        if (rememberPassword) {
-          await AsyncStorage.setItem('userToken', response.data.data.token);
-        }
+        // Save token and user data — the token must always be persisted so the
+        // axios interceptors (which read AsyncStorage 'userToken', not Redux) can
+        // authenticate subsequent requests. `rememberPassword` only controls
+        // whether the org code is pre-filled on the next launch.
+        await AsyncStorage.setItem('userToken', response.data.data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
 
         await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
@@ -106,9 +137,26 @@ const Login = ({ navigation }) => {
         dispatch(fetchAddresses(response.data.data.token));
         console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
 
+        // Persist (or clear) what the "Remember password" box controls. Besides
+        // pre-filling the form, ticking it opts the account into the same
+        // auto-login flags the customer login uses — without them the next cold
+        // start dropped straight back to the login page, which is what made the
+        // checkbox look like it did nothing.
         if (rememberPassword) {
-          await AsyncStorage.setItem('savedOrganizationCode', organizationCode);
+          await AsyncStorage.multiSet([
+            [SAVED_ORG_CODE_KEY, organizationCode],
+            [SAVED_ORG_PASSWORD_KEY, password],
+            ['rememberLogin', 'true'],
+            ['autoLoginEnabled', 'true'],
+          ]);
           console.log('💾 [Login] savedOrganizationCode ذخیره شد');
+        } else {
+          await AsyncStorage.multiRemove([
+            SAVED_ORG_CODE_KEY,
+            SAVED_ORG_PASSWORD_KEY,
+            'rememberLogin',
+            'autoLoginEnabled',
+          ]);
         }
 
         console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');
@@ -129,10 +177,9 @@ const Login = ({ navigation }) => {
             {
               text: t('Confirm'),
               onPress: () => {
-                // Navigate to FolderScreen
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'FolderScreen' }],
+                  routes: [{ name: 'List' }],
                 });
               },
             },
@@ -203,26 +250,29 @@ const Login = ({ navigation }) => {
             backgroundColor: '#1976d2',
             borderRadius: 10,
             paddingVertical: 12,
+            paddingHorizontal: 12,
             marginBottom: 15,
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 10,
             elevation: 3,
             shadowColor: '#1976d2',
             shadowOpacity: 0.3,
             shadowRadius: 4
           }}>
             <Text style={{
+              flex: 1,
               color: '#fff',
               fontSize: 16,
               fontFamily: 'VazirBold',
               textAlign: 'center'
             }}>{t('Login to account')}</Text>
-          </View>
-
-          {/* Form Container */}
-
-          <View style={[{ width: '90%', alignSelf: 'center', padding: 10, backgroundColor: themeColor1.bgColor(1), marginBottom: 12 }, NewStyles.border10]}>
-            <Text style={[NewStyles.text, { textAlign: 'center' }]}>{t("To find out and send and receive the contract, refer to the application menu or the contract start field section.")}</Text>
+            <HintBadge
+              hint={t("To find out and send and receive the contract, refer to the application menu or the contract start field section.")}
+              title={t('Login to account')}
+              size={22}
+            />
           </View>
 
           <View style={{ width: '90%', alignSelf: 'center', marginBottom: 12 }}>
@@ -249,7 +299,7 @@ const Login = ({ navigation }) => {
                 }}
               />
               {errors.organizationCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.organizationCode}
                 </Text>
               )}
@@ -293,7 +343,7 @@ const Login = ({ navigation }) => {
                 />
               </TouchableOpacity>
               {errors.password && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.password}
                 </Text>
               )}
@@ -302,41 +352,35 @@ const Login = ({ navigation }) => {
             {/* ذخیره رمز عبور - Checkbox */}
             <TouchableOpacity
               onPress={() => setRememberPassword(!rememberPassword)}
+              activeOpacity={0.7}
               style={{
+                flexDirection: isRTL ? 'row-reverse' : 'row',
+                gap: 8,
                 alignItems: 'center',
                 marginBottom: 12,
-                alignSelf: 'flex-end'
+                alignSelf: isRTL ? 'flex-end' : 'flex-start',
+                paddingVertical: 4
               }}
             >
+              <Text style={{
+                fontSize: 12,
+                color: '#555',
+                fontFamily: getFontFamily('light', i18n.language),
+                writingDirection: isRTL ? 'rtl' : 'ltr'
+              }}>{t('Remember password')}</Text>
               <View style={{
-                backgroundColor: '#ffeb3b',
-                borderRadius: 6,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                flexDirection: 'row-reverse',
-                gap: 10,
-                alignItems: 'center'
+                width: 18,
+                height: 18,
+                borderWidth: 1.5,
+                borderColor: rememberPassword ? '#1976d2' : '#bbb',
+                borderRadius: 4,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: rememberPassword ? '#1976d2' : 'transparent'
               }}>
-                <Text style={{
-                  fontSize: 12,
-                  color: '#333',
-                  fontFamily: 'VazirBold',
-                  marginRight: 4
-                }}>{t('Remember password')}</Text>
-                <View style={{
-                  width: 16,
-                  height: 16,
-                  borderWidth: 1.5,
-                  borderColor: '#333',
-                  borderRadius: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: rememberPassword ? '#333' : 'transparent'
-                }}>
-                  {rememberPassword && (
-                    <Text style={{ fontSize: 10, color: '#fff', fontWeight: 'bold' }}>✓</Text>
-                  )}
-                </View>
+                {rememberPassword && (
+                  <Ionicons name="checkmark" size={13} color="#fff" />
+                )}
               </View>
             </TouchableOpacity>
 
@@ -400,7 +444,7 @@ const Login = ({ navigation }) => {
                 </View>
               </View>
               {errors.securityCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.securityCode}
                 </Text>
               )}

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React, { useMemo } from 'react'
 import MapView, { Circle, Marker } from './MapView';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 const ShowMapDetailComponent = ({ latitude, longitude, address = '' }) => {
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

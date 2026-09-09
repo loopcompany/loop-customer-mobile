@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Image, StyleSheet, ScrollView, Linking, Platform, } from "react-native";
-import Menuitem from "../../components/Menuitem";
-import NewStyles from "../../styles/NewStyles";
+import Menuitem from "@components/Menuitem";
+import NewStyles from "@styles/NewStyles";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
@@ -15,14 +15,14 @@ function OrderMenuScreen({ navigation }) {
     Linking.openURL(contact?.link ? `${contact?.link}` : "tel:09012955939");
   };
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.container, , NewStyles.center]}>
           <Image
-            source={require("../../assets/logo.png")}
+            source={require("@assets/logo.png")}
             style={NewStyles.logo}
             resizeMode="contain"
           />

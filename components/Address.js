@@ -5,16 +5,16 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import NewStyles, { deviceWidth } from '../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6 } from '../theme/Color';
+import NewStyles, { deviceWidth } from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor5, themeColor6 } from '@theme/Color';
 import { useTranslation } from 'react-i18next';
-import { setAddressId, setGeneralData } from '../slices/stepSlice';
+import { setAddressId, setGeneralData } from '@slices/stepSlice';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import ConfirmationModal from './ConfirmationModal';
-import { fetchAddresses } from '../slices/addressSlice';
-import { handleError } from '../helpers/Common';
-import { createStyles } from '../styles/NewStyles';
+import { fetchAddresses } from '@slices/addressSlice';
+import { handleError } from '@helpers/Common';
+import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from './ShowMapDetailComponent';
 export default function Address({ step, data, navigation }) {
 

@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import Footer from './Footer';
-import NewStyles from '../styles/NewStyles';
-import ScreenTitle from '../components/ScreenTitle';
-import { themeColor10, themeColor4 } from '../theme/Color';
+import NewStyles from '@styles/NewStyles';
+import ScreenTitle from '@components/ScreenTitle';
+import { themeColor10, themeColor4 } from '@theme/Color';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 
 export default function PartsSupplyScreen() {
@@ -42,8 +32,9 @@ export default function PartsSupplyScreen() {
 
   return (
     <ImageBackground
-      source={require('../assets/moon.jpg')}
+      source={require('@assets/moon.jpg')}
       style={styles.background}
+      imageStyle={{ width: '100%', height: '100%' }}
     >
       <KeyboardAvoidingView
         style={styles.flexContainer}
@@ -150,7 +141,7 @@ export default function PartsSupplyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   background: {
     flex: 1,
   },
@@ -207,14 +198,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 12,
     width: '100%',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   conditionRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginVertical: 12,
@@ -258,7 +249,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.7)',
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     width: '100%',
@@ -282,4 +273,4 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-});
+}));

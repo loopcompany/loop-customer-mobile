@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import i18next from 'i18next';
 
 // Async thunk for fetching orders

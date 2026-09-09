@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Platform, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import { useDispatch } from "react-redux";
 import { useTranslation } from 'react-i18next';
-import NewStyles from "../../styles/NewStyles";
+import NewStyles from "@styles/NewStyles";
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from "react-native-confirmation-code-field";
-import { themeColor0, themeColor1, themeColor3, themeColor10 } from "../../theme/Color";
-import { setToken } from "../../slices/authSlice";
-import { authAPI } from "../../services/Api";
-import TokenManager from "../../services/TokenManager";
-import Button from "../../components/Button";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import ScreenHeaders from "../../components/ScreenHeaders";
-import { showToastOrAlert, formatTime, showAlert } from "../../helpers/Common";
+import { themeColor0, themeColor1, themeColor3, themeColor10 } from "@theme/Color";
+import { setToken } from "@slices/authSlice";
+import { authAPI } from "@services/Api";
+import TokenManager from "@services/TokenManager";
+import Button from "@components/Button";
+import CustomStatusBar from "@components/CustomStatusBar";
+import ScreenHeaders from "@components/ScreenHeaders";
+import { showToastOrAlert, formatTime, showAlert } from "@helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from "./OtpRetriever";
@@ -196,7 +196,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
         title={t("Reset Password")}
         showLeftIcon={true}
       />
-      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
+      <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} contentPosition={'center'} contentFit="cover" >
         <CustomStatusBar />
         <KeyboardAvoidingView
           behavior={'padding'}

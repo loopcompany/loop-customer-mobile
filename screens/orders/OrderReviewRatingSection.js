@@ -12,21 +12,22 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { createStyles } from '../../styles/NewStyles';
-import NewStyles from '../../styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from '../../theme/Color';
-import Button from '../../components/Button';
-import { uri } from '../../services/URL';
-import { showToastOrAlert } from '../../helpers/Common';
-import { submitReview, checkReviewForOrder } from '../../services/ReviewApi';
+import { createStyles } from '@styles/NewStyles';
+import NewStyles from '@styles/NewStyles';
+import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from '@theme/Color';
+import Button from '@components/Button';
+import { uri } from '@services/URL';
+import { showToastOrAlert, langIsRTL } from '@helpers/Common';
+import { submitReview, checkReviewForOrder } from '@services/ReviewApi';
 
 export default function OrderReviewRatingSection({ orderId, technicianId, orderStatus, finishedAt }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-    const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const [scores, setScores] = useState({
     application: '',
     technician: '',
@@ -276,7 +277,7 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   container: {
     paddingHorizontal: '5%',
     gap: 12,
@@ -292,7 +293,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     ...NewStyles.center,
   },
   rateRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },

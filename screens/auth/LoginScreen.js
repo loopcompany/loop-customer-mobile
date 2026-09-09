@@ -2,21 +2,21 @@ import React, { useState, useReducer,useMemo } from "react";
 import { Text, TextInput, Image, Platform, StyleSheet, ScrollView, View, TouchableOpacity, KeyboardAvoidingView, } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from "react-redux";
-import TransparentButton from "../../components/TransparentButton";
-import Button from "../../components/Button";
-import CustomStatusBar from "../../components/CustomStatusBar";
-import { authAPI } from "../../services/Api";
-import TokenManager from "../../services/TokenManager";
-import { showToastOrAlert } from "../../helpers/Common";
-import NewStyles from "../../styles/NewStyles";
-import { themeColor0, themeColor1, themeColor10, themeColor4 } from "../../theme/Color";
+import TransparentButton from "@components/TransparentButton";
+import Button from "@components/Button";
+import CustomStatusBar from "@components/CustomStatusBar";
+import { authAPI } from "@services/Api";
+import TokenManager from "@services/TokenManager";
+import { showToastOrAlert, langIsRTL } from "@helpers/Common";
+import NewStyles from "@styles/NewStyles";
+import { themeColor0, themeColor1, themeColor10, themeColor4 } from "@theme/Color";
 import { useTranslation } from "react-i18next";
-import { setToken, setUserType } from "../../slices/authSlice";
-import { fetchUser } from "../../slices/userSlice";
-import { fetchAddresses } from "../../slices/addressSlice";
+import { setToken, setUserType } from "@slices/authSlice";
+import { fetchUser } from "@slices/userSlice";
+import { fetchAddresses } from "@slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
-import { createStyles } from '../../styles/NewStyles';
+import { createStyles } from '@styles/NewStyles';
 const initialState = {
   phone: '',
   password: '',
@@ -72,11 +72,12 @@ export default function LoginScreen({ navigation }) {
   const [state, dispatch] = useReducer(formReducer, initialState);
   const reduxDispatch = useDispatch();
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   // Form validation
   const validateForm = () => {
     const errors = {};
@@ -260,10 +261,13 @@ export default function LoginScreen({ navigation }) {
         // First check if auto-login is explicitly enabled by user
         const autoLoginEnabled = await AsyncStorage.getItem('autoLoginEnabled');
 
-        // If auto-login is not explicitly enabled, clear any existing tokens
+        // Auto-login off simply means "don't sign the user in automatically".
+        // It must NOT destroy an existing session: this screen is reachable from
+        // the menu and from the org flow, so calling clearAuthData() here logged
+        // the user out just for *looking* at the login page — which is exactly
+        // the "ذخیره رمز عبور / ذخیره اطلاعات ورود tick logs me out" symptom.
         if (autoLoginEnabled !== 'true') {
-          console.log('Auto-login not enabled by user, clearing tokens');
-          await TokenManager.clearAuthData();
+          console.log('Auto-login not enabled by user, skipping automatic sign-in');
           return;
         }
 
@@ -295,9 +299,17 @@ export default function LoginScreen({ navigation }) {
               return;
             }
           } catch (error) {
-            console.log('Token validation failed, clearing auto-login:', error);
-            // Clear invalid token and auto-login flag
-            await TokenManager.clearAuthData();
+            // Only a definitive "this token is dead" answer from the server may
+            // clear the session. A timeout or an offline device is not proof the
+            // token is bad, and wiping it there logged people out on a flaky
+            // connection.
+            const status = error?.response?.status;
+            if (status === 401 || status === 403) {
+              console.log('Token rejected by server, clearing auto-login:', status);
+              await TokenManager.clearAuthData();
+            } else {
+              console.log('Token validation unreachable, keeping session:', error?.message);
+            }
           }
         } else {
           console.log('No token found, clearing auto-login flag');
@@ -313,7 +325,7 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   return (
-    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('../../assets/loopbackground.webp') : require("../../assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
+    <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
       <CustomStatusBar />
       <KeyboardAvoidingView behavior={'padding'} style={[{ flex: 1, backgroundColor: themeColor0.bgColor(0.22), width: '100%' }, NewStyles.center]} >
         <ScrollView
@@ -321,7 +333,7 @@ export default function LoginScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
         >
           <Image
-            source={require("../../assets/logo.png")}
+            source={require("@assets/logo.png")}
             style={NewStyles.logo}
             resizeMode={"contain"}
           />
@@ -496,7 +508,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) =>   StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) =>   StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: "cover",
@@ -556,7 +568,7 @@ const createLocalStyles = (NewStyles) =>   StyleSheet.create({
     color: '#ff4444',
     fontFamily: 'VazirLight',
     fontSize: 12,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginTop: 5,
   },
   checkbox: {
