@@ -7,7 +7,7 @@ import Button from "@components/Button";
 import CustomStatusBar from "@components/CustomStatusBar";
 import { authAPI } from "@services/Api";
 import TokenManager from "@services/TokenManager";
-import { showToastOrAlert } from "@helpers/Common";
+import { showToastOrAlert, langIsRTL } from "@helpers/Common";
 import NewStyles from "@styles/NewStyles";
 import { themeColor0, themeColor1, themeColor10, themeColor4 } from "@theme/Color";
 import { useTranslation } from "react-i18next";
@@ -72,11 +72,12 @@ export default function LoginScreen({ navigation }) {
   const [state, dispatch] = useReducer(formReducer, initialState);
   const reduxDispatch = useDispatch();
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   // Form validation
   const validateForm = () => {
     const errors = {};
@@ -496,7 +497,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) =>   StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) =>   StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: "cover",
@@ -556,7 +557,7 @@ const createLocalStyles = (NewStyles) =>   StyleSheet.create({
     color: '#ff4444',
     fontFamily: 'VazirLight',
     fontSize: 12,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginTop: 5,
   },
   checkbox: {

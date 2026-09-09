@@ -67,9 +67,22 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableBundleCompression": true,
+            "useLegacyPackaging": false,
+            "extraProguardRules": "-keep class com.facebook.hermes.unicode.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep class com.swmansion.reanimated.** { *; }\n-keep class com.horcrux.svg.** { *; }\n-dontwarn com.google.android.gms.**\n-dontwarn io.invertase.firebase.**"
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

@@ -1,18 +1,11 @@
 // GuideScreen.js
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ImageBackground,
-  I18nManager,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, ImageBackground, I18nManager } from 'react-native';
 import Footer from './Footer';
 import NewStyles from '@styles/NewStyles';
 import ScreenTitle from '@components/ScreenTitle';
 import Button from '@components/Button';
+import { createDirectionalStyles } from '@styles/directionalStyles';
  // فعال کردن RTL برای زبان فارسی
 
 export default function GuideScreen({ navigation, route }) {
@@ -67,7 +60,7 @@ export default function GuideScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   container: {
     flex: 1,
     resizeMode: 'cover',
@@ -104,12 +97,12 @@ const styles = StyleSheet.create({
   guideText: {
     color: '#fff',
     fontSize: 14,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   footer: {
     position: 'absolute',
     bottom: 10,
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
@@ -141,4 +134,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
   },
-});
+}));

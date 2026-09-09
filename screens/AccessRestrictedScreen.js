@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Linking,
-  Platform,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, Linking, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import Button from '@components/Button';
@@ -22,6 +13,7 @@ import NewStyles from '@styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,7 +30,7 @@ const AccessRestrictedScreen = ({
   contractRejectionReason = null,
 }) => {
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const resolvedTitle = title || t('Restricted access');
   const resolvedMessage = message || t('You do not have permission to access this section.');
 
@@ -289,7 +281,7 @@ const AccessRestrictedScreen = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   container: {
     flex: 1,
     backgroundColor: themeColor4.bgColor(1),
@@ -339,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   statusRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
@@ -348,7 +340,7 @@ const styles = StyleSheet.create({
     ...NewStyles.text10,
     fontSize: 16,
     flex: 1,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginRight: 10,
   },
   statusBadge: {
@@ -366,7 +358,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
     marginRight: 35,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     lineHeight: 20,
   },
   nextStepsContainer: {
@@ -390,7 +382,7 @@ const styles = StyleSheet.create({
     ...NewStyles.text10,
     fontSize: 16,
     marginRight: 10,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     flex: 1,
   },
   actionsContainer: {
@@ -461,6 +453,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginRight: 10,
   },
-});
+}));
 
 export default AccessRestrictedScreen;

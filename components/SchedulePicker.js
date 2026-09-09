@@ -13,7 +13,7 @@
 // هر دو مسیر سازمانی («انتخاب جامع» و «انتخاب سیستماتیک») از همین کامپوننت
 // استفاده می‌کنند تا از هم دور نیفتند.
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import DatePickerModal from './DatePickerModal';
@@ -30,6 +30,7 @@ import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { shadow } from '@theme/Shadows';
 import { L } from '@org/orgI18n';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 const MAX_MONTHS_AHEAD = 6;
 
@@ -261,9 +262,9 @@ const StepLabel = ({ index, title, fontFamily }) => (
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   summaryBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.sm,
@@ -281,12 +282,12 @@ const styles = StyleSheet.create({
   summaryText: {
     flex: 1,
     fontSize: fontSize.xs,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     color: colors.textSecondary.color,
   },
 
   stepLabelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     gap: spacing.sm,
     marginBottom: spacing.sm,
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
   },
 
   dayRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'stretch',
     gap: spacing.sm,
     marginBottom: spacing.lg,
@@ -370,12 +371,12 @@ const styles = StyleSheet.create({
   },
 
   slotGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
   slotChip: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
@@ -412,9 +413,9 @@ const styles = StyleSheet.create({
   warning: {
     marginTop: spacing.sm,
     fontSize: fontSize.xs,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     color: colors.warning.color,
   },
-});
+}));
 
 export default React.memo(SchedulePicker);

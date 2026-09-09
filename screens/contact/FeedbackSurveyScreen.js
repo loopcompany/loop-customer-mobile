@@ -21,11 +21,13 @@ import Button from '@components/Button';
 import pollAPI from '@services/PollApi';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { langIsRTL } from '@helpers/Common';
 
  // راست‌چین
 
 export default function FeedbackSurveyScreen() {
 const { t, i18n } = useTranslation();
+const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -35,7 +37,7 @@ const { t, i18n } = useTranslation();
     technician: '',
     support: '',
   });
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   const [desc, setDesc] = useState('');
   const [loading, setLoading] = useState(true);
   const [canParticipate, setCanParticipate] = useState(false);
@@ -341,7 +343,7 @@ const { t, i18n } = useTranslation();
   );
 }
 
-const createLocalStyles = (NewStyles) =>  StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) =>  StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#e0f0ff',
@@ -390,7 +392,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
     ...NewStyles.center
   },
   rateRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
@@ -444,7 +446,7 @@ const createLocalStyles = (NewStyles) =>  StyleSheet.create({
   },
   footer: {
     marginTop: 40,
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },

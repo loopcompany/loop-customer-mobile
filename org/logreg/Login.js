@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -14,9 +14,13 @@ import { themeColor0, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import HintBadge from '@components/HintBadge';
 import { uri } from '@services/URL';
-import { showAlert } from '@helpers/Common';
+import { showAlert, langIsRTL } from '@helpers/Common';
+import { getFontFamily } from '@theme/Typography';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '@styles/NewStyles';
+const SAVED_ORG_CODE_KEY = 'savedOrganizationCode';
+const SAVED_ORG_PASSWORD_KEY = 'savedOrganizationPassword';
+
 const Login = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -29,6 +33,7 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
+  const isRTL = langIsRTL(i18n.language);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [securityCode, setSecurityCode] = useState('');
@@ -44,6 +49,30 @@ const Login = ({ navigation }) => {
   };
 
   const [displayedCaptcha, setDisplayedCaptcha] = useState(generateCaptcha());
+
+  // "Remember password": restore the saved credentials so the form comes back
+  // pre-filled. Nothing read these keys before, which is why ticking the box
+  // appeared to do nothing.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [savedCode, savedPassword] = await Promise.all([
+          AsyncStorage.getItem(SAVED_ORG_CODE_KEY),
+          AsyncStorage.getItem(SAVED_ORG_PASSWORD_KEY),
+        ]);
+        if (cancelled || !savedCode) return;
+        setOrganizationCode(savedCode);
+        if (savedPassword) setPassword(savedPassword);
+        setRememberPassword(true);
+      } catch (error) {
+        console.warn('[Login] could not restore saved credentials', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLogin = async () => {
     // Clear previous errors
@@ -108,9 +137,16 @@ const Login = ({ navigation }) => {
         dispatch(fetchAddresses(response.data.data.token));
         console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
 
+        // Persist (or clear) what the "Remember password" box controls, so the
+        // next visit can pre-fill the form.
         if (rememberPassword) {
-          await AsyncStorage.setItem('savedOrganizationCode', organizationCode);
+          await AsyncStorage.multiSet([
+            [SAVED_ORG_CODE_KEY, organizationCode],
+            [SAVED_ORG_PASSWORD_KEY, password],
+          ]);
           console.log('💾 [Login] savedOrganizationCode ذخیره شد');
+        } else {
+          await AsyncStorage.multiRemove([SAVED_ORG_CODE_KEY, SAVED_ORG_PASSWORD_KEY]);
         }
 
         console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');
@@ -253,7 +289,7 @@ const Login = ({ navigation }) => {
                 }}
               />
               {errors.organizationCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.organizationCode}
                 </Text>
               )}
@@ -297,7 +333,7 @@ const Login = ({ navigation }) => {
                 />
               </TouchableOpacity>
               {errors.password && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.password}
                 </Text>
               )}
@@ -308,18 +344,19 @@ const Login = ({ navigation }) => {
               onPress={() => setRememberPassword(!rememberPassword)}
               activeOpacity={0.7}
               style={{
-                flexDirection: 'row-reverse',
+                flexDirection: isRTL ? 'row-reverse' : 'row',
                 gap: 8,
                 alignItems: 'center',
                 marginBottom: 12,
-                alignSelf: 'flex-end',
+                alignSelf: isRTL ? 'flex-end' : 'flex-start',
                 paddingVertical: 4
               }}
             >
               <Text style={{
                 fontSize: 12,
                 color: '#555',
-                fontFamily: 'VazirLight'
+                fontFamily: getFontFamily('light', i18n.language),
+                writingDirection: isRTL ? 'rtl' : 'ltr'
               }}>{t('Remember password')}</Text>
               <View style={{
                 width: 18,
@@ -397,7 +434,7 @@ const Login = ({ navigation }) => {
                 </View>
               </View>
               {errors.securityCode && (
-                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: 'VazirLight', marginTop: 4, textAlign: 'right' }}>
+                <Text style={{ color: '#ff0000', fontSize: 12, fontFamily: getFontFamily('light', i18n.language), marginTop: 4, textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }}>
                   {errors.securityCode}
                 </Text>
               )}

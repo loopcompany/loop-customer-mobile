@@ -8,13 +8,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import HintBadge from './HintBadge';
-import { showToastOrAlert } from '@helpers/Common';
+import { showToastOrAlert, langIsRTL } from '@helpers/Common';
 import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize } from '@theme/Typography';
 import { shadow } from '@theme/Shadows';
 import { L } from '@org/orgI18n';
+import i18n from 'i18next';
+
+// این کیت از کامپوننت‌های بدون بدنه (implicit return) ساخته شده، پس نمی‌توان
+// داخلشان hook صدا زد. جهت‌گیری در لحظه‌ی رندر از i18n خوانده می‌شود تا مقدار
+// 'row-reverse'/'right' روی زبان انگلیسی جا نماند.
+const rtl = () => langIsRTL(i18n.language);
 
 // سربرگ آکاردئونی هر بخش. با پاس‌دادن step، شماره‌ی مرحله در سمت راست عنوان
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).
@@ -114,7 +120,7 @@ export const RadioList = ({ options, value, onChange }) => (
           key={opt.id}
           onPress={() => onChange(opt.id)}
           style={{
-            flexDirection: 'row-reverse',
+            flexDirection: rtl() ? 'row-reverse' : 'row',
             alignItems: 'center',
             paddingVertical: 10,
             borderBottomWidth: 1,
@@ -214,7 +220,7 @@ export const SelectableOptions = ({ options, value, onChange, multi = false, col
 export const CounterRow = ({ title, count, onIncrement, onDecrement }) => (
   <View
     style={{
-      flexDirection: 'row-reverse',
+      flexDirection: rtl() ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingVertical: 8,
@@ -223,7 +229,7 @@ export const CounterRow = ({ title, count, onIncrement, onDecrement }) => (
     <Text style={{ fontFamily: 'VazirLight', fontSize: 13, color: themeColor10.bgColor(1), flex: 1 }}>
       {title}
     </Text>
-    <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
+    <View style={{ flexDirection: rtl() ? 'row-reverse' : 'row', alignItems: 'center' }}>
       <TouchableOpacity
         onPress={onIncrement}
         style={{ width: 30, height: 30, borderRadius: 6, backgroundColor: themeColor0.bgColor(1), alignItems: 'center', justifyContent: 'center' }}
@@ -507,7 +513,7 @@ export const DescriptionInput = ({ value, onChangeText, placeholder = L('توض�
         fontFamily: 'VazirLight',
         color: colors.textPrimary.color,
         textAlignVertical: 'top',
-        textAlign: 'right',
+        textAlign: rtl() ? 'right' : 'left', writingDirection: rtl() ? 'rtl' : 'ltr',
       },
       style,
     ]}
@@ -559,7 +565,7 @@ export const PhotoNoteInput = ({
   const removePhoto = (uri) => onChangePhotos(photos.filter((item) => item !== uri));
 
   const row = {
-    flexDirection: 'row-reverse',
+    flexDirection: rtl() ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: colors.surface.bgColor(0.92),
     borderWidth: 1,

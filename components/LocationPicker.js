@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uri } from '@services/URL';
-import { showAlert } from '@helpers/Common';
+import { showAlert, langIsRTL } from '@helpers/Common';
 import NewStyles from '@styles/NewStyles';
 import { createStyles } from '@styles/NewStyles';
 import { themeColor10, themeColor3, themeColor4 } from '@theme/Color';
@@ -36,6 +36,7 @@ const LocationPicker = ({
   style = {}
 }) => {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -206,7 +207,7 @@ const LocationPicker = ({
         <Text style={[NewStyles.text, {
           fontSize: 14,
           color: selectedItem ? themeColor10.bgColor(1) : themeColor10.bgColor(0.6),
-          textAlign: 'right',
+          textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
           flex: 1
         }]}>
           {selectedItem ? selectedItem.title : `${label}${required ? ' *' : ''}`}
@@ -217,7 +218,7 @@ const LocationPicker = ({
         <Text style={[NewStyles.text6, {
           fontSize: 12,
           marginTop: 4,
-          textAlign: 'right'
+          textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
         }]}>
           {error}
         </Text>
@@ -322,7 +323,7 @@ const LocationPicker = ({
                     <Text style={[NewStyles.text, {
                       fontSize: 14,
                       color: '#333',
-                      textAlign: 'right'
+                      textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
                     }]}>
                       {item.title}
                     </Text>

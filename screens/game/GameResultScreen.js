@@ -15,14 +15,16 @@ import { getResultMessage } from './GameData';
 import Button from '@components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createStyles } from '@styles/NewStyles';
+import { langIsRTL } from '@helpers/Common';
 
 export default function GameResultScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
 
   const {
     score = 0,
@@ -226,7 +228,7 @@ export default function GameResultScreen({ route, navigation }) {
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor5.bgColor(1),
@@ -260,7 +262,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     marginBottom: 24,
   },
   starsContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     gap: 12,
   },
   statsCard: {
@@ -275,7 +277,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     textAlign: 'center',
   },
   statRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
@@ -330,7 +332,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     fontSize: 16, 
   },
   tipCard: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: '#FFF9C4',
     borderRadius: 10,

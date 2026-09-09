@@ -6,8 +6,12 @@ import HintBadge from '@components/HintBadge';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const DiscountCodeScreen = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [discountCode, setDiscountCode] = useState('');
   const [operatorInfo, setOperatorInfo] = useState({
     title: '',
@@ -102,7 +106,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={discountCode}
@@ -166,7 +170,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.title}
@@ -187,7 +191,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.name}
@@ -208,7 +212,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.nationalId}
@@ -230,7 +234,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.mobileNumber}
@@ -252,7 +256,7 @@ const DiscountCodeScreen = ({ navigation }) => {
               borderColor: '#ccc',
               fontSize: 14,
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               color: '#333'
             }}
             value={operatorInfo.birthDate}

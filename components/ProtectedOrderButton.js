@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, View } from 'react-native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -9,6 +9,7 @@ import {
   themeColor0, themeColor1, themeColor3, themeColor4, 
   themeColor5, themeColor7, themeColor10, themeColor11 
 } from '@theme/Color';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 /**
  * کامپوننت دکمه محافظت شده برای سفارشات
@@ -208,9 +209,9 @@ const ProtectedOrderButton = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   button: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -248,19 +249,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontFamily: 'VazirBold',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   subtitle: {
     fontSize: 14,
     fontFamily: 'VazirLight',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginTop: 4,
     opacity: 0.8,
   },
   statusText: {
     fontSize: 12,
     fontFamily: 'VazirLight',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginTop: 6,
     color: themeColor11.color,
   },
@@ -276,6 +277,6 @@ const styles = StyleSheet.create({
   verifiedIcon: {
     marginLeft: 8,
   },
-});
+}));
 
 export default ProtectedOrderButton;

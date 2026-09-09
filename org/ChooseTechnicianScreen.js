@@ -5,8 +5,12 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 export default function ChooseTechnicianScreen({ navigation }) {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   return (
     <View style={[NewStyles.container, { flex: 1, backgroundColor: '#d1e9ff' }]}>
       <CustomStatusBar />
@@ -174,7 +178,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
           </View>
 
           {/* Time slots for second section */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 }}>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: 12 }}>
             <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
@@ -275,7 +279,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
               fontSize: 11,
               color: '#666',
               fontFamily: 'VazirLight',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               lineHeight: 16
             }}>
               بین مراجعه داشتن / اطلاعات تکنیکی در درخواست قویت با تاسیسات، تیم و ایمنی هنده
@@ -306,7 +310,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
           </View>
 
           {/* Gender selection buttons */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 }}>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: 12 }}>
             <TouchableOpacity style={{
               backgroundColor: '#f5f5f5',
               borderRadius: 8,

@@ -9,7 +9,7 @@ import { themeColor0, themeColor3, themeColor6, themeColor4 } from '@theme/Color
 import Button from '@components/Button';
 import { uri } from '@services/URL';
 import { setAddress, setCity, setRegion, setTitle, setFname, setLname, setTelephone, setMobile, setUnit, setNumber, setFloor } from '@slices/addressSlice';
-import { convertToEnglish, showToastOrAlert } from '@helpers/Common';
+import { convertToEnglish, showToastOrAlert, langIsRTL } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { createStyles } from '@styles/NewStyles';
@@ -18,13 +18,14 @@ export default function AddNewAddress({ navigation }) {
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
+    const isRTL = langIsRTL(i18n.language);
     // فضای رزرو شده زیر محتوا تا دکمه زیر داک شناور پنهان نشود
     const { footerSpace } = useMenu();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
     const token = useSelector((state) => state?.auth?.token)
     const address = useSelector(state => state?.address);
 
@@ -240,7 +241,7 @@ export default function AddNewAddress({ navigation }) {
     )
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     contentContainerStyle: {
         paddingHorizontal: 0,
         paddingVertical: '5%',
@@ -250,7 +251,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         gap: 10,
     },
     row: {
-        flexDirection: 'row-reverse',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         gap: 10,
     },
     prefixInput: {

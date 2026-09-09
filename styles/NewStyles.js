@@ -1,4 +1,5 @@
 import { StyleSheet, Platform, Dimensions } from "react-native";
+import i18n from "i18next";
 import {
   themeColor0,
   themeColor1,
@@ -38,7 +39,9 @@ const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
 const langIsRTL = (lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
 
 
-export const createStyles = (lang) => {
+const styleCache = new Map();
+
+const buildStyles = (lang) => {
 
   return (
     StyleSheet.create({
@@ -75,6 +78,7 @@ export const createStyles = (lang) => {
         fontFamily: 'VazirBold',
         color: themeColor6.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       add: {
         padding: 3,
@@ -161,6 +165,8 @@ export const createStyles = (lang) => {
       },
       status: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
+        textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
         // backgroundColor: themeColor0.bgColor(1),
         color: themeColor3.bgColor(1),
         paddingHorizontal: 15,
@@ -229,53 +235,62 @@ export const createStyles = (lang) => {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor0.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text1: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor1.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text2: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor2.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text3: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor3.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text4: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor4.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text6: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor6.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text7: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor7.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       text10: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor10.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       text11: {
         fontFamily: langIsRTL(lang) ? "VazirLightFD" : "VazirLight",
         color: themeColor11.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       title: {
@@ -283,18 +298,21 @@ export const createStyles = (lang) => {
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor0.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       title1: {
         fontSize: 16,
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor1.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       title3: {
         fontSize: 16,
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor3.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       title4: {
@@ -302,12 +320,14 @@ export const createStyles = (lang) => {
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor4.bgColor(1),
         textAlign: "center",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       title7: {
         fontSize: 16,
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor7.bgColor(1),
         textAlign: "center",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       title10: {
@@ -315,6 +335,7 @@ export const createStyles = (lang) => {
         fontFamily: langIsRTL(lang) ? "VazirBoldFD" : "VazirBold",
         color: themeColor10.bgColor(1),
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
       background: {
         position: "absolute",
@@ -328,6 +349,7 @@ export const createStyles = (lang) => {
         color: themeColor3.bgColor(1),
         textDecorationLine: "line-through",
         textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
       },
 
       textInput: {
@@ -335,7 +357,8 @@ export const createStyles = (lang) => {
         paddingVertical: 12,
         paddingHorizontal: 20,
         width: "100%",
-        textAlign: 'right',
+        textAlign: langIsRTL(lang) ? "right" : "left",
+        writingDirection: langIsRTL(lang) ? "rtl" : "ltr",
         // maxWidth: 800,
       },
 
@@ -355,8 +378,40 @@ export const createStyles = (lang) => {
   );
 }
 
+export const createStyles = (lang) => {
+  const key = langIsRTL(lang) ? 'rtl' : 'ltr';
+  let sheet = styleCache.get(key);
+  if (!sheet) {
+    sheet = buildStyles(lang);
+    styleCache.set(key, sheet);
+  }
+  return sheet;
+};
 
+const currentLang = () => i18n?.resolvedLanguage ?? i18n?.language ?? 'fa';
 
-export const NewStyles = createStyles('fa');
+/**
+ * The default export used to be `createStyles('fa')`, i.e. a sheet frozen to
+ * Persian. Around a hundred screens import it directly, so in English they all
+ * rendered right-aligned text, `row-reverse` rows and the RTL (`*FD`) fonts.
+ *
+ * This proxy resolves each style against the *current* i18n language at read
+ * time, so those screens follow the language without having to be rewritten to
+ * `createStyles(i18n.language)` one by one. Components re-render on language
+ * change through `useTranslation()`, which is what re-reads these styles.
+ */
+export const NewStyles = new Proxy(
+  {},
+  {
+    get: (_target, prop) => createStyles(currentLang())[prop],
+    has: (_target, prop) => prop in createStyles(currentLang()),
+    ownKeys: () => Reflect.ownKeys(createStyles(currentLang())),
+    getOwnPropertyDescriptor: (_target, prop) => {
+      const value = createStyles(currentLang())[prop];
+      if (value === undefined) return undefined;
+      return { value, enumerable: true, configurable: true, writable: false };
+    },
+  }
+);
 
 export default NewStyles;

@@ -146,6 +146,25 @@ const isOrganizationRelatedAPI = (url) => {
 };
 
 /**
+ * تشخیص API هایی که background / best-effort هستند: خطای آن‌ها نباید در
+ * interceptor باعث alert یا navigation سراسری شود، چون خود صدازننده خطا را
+ * مدیریت می‌کند (مثلاً ثبت device-token برای نوتیفیکیشن که در نبود پشتیبانی
+ * no-op می‌شود).
+ *
+ * @param {string} url - URL درخواست
+ * @returns {boolean} - آیا درخواست silent است یا نه
+ */
+const isSilentAPI = (url) => {
+  if (!url) return false;
+
+  const silentAPIs = [
+    '/notifications/device-token',
+  ];
+
+  return silentAPIs.some(api => url.includes(api));
+};
+
+/**
  * Helper function برای ایجاد درخواست با retry mechanism
  * 
  * @param {Function} apiCall - تابع API call

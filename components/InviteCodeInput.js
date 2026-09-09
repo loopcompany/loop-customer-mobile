@@ -9,6 +9,7 @@ import {
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, themeColor3 } from '@theme/Color';
 import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 /**
  * Reusable Invite Code Input Component
@@ -30,7 +31,8 @@ export default function InviteCodeInput({
     errorMessage = '',
     style = {},
 }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isRTL = langIsRTL(i18n.language);
     
     // CodeField hooks
     const ref = useBlurOnFulfill({ value, cellCount });
@@ -60,7 +62,7 @@ export default function InviteCodeInput({
                 color: themeColor10.bgColor(1), 
                 fontFamily: 'VazirLight', 
                 marginBottom: 6, 
-                textAlign: 'right' 
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' 
             }}>
                 {t('Referral code (optional)')}
             </Text>
@@ -120,7 +122,7 @@ export default function InviteCodeInput({
                     color: '#ff4444',
                     fontFamily: 'VazirLight',
                     fontSize: 12,
-                    textAlign: 'right',
+                    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                     marginTop: 5,
                 }}>
                     {errorMessage}

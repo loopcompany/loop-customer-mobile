@@ -13,7 +13,7 @@ import axios from 'axios';
 import ScreenHeaders from '@components/ScreenHeaders';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { uri } from '@services/URL';
-import { showAlert } from '@helpers/Common';
+import { showAlert, langIsRTL } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
 import NewStyles from '@styles/NewStyles';
 import { createStyles } from '@styles/NewStyles';
@@ -22,6 +22,7 @@ import { useSelector } from 'react-redux';
 import { restartOtpRetriever, stopOtpRetriever } from '@screens/auth/OtpRetriever';
 const OrganizationForgotPassword = ({ navigation }) => {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -233,7 +234,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   fontSize: 12,
                   fontFamily: 'VazirLight',
                   marginTop: 5,
-                  textAlign: 'right',
+                  textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 }}
               >
                 {errors.organizationCode}
@@ -285,7 +286,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
                   fontSize: 12,
                   fontFamily: 'VazirLight',
                   marginTop: 5,
-                  textAlign: 'right',
+                  textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 }}
               >
                 {errors.mobileNumber}

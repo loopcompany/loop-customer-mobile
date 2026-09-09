@@ -35,11 +35,12 @@ const OrganizationProfile = () => {
   const navigation = useNavigation();
   const { logoutWithConfirmation, isLoggingOut } = useLogout();
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   // Form states - مطابق با فیلدهای ثبت‌نام
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
@@ -825,7 +826,7 @@ const OrganizationProfile = () => {
   );
 };
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   headerContainer: {
     width: '90%',
     alignSelf: 'center',
@@ -962,7 +963,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     fontFamily: 'VazirBold',
     color: '#1976d2',
     marginBottom: 15,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   passwordInputContainer: {
     position: 'relative',
@@ -977,7 +978,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     borderColor: '#ccc',
     fontSize: 14,
     fontFamily: 'VazirLight',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     minHeight: 40,
   },
   eyeIcon: {

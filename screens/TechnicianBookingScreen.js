@@ -1,21 +1,13 @@
 // screens/TechnicianBookingScreen.js
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import HintBadge from '@components/HintBadge';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 export default function TechnicianBookingScreen({navigation}) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [timeSlot, setTimeSlot] = useState('10-12');
   const [gender, setGender] = useState('Male');
 
@@ -122,7 +114,7 @@ export default function TechnicianBookingScreen({navigation}) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   background: { flex: 1 },
   container: {
     padding: 40,
@@ -139,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timeRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginBottom: 15,
@@ -167,10 +159,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginBottom: 12,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   genderRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 12,
@@ -219,7 +211,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     backgroundColor: 'rgba(0,0,0,0.6)',
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 10,
@@ -241,4 +233,4 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-});
+}));

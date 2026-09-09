@@ -9,7 +9,7 @@ import NewStyles from '@styles/NewStyles';
 import { themeColor4, themeColor10 } from '@theme/Color';
 import Button from '@components/Button';
 import violationReportAPI from '@services/ViolationReportApi';
-import { showToastOrAlert } from '@helpers/Common';
+import { showToastOrAlert, langIsRTL } from '@helpers/Common';
 import DatePickerModal from '@components/DatePickerModal';
 import { Text } from 'react-native';
 import { createStyles } from '@styles/NewStyles';
@@ -17,6 +17,7 @@ import { createStyles } from '@styles/NewStyles';
 
 export default function ViolationReportScreen({ navigation }) {
 const { t, i18n } = useTranslation();
+const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -85,7 +86,7 @@ const { t, i18n } = useTranslation();
       setLoading(false);
     }
   };
-  const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
   return (
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t("Violation Report/Tracking")} />
@@ -160,7 +161,7 @@ const { t, i18n } = useTranslation();
   );
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -230,7 +231,7 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
   },
   footer: {
     marginTop: 30,
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
