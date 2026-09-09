@@ -591,7 +591,7 @@ function Details({ route, navigation }) {
                                             </View>
                                         </View>
                                         <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.border10]}>
-                                            <Text style={[NewStyles.text10, { textAlign: 'right', lineHeight: 24 }]}>
+                                            <Text style={[NewStyles.text10, { lineHeight: 24 }]}>
                                                 {data?.technician_cancel_reason}
                                             </Text>
                                         </View>

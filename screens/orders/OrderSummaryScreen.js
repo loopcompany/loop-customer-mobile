@@ -12,15 +12,7 @@
 //   price         : number|null - اگر مبلغ قطعی نیست null بماند تا «استعلام» نمایش داده شود
 
 import React, { useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ImageBackground,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
 import { useSelector } from 'react-redux';
 import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
@@ -32,6 +24,7 @@ import { colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 const NOT_SET = 'ثبت نشده';
 
@@ -216,7 +209,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   container: {
     padding: spacing.md,
     alignItems: 'center',
@@ -233,10 +226,10 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.textPrimary.color,
     marginBottom: spacing.sm,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   summaryRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.xs,
@@ -248,7 +241,7 @@ const styles = StyleSheet.create({
     fontFamily: getFontFamily('light', 'fa'),
     fontSize: fontSize.sm,
     color: colors.textSecondary.color,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   summaryValue: {
     fontFamily: getFontFamily('bold', 'fa'),
@@ -275,4 +268,4 @@ const styles = StyleSheet.create({
   priceText: {
     color: colors.info.color,
   },
-});
+}));

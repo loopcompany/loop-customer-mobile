@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import ScreenTitle from '@components/ScreenTitle';
 import NewStyles from '@styles/NewStyles';
@@ -16,9 +7,10 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import { themeColor10, themeColor14 } from '@theme/Color';
 import ScreenHeaders from '@components/ScreenHeaders';
 import Footer from '@screens/Footer';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 
 export default function DeviceOrderSummary({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [visibleSection, setVisibleSection] = useState(null);
 
   const toggleSection = (section) => {
@@ -424,7 +416,7 @@ const FormSection = ({ label, visible, onPress, sectionKey, t }) => (
   </>
 );
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   background: { flex: 1 },
   container: { padding: 20, paddingBottom: 100 },
   headerBox: {
@@ -451,7 +443,7 @@ const styles = StyleSheet.create({
   sectionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
 
   sectionContent: {
@@ -478,7 +470,7 @@ const styles = StyleSheet.create({
   },
 
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
   },
@@ -508,7 +500,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     marginBottom: 10,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
 
   dottedLine: {
@@ -530,7 +522,7 @@ const styles = StyleSheet.create({
   },
 
   priceRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 10,
@@ -545,7 +537,7 @@ const styles = StyleSheet.create({
   },
 
   walletButtons: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },
@@ -612,7 +604,7 @@ const styles = StyleSheet.create({
   },
 
   smallButtonsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'flex-start',
     marginBottom: 8,
   },
@@ -628,7 +620,7 @@ const styles = StyleSheet.create({
   },
 
   inlineRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
@@ -644,7 +636,7 @@ const styles = StyleSheet.create({
   },
 
   phoneRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
@@ -660,4 +652,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-});
+}));

@@ -15,7 +15,7 @@ import axios from 'axios';
 import ScreenHeaders from '@components/ScreenHeaders';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { uri } from '@services/URL';
-import { showAlert } from '@helpers/Common';
+import { showAlert, langIsRTL } from '@helpers/Common';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '@styles/NewStyles';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
@@ -29,6 +29,7 @@ import {
 } from '@screens/auth/OtpRetriever';
 const OrganizationResetPassword = ({ route, navigation }) => {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
@@ -379,7 +380,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                 fontFamily: 'VazirLight',
                 marginTop: 5,
                 marginBottom: 15,
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               }}
             >
               {errors.code}
@@ -443,7 +444,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                   fontSize: 12,
                   fontFamily: 'VazirLight',
                   marginTop: 5,
-                  textAlign: 'right',
+                  textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 }}
               >
                 {errors.newPassword}
@@ -494,7 +495,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
                   fontSize: 12,
                   fontFamily: 'VazirLight',
                   marginTop: 5,
-                  textAlign: 'right',
+                  textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 }}
               >
                 {errors.confirmPassword}

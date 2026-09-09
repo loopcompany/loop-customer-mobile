@@ -10,8 +10,12 @@ import { ScreenHeaders } from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const Privacy = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -93,7 +97,7 @@ const Privacy = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 color: '#666'
               }}
             />
@@ -113,7 +117,7 @@ const Privacy = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 color: '#666'
               }}
             />
@@ -133,7 +137,7 @@ const Privacy = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 color: '#666'
               }}
             />
@@ -173,7 +177,7 @@ const Privacy = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 color: '#666'
               }}
             />
@@ -205,7 +209,7 @@ const Privacy = ({ navigation }) => {
                   paddingHorizontal: 10,
                   fontSize: 14,
                   fontFamily: 'VazirLight',
-                  textAlign: 'right',
+                  textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                   color: '#666'
                 }}
               />
@@ -254,7 +258,7 @@ const Privacy = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 height: 60,
                 textAlignVertical: 'top'
               }}
@@ -334,7 +338,7 @@ const Privacy = ({ navigation }) => {
                     paddingHorizontal: 8,
                     fontSize: 12,
                     fontFamily: 'VazirLight',
-                    textAlign: 'right'
+                    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
                   }}
                 />
               </View>
@@ -365,7 +369,7 @@ const Privacy = ({ navigation }) => {
                     paddingHorizontal: 8,
                     fontSize: 12,
                     fontFamily: 'VazirLight',
-                    textAlign: 'right'
+                    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
                   }}
                 />
               </View>

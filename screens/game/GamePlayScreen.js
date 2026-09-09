@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '@components/ScreenHeaders';
 import  { createStyles } from '@styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
+import { langIsRTL } from '@helpers/Common';
 import {
   GAME_LEVELS,
   generateQuestion,
@@ -22,11 +23,12 @@ import {
 
 export default function GamePlayScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
 
   const { level = 'easy' } = route.params || {};
   const levelConfig = GAME_LEVELS[level.toUpperCase()];
@@ -275,7 +277,7 @@ export default function GamePlayScreen({ route, navigation }) {
     </SafeAreaView>
   );
 }
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: themeColor5.bgColor(1),
@@ -297,13 +299,13 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     fontSize: 64,
   },
   scoreBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     marginBottom: 24,
     gap: 12,
   },
   scoreItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: themeColor4.bgColor(1),
     paddingHorizontal: 14,

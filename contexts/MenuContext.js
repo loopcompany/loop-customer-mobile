@@ -40,6 +40,7 @@ import { createStyles } from '@styles/NewStyles';
 import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLanguage } from '@slices/languageSlice';
+import { langIsRTL } from '@helpers/Common';
 // Create Context
 const MenuContext = createContext();
 
@@ -337,6 +338,7 @@ const langStyles = StyleSheet.create({
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
     const { t, i18n } = useTranslation();
+    const isRTL = langIsRTL(i18n.language);
     const userData = useSelector((state) => state.user?.data);
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
@@ -345,7 +347,7 @@ export const MenuProvider = ({ children }) => {
 
 
 
-    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language, isRTL), [NewStyles, i18n.language, isRTL]);
     const navigation = useNavigation();
     const { logoutWithConfirmation, isLoggingOut } = useLogout();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -751,7 +753,7 @@ export const useMenu = () => {
 };
 
 // Styles
-const createLocalStyles = (NewStyles, language) => StyleSheet.create({
+const createLocalStyles = (NewStyles, language, isRTL) => StyleSheet.create({
 
 
     // داک شیشه‌ای شناور پایین صفحه
@@ -769,7 +771,7 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         ...shadow.lg,
     },
     dock: {
-        flexDirection: 'row-reverse',
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: spacing.xs,

@@ -55,7 +55,7 @@ const ContractScreen = ({ navigation }) => {
         ) : null}
         {/* توضیحات راهنما */}
         <View style={[NewStyles.center, { width: '95%', alignSelf: 'center', marginBottom: 10 }]}>
-          <Text style={[NewStyles.text3, { fontSize: 13, textAlign: 'right' }]}>نامه / اطلاعات جامع / درخواست های خود را با سربرگ مهر و امضاء شده با موضوع (توافق نامه معین / ویرایش توافق نامه) بارگذاری نمایید</Text>
+          <Text style={[NewStyles.text3, { fontSize: 13 }]}>نامه / اطلاعات جامع / درخواست های خود را با سربرگ مهر و امضاء شده با موضوع (توافق نامه معین / ویرایش توافق نامه) بارگذاری نمایید</Text>
         </View>
         {/* دکمه‌های اصلی */}
         <TouchableOpacity style={[NewStyles.button, NewStyles.shadow, { width: '95%', alignSelf: 'center', backgroundColor: '#e0f2f1', borderRadius: 12, marginBottom: 8, paddingVertical: 10 }]}>

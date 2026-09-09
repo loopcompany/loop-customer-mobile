@@ -7,12 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.clpiran.loop",
@@ -32,7 +26,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.clpiran.loop",
       "googleServicesFile": "./google-services.json",
       "config": {
@@ -67,9 +60,29 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableBundleCompression": true,
+            "useLegacyPackaging": false,
+            "extraProguardRules": "-keep class com.facebook.hermes.unicode.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep class com.swmansion.reanimated.** { *; }\n-keep class com.horcrux.svg.** { *; }\n-dontwarn com.google.android.gms.**\n-dontwarn io.invertase.firebase.**"
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

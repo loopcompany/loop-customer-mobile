@@ -16,6 +16,7 @@ import { createStyles } from '@styles/NewStyles';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { L } from './orgI18n';
+import { langIsRTL } from '@helpers/Common';
 
 const entryOptions = [
   {
@@ -36,8 +37,9 @@ const entryOptions = [
 
 const List = ({ navigation }) => {
   const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(() => createStyles(i18n.language), [i18n.language]);
-  const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+  const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
 
   const organizationName = useSelector(
     (state) => state?.organization?.profile?.company_name
@@ -92,7 +94,7 @@ const List = ({ navigation }) => {
   );
 };
 
-const createLocalStyles = (NewStyles) =>
+const createLocalStyles = (NewStyles, isRTL) =>
   StyleSheet.create({
     logoWrapper: {
       alignItems: 'center',
@@ -124,7 +126,7 @@ const createLocalStyles = (NewStyles) =>
     },
     // عنوان و علامت راهنما کنار هم در یک ردیف؛ عنوان در یک خط جا می‌شود.
     titleRow: {
-      flexDirection: 'row-reverse',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       gap: spacing.sm,
     },

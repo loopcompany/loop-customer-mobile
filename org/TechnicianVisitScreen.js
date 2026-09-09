@@ -7,8 +7,12 @@ import HintBadge from '@components/HintBadge';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const TechnicianVisitScreen = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedLetter, setSelectedLetter] = useState(null);
   
@@ -161,7 +165,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
           </View>
 
           {/* Time slots */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 8 }}>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: 8 }}>
             {timeSlots.map((slot) => (
               <TouchableOpacity
                 key={slot.id}
@@ -248,7 +252,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
               fontSize: 11, 
               color: '#666', 
               fontFamily: 'VazirLight', 
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               lineHeight: 16
             }}>
               بین مراجعه داشتن / اطلاعات تکنیکی در درخواست قویت با تاسیسات، تیم و ایمنی هنده

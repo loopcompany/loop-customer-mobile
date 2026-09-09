@@ -33,7 +33,7 @@ export default function Description({ data }) {
                                         <Text style={[NewStyles.title4, { textAlign: 'center' }]}>{item?.title}</Text>
                                     </View>
                                     <View style={[{ padding: '5%' }, NewStyles.rowWrapper]}>
-                                        {item?.first_column ? <Text style={[NewStyles.text, { flex: 1, textAlign: 'right' }]}>{item?.first_column}</Text> : null}
+                                        {item?.first_column ? <Text style={[NewStyles.text, { flex: 1 }]}>{item?.first_column}</Text> : null}
                                         {item?.second_column ? <Text style={[NewStyles.text10, { flex: 1, textAlign: item?.third_column ? 'center' : 'left' }]}>{item?.second_column}</Text> : null}
                                         {item?.third_column ? <Text style={[NewStyles.text10, { flex: 1, textAlign: 'left' }]}>{item?.third_column}</Text> : null}
                                     </View>
@@ -45,7 +45,7 @@ export default function Description({ data }) {
                                         renderItem={({ item: subItem, index }) => {
                                             return (
                                                 <View style={[{ padding: '5%' }, NewStyles.rowWrapper, (index % 2 == 0) ? { backgroundColor: themeColor0.bgColor(0.08) } : { backgroundColor: themeColor3.bgColor(0.08) }]}>
-                                                    {subItem?.first ? <Text style={[NewStyles.text, { flex: 1, textAlign: 'right' }]} >{subItem?.first}</Text> : null}
+                                                    {subItem?.first ? <Text style={[NewStyles.text, { flex: 1 }]} >{subItem?.first}</Text> : null}
                                                     {subItem?.second ? <Text style={[NewStyles.text10, { flex: 1, textAlign: subItem?.third ? 'center' : 'left' }]} >{subItem?.second}</Text> : null}
                                                     {subItem?.third ? <Text style={[NewStyles.text10, { flex: 1, textAlign: 'left' }]} >{subItem?.third}</Text> : null}
                                                 </View>

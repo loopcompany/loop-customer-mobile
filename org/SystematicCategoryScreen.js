@@ -35,12 +35,17 @@ import { showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import { createStyles } from '@styles/NewStyles';
 import { colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
 import {
   SYSTEMATIC_CATEGORIES,
   getFlow,
   resolveSystematicCategoryId,
 } from './systematicFlows';
 import { L } from './orgI18n';
+
+// عرض کاشی در components/Folder.js و فاصله‌ی بین دو ستون
+const TILE_WIDTH = 100;
+const GRID_GAP = spacing.sm;
 
 const SystematicCategoryScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -171,21 +176,17 @@ const SystematicCategoryScreen = ({ navigation }) => {
         <CustomStatusBar />
         <ScreenHeaders title={L('انتخاب سیستماتیک')} />
 
-        <View>
-          <ScrollView
-            style={styles.logoScroll}
-            contentContainerStyle={styles.logoScrollContent}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-            }
-          >
-            <View style={styles.logoWrapper}>
-              <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
-            </View>
-          </ScrollView>
+        <View style={styles.logoWrapper}>
+          <Image source={require('@assets/logo.png')} style={NewStyles.logo} />
         </View>
 
-        <View style={styles.grid}>
+        <ScrollView
+          style={styles.gridScroll}
+          contentContainerStyle={styles.grid}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        >
           {/* کاشی حساب کاربری - مثل قبل بالای شبکه و با همان آیکون سروری */}
           <Folder
             title={L('حساب کاربری')}
@@ -219,7 +220,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
                 onPress={() => openCategory(entry)}
               />
             ))}
-        </View>
+        </ScrollView>
       </ImageBackground>
     </SafeAreaView>
   );
@@ -227,26 +228,27 @@ const SystematicCategoryScreen = ({ navigation }) => {
 
 const createLocalStyles = (NewStyles) =>
   StyleSheet.create({
-    logoScroll: {
-      height: 110,
-      width: '100%',
-    },
-    logoScrollContent: {
-      height: 110,
-    },
     logoWrapper: {
       alignItems: 'center',
-      marginTop: 10,
-      marginBottom: 5,
+      marginTop: spacing.sm,
+      marginBottom: spacing.xs,
     },
-    // چیدمان ستونی wrap - همان چیدمان صفحه‌ی اصلی قبلی: کاشی‌ها از بالا به پایین
-    // پر می‌شوند و بعد به ستون بعدی می‌روند.
-    grid: {
+    gridScroll: {
       flex: 1,
-      alignItems: 'flex-start',
+    },
+    // دو کاشی در هر ردیف - ۸ کاشی یعنی ۴ ردیف. کاشی‌ها عرض ۱۰۰ خودشان را نگه
+    // می‌دارند و شبکه چسبیده به سمت چپ صفحه می‌ماند؛ عرض شبکه دقیقاً اندازه‌ی
+    // دو کاشی + فاصله است تا هیچ‌وقت کاشی سومی در ردیف جا نشود.
+    grid: {
+      flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 10,
-      paddingHorizontal: 10,
+      alignSelf: 'flex-start',
+      // border-box است، پس فاصله‌ی لبه‌ی چپ باید margin باشد نه padding - وگرنه
+      // از عرض محتوا کم می‌شود و ستون دوم به ردیف بعد می‌افتد.
+      width: TILE_WIDTH * 2 + GRID_GAP,
+      marginLeft: spacing.sm,
+      columnGap: GRID_GAP,
+      paddingBottom: spacing.lg,
     },
   });
 

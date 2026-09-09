@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  TextInput,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, ImageBackground, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from './Footer';
 import ScreenHeaders from '@components/ScreenHeaders';
@@ -16,6 +7,7 @@ import ScreenTitle from '@components/ScreenTitle';
 import HintBadge from '@components/HintBadge';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10 } from '@theme/Color';
+import { createDirectionalStyles } from '@styles/directionalStyles';
 export default function DeviceModelInfoScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const [visibleSection, setVisibleSection] = useState(null);
@@ -259,7 +251,7 @@ const SelectableButton = ({ label }) => (
   </TouchableOpacity>
 );
 
-const styles = StyleSheet.create({
+const styles = createDirectionalStyles((isRTL) => ({
   background: { flex: 1 },
   container: {
     padding: 20,
@@ -293,25 +285,25 @@ const styles = StyleSheet.create({
   sectionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   sectionContent: {
     backgroundColor: '#fff8dc',
     borderRadius: 8,
     padding: 12,
     marginBottom: 10,
-    textAlign: 'right'
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
   },
   whiteInput: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     color: '#000',
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
     marginBottom: 10,
   },
   buttonRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     flexWrap: 'wrap',
     gap: 8,
     justifyContent: 'space-between',
@@ -328,7 +320,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   timeRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginBottom: 10,
@@ -403,4 +395,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-});
+}));

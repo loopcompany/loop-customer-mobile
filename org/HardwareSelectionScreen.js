@@ -5,8 +5,12 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import { useTranslation } from 'react-i18next';
+import { langIsRTL } from '@helpers/Common';
 
 const HardwareSelectionScreen = ({ navigation }) => {
+  const { i18n } = useTranslation();
+  const isRTL = langIsRTL(i18n.language);
   const [selectedCategory, setSelectedCategory] = useState('لپ تاپ');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [generalNeed, setGeneralNeed] = useState('');
@@ -133,7 +137,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
               fontWeight: 'bold',
               color: '#333',
               fontFamily: 'VazirBold',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               marginBottom: 6
             }}>شرح کلی نیاز</Text>
             <TextInput
@@ -151,14 +155,14 @@ const HardwareSelectionScreen = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 minHeight: 80
               }}
             />
           </View>
 
           {/* کارکرده / اکبند buttons with quantities */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 }}>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: 12 }}>
             {/* کارکرده */}
             <View style={{ flex: 1, marginRight: 4 }}>
               <TouchableOpacity style={{
@@ -179,7 +183,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
               </TouchableOpacity>
 
               {/* Quantity controls for کارکرده */}
-              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'center' }}>
                 <TouchableOpacity
                   onPress={() => handleQuantityChange('کارکرده', 1)}
                   style={{
@@ -249,7 +253,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
               </TouchableOpacity>
 
               {/* Quantity controls for اکبند */}
-              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'center' }}>
                 <TouchableOpacity
                   onPress={() => handleQuantityChange('اکبند', 1)}
                   style={{
@@ -307,7 +311,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
               fontWeight: 'bold',
               color: '#333',
               fontFamily: 'VazirBold',
-              textAlign: 'right',
+              textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
               marginBottom: 6
             }}>توضیحات :</Text>
             <TextInput
@@ -325,7 +329,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
                 borderColor: '#ddd',
                 fontSize: 14,
                 fontFamily: 'VazirLight',
-                textAlign: 'right',
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
                 minHeight: 100
               }}
             />
