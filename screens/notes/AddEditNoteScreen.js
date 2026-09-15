@@ -17,6 +17,7 @@ import { showToastOrAlert, showAlert } from "@helpers/Common";
 import Button from "@components/Button";
 import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from "react-native-safe-area-context";
+import FooterSpacer from '@components/FooterSpacer';
 export default function AddEditNoteScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -163,6 +164,7 @@ export default function AddEditNoteScreen({ route, navigation }) {
               </Text>
             </View>
           </View>
+          <FooterSpacer />
         </ScrollView>
 
         {/* Save Button */}

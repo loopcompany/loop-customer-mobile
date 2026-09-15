@@ -21,6 +21,7 @@ import { createStyles } from '@styles/NewStyles';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import { themeColor0, themeColor4 } from '@theme/Color';
 import { useSelector } from 'react-redux';
+import FooterSpacer from '@components/FooterSpacer';
 import {
   restartOtpRetriever,
   startOtpRetriever,
@@ -563,6 +564,7 @@ const OrganizationResetPassword = ({ route, navigation }) => {
             )}
           </TouchableOpacity>
         </View>
+        <FooterSpacer />
       </ScrollView>
     </KeyboardAvoidingView>
   );

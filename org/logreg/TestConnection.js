@@ -11,6 +11,7 @@ import axios from 'axios';
 import { uri } from '@services/URL';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { showAlert } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 const TestConnection = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -261,6 +262,7 @@ const TestConnection = ({ navigation }) => {
             <Text style={styles.emptySubtext}>یکی از دکمه‌های بالا را بزنید</Text>
           </View>
         )}
+        <FooterSpacer />
       </ScrollView>
 
       <View style={styles.buttonsContainer}>

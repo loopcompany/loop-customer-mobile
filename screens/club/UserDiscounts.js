@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import BlankScreen from '@components/BlankScreen';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 export default function UserDiscounts({ navigation }) {
 
     const { t, i18n } = useTranslation();
@@ -44,6 +45,7 @@ export default function UserDiscounts({ navigation }) {
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Received Prizes")} />
             <FlatList
+                ListFooterComponent={<FooterSpacer />}
                 contentContainerStyle={[NewStyles.center, { gap: 10, paddingBottom: 100 }]}
                 showsVerticalScrollIndicator={false}
                 data={data}

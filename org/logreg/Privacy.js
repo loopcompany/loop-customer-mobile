@@ -12,6 +12,7 @@ import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 const Privacy = ({ navigation }) => {
   const { i18n } = useTranslation();
@@ -469,6 +470,7 @@ const Privacy = ({ navigation }) => {
           </View>
 
         </View>
+        <FooterSpacer />
       </ScrollView>
     </View>
   );

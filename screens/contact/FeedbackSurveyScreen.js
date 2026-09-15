@@ -22,6 +22,7 @@ import pollAPI from '@services/PollApi';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
  // راست‌چین
 
@@ -221,6 +222,7 @@ const isRTL = langIsRTL(i18n.language);
               </View>
             )}
           </View>
+          <FooterSpacer />
         </ScrollView>
       </SafeAreaView>
     );
@@ -337,6 +339,7 @@ const isRTL = langIsRTL(i18n.language);
               <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>{error}</Text>
             )}
           </View>
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

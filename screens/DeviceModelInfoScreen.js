@@ -8,6 +8,7 @@ import HintBadge from '@components/HintBadge';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10 } from '@theme/Color';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import FooterSpacer from '@components/FooterSpacer';
 export default function DeviceModelInfoScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const [visibleSection, setVisibleSection] = useState(null);
@@ -219,6 +220,7 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
             <Text style={NewStyles.text4}>نمایش / استعلام / ثبت سفارش</Text>
           </TouchableOpacity>
 
+          <FooterSpacer />
         </ScrollView>
 
    

@@ -15,6 +15,7 @@ import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 export default function Increase({ navigation }) {
       const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -154,6 +155,7 @@ const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
                     loading={loading}
                     onPress={increaseWallet}
                 />
+              <FooterSpacer />
             </ScrollView>
 
         </SafeAreaView>

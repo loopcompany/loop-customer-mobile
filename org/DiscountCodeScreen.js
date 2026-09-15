@@ -8,6 +8,7 @@ import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 const DiscountCodeScreen = ({ navigation }) => {
   const { i18n } = useTranslation();
@@ -292,6 +293,7 @@ const DiscountCodeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        <FooterSpacer />
       </ScrollView>
       
     </View>

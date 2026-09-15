@@ -12,6 +12,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import { setCategory } from "@slices/categorySlice";
 import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
+import FooterSpacer from '@components/FooterSpacer';
 
 const SubCategories = ({ navigation, route }) => {
   const { categoryId, categoryTitle } = route.params;
@@ -69,6 +70,7 @@ const SubCategories = ({ navigation, route }) => {
           </View>
 
           <FlatList
+            ListFooterComponent={<FooterSpacer />}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
             data={subCategories}
             renderItem={({ item }) => {

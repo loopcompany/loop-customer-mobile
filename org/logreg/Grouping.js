@@ -1,10 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Pressable, Platform, Linking } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import Footer from "@screens/Footer";
 import ScreenHeaders from "@components/ScreenHeaders";
 import NewStyles from "@styles/NewStyles";
-import { themeColor0, themeColor1, themeColor3, themeColor4 } from "@theme/Color";
+import { themeColor0, themeColor1, themeColor3, themeColor4, colors } from "@theme/Color";
+import { spacing } from "@theme/Spacing";
+import { radius } from "@theme/Radius";
+import { fontSize, getFontFamily } from "@theme/Typography";
+import { shadow } from "@theme/Shadows";
 import CustomStatusBar from "@components/CustomStatusBar";
 import { ImageBackground } from "expo-image";
 import { createStyles } from '@styles/NewStyles';
@@ -95,28 +100,26 @@ const Grouping = ({ navigation }) => {
               alignItems: "center",
             }}
           >
-            {/* Main header - سازمانی / دولتی */}
+            {/* عنوان بخش «سازمانی / شرکتی» - عمداً کوچک‌تر از دکمه‌ی ورود است
+                تا کاربر دکمه‌ی واقعی عمل را اشتباه نگیرد. */}
             <View
               style={{
-                width: "75%",
-                backgroundColor: "#1a4480",
-                borderRadius: 12,
-                paddingVertical: 18,
+                width: "58%",
+                backgroundColor: colors.primary.bgColor(0.75),
+                borderRadius: radius.sm,
+                paddingVertical: spacing.sm,
                 alignItems: "center",
                 justifyContent: "center",
-                elevation: 8,
-                shadowColor: "#1a4480",
-                shadowOpacity: 0.5,
-                shadowRadius: 8,
                 position: "relative",
-                marginBottom: 8,
+                marginBottom: spacing.sm,
+                ...shadow.sm,
               }}
             >
               <Text
                 style={{
-                  color: "#fff",
-                  fontSize: 20,
-                  fontFamily: "VazirBold",
+                  color: colors.textInverse.color,
+                  fontSize: fontSize.sm,
+                  fontFamily: getFontFamily('bold', i18n.language),
                   textAlign: "center",
                 }}
               >
@@ -127,42 +130,52 @@ const Grouping = ({ navigation }) => {
               <View
                 style={{
                   position: "absolute",
-                  bottom: -10,
+                  bottom: -8,
                   alignSelf: "center",
                   width: 0,
                   height: 0,
-                  borderLeftWidth: 12,
-                  borderRightWidth: 12,
-                  borderTopWidth: 10,
+                  borderLeftWidth: 9,
+                  borderRightWidth: 9,
+                  borderTopWidth: 8,
                   borderLeftColor: "transparent",
                   borderRightColor: "transparent",
-                  borderTopColor: "#1a4480",
+                  borderTopColor: colors.primary.bgColor(0.75),
                 }}
               />
             </View>
 
-            {/* Login button for organizational */}
+            {/* دکمه‌ی ورود - عمل اصلی این صفحه: بزرگ، پررنگ و با آیکون تا در نگاه
+                اول به‌عنوان دکمه دیده شود. */}
             <TouchableOpacity
               onPress={handleOrganizationalLogin}
+              activeOpacity={0.85}
+              accessibilityRole="button"
               style={{
-                width: "60%",
-                backgroundColor: "#4a90e2",
-                borderRadius: 8,
-                paddingVertical: 10,
-                marginTop: 8,
+                width: "86%",
+                maxWidth: 420,
+                // سرمه‌ای اصلی اپ با حاشیه‌ی طلایی - همان ترکیبی که نوار عنوان
+                // صفحه‌های دیگر دارد، و روی پس‌زمینه‌ی آبی روشن هم خوانا می‌ماند.
+                backgroundColor: colors.primary.bgColor(1),
+                borderRadius: radius.md,
+                borderWidth: 2,
+                borderColor: colors.accent.bgColor(1),
+                paddingVertical: spacing.lg,
+                paddingHorizontal: spacing.lg,
+                marginTop: spacing.xl,
+                marginBottom: spacing.lg,
+                flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
-                elevation: 4,
-                shadowColor: "#4a90e2",
-                shadowOpacity: 0.4,
-                shadowRadius: 5,
+                gap: spacing.sm,
+                ...shadow.lg,
               }}
             >
+              <Ionicons name="log-in-outline" size={26} color={colors.accent.color} />
               <Text
                 style={{
-                  color: "#fff",
-                  fontSize: 13,
-                  fontFamily: "VazirBold",
+                  color: colors.textInverse.color,
+                  fontSize: fontSize.xl,
+                  fontFamily: getFontFamily('bold', i18n.language),
                   textAlign: "center",
                 }}
               >

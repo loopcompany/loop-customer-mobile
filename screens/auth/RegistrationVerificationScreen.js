@@ -31,6 +31,7 @@ import { fetchUser } from '@slices/userSlice';
 import { showToastOrAlert, formatTime } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground } from 'expo-image';
+import FooterSpacer from '@components/FooterSpacer';
 import {
   restartOtpRetriever,
   startOtpRetriever,
@@ -134,7 +135,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
         stopOtpRetriever({ clearPending: true });
         showToastOrAlert(t('Mobile number successfully verified'));
-        navigation.navigate('FolderScreen'); // Navigate to main app
+        navigation.navigate('List'); // Navigate to main app
       } else {
         setError(response.message || t('The entered code is not correct!'));
         setVerificationCode('');
@@ -340,6 +341,7 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
                 style={styles.verifyButton}
               />
             </View>
+            <FooterSpacer />
           </ScrollView>
         </KeyboardAvoidingView>
       </ImageBackground>

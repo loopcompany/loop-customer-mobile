@@ -15,6 +15,7 @@ import { colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function ArticlesScreen({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -97,6 +98,7 @@ export default function ArticlesScreen({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

@@ -17,6 +17,7 @@ import { fetchAddresses } from "@slices/addressSlice";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 const initialState = {
   phone: '',
   password: '',
@@ -185,7 +186,7 @@ export default function LoginScreen({ navigation }) {
         showToastOrAlert(t('Login successful'));
 
         // Navigate to main app
-        navigation.navigate('FolderScreen');
+        navigation.navigate('List');
 
       } else {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });
@@ -295,7 +296,7 @@ export default function LoginScreen({ navigation }) {
               showToastOrAlert(t('Automatic login successful'));
 
               // Navigate to main app
-              navigation.navigate('FolderScreen');
+              navigation.navigate('List');
               return;
             }
           } catch (error) {
@@ -502,6 +503,7 @@ export default function LoginScreen({ navigation }) {
             }}
             disabled={state.isLoading}
           />
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </ImageBackground>

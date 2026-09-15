@@ -28,6 +28,7 @@ import useLogout from '@hooks/useLogout';
 import { imageUri, uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
+import FooterSpacer from '@components/FooterSpacer';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '@helpers/Common';
 
@@ -812,6 +813,7 @@ const OrganizationProfile = () => {
           </TouchableOpacity>
 
         </View>
+        <FooterSpacer />
       </ScrollView>
 
       {/* DatePicker Modal */}

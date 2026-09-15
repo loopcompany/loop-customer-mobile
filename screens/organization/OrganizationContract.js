@@ -33,6 +33,7 @@ import { imageUri, uri } from '@services/URL';
 import Button from '@components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import FooterSpacer from '@components/FooterSpacer';
 
 const OrganizationContract = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -812,6 +813,7 @@ const OrganizationContract = ({ navigation }) => {
             )}
 
           </View>
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

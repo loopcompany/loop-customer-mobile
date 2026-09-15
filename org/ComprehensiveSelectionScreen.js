@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import ScreenHeaders from '@components/ScreenHeaders';
@@ -36,7 +37,9 @@ import { spacing } from '@theme/Spacing';
 import { fontSize } from '@theme/Typography';
 import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
+import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
+import { RECEIPT_STATE, receiptFromComprehensive } from '@services/receipt';
 
 const DELIVERY_MODE_OPTIONS = [
   { id: 'once_short', title: 'کوتاه مدت / یکبار' },
@@ -157,10 +160,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const { i18n } = useTranslation();
   // فضای رزرو شده زیر محتوا تا آخرین بخش (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
   const { footerSpace } = useMenu();
+  // باز شدن هر بخش، همان بخش را به بالای صفحه می‌آورد تا کاربر مجبور به اسکرول
+  // دستی نشود (بخش‌های بلند فرم این مشکل را داشتند).
+  const { scrollRef, registerSection, requestScrollTo } = useAccordionScroll();
   const SEC = useMemo(
     () => SECTIONS.map((s) => ({ ...s, title: L(s.title), hint: L(s.hint) })),
     [i18n.language]
   );
+  // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید.
+  const user = useSelector((state) => state?.user?.data);
+  const orgProfile = useSelector((state) => state?.organization?.profileData);
+
   const [expanded, setExpanded] = useState('delivery_mode');
 
   const [deliveryMode, setDeliveryMode] = useState([]);
@@ -192,7 +202,12 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const [letterFile, setLetterFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const toggleSection = (id) => setExpanded((prev) => (prev === id ? null : id));
+  const toggleSection = (id) =>
+    setExpanded((prev) => {
+      if (prev === id) return null;
+      requestScrollTo(id);
+      return id;
+    });
 
   const changeDeviceCount = (id, delta) =>
     setDeviceCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
@@ -252,6 +267,13 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   const softwareSummaryLines = useMemo(() => {
     const lines = [];
+    // تعداد لپ‌تاپ/کیسِ «نصب سیستم عامل» هم باید در خلاصه بیاید - قبلاً فقط
+    // سیستم‌عامل‌ها و نرم‌افزارها شمرده می‌شدند و انتخاب کاربر گم می‌شد.
+    DEVICE_TYPES.forEach((device) => {
+      if (deviceCounts[device.id] > 0) {
+        lines.push({ label: L(device.title), value: deviceCounts[device.id] });
+      }
+    });
     OS_ITEMS.forEach((os) => {
       if (osCounts[os.id] > 0) lines.push({ label: L(os.title), value: osCounts[os.id] });
     });
@@ -265,7 +287,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       if (entry?.count > 0) lines.push({ label: L(item.title), value: entry.count });
     });
     return lines;
-  }, [osCounts, softwareDeviceCounts, softwareItems]);
+  }, [deviceCounts, osCounts, softwareDeviceCounts, softwareItems]);
 
   const hardwareSummaryLines = useMemo(() => {
     return HARDWARE_ITEMS
@@ -284,6 +306,25 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   }, [procurementItems]);
 
   const handleOrderAction = (action) => {
+    // «انتخاب جامع» روی سرور ثبت نمی‌شود؛ رسید از همین state ساخته می‌شود.
+    // این مسیر برند/مدل نمی‌پرسد، پس رسیدش «مشخصات محصول» ندارد.
+    const preReceipt = () =>
+      receiptFromComprehensive({
+        deviceCounts,
+        osCounts,
+        softwareDeviceCounts,
+        softwareItems,
+        hardwareItems,
+        procurementItems,
+        operatorInfo,
+        startDate,
+        onceDate,
+        timeSlot,
+        user,
+        orgProfile,
+        state: RECEIPT_STATE.PENDING,
+      });
+
     if (action === 'cancel_order') {
       showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
         { text: L('انصراف'), style: 'cancel' },
@@ -295,6 +336,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       if (!validateOperatorInfo()) {
         showToastOrAlert(L('لطفاً اطلاعات اپراتور را کامل کنید.'));
         setExpanded('operator_info');
+        requestScrollTo('operator_info');
         return;
       }
       navigation.navigate('OrderSummaryScreen', {
@@ -308,15 +350,14 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         ],
         schedule: { date: isOnceShort ? onceDate : startDate, slot: timeSlot },
         contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
+        // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش
+        // تکمیل و نمایش می‌دهد.
+        receipt: preReceipt(),
       });
       return;
     }
-    if (action === 'issue_receipt') {
-      showToastOrAlert(L('پیش‌رسید صادر شد'));
-      return;
-    }
-    if (action === 'show_receipt') {
-      showToastOrAlert(L('نمایش پیش‌رسید'));
+    if (action === 'issue_receipt' || action === 'show_receipt') {
+      navigation.navigate('OrderReceipt', { receipt: preReceipt() });
       return;
     }
   };
@@ -331,7 +372,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         style={{ borderBottomWidth: 3, borderBottomColor: colors.accent.color }}
       />
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
 
         {/* ۱. نحوه ارائه خدمات */}
         <AccordionHeader
@@ -340,6 +381,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[0].icon}
           expanded={expanded === 'delivery_mode'}
           onPress={() => toggleSection('delivery_mode')}
+          innerRef={registerSection('delivery_mode')}
         />
         {expanded === 'delivery_mode' && (
           <SectionBody>
@@ -354,6 +396,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[1].icon}
           expanded={expanded === 'software_services'}
           onPress={() => toggleSection('software_services')}
+          innerRef={registerSection('software_services')}
         />
         {expanded === 'software_services' && (
           <SectionBody>
@@ -438,6 +481,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[2].icon}
           expanded={expanded === 'hardware_services'}
           onPress={() => toggleSection('hardware_services')}
+          innerRef={registerSection('hardware_services')}
         />
         {expanded === 'hardware_services' && (
           <SectionBody>
@@ -467,6 +511,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[3].icon}
           expanded={expanded === 'procurement'}
           onPress={() => toggleSection('procurement')}
+          innerRef={registerSection('procurement')}
         />
         {expanded === 'procurement' && (
           <SectionBody>
@@ -499,6 +544,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[4].icon}
           expanded={expanded === 'equipment_status'}
           onPress={() => toggleSection('equipment_status')}
+          innerRef={registerSection('equipment_status')}
         />
         {expanded === 'equipment_status' && (
           <SectionBody>
@@ -513,6 +559,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[5].icon}
           expanded={expanded === 'critical_infra'}
           onPress={() => toggleSection('critical_infra')}
+          innerRef={registerSection('critical_infra')}
         />
         {expanded === 'critical_infra' && (
           <SectionBody>
@@ -527,6 +574,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[6].icon}
           expanded={expanded === 'service_level'}
           onPress={() => toggleSection('service_level')}
+          innerRef={registerSection('service_level')}
         />
         {expanded === 'service_level' && (
           <SectionBody>
@@ -541,41 +589,44 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[7].icon}
           expanded={expanded === 'time_range'}
           onPress={() => toggleSection('time_range')}
+          innerRef={registerSection('time_range')}
         />
         {expanded === 'time_range' && (
           <SectionBody>
+            {/* «تعداد بازدید» همیشه دیده می‌شود؛ ولی وقتی خدمت «کوتاه مدت / یکبار»
+                باشد معنایی ندارد، پس قفل و غیرفعال می‌شود تا کاربر ببیند چرا
+                نمی‌تواند «۶ بار در ماه» را انتخاب کند. */}
+            <SubSectionBanner title={L('تعداد بازدید')} />
             {isOnceShort ? (
-              <>
-                <Text style={{ fontFamily: 'VazirLight', fontSize: fontSize.xs, color: themeColor10.bgColor(0.7), marginBottom: spacing.sm }}>
-                  {L('چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.')}
-                </Text>
-                <SchedulePicker
-                  date={onceDate}
-                  onChangeDate={setOnceDate}
-                  slot={timeSlot}
-                  onChangeSlot={setTimeSlot}
-                  slots={LO(TIME_SLOT_OPTIONS)}
-                />
-              </>
+              <Text style={{ fontFamily: 'VazirLight', fontSize: fontSize.xs, color: themeColor10.bgColor(0.7), marginBottom: spacing.sm }}>
+                {L('چون «کوتاه مدت / یکبار» انتخاب شده، تعداد بازدید قفل است و فقط روز و بازه ساعتی مراجعه را انتخاب می‌کنید.')}
+              </Text>
+            ) : null}
+            <SelectableOptions
+              options={LO(VISIT_FREQUENCY_OPTIONS)}
+              value={isOnceShort ? null : visitFrequency}
+              onChange={setVisitFrequency}
+              columns={2}
+              disabled={isOnceShort}
+            />
+            <View style={{ height: spacing.md }} />
+            {isOnceShort ? (
+              <SchedulePicker
+                date={onceDate}
+                onChangeDate={setOnceDate}
+                slot={timeSlot}
+                onChangeSlot={setTimeSlot}
+                slots={LO(TIME_SLOT_OPTIONS)}
+              />
             ) : (
-              <>
-                <SubSectionBanner title={L('تعداد بازدید')} />
-                <SelectableOptions
-                  options={LO(VISIT_FREQUENCY_OPTIONS)}
-                  value={visitFrequency}
-                  onChange={setVisitFrequency}
-                  columns={2}
-                />
-                <View style={{ height: spacing.md }} />
-                <SchedulePicker
-                  date={startDate}
-                  onChangeDate={setStartDate}
-                  slot={timeSlot}
-                  onChangeSlot={setTimeSlot}
-                  slots={LO(TIME_SLOT_OPTIONS)}
-                  dateTitle={L('تاریخ شروع')}
-                />
-              </>
+              <SchedulePicker
+                date={startDate}
+                onChangeDate={setStartDate}
+                slot={timeSlot}
+                onChangeSlot={setTimeSlot}
+                slots={LO(TIME_SLOT_OPTIONS)}
+                dateTitle={L('تاریخ شروع')}
+              />
             )}
           </SectionBody>
         )}
@@ -587,6 +638,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[8].icon}
           expanded={expanded === 'operator_info'}
           onPress={() => toggleSection('operator_info')}
+          innerRef={registerSection('operator_info')}
         />
         {expanded === 'operator_info' && (
           <SectionBody>
@@ -644,6 +696,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[9].icon}
           expanded={expanded === 'technician'}
           onPress={() => toggleSection('technician')}
+          innerRef={registerSection('technician')}
         />
         {expanded === 'technician' && (
           <SectionBody>
@@ -663,6 +716,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[10].icon}
           expanded={expanded === 'letter_upload'}
           onPress={() => toggleSection('letter_upload')}
+          innerRef={registerSection('letter_upload')}
         />
         {expanded === 'letter_upload' && (
           <SectionBody>
@@ -695,6 +749,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           icon={SEC[11].icon}
           expanded={expanded === 'order_actions'}
           onPress={() => toggleSection('order_actions')}
+          innerRef={registerSection('order_actions')}
         />
         {expanded === 'order_actions' && (
           <SectionBody>

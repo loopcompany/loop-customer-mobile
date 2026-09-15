@@ -18,6 +18,7 @@ import Button from "@components/Button";
 import moment from "moment-jalaali";
 import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from "react-native-safe-area-context";
+import FooterSpacer from '@components/FooterSpacer';
 export default function NotesScreen({ route, navigation }) {
 const { t, i18n } = useTranslation();
 const isRTL = langIsRTL(i18n.language);
@@ -169,6 +170,7 @@ const isRTL = langIsRTL(i18n.language);
       <ScreenHeaders title={t('My Notes')} />
 
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         data={notes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderNoteCard}

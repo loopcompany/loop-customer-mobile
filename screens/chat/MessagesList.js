@@ -1,10 +1,12 @@
 import { FlatList, Platform, RefreshControl, StyleSheet } from 'react-native';
 import MessageItem from './MessageItem';
 import { themeColor1 } from '@theme/Color';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function MessagesList({ messages, onRefresh, refreshing }) {
     return (
         <FlatList
+            ListFooterComponent={<FooterSpacer />}
             contentContainerStyle={styles.contentContainerStyle}
             showsVerticalScrollIndicator={false}
             inverted={true}

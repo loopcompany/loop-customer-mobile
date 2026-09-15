@@ -27,6 +27,7 @@ import ServiceSchedule from '@components/ServiceSchedule';
 import { emptyAddress } from '@slices/addressSlice';
 import StepsHeader from '@components/StepsHeader';
 import FileStep from '@components/File';
+import FooterSpacer from '@components/FooterSpacer';
 function Steps({ navigation, route }) {
 
     const dispatch = useDispatch();
@@ -253,6 +254,7 @@ function Steps({ navigation, route }) {
                     {
                         Platform.OS != 'web' ?
                             <FlatList
+                                ListFooterComponent={<FooterSpacer />}
                                 contentContainerStyle={styles.flatListContainer}
                                 showsVerticalScrollIndicator={false} scrollEnabled={false}
                                 data={steps?.data?.[step]}
@@ -308,6 +310,7 @@ function Steps({ navigation, route }) {
                                 }
                             </View>
                     }
+                  <FooterSpacer />
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>

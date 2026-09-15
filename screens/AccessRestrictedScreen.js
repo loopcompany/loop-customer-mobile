@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 const { width, height } = Dimensions.get('window');
 
@@ -276,6 +277,7 @@ const AccessRestrictedScreen = ({
             <Text style={styles.helpButtonText}>{t('Contact support')}</Text>
           </TouchableOpacity>
         </View>
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

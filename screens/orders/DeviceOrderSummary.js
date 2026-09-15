@@ -8,6 +8,7 @@ import { themeColor10, themeColor14 } from '@theme/Color';
 import ScreenHeaders from '@components/ScreenHeaders';
 import Footer from '@screens/Footer';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function DeviceOrderSummary({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -53,6 +54,7 @@ export default function DeviceOrderSummary({ navigation }) {
         <TouchableOpacity style={styles.sectionButton}>
           <Text style={styles.sectionButtonText}>{t('Back to home page')}</Text>
         </TouchableOpacity>
+        <FooterSpacer />
       </ScrollView>
       
     </ImageBackground>

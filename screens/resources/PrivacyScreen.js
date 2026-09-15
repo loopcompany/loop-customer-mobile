@@ -13,6 +13,7 @@ import BlankScreen from '@components/BlankScreen';
 import { RefreshControl } from 'react-native';
 import Loader from '@components/Loader';
 import AccordionItem from '@components/AccordionItem';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function PrivacyScreen() {
   const { t } = useTranslation();
@@ -63,6 +64,7 @@ export default function PrivacyScreen() {
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t("Privacy Policy")} />
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         data={privacies}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}
         showsVerticalScrollIndicator={false}

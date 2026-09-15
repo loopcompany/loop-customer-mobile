@@ -12,6 +12,7 @@ import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from '@styles/NewStyles';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
+import FooterSpacer from '@components/FooterSpacer';
 export default function ForgotPassword({ navigation }) {
     const dispatch = useDispatch();
     const { t, i18n } = useTranslation();
@@ -257,6 +258,7 @@ export default function ForgotPassword({ navigation }) {
                                 <Text style={styles.backToLoginText}>{t('Back to login')}</Text>
                             </TouchableOpacity>
                         </View>
+                      <FooterSpacer />
                     </ScrollView>
                 </KeyboardAvoidingView>
             </ImageBackground>

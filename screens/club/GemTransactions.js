@@ -12,6 +12,7 @@ import { fetchUser } from '@slices/userSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import i18n from 'i18next';
+import FooterSpacer from '@components/FooterSpacer';
 export default function GemTransactions() {
 
     const dispatch = useDispatch();
@@ -42,6 +43,7 @@ export default function GemTransactions() {
         <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
             <ScreenHeaders title={t("Lucky Wheel History")} />
             <FlatList
+                ListFooterComponent={<FooterSpacer />}
                 contentContainerStyle={[styles.contentContainerStyle, NewStyles.center]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}

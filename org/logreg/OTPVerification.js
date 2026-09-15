@@ -14,6 +14,7 @@ import { themeColor0, themeColor3, themeColor4 } from '@theme/Color';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from '@screens/auth/OtpRetriever';
+import FooterSpacer from '@components/FooterSpacer';
 
 const normalizeOtpCode = value => String(value || '')
   .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
@@ -417,6 +418,7 @@ const OTPVerification = ({ route, navigation }) => {
               )}
             </TouchableOpacity>
           </View>
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

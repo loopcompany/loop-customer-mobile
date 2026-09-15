@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
@@ -41,7 +42,9 @@ import { radius } from '@theme/Radius';
 import { fontSize } from '@theme/Typography';
 import { describePickerDate, showAlert, showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
+import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
+import { RECEIPT_STATE, receiptFromSystematic } from '@services/receipt';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -83,9 +86,16 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   useTranslation(); // subscribe to runtime language switches so L()/LO() re-evaluate
   // فضای رزرو شده زیر محتوا تا آخرین مرحله (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
   const { footerSpace } = useMenu();
+  // باز شدن هر مرحله، همان مرحله را به بالای صفحه می‌آورد (مراحل بلند، مرحله‌ی
+  // بعدی را از کادر دید بیرون می‌انداختند).
+  const { scrollRef, registerSection, requestScrollTo } = useAccordionScroll();
   const categoryId = route?.params?.categoryId;
   const category = getCategory(categoryId);
   const steps = getFlow(categoryId);
+
+  // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید.
+  const user = useSelector((state) => state?.user?.data);
+  const orgProfile = useSelector((state) => state?.organization?.profileData);
 
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
@@ -93,7 +103,12 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const setAnswer = (stepId, patch) =>
     setAnswers((prev) => ({ ...prev, [stepId]: { ...prev[stepId], ...patch } }));
 
-  const toggleSection = (id) => setExpanded((prev) => (prev === id ? null : id));
+  const toggleSection = (id) =>
+    setExpanded((prev) => {
+      if (prev === id) return null;
+      requestScrollTo(id);
+      return id;
+    });
 
   const filledCount = useMemo(
     () => steps.filter((step) => isStepFilled(step, answers[step.id])).length,
@@ -185,9 +200,21 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       if (missing) {
         showToastOrAlert(`${L(missing.title)} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
         setExpanded(missing.id);
+        requestScrollTo(missing.id);
         return;
       }
     }
+
+    // این مسیر سفارش را روی سرور ثبت نمی‌کند، پس رسید کاملاً از همین answers
+    // ساخته می‌شود و به‌صورت پارامتر پاس داده می‌شود (orderId ندارد).
+    const preReceipt = () =>
+      receiptFromSystematic({
+        categoryId,
+        answers,
+        user,
+        orgProfile,
+        state: RECEIPT_STATE.PENDING,
+      });
 
     if (action === 'submit_order') {
       // مرحله‌ی «بازه زمانی / رزرو» تاریخ و ساعت مراجعه را نگه می‌دارد.
@@ -200,15 +227,14 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         summaryLines,
         schedule: scheduleStep ? answers[scheduleStep.id] : null,
         answers,
+        // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش
+        // تکمیل و نمایش می‌دهد.
+        receipt: preReceipt(),
       });
       return;
     }
-    if (action === 'issue_receipt') {
-      showToastOrAlert(L('پیش‌رسید صادر شد'));
-      return;
-    }
-    if (action === 'show_receipt') {
-      showToastOrAlert(L('نمایش پیش‌رسید'));
+    if (action === 'issue_receipt' || action === 'show_receipt') {
+      navigation.navigate('OrderReceipt', { receipt: preReceipt() });
     }
   };
 
@@ -455,7 +481,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
         {steps.map((step, index) => (
           <View key={step.id}>
             <AccordionHeader
@@ -466,6 +492,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               done={isStepFilled(step, answers[step.id])}
               expanded={expanded === step.id}
               onPress={() => toggleSection(step.id)}
+              innerRef={registerSection(step.id)}
             />
             {expanded === step.id && <SectionBody>{renderStepBody(step)}</SectionBody>}
           </View>

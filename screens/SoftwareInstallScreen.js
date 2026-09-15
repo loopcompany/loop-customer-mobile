@@ -19,6 +19,7 @@ import { themeColor4 } from "@theme/Color";
 import ScreenHeaders from "@components/ScreenHeaders";
 import ScreenTitle from "@components/ScreenTitle";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FooterSpacer from '@components/FooterSpacer';
 export default function SoftwareInstallScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
 
@@ -75,6 +76,7 @@ export default function SoftwareInstallScreen({ navigation, route }) {
 
 
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         ListHeaderComponent={() => {
           return (
             <ScreenTitle title={'نرم افزار'} onPress={() => navigation.navigate("WindowsInstallScreen", { category })} />

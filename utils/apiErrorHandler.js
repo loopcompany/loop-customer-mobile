@@ -68,22 +68,31 @@ export const handleApiError = (error, navigation) => {
     }
     
     case 401: {
-      // خطای احراز هویت - token منقضی شده
+      // خطای احراز هویت
       console.log('🔐 Authentication error detected');
-      
+
+      // یک ۴۰۱ روی درخواستِ *دارای توکن* هرگز به اینجا نمی‌رسد: interceptor آن را
+      // به کشوی «نشست منقضی شد» می‌سپارد. آنچه اینجا می‌ماند درخواستی است که اصلاً
+      // توکن نداشته، یعنی کاربر اساساً وارد نشده بود.
+      //
+      // A 401 on an *authenticated* request never reaches this branch — the
+      // axios interceptor routes that to the session-expiry sheet, which owns
+      // both the prompt and the credential cleanup. What is left here is a
+      // request sent with no token at all, so tell the user to sign in rather
+      // than claiming a session of theirs ran out.
       showAlert(
-        'خطای احراز هویت',
-        'نشست شما منقضی شده است. لطفا مجددا وارد شوید.',
+        'ورود لازم است',
+        'برای ادامه لطفا وارد حساب کاربری خود شوید.',
         [
           {
-            text: 'ورود مجدد',
+            text: 'ورود',
             style: 'default',
             onPress: () => {
               if (navigation) {
                 // پاک کردن navigation stack و رفتن به login
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'Login' }],
+                  routes: [{ name: 'LoginScreen' }],
                 });
               }
             }

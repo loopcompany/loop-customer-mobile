@@ -9,6 +9,7 @@ import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 const TechnicianVisitScreen = ({ navigation }) => {
   const { i18n } = useTranslation();
@@ -270,6 +271,7 @@ const TechnicianVisitScreen = ({ navigation }) => {
         {/* ادامه رزرو / مراجعه تکنسین section */}
 
 
+        <FooterSpacer />
       </ScrollView>
       
     </View>

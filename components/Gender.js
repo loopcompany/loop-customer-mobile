@@ -14,7 +14,6 @@ export default function Gender({ step, data }) {
 
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const femaleCount = useSelector(state => state.step?.femaleCount);
     const maleCount = useSelector(state => state.step?.maleCount);
     const unspecifiedCount = useSelector(state => state.step?.unspecifiedCount);
 
@@ -65,20 +64,23 @@ export default function Gender({ step, data }) {
                 <Text style={[NewStyles.text3, { color: maleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Male Technician')}</Text>
             </Pressable>
             }
+            {/* تکنسین خانم هنوز در دسترس نیست: گزینه دیده می‌شود ولی قفل است تا
+                کاربر بداند این امکان در راه است. */}
             {data?.is_required == 1 && <Pressable
-                onPress={() => {
-                    dispatch(setFemaleCount(1));
-                    dispatch(setMaleCount(0));
-                    dispatch(setUnspecifiedCount(0));
-                    dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }));
-                }}
-                style={[NewStyles.border5, {
+                disabled
+                accessibilityState={{ disabled: true }}
+                style={[NewStyles.border5, NewStyles.row, {
                     paddingHorizontal: 16,
                     paddingVertical: 12,
-                    backgroundColor: femaleCount === 1 ? themeColor0.bgColor(0.1) : themeColor4.bgColor(1)
+                    gap: 6,
+                    backgroundColor: themeColor3.bgColor(0.15),
+                    opacity: 0.6
                 }]}
             >
-                <Text style={[NewStyles.text3, { color: femaleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Female Technician')}</Text>
+                <Ionicons name="lock-closed" size={14} color={themeColor3.bgColor(1)} />
+                <Text style={[NewStyles.text3, { color: themeColor3.bgColor(1) }]}>
+                    {`${t('Female Technician')} (${t('Coming soon')})`}
+                </Text>
             </Pressable>}
         </View>
     )

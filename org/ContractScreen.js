@@ -8,6 +8,7 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import Footer from '@screens/Footer';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FooterSpacer from '@components/FooterSpacer';
 
 const ContractScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -70,6 +71,7 @@ const ContractScreen = ({ navigation }) => {
         <TouchableOpacity style={[NewStyles.button, NewStyles.shadow, { width: '95%', alignSelf: 'center', backgroundColor: '#e0f2f1', borderRadius: 12, marginBottom: 8, paddingVertical: 10 }]}>
           <Text style={[NewStyles.title, { color: themeColor0.bgColor(1), fontSize: 15 }]}>نمایش / ذخیره توافق نامه معین</Text>
         </TouchableOpacity>
+        <FooterSpacer />
       </ScrollView>
       {/* فوتر استاندارد */}
 

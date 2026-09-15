@@ -15,6 +15,7 @@ import Loader from '@components/Loader';
 import AccordionItem from '@components/AccordionItem';
 import { createStyles } from '@styles/NewStyles';
 import { ImageBackground } from 'expo-image';
+import FooterSpacer from '@components/FooterSpacer';
 export default function WarrantyScreen() {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -73,6 +74,7 @@ export default function WarrantyScreen() {
       <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }, NewStyles.center]} imageStyle={{ opacity: 0.8, }} contentPosition={'center'} contentFit={"cover"}>
         <ScreenHeaders title={t("Warranty / Guarantee")} />
         <FlatList
+        ListFooterComponent={<FooterSpacer />}
         style={{width:'100%'}}
           data={warranties}
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}

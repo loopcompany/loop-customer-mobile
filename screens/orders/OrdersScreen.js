@@ -15,8 +15,8 @@ import OrderItem from '@components/OrderItem';
 import BlankScreen from '@components/BlankScreen';
 import Loader from '@components/Loader';
 import { createStyles } from '@styles/NewStyles';
-import Button from '@components/Button';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 function OrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -119,7 +119,7 @@ function OrdersScreen({ navigation }) {
       const onBackPress = () => {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'FolderScreen' }],
+          routes: [{ name: 'List' }],
         });
         return true;
       };
@@ -142,7 +142,7 @@ function OrdersScreen({ navigation }) {
         onBackPress={() => {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'FolderScreen' }],
+            routes: [{ name: 'List' }],
           });
         }}
       />
@@ -180,6 +180,7 @@ function OrdersScreen({ navigation }) {
         </View>
       )}
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         data={orders}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingVertical: 20, gap: 15, paddingBottom: 100 }}
@@ -218,15 +219,28 @@ function OrdersScreen({ navigation }) {
               nestedScrollEnabled={true}
               contentContainerStyle={styles.modalScrollContent}
             >
-              {/* انتخاب وضعیت */}
+              {/* انتخاب وضعیت - کنترل بازشونده: برچسب + مقدار انتخاب‌شده + فلش،
+                  تا معلوم باشد قابل لمس است و چه چیزی الان انتخاب شده */}
               <View style={styles.statusContainer}>
-
-                <Button
-                  title={t('Order Status')}
+                <Text style={[NewStyles.text10, styles.statusLabel]}>{t('Order Status')}</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: showStatusOptions }}
+                  style={[styles.statusSelector, showStatusOptions && styles.statusSelectorActive]}
                   onPress={() => {
                     setShowStatusOptions(pre => !pre)
                   }}
-                />
+                >
+                  <Text style={[styles.statusSelectorText, tempStatus !== null && styles.statusSelectorTextSelected]}>
+                    {getStatusText(tempStatus)}
+                  </Text>
+                  <Ionicons
+                    name={showStatusOptions ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={showStatusOptions ? themeColor0.bgColor(1) : '#666'}
+                  />
+                </TouchableOpacity>
                 {showStatusOptions && <View style={styles.statusButtons}>
                   {[null, 0, 1, 2, 3].map((statusValue) => (
                     <TouchableOpacity
@@ -520,6 +534,34 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   statusContainer: {
 
     marginBottom: 20,
+  },
+  statusLabel: {
+    marginBottom: 10,
+    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
+  },
+  // همان ظاهر کادرهای «از تاریخ / تا تاریخ» تا کاربر بفهمد این هم یک انتخابگر است
+  statusSelector: {
+    ...NewStyles.row,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  statusSelectorActive: {
+    borderColor: themeColor0.bgColor(1),
+  },
+  statusSelectorText: {
+    fontSize: 14,
+    fontFamily: 'VazirBold',
+    color: '#666',
+  },
+  statusSelectorTextSelected: {
+    color: themeColor0.bgColor(1),
   },
   statusButtons: {
     ...NewStyles.row,

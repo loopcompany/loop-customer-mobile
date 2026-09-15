@@ -12,7 +12,14 @@
 //   price         : number|null - اگر مبلغ قطعی نیست null بماند تا «استعلام» نمایش داده شود
 
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  ActivityIndicator,
+} from 'react-native';
 import { useSelector } from 'react-redux';
 import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
@@ -25,6 +32,8 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import OrderReceipt from '@components/receipt/OrderReceipt';
+import FooterSpacer from '@components/FooterSpacer';
 
 const NOT_SET = 'ثبت نشده';
 
@@ -54,6 +63,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
     contact,
     price = null,
     currency = 'تومان',
+    // رسیدِ از پیش ساخته‌شده توسط صفحه‌ی مبدا (مسیرهای سازمانی).
+    receipt = null,
   } = params;
 
   const user = useSelector((state) => state?.user?.data);
@@ -82,12 +93,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
     const picked = Array.isArray(savedAddresses)
       ? savedAddresses.find((item) => String(item?.id) === String(selectedAddressId))
       : null;
-    return (
-      formatAddress(picked) ||
-      formatAddress(addressDraft) ||
-      orgProfile?.address ||
-      NOT_SET
-    );
+    return formatAddress(picked) || formatAddress(addressDraft) || orgProfile?.address || NOT_SET;
   }, [savedAddresses, selectedAddressId, addressDraft, orgProfile?.address]);
 
   const phone =
@@ -118,44 +124,54 @@ export default function OrderSummaryScreen({ navigation, route }) {
         <ScreenTitle title={'پیش‌نمایش نهایی ثبت سفارش'} />
       </View>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.card}>
-          <Text style={NewStyles.title10}>نوع سفارش:</Text>
-          <Text style={NewStyles.text10}>{orderType}</Text>
+        {/* وقتی صفحه‌ی مبدا رسید را ساخته باشد، همان رسید نشان داده می‌شود تا
+            «پیش‌نمایش نهایی» دقیقاً همان چیزی باشد که کاربر بعد از ثبت می‌بیند.
+            ورودی‌های دیگرِ این صفحه (مثلاً نوتیفیکیشن) رسید ندارند و خلاصه‌ی
+            قبلی برایشان می‌ماند. */}
+        {receipt ? (
+          <OrderReceipt receipt={receipt} />
+        ) : (
+          <>
+            <View style={styles.card}>
+              <Text style={NewStyles.title10}>نوع سفارش:</Text>
+              <Text style={NewStyles.text10}>{orderType}</Text>
 
-          <Text style={NewStyles.title10}>تاریخ مراجعه:</Text>
-          <Text style={NewStyles.text10}>{visitDate}</Text>
+              <Text style={NewStyles.title10}>تاریخ مراجعه:</Text>
+              <Text style={NewStyles.text10}>{visitDate}</Text>
 
-          <Text style={NewStyles.title10}>ساعت مراجعه:</Text>
-          <Text style={NewStyles.text10}>{visitTime}</Text>
+              <Text style={NewStyles.title10}>ساعت مراجعه:</Text>
+              <Text style={NewStyles.text10}>{visitTime}</Text>
 
-          <Text style={NewStyles.title10}>آدرس:</Text>
-          <Text style={NewStyles.text10}>{address}</Text>
+              <Text style={NewStyles.title10}>آدرس:</Text>
+              <Text style={NewStyles.text10}>{address}</Text>
 
-          <Text style={NewStyles.title10}>شماره تماس:</Text>
-          <Text style={NewStyles.text10}>{phone}</Text>
+              <Text style={NewStyles.title10}>شماره تماس:</Text>
+              <Text style={NewStyles.text10}>{phone}</Text>
 
-          <Text style={NewStyles.title10}>هزینه:</Text>
-          <Text style={[NewStyles.text11, styles.priceText]}>
-            {price > 0
-              ? `${price.toLocaleString('fa-IR')} ${currency}`
-              : 'پس از بررسی کارشناس اعلام می‌شود'}
-          </Text>
+              <Text style={NewStyles.title10}>هزینه:</Text>
+              <Text style={[NewStyles.text11, styles.priceText]}>
+                {price > 0
+                  ? `${price.toLocaleString('fa-IR')} ${currency}`
+                  : 'پس از بررسی کارشناس اعلام می‌شود'}
+              </Text>
 
-          <Text style={NewStyles.title10}>وضعیت سفارش:</Text>
-          <Text style={NewStyles.text11}>{status}</Text>
-        </View>
+              <Text style={NewStyles.title10}>وضعیت سفارش:</Text>
+              <Text style={NewStyles.text11}>{status}</Text>
+            </View>
 
-        {/* خلاصه‌ی واقعی انتخاب‌های کاربر در فرم قبلی */}
-        {summaryLines.length > 0 && (
-          <View style={styles.card}>
-            <Text style={styles.summaryTitle}>جزئیات انتخاب‌های شما</Text>
-            {summaryLines.map((line, idx) => (
-              <View key={`${line.label}-${idx}`} style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>{line.label}</Text>
-                <Text style={styles.summaryValue}>{line.value}</Text>
+            {/* خلاصه‌ی واقعی انتخاب‌های کاربر در فرم قبلی */}
+            {summaryLines.length > 0 && (
+              <View style={styles.card}>
+                <Text style={styles.summaryTitle}>جزئیات انتخاب‌های شما</Text>
+                {summaryLines.map((line, idx) => (
+                  <View key={`${line.label}-${idx}`} style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>{line.label}</Text>
+                    <Text style={styles.summaryValue}>{line.value}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
+            )}
+          </>
         )}
 
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
@@ -185,7 +201,10 @@ export default function OrderSummaryScreen({ navigation, route }) {
               });
             } catch (error) {
               smsSent = false;
-              console.warn('Order confirmation SMS failed (order still submitted):', error?.message);
+              console.warn(
+                'Order confirmation SMS failed (order still submitted):',
+                error?.message
+              );
             }
 
             setStatus('در حال بررسی');
@@ -195,14 +214,24 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 : 'سفارش با موفقیت ثبت شد. ارسال پیامک تایید با تاخیر انجام می‌شود.'
             );
 
-            navigation.replace('OrderTrackingScreen', {
-              orderData: {
-                orderNumber,
-                userId: user?.id ?? orgProfile?.id ?? null,
-                phone,
-                date: scheduleDate || '',
-              },
-            });
+            // پس از ثبت، کاربر باید رسید را ببیند - نه صفحه‌ی رهگیری. رسیدِ
+            // ساخته‌شده در صفحه‌ی مبدا فقط شماره‌ی سفارش کم دارد، که همین‌جا
+            // تولید شده است. اگر صفحه‌ی مبدا رسیدی نفرستاده باشد، رفتار قبلی
+            // (رهگیری سفارش) حفظ می‌شود.
+            if (receipt) {
+              navigation.replace('OrderReceipt', {
+                receipt: { ...receipt, order: { ...receipt.order, number: orderNumber } },
+              });
+            } else {
+              navigation.replace('OrderTrackingScreen', {
+                orderData: {
+                  orderNumber,
+                  userId: user?.id ?? orgProfile?.id ?? null,
+                  phone,
+                  date: scheduleDate || '',
+                },
+              });
+            }
             setIsSubmitting(false);
           }}
           disabled={isSubmitting}
@@ -213,6 +242,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
             <Text style={NewStyles.text4}>ثبت نهایی سفارش</Text>
           )}
         </TouchableOpacity>
+        <FooterSpacer />
       </ScrollView>
     </ImageBackground>
   );
@@ -235,7 +265,8 @@ const styles = createDirectionalStyles((isRTL) => ({
     fontSize: fontSize.md,
     color: colors.textPrimary.color,
     marginBottom: spacing.sm,
-    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+    writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   summaryRow: {
     flexDirection: isRTL ? 'row-reverse' : 'row',
@@ -250,7 +281,8 @@ const styles = createDirectionalStyles((isRTL) => ({
     fontFamily: getFontFamily('light', 'fa'),
     fontSize: fontSize.sm,
     color: colors.textSecondary.color,
-    textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+    writingDirection: isRTL ? 'rtl' : 'ltr',
   },
   summaryValue: {
     fontFamily: getFontFamily('bold', 'fa'),
@@ -262,6 +294,9 @@ const styles = createDirectionalStyles((isRTL) => ({
     backgroundColor: colors.warning.bgColor(1),
     padding: spacing.md,
     borderRadius: radius.sm,
+    // فاصله از رسیدِ بالای دکمه - رسید حاشیه‌ی پایین ندارد و بدون این، دکمه
+    // به لبه‌ی کارت می‌چسبید.
+    marginTop: spacing.xl,
     marginBottom: spacing.lg,
     width: '100%',
     alignItems: 'center',

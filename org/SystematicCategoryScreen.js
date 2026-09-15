@@ -21,7 +21,6 @@ import { ImageBackground } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
 
 import Folder from '@components/Folder';
 import Loader from '@components/Loader';
@@ -31,10 +30,9 @@ import categoriesAPI from '@services/CategoriesApi';
 import { imageUri } from '@services/URL';
 import { fetchSteps } from '@slices/stepSlice';
 import { setCategory } from '@slices/categorySlice';
-import { showToastOrAlert } from '@helpers/Common';
+import { showAlert, showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import { createStyles } from '@styles/NewStyles';
-import { colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import {
   SYSTEMATIC_CATEGORIES,
@@ -46,6 +44,18 @@ import { L } from './orgI18n';
 // عرض کاشی در components/Folder.js و فاصله‌ی بین دو ستون
 const TILE_WIDTH = 100;
 const GRID_GAP = spacing.sm;
+
+// ستون سمت چپ دقیقاً سه کاشی دارد و «ضایعات» کاشی سوم همان ستون است؛ بقیه‌ی
+// کاشی‌ها در ستون دوم می‌نشینند.
+const LEFT_COLUMN_SIZE = 3;
+
+// ستون چپ = [حساب کاربری، اولین دسته، ضایعات]. پس جای «ضایعات» در فهرست دسته‌ها
+// (بدون کاشی حساب کاربری) یکی مانده به انتهای ستون چپ است.
+const TRASH_INDEX_IN_CATEGORIES = LEFT_COLUMN_SIZE - 2;
+
+// آیکون اختصاصی «ضایعات». حتی وقتی دسته‌ها از API می‌آیند همین آیکون محلی
+// استفاده می‌شود تا کاشی ضایعات همه‌جا یک شکل باشد.
+const TRASH_ICON = require('@assets/icons/hardware-services/trash.png');
 
 const SystematicCategoryScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -116,7 +126,6 @@ const SystematicCategoryScreen = ({ navigation }) => {
       key: item.id,
       title: item.title,
       imageSource: item.image,
-      iconName: item.iconName,
       apiItem: item,
     }));
   }, [folders]);
@@ -128,6 +137,14 @@ const SystematicCategoryScreen = ({ navigation }) => {
     // کاشی «حساب کاربری» مرحله‌ای ندارد و مستقیم صفحه‌ی پروفایل را باز می‌کند.
     if (systematicId === 'user_account') {
       navigation.navigate('Profile');
+      return;
+    }
+
+    // «ضایعات» هنوز فعال نیست: به‌جای ورود به مراحل، فقط پیام «به زودی» می‌دهد.
+    // مراحل این دسته در systematicFlows.js آماده است و هر وقت فعال شد، حذف همین
+    // شرط کافی است.
+    if (systematicId === 'trash') {
+      showAlert(L('ضایعات'), L('این بخش به زودی فعال می‌شود.'));
       return;
     }
 
@@ -169,6 +186,62 @@ const SystematicCategoryScreen = ({ navigation }) => {
     }
   };
 
+  // کاشی‌های نمایشی: «حساب کاربری» اول، بعد دسته‌هایی که مسیر سیستماتیک دارند
+  // («انتخاب جامع» اینجا کاشی ندارد چون مسیر جداگانه‌ای است).
+  // بدون useMemo ساخته می‌شود تا onPress همیشه آخرین مقدار user/token را ببیند.
+  const buildTiles = () => {
+    const categories = items.filter((entry) => {
+      const categoryId = resolveSystematicCategoryId(entry.apiItem);
+      const isComprehensive = entry.apiItem?.id === 'comprehensive' ||
+                             entry.title === 'انتخاب جامع' ||
+                             entry.title === 'Comprehensive Selection';
+      return categoryId !== 'user_account' && !isComprehensive;
+    });
+
+    const accountTile = {
+      key: 'user_account',
+      title: 'حساب کاربری',
+      imageSource: { uri: `${imageUri}/userfolder/Profile.png` },
+      onPress: () => navigation.navigate('Profile'),
+    };
+
+    const rest = categories.map((entry) => ({
+      key: entry.key,
+      title: entry.title,
+      image: entry.image,
+      // ضایعات همیشه با آیکون محلی جدید نمایش داده می‌شود.
+      imageSource:
+        resolveSystematicCategoryId(entry.apiItem) === 'trash'
+          ? TRASH_ICON
+          : entry.imageSource,
+      onPress: () => openCategory(entry),
+      isTrash: resolveSystematicCategoryId(entry.apiItem) === 'trash',
+    }));
+
+    // «ضایعات» را به کاشی سومِ ستون چپ می‌بریم؛ بقیه ترتیب خودشان را نگه می‌دارند.
+    const trashIndex = rest.findIndex((tile) => tile.isTrash);
+    if (trashIndex > -1) {
+      const [trashTile] = rest.splice(trashIndex, 1);
+      rest.splice(Math.min(TRASH_INDEX_IN_CATEGORIES, rest.length), 0, trashTile);
+    }
+
+    return [accountTile, ...rest];
+  };
+
+  const tiles = buildTiles();
+  const leftColumn = tiles.slice(0, LEFT_COLUMN_SIZE);
+  const rightColumn = tiles.slice(LEFT_COLUMN_SIZE);
+
+  const renderTile = (tile) => (
+    <Folder
+      key={tile.key}
+      title={L(tile.title)}
+      image={tile.image}
+      imageSource={tile.imageSource}
+      onPress={tile.onPress}
+    />
+  );
+
   if (loader) {
     return <Loader />;
   }
@@ -201,39 +274,8 @@ const SystematicCategoryScreen = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          {/* کاشی حساب کاربری - مثل قبل بالای شبکه و با همان آیکون سروری */}
-          <Folder
-            title={L('حساب کاربری')}
-            imageSource={{ uri: `${imageUri}/userfolder/Profile.png` }}
-            onPress={() => navigation.navigate('Profile')}
-          />
-
-          {items
-            .filter((entry) => {
-              const categoryId = resolveSystematicCategoryId(entry.apiItem);
-              const isComprehensive = entry.apiItem?.id === 'comprehensive' ||
-                                     entry.title === 'انتخاب جامع' ||
-                                     entry.title === 'Comprehensive Selection';
-              return categoryId !== 'user_account' && !isComprehensive;
-            })
-            .map((entry) => (
-              <Folder
-                key={entry.key}
-                title={L(entry.title)}
-                image={entry.image}
-                imageSource={entry.imageSource}
-                icon={
-                  entry.iconName ? (
-                    <Ionicons
-                      name={entry.iconName}
-                      size={56}
-                      color={colors.textInverse.color}
-                    />
-                  ) : null
-                }
-                onPress={() => openCategory(entry)}
-              />
-            ))}
+          <View style={styles.column}>{leftColumn.map(renderTile)}</View>
+          <View style={styles.column}>{rightColumn.map(renderTile)}</View>
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>
@@ -250,12 +292,10 @@ const createLocalStyles = (NewStyles) =>
     gridScroll: {
       flex: 1,
     },
-    // دو کاشی در هر ردیف - ۸ کاشی یعنی ۴ ردیف. کاشی‌ها عرض ۱۰۰ خودشان را نگه
-    // می‌دارند و شبکه چسبیده به سمت چپ صفحه می‌ماند؛ عرض شبکه دقیقاً اندازه‌ی
-    // دو کاشی + فاصله است تا هیچ‌وقت کاشی سومی در ردیف جا نشود.
+    // دو ستون واقعی (نه ردیف wrap): ستون چپ سه کاشی و ستون راست بقیه. چون هر
+    // ستون مستقل پر می‌شود، تعداد کاشی‌های ستون چپ ثابت می‌ماند.
     grid: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
       alignSelf: 'flex-start',
       // border-box است، پس فاصله‌ی لبه‌ی چپ باید margin باشد نه padding - وگرنه
       // از عرض محتوا کم می‌شود و ستون دوم به ردیف بعد می‌افتد.
@@ -263,6 +303,9 @@ const createLocalStyles = (NewStyles) =>
       marginLeft: spacing.sm,
       columnGap: GRID_GAP,
       paddingBottom: spacing.lg,
+    },
+    column: {
+      width: TILE_WIDTH,
     },
   });
 

@@ -30,7 +30,7 @@ const SCREEN_TO_ROUTE = {
   'organization-profile': 'OrganizationProfile',
   'org-contract': 'OrganizationContract',
   club: 'Club',
-  home: 'FolderScreen',
+  home: 'List',
 };
 
 /** Fallback when `data.screen` is absent/unknown but `data.type` is known. */

@@ -16,6 +16,7 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { createStyles } from '@styles/NewStyles';
 import AccordionItem from '@components/AccordionItem';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function FAQScreen({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -83,6 +84,7 @@ export default function FAQScreen({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

@@ -23,6 +23,7 @@ import { formatDate, formatDateTime, showAlert } from '@helpers/Common';
 import Button from '@components/Button';
 import { useSelector } from 'react-redux';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 export default function MessageScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -266,6 +267,7 @@ export default function MessageScreen({ navigation }) {
               )}
             </View>
           )}
+          <FooterSpacer />
         </ScrollView>
       )}
 

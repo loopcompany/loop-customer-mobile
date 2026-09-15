@@ -7,6 +7,7 @@ import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function ChooseTechnicianScreen({ navigation }) {
   const { i18n } = useTranslation();
@@ -351,6 +352,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
           </View>
         </View>
 
+        <FooterSpacer />
       </ScrollView>
 
     </View>

@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 
 import AuthInitializer from '@components/AuthInitializer';
 import PushNotificationProvider from '@components/PushNotificationProvider';
+import SessionExpiredSheet from '@components/SessionExpiredSheet';
 import { MenuProvider } from '@contexts/MenuContext';
 import { setNavigationRef } from '@services/axiosConfig';
 
@@ -74,6 +75,9 @@ const App = () => {
               <PushNotificationProvider>
                 <MenuProvider>
                   <RootNavigator />
+                  {/* Sits above every screen: an expired session can surface
+                      anywhere, and the sheet drives the navigator itself. */}
+                  <SessionExpiredSheet />
                 </MenuProvider>
               </PushNotificationProvider>
             </AuthInitializer>

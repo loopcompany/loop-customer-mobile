@@ -12,7 +12,7 @@ import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
 import Button from '@components/Button';
 import { imageUri, uri } from '@services/URL';
 import { API_ENDPOINTS } from '@services/ApiEndpoints';
-import { fetchOrders } from '@slices/orderSlice';
+import { fetchOrders } from '@slices/ordersSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { emptyCategory } from '@slices/categorySlice';
 import ProgressBar from '@components/ProgressBar';
@@ -62,7 +62,16 @@ function Preview({ navigation }) {
     const [discountCode, setDiscountCode] = useState(null);
     const [discountPercent, setDiscountPercent] = useState(null);
 
-    const address = useSelector(state => state.address?.data)?.find(item => item?.id == addressId);
+    const addresses = useSelector(state => state.address?.data);
+    const address = addresses?.find(item => item?.id == addressId);
+
+    // آیا این دسته اصلاً مرحله‌ی آدرس دارد؟ اگر دارد، سفارش بدون آدرسِ معتبر
+    // نباید ثبت شود - قبلاً وقتی addressId خالی (یا آدرسِ انتخاب‌شده پاک‌شده)
+    // بود، سفارش با address_id خالی به سرور می‌رفت.
+    const hasAddressStep = steps?.data?.some(stepArray =>
+        stepArray?.some(item => item?.type === 'address')
+    );
+    const isAddressSelected = Boolean(addressId) && Boolean(address);
     
     const isFixed = (Number(category?.is_fixed) > 0 && totalPrice > 0) ? 1 : 0;
     console.log(showPrice);
@@ -161,6 +170,18 @@ function Preview({ navigation }) {
     };
 
     const submitOrder = async () => {
+        // گاردِ آدرس، پیش از هر کار دیگری: کاربر باید آدرسی را انتخاب کرده باشد
+        // و آن آدرس هنوز در فهرست آدرس‌هایش موجود باشد.
+        if (hasAddressStep && !isAddressSelected) {
+            showToastOrAlert(
+                addressId
+                    ? t('The selected address is no longer available. Please choose an address again.')
+                    : t('Please select your address before submitting the order.')
+            );
+            navigation.goBack();
+            return;
+        }
+
         setLoading(true);
         try {
 
@@ -212,7 +233,7 @@ function Preview({ navigation }) {
             } else {
             }
 
-            // Route صحیح: POST /api/orders/ (با / در انتها) — services/ApiEndpoints.js
+            // Route صحیح: POST /api/orders/submit — services/ApiEndpoints.js
             const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, payload, {
                 headers: {
                     'Accept': 'application/json',
@@ -221,14 +242,51 @@ function Preview({ navigation }) {
                 }
             });
 
-            // 📥 لاگ کردن پاسخ کامل از API 
+            // 📥 لاگ کردن پاسخ کامل از API (در بیلد production حذف می‌شود)
+            console.log('[Preview] POST', API_ENDPOINTS.ORDERS.CREATE, '→', response.status, JSON.stringify(response.data));
 
-            if (response.status == 200 || response.status == 201) {
-                showToastOrAlert(response?.data?.message);
-                dispatch(fetchOrders(token));
-                dispatch(emptySteps());
-                dispatch(emptyCategory());
-                dispatch(emptyAddress());
+            // این API پاکتِ `{ success, message, order }` برمی‌گرداند (همان قراردادی که
+            // slices/ordersSlice.js هم روی GET /orders چک می‌کند). یک 2xx به‌تنهایی
+            // «موفقیت» نیست: سرور می‌تواند 200 با success:false برگرداند و قبلاً همین
+            // حالت، سفارشِ ثبت‌نشده را «موفق» نشان می‌داد، سبد را خالی می‌کرد و کاربر را
+            // به لیست سفارش‌ها می‌فرستاد — جایی که هیچ سفارشی وجود نداشت.
+            const body = response?.data;
+            const isSuccess =
+                (response.status === 200 || response.status === 201) &&
+                body?.success !== false &&
+                body?.error_code == null;
+
+            if (!isSuccess) {
+                // سبد را نگه می‌داریم و روی همین صفحه می‌مانیم تا کاربر بتواند دوباره تلاش کند.
+                showToastOrAlert(
+                    (typeof body?.message === 'string' && body.message.trim())
+                        ? body.message
+                        : `${t('An unexpected error occurred!')} (${response.status})`
+                );
+                return;
+            }
+
+            showToastOrAlert(
+                (typeof body?.message === 'string' && body.message.trim())
+                    ? body.message
+                    : t('Your order has been submitted successfully.')
+            );
+
+            // لیست را *قبل از* ناوبری تازه می‌کنیم تا کاربر با فهرستِ به‌روز وارد شود.
+            // نکته: این باید fetchOrders سازگار با state.orders باشد (ordersSlice)،
+            // نه orderSlice که روی state.order می‌نویسد و OrdersScreen آن را نمی‌خواند.
+            await dispatch(fetchOrders({}));
+            dispatch(emptySteps());
+            dispatch(emptyCategory());
+            dispatch(emptyAddress());
+
+            // پس از ثبت، کاربر باید رسید همان سفارش را ببیند. شناسه‌ی سفارش از
+            // پاکتِ `{ success, message, order }` می‌آید؛ اگر سرور آن را برنگرداند
+            // به فهرست سفارش‌ها برمی‌گردیم تا کاربر بدون بازخورد نماند.
+            const createdOrderId = body?.order?.id ?? body?.order_id ?? body?.id ?? null;
+            if (createdOrderId != null) {
+                navigation.replace('OrderReceipt', { orderId: createdOrderId });
+            } else {
                 navigation.replace('OrdersScreen');
             }
         } catch (error) {
@@ -397,7 +455,9 @@ function Preview({ navigation }) {
                     }
 
                     {renderRow(t('Address'), '')}
-                    {renderRow(address?.full_name + ' - ' + address?.city + ' - ' + t("Region") + ' ' + address?.region + ' - ' + t("Number") + ' ' + address?.number + ' - ' + t("Unit") + ' ' + address?.unit + ' - ' + t("Floor") + ' ' + address?.floor + ' - ' + address?.address, '', NewStyles.text10)}
+                    {isAddressSelected
+                        ? renderRow(address?.full_name + ' - ' + address?.city + ' - ' + t("Region") + ' ' + address?.region + ' - ' + t("Number") + ' ' + address?.number + ' - ' + t("Unit") + ' ' + address?.unit + ' - ' + t("Floor") + ' ' + address?.floor + ' - ' + address?.address, '', NewStyles.text10)
+                        : renderRow(t('No address selected'), '', [NewStyles.text10, { color: themeColor6.bgColor(1) }])}
                     {discountPercent && renderRow(t('Your Final Discount Percentage'), discountPercent + t(' percent'), NewStyles.text10)}
                 </View>
 

@@ -20,6 +20,7 @@ import { createStyles } from '@styles/NewStyles';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useSelector } from 'react-redux';
 import { restartOtpRetriever, stopOtpRetriever } from '@screens/auth/OtpRetriever';
+import FooterSpacer from '@components/FooterSpacer';
 
 const Register = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -1108,6 +1109,7 @@ const Register = ({ navigation }) => {
             />
           </View>
 
+          <FooterSpacer />
         </ScrollView>
 
         {/* DatePicker Modal */}

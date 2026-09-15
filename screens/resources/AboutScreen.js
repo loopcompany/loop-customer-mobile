@@ -13,6 +13,7 @@ import { RefreshControl } from 'react-native';
 import Loader from '@components/Loader';
 import AccordionItem from '@components/AccordionItem';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function AboutScreen() {
   const [terms, setTerms] = useState([]);
@@ -67,6 +68,7 @@ export default function AboutScreen() {
     <SafeAreaView edges={{ top: 'off', bottom: 'off' }} style={NewStyles.container}>
       <ScreenHeaders title={t("Terms / About Loop")} />
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         data={terms}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => { setIsRefreshing(true) }} />}
         showsVerticalScrollIndicator={false}

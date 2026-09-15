@@ -13,6 +13,7 @@ import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { themeColor0, themeColor4 } from '@theme/Color';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function OrderTrackingScreen({ navigation, route }) {
   // دریافت اطلاعات سفارش از route params.
@@ -98,6 +99,7 @@ export default function OrderTrackingScreen({ navigation, route }) {
         >
           <Text style={NewStyles.text4}>ثبت سفارش جدید</Text>
         </TouchableOpacity>
+        <FooterSpacer />
       </ScrollView>
       
     </ImageBackground>

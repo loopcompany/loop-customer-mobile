@@ -21,6 +21,7 @@ import { getGemActions, spinWheel, canPlayWheel } from '@services/GemApi';
 import { showToastOrAlert } from '@helpers/Common';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 export default function Club({ navigation }) {
 
   const { t, i18n } = useTranslation();
@@ -252,6 +253,7 @@ export default function Club({ navigation }) {
         </View>
         <Filters data={categories} activeIndex={activeIndex} setActiveIndex={setActiveIndex} isRtl={isRtl} />
         <FlatList
+          ListFooterComponent={<FooterSpacer />}
           contentContainerStyle={NewStyles.center} scrollEnabled={false}
           showsVerticalScrollIndicator={false}
           data={activeIndex ? data.filter(item => item?.category_id == categories?.[activeIndex]?.id) : data}
@@ -262,6 +264,7 @@ export default function Club({ navigation }) {
             )
           }}
         />
+        <FooterSpacer />
       </ScrollView>
 
       {/* مودال گردونه شانس */}

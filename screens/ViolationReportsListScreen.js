@@ -10,6 +10,7 @@ import { themeColor1, themeColor0, themeColor10 } from '@theme/Color';
 import violationReportAPI from '@services/ViolationReportApi';
 import { formatJalaaliDate, formatPrice, showToastOrAlert } from '@helpers/Common';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 export default function ViolationReportsListScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -119,15 +120,19 @@ export default function ViolationReportsListScreen({ navigation }) {
         </View>
     );
 
-    const renderFooter = () => {
-        if (!loadingMore) return null;
-        return (
-            <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color={themeColor1.bgColor(1)} />
-                <Text style={styles.loadingText}>{t('Loading...')}</Text>
-            </View>
-        );
-    };
+    // اسپینرِ «در حال بارگذاری بیشتر» و فاصله‌ی ته لیست با هم؛ فاصله همیشه
+    // هست تا آخرین ردیف زیر داک شناور پنهان نشود.
+    const renderFooter = () => (
+        <>
+            {loadingMore && (
+                <View style={styles.footerLoader}>
+                    <ActivityIndicator size="small" color={themeColor1.bgColor(1)} />
+                    <Text style={styles.loadingText}>{t('Loading...')}</Text>
+                </View>
+            )}
+            <FooterSpacer />
+        </>
+    );
 
     if (loading) {
         return (

@@ -16,6 +16,7 @@ import Button from '@components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function GameResultScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
@@ -80,7 +81,7 @@ export default function GameResultScreen({ route, navigation }) {
   };
 
   const handleBackToMenu = () => {
-    navigation.navigate('FolderScreen');
+    navigation.navigate('List');
   };
 
   return (
@@ -223,6 +224,7 @@ export default function GameResultScreen({ route, navigation }) {
             </Text>
           </View>
         )}
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

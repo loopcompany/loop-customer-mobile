@@ -25,6 +25,7 @@ import { showToastOrAlert } from '@helpers/Common';
 import { themeColor1, themeColor4 } from '@theme/Color';
 import Button from '@components/Button';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 
 export default function ProductIssueScreen({ navigation }) {
@@ -235,6 +236,7 @@ export default function ProductIssueScreen({ navigation }) {
 
           <Button title={t('Submit')} onPress={handleSubmit} loading={isSubmitting} />
 
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
 

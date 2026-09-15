@@ -22,6 +22,7 @@ import { imageUri } from '@services/URL';
 import { createStyles } from '@styles/NewStyles';
 import LocationPicker from '@components/LocationPicker';
 import { fetchUser } from '@slices/userSlice';
+import FooterSpacer from '@components/FooterSpacer';
 export default function Profile() {
     const { t, i18n } = useTranslation();
     const isRTL = langIsRTL(i18n.language);
@@ -887,6 +888,7 @@ export default function Profile() {
                             disabled={isLoggingOut}
                         />
                     </View>
+                  <FooterSpacer />
                 </ScrollView>
             </KeyboardAvoidingView>
 

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from './Api';
 import i18next from 'i18next';
 import { unregisterForPushNotifications } from './notifications';
+import { resetSessionExpiry } from './sessionExpiry';
 
 // Token Management Service
 export class TokenManager {
@@ -10,10 +11,19 @@ export class TokenManager {
   static SESSION_TOKEN_KEY = 'sessionToken'; // For temporary session storage
   static SESSION_USER_DATA_KEY = 'sessionUserData'; // For temporary session storage
 
+  /**
+   * In-flight `validateToken` call, so simultaneous checks share one request.
+   * @type {{ token: string, promise: Promise<object> } | null}
+   */
+  static _validation = null;
+
   // Save token to AsyncStorage
   static async saveToken(token) {
     try {
       await AsyncStorage.setItem(this.TOKEN_KEY, token);
+      // A fresh token starts a fresh session: release the session-expiry latch
+      // so a later expiry can raise the prompt again.
+      resetSessionExpiry();
       console.log('✅ Token saved to AsyncStorage');
       return true;
     } catch (error) {
@@ -70,8 +80,36 @@ export class TokenManager {
     }
   }
 
-  // Validate token with server
+  /**
+   * Validate a token with the server.
+   *
+   * Concurrent calls for the same token share one request: on a cold start
+   * both `Landing` and `AuthInitializer` check the session at the same moment,
+   * and firing two identical POSTs at the auth endpoint is pure waste.
+   *
+   * @param {string} token
+   * @returns {Promise<{valid: boolean, [key: string]: any}>}
+   */
   static async validateToken(token) {
+    if (!token) {
+      console.log('❌ No token provided for validation');
+      return { valid: false, error: 'No token' };
+    }
+
+    if (this._validation?.token === token) {
+      return this._validation.promise;
+    }
+
+    const promise = this._validateTokenWithServer(token).finally(() => {
+      if (this._validation?.promise === promise) this._validation = null;
+    });
+
+    this._validation = { token, promise };
+    return promise;
+  }
+
+
+  static async _validateTokenWithServer(token) {
     try {
       if (!token) {
         console.log('❌ No token provided for validation');
@@ -232,6 +270,7 @@ export class TokenManager {
         AsyncStorage.setItem(this.SESSION_USER_DATA_KEY, JSON.stringify(userData)),
       ]);
 
+      resetSessionExpiry();
       console.log('✅ Session auth data saved successfully');
       return true;
     } catch (error) {

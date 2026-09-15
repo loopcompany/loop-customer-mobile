@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { getStateFromPath as getStateFromPathDefault } from '@react-navigation/native';
 
 import { routes } from './routes';
 
@@ -13,6 +14,50 @@ const PREFIXES = [
 ];
 
 /**
+ * URLs that no longer exist, mapped to the path that replaced them.
+ *
+ * `/folder` was a second home page next to `/list`; `/list` is now the only
+ * one. Bookmarks and old links still point at the retired path, so rewrite it
+ * here rather than leaving the visitor on React Navigation's fallback route.
+ *
+ * Keys are compared without the leading slash and without the query string.
+ */
+const LEGACY_PATHS = {
+  folder: '/list',
+};
+
+/**
+ * Path → screen map, derived from the route registry.
+ *
+ * Exported so the rewrite below can be exercised without standing up the whole
+ * (web-only) linking object.
+ *
+ * @type {{ screens: Record<string, string> }}
+ */
+export const linkingConfig = {
+  screens: Object.fromEntries(
+    routes.filter((route) => route.path != null).map((route) => [route.name, route.path])
+  ),
+};
+
+/**
+ * Rewrites retired paths before React Navigation resolves them.
+ *
+ * @param {string} path - Incoming path, e.g. `/folder?x=1`
+ * @param {object} config - Linking config passed through untouched
+ */
+export function getStateFromPath(path, config) {
+  const [pathname, query] = String(path ?? '').split('?');
+  const replacement = LEGACY_PATHS[pathname.replace(/^\/+|\/+$/g, '')];
+
+  if (replacement) {
+    return getStateFromPathDefault(query ? `${replacement}?${query}` : replacement, config);
+  }
+
+  return getStateFromPathDefault(path, config);
+}
+
+/**
  * React Navigation linking config, derived from the route registry.
  *
  * Native builds return `undefined`: the app has no custom URL scheme handling
@@ -25,11 +70,8 @@ export const linking =
   Platform.OS === 'web'
     ? {
         prefixes: PREFIXES,
-        config: {
-          screens: Object.fromEntries(
-            routes.filter((route) => route.path != null).map((route) => [route.name, route.path])
-          ),
-        },
+        config: linkingConfig,
+        getStateFromPath,
       }
     : undefined;
 

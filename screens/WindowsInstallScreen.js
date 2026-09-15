@@ -17,6 +17,7 @@ import ScreenHeaders from "@components/ScreenHeaders";
 import RadioButton from "@components/RadioButton";
 import ScreenTitle from "@components/ScreenTitle";
 import NewStyles from "@styles/NewStyles";
+import FooterSpacer from '@components/FooterSpacer';
 export default function WindowsInstallScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const windowsVersions = [
@@ -62,6 +63,7 @@ export default function WindowsInstallScreen({ navigation, route }) {
       />
 
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         contentContainerStyle={{ gap: 10, padding: 10 }}
         ListHeaderComponent={() => {
           return (

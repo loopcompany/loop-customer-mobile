@@ -15,6 +15,7 @@ import { GAME_LEVELS } from './GameData';
 import Button from '@components/Button';
 import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FooterSpacer from '@components/FooterSpacer';
 export default function GameMenuScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -164,6 +165,7 @@ export default function GameMenuScreen({ navigation }) {
             {t("This game is designed for children aged 1 to 5 years and helps them become familiar with computer devices and technology.")}
           </Text>
         </View>
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

@@ -24,6 +24,7 @@ import { useNavigation } from '@react-navigation/native';
 import { createStyles } from '@styles/NewStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import FooterSpacer from '@components/FooterSpacer';
 
 
 export default function RateCategory() {
@@ -100,6 +101,7 @@ export default function RateCategory() {
       </View>
       <View style={[{ flex: 1 }]}>
         <FlatList
+          ListFooterComponent={<FooterSpacer />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}
           showsVerticalScrollIndicator={false}
           data={rates}

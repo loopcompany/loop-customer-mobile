@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import Button from '@components/Button';
 import { imageUri } from '@services/URL';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function OrganizationTermsScreen() {
   const { t } = useTranslation();
@@ -76,12 +77,16 @@ export default function OrganizationTermsScreen() {
         }}
         ListFooterComponent={() => {
           return (
-            <Button
-              title={t("PDF of organizational terms and conditions")}
-              onPress={()=>{
-                Linking.openURL(`${imageUri}/${pdf?.organ_term}`)
-              }}
-            />
+            <>
+              <Button
+                title={t("PDF of organizational terms and conditions")}
+                onPress={()=>{
+                  Linking.openURL(`${imageUri}/${pdf?.organ_term}`)
+                }}
+              />
+              {/* تا دکمه‌ی PDF زیر داک شناور پنهان نشود */}
+              <FooterSpacer />
+            </>
           )
         }}
       />

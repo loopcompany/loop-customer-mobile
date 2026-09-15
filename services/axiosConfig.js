@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleApiError, handleOrganizationApiError } from '@utils/apiErrorHandler';
 import i18next from 'i18next';
+import { notifySessionExpired, SESSION_EXPIRY_REASON } from './sessionExpiry';
 
 /**
  * Navigation reference برای استفاده در interceptors
@@ -100,6 +101,17 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // ۴۰۱ یعنی توکن باطل/منقضی شده است: کاربر باید دوباره وارد شود.
+    // 401 means the bearer token is gone, revoked or expired. Announce it on
+    // the session bus instead of alerting here: the bus de-duplicates (a screen
+    // firing five parallel requests gets five 401s and must see one sheet), and
+    // it works even before a navigation ref exists — during the startup token
+    // check, for instance. `<SessionExpiredSheet />` owns the UI and the cleanup.
+    if (error.response?.status === 401 && wasAuthenticatedRequest(error.config)) {
+      notifySessionExpired(SESSION_EXPIRY_REASON.UNAUTHORIZED);
+      return Promise.reject(error);
+    }
+
     // اگر navigation reference وجود داره، از error handler استفاده کن
     if (navigationRef?.current) {
       const navigation = navigationRef.current;
@@ -123,6 +135,23 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * آیا این درخواست با توکن ارسال شده بود؟
+ *
+ * Did this request actually carry a bearer token?
+ *
+ * A 401 on a request that never had one just means the endpoint needs a login —
+ * the user's session did not "expire", because there was none. Only the
+ * authenticated case should raise the session-expiry sheet.
+ *
+ * @param {object} config - axios request config
+ * @returns {boolean}
+ */
+const wasAuthenticatedRequest = (config) => {
+  const headers = config?.headers || {};
+  return Boolean(headers.Authorization || headers.authorization);
+};
 
 /**
  * تشخیص API های مربوط به سازمان

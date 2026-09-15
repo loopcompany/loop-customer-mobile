@@ -18,6 +18,7 @@ import { showAlert, langIsRTL } from '@helpers/Common';
 import { getFontFamily } from '@theme/Typography';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 const SAVED_ORG_CODE_KEY = 'savedOrganizationCode';
 const SAVED_ORG_PASSWORD_KEY = 'savedOrganizationPassword';
 
@@ -506,6 +507,7 @@ const Login = ({ navigation }) => {
             </View>
           </View>
 
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

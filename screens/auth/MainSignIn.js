@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { createStyles } from '@styles/NewStyles';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
 import { useSelector } from "react-redux";
+import FooterSpacer from '@components/FooterSpacer';
 const initialState = {
     melicode: '',
     phone: '',
@@ -420,6 +421,7 @@ export default function MainSignIn({ navigation }) {
                             </Text>
                         </TouchableOpacity>
                     </View>
+                  <FooterSpacer />
                 </ScrollView>
             </KeyboardAvoidingView>
         </ImageBackground>

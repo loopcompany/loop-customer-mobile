@@ -32,6 +32,8 @@ const deviceIcon = {
   allInOne: require('@assets/icons/hardware-services/all-in-one.png'),
   printer: require('@assets/icons/hardware-services/printer-multi.png'),
   hardDisk: require('@assets/icons/hardware-services/storage-drive.png'),
+  // آیکون اختصاصی «ضایعات» - جایگزین گلیف trash-outline قبلی
+  trash: require('@assets/icons/hardware-services/trash.png'),
 };
 
 // ---------------------------------------------------------------------------
@@ -50,7 +52,7 @@ export const SYSTEMATIC_CATEGORIES = [
   { id: 'printer_copy', title: 'پرینتر / کپی', subtitle: 'Printer / Copy', image: deviceIcon.printer },
   { id: 'monitor', title: 'مانیتور', subtitle: 'Monitor', image: deviceIcon.monitor },
   { id: 'case', title: 'کیس', subtitle: 'Case', image: deviceIcon.case },
-  { id: 'trash', title: 'ضایعات', subtitle: 'Trash', iconName: 'trash-outline' },
+  { id: 'trash', title: 'ضایعات', subtitle: 'Trash', image: deviceIcon.trash },
   { id: 'all_in_one', title: 'آل این وان', subtitle: 'All in One', image: deviceIcon.allInOne },
   { id: 'hard_disk', title: 'هارد دیسک', subtitle: 'Hard Disk', image: deviceIcon.hardDisk },
 ];
@@ -302,7 +304,6 @@ export const SYSTEMATIC_FLOWS = {
       fields: [
         { id: 'model', placeholder: 'مدل لپ تاپ (مثلاً X550)' },
       ],
-      required: true,
     },
     {
       id: 'os',
@@ -479,7 +480,6 @@ export const SYSTEMATIC_FLOWS = {
         { id: 'serial', placeholder: 'شماره سریال' },
         { id: 'specs', placeholder: 'مشخصات (CPU / RAM / هارد / گرافیک)' },
       ],
-      required: true,
     },
     {
       id: 'os',
@@ -587,7 +587,6 @@ export const SYSTEMATIC_FLOWS = {
         { id: 'serial', placeholder: 'شماره سریال' },
         { id: 'specs', placeholder: 'مشخصات (CPU / RAM / هارد)' },
       ],
-      required: true,
     },
     {
       id: 'os',
@@ -676,7 +675,6 @@ export const SYSTEMATIC_FLOWS = {
         { id: 'model', placeholder: 'مدل دستگاه' },
         { id: 'serial', placeholder: 'شماره سریال' },
       ],
-      required: true,
     },
     {
       id: 'device_type',

@@ -27,6 +27,7 @@ import { fetchUser } from '@slices/userSlice';
 import { fetchOrders } from '@slices/orderSlice';
 import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from '@components/ShowMapDetailComponent';
+import FooterSpacer from '@components/FooterSpacer';
 
 const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, styles, NewStyles, user }) => {
     let is_package = 0
@@ -91,6 +92,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
             </View>
 
             <SectionList
+                ListFooterComponent={<FooterSpacer />}
                 style={{ paddingHorizontal: '5%', padding: 20 }}
                 contentContainerStyle={{ gap: 1 }}
                 scrollEnabled={false}
@@ -961,6 +963,7 @@ function Details({ route, navigation }) {
                             finishedAt={data?.finished_at}
                         />
                     )}
+                  <FooterSpacer />
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>

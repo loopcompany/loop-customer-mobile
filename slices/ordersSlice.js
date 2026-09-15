@@ -35,11 +35,14 @@ export const fetchOrders = createAsyncThunk(
                 }
             });
 
-           
             if (response.data?.success) {
                 return response.data.data || [];
             }
-            
+
+            // بدونِ پرچمِ `success` بی‌سروصدا [] برمی‌گشت، که از دیدِ کاربر یعنی
+            // «لیست خالی» و از دیدِ توسعه‌دهنده یعنی هیچ سرنخی. اگر پاکتِ پاسخ
+            // چیزِ دیگری بود، لااقل دیده شود.
+            console.warn('[ordersSlice] GET /orders returned an unexpected envelope:', JSON.stringify(response.data)?.slice(0, 500));
             return [];
         } catch (error) {
             console.error('Fetch orders error:', error.response?.data || error.message);

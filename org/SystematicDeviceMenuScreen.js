@@ -17,6 +17,7 @@ import { radius } from '@theme/Radius';
 import { spacing } from '@theme/Spacing';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { L } from './orgI18n';
+import FooterSpacer from '@components/FooterSpacer';
 
 // رنگ‌های فهرست سازمانی قبلی. این دو مقدار در theme/Color.js نیستند و عمداً
 // عیناً حفظ شده‌اند تا ظاهر صفحه با نسخه‌ی قبلی List.js یکی باشد.
@@ -72,6 +73,7 @@ const SystematicDeviceMenuScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           ))}
         </View>
+        <FooterSpacer />
       </ScrollView>
     </View>
   );

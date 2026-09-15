@@ -46,6 +46,14 @@ module.exports = defineConfig([
     rules: {
       /* --- correctness --- */
       'react-hooks/rules-of-hooks': 'error',
+      // یک نامِ تکراری (مثلاً دو بار `import FooterSpacer`) برای Metro خطای
+      // redeclaration است و bundle را می‌شکند، ولی lint تا پیش از این ساکت بود.
+      //
+      // عمداً no-duplicate-imports نیست: آن قاعده `import X from 'm'` در کنار
+      // `import { y } from 'm'` را هم خطا می‌گیرد، که در این ریپو الگوی رایج و
+      // درستی است (NewStyles + createStyles). چیزی که واقعاً می‌شکند، تکرارِ
+      // خودِ *نام* است و no-redeclare دقیقاً همان را می‌گیرد.
+      'no-redeclare': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       eqeqeq: ['warn', 'smart'],
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],

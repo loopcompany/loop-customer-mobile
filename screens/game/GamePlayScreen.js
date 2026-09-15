@@ -15,6 +15,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import  { createStyles } from '@styles/NewStyles';
 import { themeColor1, themeColor3, themeColor4, themeColor5 } from '@theme/Color';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 import {
   GAME_LEVELS,
   generateQuestion,
@@ -273,6 +274,7 @@ export default function GamePlayScreen({ route, navigation }) {
             </Text>
           </Animated.View>
         )}
+        <FooterSpacer />
       </ScrollView>
     </SafeAreaView>
   );

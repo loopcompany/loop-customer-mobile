@@ -102,9 +102,12 @@ export default function OrderItem({ item, navigation, user }) {
         const status = item?.status;
         if (status == 0) {
             return {
-                text1: t('Awaiting Review'),
+                // پیش‌تر این دکمه onPress خالی داشت و سفارشِ در انتظار بررسی
+                // هیچ راهی به رسید نداشت - در حالی که «جزئیات سفارش» در طرح
+                // دقیقاً همین وضعیت است.
+                text1: t('Pre-receipt'),
                 text2: t('Cancel Order'),
-                onPress1: () => { },
+                onPress1: () => navigation.navigate('OrderReceipt', { orderId: item?.id }),
                 onPress2: () => setCancelModal(true),
                 loading1: loading,
                 loading2: loading,
@@ -113,8 +116,11 @@ export default function OrderItem({ item, navigation, user }) {
 
         if (status == 2 && user?.apple_check != 1) {
             return {
-                text1: t('Order Invoice'),
-                onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
+                // سفارشِ انجام‌شده رسیدِ «انجام شد» می‌گیرد. صفحه‌ی Invoice
+                // (درگاه پرداخت / خدمات اضافه) همچنان از مسیر جزئیات سفارش
+                // در دسترس است و اینجا ارزشی ندارد چون سفارش پرداخت شده.
+                text1: t('Order Receipt'),
+                onPress1: () => navigation.navigate('OrderReceipt', { orderId: item?.id }),
                 loading1: loading,
                 loading2: loading,
                 style: { fontSize: 13 }
@@ -122,9 +128,12 @@ export default function OrderItem({ item, navigation, user }) {
         }
         if (status >= 3) {
             return {
-                text1: ((item?.status == 4 && item?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (item?.status == 3 && item?.arrived_at)) ? 'پیش رسید' : '',
+                // برچسب قبلی «پیش رسید» بود، ولی طبق «توضیحات رسیدها.pdf»
+                // پیش‌رسید مربوط به سفارشِ در انتظار است؛ سفارش لغو‌شده رسیدِ
+                // «ناموفق» دارد.
+                text1: ((item?.status == 4 && item?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (item?.status == 3 && item?.arrived_at)) ? t('Receipt') : '',
                 text2: item?.status == 3 ? t('Canceled by You') : item?.status == 4 ? t('Canceled by Technician') : item?.status == 5 ? t('Canceled by Loop') : item?.status == 6 ? t('Canceled due to Order Time Expiry') : t('Canceled'),
-                onPress1: () => navigation.navigate('Invoice', { orderId: item?.id }),
+                onPress1: () => navigation.navigate('OrderReceipt', { orderId: item?.id }),
 
                 onPress2: () => { },
                 loading1: loading,
@@ -136,7 +145,7 @@ export default function OrderItem({ item, navigation, user }) {
 
     return (
         <Pressable style={[styles.itemWrapper, NewStyles.shadow, NewStyles.border10]} onPress={() => { navigation.navigate('Details', { orderId: item?.id }); }}>
-            {item?.technician_id &&
+            {!!item?.technician_id &&
                 <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]} >
                     <View>
                         {item?.technician?.profile_photo_path ? (<Image style={[styles.profileImage, NewStyles.center, NewStyles.border100]} source={{ uri: `${imageUri}/${item?.technician?.profile_photo_path}` }} contentFit="cover" />) : (<View style={[styles.profileImage, NewStyles.border100, NewStyles.center]}><Text style={styles.profileImageThumbnail}>{item?.technician?.name?.[0]}</Text></View>)}
@@ -175,7 +184,7 @@ export default function OrderItem({ item, navigation, user }) {
                     </View>
                 </View>
             </View>}
-            {(item.status == 3 && item?.user_cancellation_reason && item?.user_cancellation_date) && <View style={styles.cardSection}>
+            {!!(item.status == 3 && item?.user_cancellation_reason && item?.user_cancellation_date) && <View style={styles.cardSection}>
                 <View style={[]}>
                     <Text style={NewStyles.text10}>{t("Cancel reason")}: </Text>
                     <View style={[styles.statusBadge]}>

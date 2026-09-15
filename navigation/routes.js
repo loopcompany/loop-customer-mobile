@@ -120,12 +120,10 @@ export const routes = [
     getComponent: () => require('@screens/orders/OrderMenuScreen').default,
     path: 'order-menu',
   },
+  // The app's home page. `/folder` (screens/FolderScreen.js) used to be a second
+  // home and is gone: nothing navigates to it and the old URL is rewritten to
+  // `/list` in navigation/linking.js.
   { name: 'List', getComponent: () => require('@org/List').default, path: 'list' },
-  {
-    name: 'FolderScreen',
-    getComponent: () => require('@screens/FolderScreen').default,
-    path: 'folder',
-  },
   {
     name: 'SubCategories',
     getComponent: () => require('@screens/category/SubCategories').default,
@@ -161,6 +159,11 @@ export const routes = [
     name: 'Invoice',
     getComponent: () => require('@screens/orders/Invoice').default,
     path: 'invoice',
+  },
+  {
+    name: 'OrderReceipt',
+    getComponent: () => require('@screens/orders/OrderReceiptScreen').default,
+    path: 'receipt',
   },
   {
     name: 'Increase',
@@ -469,6 +472,20 @@ export const routes = [
     getComponent: () => require('@screens/MapPickerScreen').default,
     path: 'map-picker',
   },
+
+  /* ---- Dev-only ---- */
+  // گالری ۹ حالت رسید. تولید همه‌ی ترکیب‌ها از داده‌ی واقعی عملی نیست، پس
+  // این صفحه آن‌ها را از fixture می‌سازد. فقط در توسعه ثبت می‌شود تا در
+  // بیلد تولیدی نه مسیر داشته باشد نه URL.
+  ...(__DEV__
+    ? [
+        {
+          name: 'ReceiptGallery',
+          getComponent: () => require('@screens/dev/ReceiptGalleryScreen').default,
+          path: 'dev/receipts',
+        },
+      ]
+    : []),
 ];
 
 /** The route the app opens on. */
@@ -479,6 +496,6 @@ export const INITIAL_ROUTE = 'Landing';
  * `List` is the home page every cold start lands on, so it belongs here —
  * otherwise back from home pops to an empty stack.
  */
-export const ROOT_ROUTES = ['Landing', 'Welcome', 'FolderScreen', 'List'];
+export const ROOT_ROUTES = ['Landing', 'Welcome', 'List'];
 
 export default routes;

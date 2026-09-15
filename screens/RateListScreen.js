@@ -18,6 +18,7 @@ import { themeColor0, themeColor4 } from '@theme/Color';
 import letterRatesAPI from '@services/LetterRatesApi';
 import { RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import FooterSpacer from '@components/FooterSpacer';
 
 
 
@@ -61,6 +62,7 @@ export default function RateListScreen({ route }) {
             <Text style={NewStyles.title4}>{params?.title}</Text>
           </View>
           <FlatList
+            ListFooterComponent={<FooterSpacer />}
             showsVerticalScrollIndicator={false}
             data={rates}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true) }} />}

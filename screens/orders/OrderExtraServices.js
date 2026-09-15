@@ -5,6 +5,7 @@ import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useTranslation } from 'react-i18next'
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 import { mainUri, uri } from '@services/URL'
 import NewStyles from '@styles/NewStyles'
 import { formatPrice, showToastOrAlert } from '@helpers/Common'
@@ -128,6 +129,7 @@ const OrderExtraServices = ({ orderId, navigation }) => {
 
                 {/* List */}
                 <FlatList
+                    ListFooterComponent={<FooterSpacer />}
                     data={extraServices}
                     renderItem={renderExtraServiceItem}
                     keyExtractor={(item, index) => item?.id?.toString() || index.toString()}

@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import OrderItem from '@components/OrderItem';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
+import FooterSpacer from '@components/FooterSpacer';
 function CanceledOrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -45,6 +46,7 @@ function CanceledOrdersScreen({ navigation }) {
       <ScreenHeaders title={t('Canceled Orders')} />
 
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         contentContainerStyle={{ paddingVertical: 20, gap: 15 }}
         data={orders?.filter(order => (order.status == 3 || order.status == 4 || order.status == 5 || order.status == 6))}
         refreshControl={

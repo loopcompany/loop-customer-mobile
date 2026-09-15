@@ -5,6 +5,7 @@ import NewStyles from "@styles/NewStyles";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import FooterSpacer from '@components/FooterSpacer';
 
 
 
@@ -59,6 +60,7 @@ function OrderMenuScreen({ navigation }) {
             }}
           />
         </View>}
+        <FooterSpacer />
       </ScrollView>
     </ImageBackground>
   );

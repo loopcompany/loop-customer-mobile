@@ -22,6 +22,7 @@ import { showToastOrAlert } from "@helpers/Common";
 import Button from "@components/Button";
 import { createStyles } from "@styles/NewStyles";
 import { Ionicons } from "@expo/vector-icons";
+import FooterSpacer from '@components/FooterSpacer';
 
 const COURSE_OPTIONS = [
   { labelKey: "Computer Software Installation Training", value: "آموزش نصب نرم افزار رایانه" },
@@ -620,6 +621,7 @@ export default function TrainingRegistrationScreen() {
             onPress={handleSubmit}
             loading={isSubmitting}
           />
+          <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

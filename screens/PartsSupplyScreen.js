@@ -7,6 +7,7 @@ import ScreenTitle from '@components/ScreenTitle';
 import { themeColor10, themeColor4 } from '@theme/Color';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 
 export default function PartsSupplyScreen() {
@@ -132,6 +133,7 @@ export default function PartsSupplyScreen() {
             onChangeText={setDesc}
             multiline
           />
+          <FooterSpacer />
         </ScrollView>
 
         {/* Footer */}

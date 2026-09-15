@@ -24,8 +24,11 @@ const rtl = () => langIsRTL(i18n.language);
 
 // سربرگ آکاردئونی هر بخش. با پاس‌دادن step، شماره‌ی مرحله در سمت راست عنوان
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).
-export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, done }) => (
+// innerRef به بیرون داده می‌شود تا صفحه بتواند موقعیت سربرگ را اندازه بگیرد و بعد
+// از باز شدن بخش، خودکار روی همان سربرگ اسکرول کند (hooks/useAccordionScroll.js).
+export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, done, innerRef }) => (
   <View
+    ref={innerRef}
     style={{
       flexDirection: 'row',
       alignItems: 'center',
@@ -162,7 +165,15 @@ export const RadioList = ({ options, value, onChange }) => (
 // دکمه‌های سفید با بوردر برای گزینه‌هایی که باید به‌جای رادیو، به‌صورت دکمه
 // نمایش داده شوند - با multi=true چند‌انتخابی (value: آرایه)، در غیر این‌صورت
 // تک‌انتخابی (value: رشته یا null) با امکان لغو انتخاب با لمس دوباره.
-export const SelectableOptions = ({ options, value, onChange, multi = false, columns = 2 }) => {
+//
+// ترتیب خواندن: چیدمان اپ LTR است، ولی متن گزینه‌ها فارسی است؛ پس روی زبان‌های
+// راست‌به‌چپ ردیف‌ها با row-reverse پر می‌شوند تا گزینه‌ی اول بالا-راست بیفتد و
+// شماره‌گذاری ذهنی کاربر (۱، ۲، ۳، ۴) با چیدمان بخواند.
+//
+// قفل‌کردن گزینه: یا `disabled` روی خود گزینه (مثل «خانم (به زودی)») یا prop
+// `disabled` روی کل فهرست (مثل «تعداد بازدید» وقتی خدمت یکباره است). گزینه‌ی
+// قفل‌شده دیده می‌شود ولی خاکستری و بدون واکنش است و قفل کوچکی کنارش می‌آید.
+export const SelectableOptions = ({ options, value, onChange, multi = false, columns = 2, disabled = false }) => {
   const isSelected = (id) => (multi ? Array.isArray(value) && value.includes(id) : value === id);
 
   const handlePress = (id) => {
@@ -177,34 +188,65 @@ export const SelectableOptions = ({ options, value, onChange, multi = false, col
   const itemWidth = columns === 1 ? '100%' : `${Math.floor(100 / columns) - 3}%`;
 
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+    <View
+      style={{
+        flexDirection: rtl() ? 'row-reverse' : 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+      }}
+    >
       {options.map((opt) => {
         const selected = isSelected(opt.id);
+        const locked = disabled || opt.disabled;
         return (
           <TouchableOpacity
             key={opt.id}
             onPress={() => handlePress(opt.id)}
+            disabled={locked}
             activeOpacity={0.75}
+            accessibilityState={{ disabled: Boolean(locked), selected: Boolean(selected) }}
             style={{
               width: itemWidth,
               minHeight: 52,
               borderRadius: radius.md,
               borderWidth: 1.5,
-              borderColor: selected ? colors.primary.color : colors.border.bgColor(1),
-              backgroundColor: selected ? colors.primary.bgColor(0.08) : colors.surface.bgColor(1),
+              borderColor: locked
+                ? colors.border.bgColor(1)
+                : selected
+                  ? colors.primary.color
+                  : colors.border.bgColor(1),
+              backgroundColor: locked
+                ? colors.disabled.bgColor(0.12)
+                : selected
+                  ? colors.primary.bgColor(0.08)
+                  : colors.surface.bgColor(1),
+              flexDirection: rtl() ? 'row-reverse' : 'row',
               alignItems: 'center',
               justifyContent: 'center',
               paddingVertical: spacing.md,
               paddingHorizontal: spacing.sm,
               marginBottom: spacing.sm,
+              opacity: locked ? 0.6 : 1,
             }}
           >
+            {locked ? (
+              <Ionicons
+                name="lock-closed"
+                size={12}
+                color={colors.textMuted.color}
+                style={{ marginHorizontal: spacing.xs }}
+              />
+            ) : null}
             <Text
               style={{
                 fontFamily: 'VazirBold',
                 fontSize: 13,
                 textAlign: 'center',
-                color: selected ? colors.primary.color : colors.textPrimary.color,
+                color: locked
+                  ? colors.textMuted.color
+                  : selected
+                    ? colors.primary.color
+                    : colors.textPrimary.color,
               }}
               numberOfLines={2}
             >
@@ -772,8 +814,12 @@ export const CounterWithDescription = ({ title, count, desc, onIncrement, onDecr
   </View>
 );
 
+// خلاصه‌ی انتخاب‌ها. روی موبایل عنوان و عدد به‌هم می‌چسبیدند چون عنوان فارسی
+// چپ‌چین رندر می‌شد؛ حالا روی زبان راست‌به‌چپ عنوان کاملاً سمت راست و تعداد در
+// سمت چپ ردیف می‌نشیند (و روی انگلیسی برعکس).
 export const SummaryBox = ({ title, lines }) => {
   if (!lines.length) return null;
+  const isRTL = rtl();
   return (
     <View
       style={{
@@ -783,18 +829,52 @@ export const SummaryBox = ({ title, lines }) => {
         marginTop: spacing.md,
       }}
     >
-      <Text style={{ fontFamily: 'VazirBold', fontSize: fontSize.md, marginBottom: spacing.xs, color: colors.accent.color }}>
+      <Text
+        style={{
+          fontFamily: 'VazirBold',
+          fontSize: fontSize.md,
+          marginBottom: spacing.xs,
+          color: colors.accent.color,
+          textAlign: isRTL ? 'right' : 'left',
+          writingDirection: isRTL ? 'rtl' : 'ltr',
+        }}
+      >
         {title}
       </Text>
       {lines.map((line, idx) => (
         <View
           key={idx}
-          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 3 }}
+          // ترتیب JSX «عدد، عنوان» است: روی RTL عدد سمت چپ می‌ماند و عنوان
+          // فضای باقی‌مانده را تا لبه‌ی راست پر می‌کند.
+          style={{
+            flexDirection: isRTL ? 'row' : 'row-reverse',
+            alignItems: 'center',
+            paddingVertical: 3,
+          }}
         >
-          <Text style={{ minWidth: 32, fontFamily: 'VazirBold', fontSize: fontSize.sm, color: colors.accent.color, textAlign: 'left' }}>
+          <Text
+            style={{
+              minWidth: 32,
+              fontFamily: 'VazirBold',
+              fontSize: fontSize.sm,
+              color: colors.accent.color,
+              textAlign: isRTL ? 'left' : 'right',
+            }}
+          >
             {line.value}
           </Text>
-          <Text style={{ flex: 1, marginLeft: spacing.sm, fontFamily: 'VazirLight', fontSize: fontSize.sm, lineHeight: 22, color: colors.textInverse.color }}>
+          <Text
+            style={{
+              flex: 1,
+              marginHorizontal: spacing.sm,
+              fontFamily: 'VazirLight',
+              fontSize: fontSize.sm,
+              lineHeight: 22,
+              color: colors.textInverse.color,
+              textAlign: isRTL ? 'right' : 'left',
+              writingDirection: isRTL ? 'rtl' : 'ltr',
+            }}
+          >
             {line.label}
           </Text>
         </View>

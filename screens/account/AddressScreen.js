@@ -21,6 +21,7 @@ import { showToastOrAlert, showAlert, langIsRTL } from "@helpers/Common";
 import Button from "@components/Button";
 import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from "@components/ShowMapDetailComponent";
+import FooterSpacer from '@components/FooterSpacer';
 export default function AddressScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -196,6 +197,7 @@ export default function AddressScreen({ route, navigation }) {
           </View>
         ) : (
           <FlatList
+            ListFooterComponent={<FooterSpacer />}
             data={addresses}
             renderItem={renderAddressCard}
             keyExtractor={(item) => item.id.toString()}

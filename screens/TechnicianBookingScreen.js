@@ -5,6 +5,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Scroll
 import { useTranslation } from 'react-i18next';
 import HintBadge from '@components/HintBadge';
 import { createDirectionalStyles } from '@styles/directionalStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function TechnicianBookingScreen({navigation}) {
   const { t, i18n } = useTranslation();
@@ -101,6 +102,7 @@ export default function TechnicianBookingScreen({navigation}) {
         <TouchableOpacity style={styles.submitButton}>
           <Text style={styles.submitText}>{t("Submit / Continue")}</Text>
         </TouchableOpacity>
+        <FooterSpacer />
       </ScrollView>
 
       {/* فوتر */}

@@ -15,6 +15,7 @@ import { showToastOrAlert, formatTime, showAlert } from "@helpers/Common";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "expo-image";
 import { restartOtpRetriever, startOtpRetriever, stopOtpRetriever, subscribeOtp } from "./OtpRetriever";
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function ResetPasswordScreen({ navigation, route }) {
   const { t } = useTranslation();
@@ -121,7 +122,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
           setTimeout(() => {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'FolderScreen' }],
+              routes: [{ name: 'List' }],
             });
           }, 1500);
         }
@@ -294,6 +295,7 @@ export default function ResetPasswordScreen({ navigation, route }) {
                 style={styles.verifyButton}
               />
             </View>
+            <FooterSpacer />
           </ScrollView>
         </KeyboardAvoidingView>
       </ImageBackground>

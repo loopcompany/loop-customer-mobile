@@ -11,6 +11,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '@helpers/Common';
 import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
 import { getTransactions } from '@services/WalletApi';
+import FooterSpacer from '@components/FooterSpacer';
 
 export default function TransactionsScreen() {
   const { t, i18n } = useTranslation();
@@ -205,6 +206,7 @@ export default function TransactionsScreen() {
       ) : (
         <View style={{ flex: 1 }} >
           <FlatList
+            ListFooterComponent={<FooterSpacer />}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl

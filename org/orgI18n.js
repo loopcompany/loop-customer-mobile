@@ -35,6 +35,7 @@ const EN = {
   'کیس / پی‌سی': 'Case / PC',
   'کیس پی سی': 'Case / PC',
   'ضایعات': 'Trash / Scrap',
+  'این بخش به زودی فعال می‌شود.': 'This section will be available soon.',
   'اقلام ضایعاتی': 'Scrap items',
   'آل این وان': 'All in One',
   'هارد دیسک': 'Hard Disk',
@@ -151,10 +152,13 @@ const EN = {
   'بازه ساعتی': 'Time slot',
   'چون «کوتاه مدت / یکبار» انتخاب شده، فقط روز و بازه ساعتی مراجعه را انتخاب کنید.':
     'Since "Short-term / one-time" is selected, just choose the day and time slot for the visit.',
+  'چون «کوتاه مدت / یکبار» انتخاب شده، تعداد بازدید قفل است و فقط روز و بازه ساعتی مراجعه را انتخاب می‌کنید.':
+    'Since "Short-term / one-time" is selected, the visit count is locked and you only choose the day and time slot of the visit.',
 
   // --- technician gender -------------------------------------------------
   'آقا': 'Male',
   'خانم': 'Female',
+  'خانم (به زودی)': 'Female (coming soon)',
 
   // --- operator info form --------------------------------------------
   'عنوان شغلی اپراتور': 'Operator job title',

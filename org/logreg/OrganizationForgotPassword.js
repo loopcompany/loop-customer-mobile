@@ -20,6 +20,7 @@ import { createStyles } from '@styles/NewStyles';
 import { themeColor3 } from '@theme/Color';
 import { useSelector } from 'react-redux';
 import { restartOtpRetriever, stopOtpRetriever } from '@screens/auth/OtpRetriever';
+import FooterSpacer from '@components/FooterSpacer';
 const OrganizationForgotPassword = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -372,6 +373,7 @@ const OrganizationForgotPassword = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
+        <FooterSpacer />
       </ScrollView>
     </KeyboardAvoidingView>
   );

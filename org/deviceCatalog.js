@@ -15,7 +15,6 @@ export const DEVICE_TYPES = [
 export const SOFTWARE_DEVICE_TYPES = [
   { id: 'printer_multi', title: 'پرینتر لیزری چندکاره', image: require('@assets/icons/hardware-services/printer-multi.png') },
   { id: 'industrial_copier', title: 'دستگاه کپی صنعتی', image: require('@assets/icons/hardware-services/industrial-copier.png') },
-  { id: 'storage_drive', title: 'هارد ذخیره‌سازی', image: require('@assets/icons/hardware-services/storage-drive.png') },
   { id: 'network_internet', title: 'شبکه و اینترنت', image: require('@assets/icons/procurement/network-internet.png') },
 ];
 
@@ -88,7 +87,9 @@ export const TIME_SLOT_OPTIONS = [
 
 // «انتخاب تکنسین» - کاربر فقط جنسیت تکنسین را انتخاب می‌کند (انتخاب مستقیم
 // تکنسین هنوز فعال نیست).
+// تکنسین خانم هنوز فعال نیست: گزینه دیده می‌شود ولی قفل است تا کاربر بداند
+// این امکان در راه است (نه اینکه حذف شده باشد).
 export const TECHNICIAN_GENDER_OPTIONS = [
   { id: 'male', title: 'آقا' },
-  { id: 'female', title: 'خانم' },
+  { id: 'female', title: 'خانم (به زودی)', disabled: true },
 ];

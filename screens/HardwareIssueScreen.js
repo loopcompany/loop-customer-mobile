@@ -18,6 +18,7 @@ import CustomStatusBar from "@components/CustomStatusBar";
 import ScreenHeaders from "@components/ScreenHeaders";
 import ScreenTitle from "@components/ScreenTitle";
 import CheckBox from "@components/CheckBox";
+import FooterSpacer from '@components/FooterSpacer';
 export default function HardwareIssueScreen({ navigation, route }) {
   const category = route?.params?.category || 'لپ تاپ';
   const issues = [
@@ -81,6 +82,7 @@ export default function HardwareIssueScreen({ navigation, route }) {
         title={category}
       />
       <FlatList
+        ListFooterComponent={<FooterSpacer />}
         data={issues}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ gap: 10, padding: 10 }}

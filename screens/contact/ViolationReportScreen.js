@@ -13,6 +13,7 @@ import { showToastOrAlert, langIsRTL } from '@helpers/Common';
 import DatePickerModal from '@components/DatePickerModal';
 import { Text } from 'react-native';
 import { createStyles } from '@styles/NewStyles';
+import FooterSpacer from '@components/FooterSpacer';
 
 
 export default function ViolationReportScreen({ navigation }) {
@@ -148,6 +149,7 @@ const isRTL = langIsRTL(i18n.language);
               onPress={() => navigation.navigate('ViolationReportsListScreen')}
             />
           </View>
+          <FooterSpacer />
         </ScrollView>
         <DatePickerModal
           datePickerModal={datePickerModal}
