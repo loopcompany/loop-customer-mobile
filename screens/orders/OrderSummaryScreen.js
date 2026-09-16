@@ -19,13 +19,18 @@ import {
   ScrollView,
   ImageBackground,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import NewStyles from '@styles/NewStyles';
 import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenTitle from '@components/ScreenTitle';
 import { notificationAPI } from '@services/NotificationService';
-import { describePickerDate, showToastOrAlert } from '@helpers/Common';
+import apiClient from '@services/axiosConfig';
+import { uri } from '@services/URL';
+import { API_ENDPOINTS } from '@services/ApiEndpoints';
+import { describeApiError } from '@utils/apiErrorHandler';
+import { describePickerDate, parsePickerDate, showToastOrAlert } from '@helpers/Common';
 import { TIME_SLOT_OPTIONS } from '@org/deviceCatalog';
 import { colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -34,6 +39,14 @@ import { fontSize, getFontFamily } from '@theme/Typography';
 import { createDirectionalStyles } from '@styles/directionalStyles';
 import OrderReceipt from '@components/receipt/OrderReceipt';
 import FooterSpacer from '@components/FooterSpacer';
+
+// این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
+// صفحه از i18next استفاده نمی‌کند (L()/LO() فارسی محلی‌اش را دارد) پس یک
+// مترجم کوچک محلی برای همین دو مورد کافی است.
+const describeErrorFa = (key) => ({
+  'Network error!': 'اتصال به اینترنت برقرار نیست. لطفاً دوباره تلاش کنید.',
+  'An unexpected error occurred!': 'خطای غیرمنتظره‌ای رخ داد.',
+}[key] || key);
 
 const NOT_SET = 'ثبت نشده';
 
@@ -56,6 +69,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
 
   const params = route?.params || {};
   const {
+    source,
+    categoryId,
     orderTitle,
     categoryTitle,
     summaryLines = [],
@@ -181,12 +196,80 @@ export default function OrderSummaryScreen({ navigation, route }) {
         <TouchableOpacity
           style={[styles.submitButton, isSubmitting && { opacity: 0.6 }]}
           onPress={async () => {
+            if (isSubmitting) return;
             setIsSubmitting(true);
-            const orderNumber = `${Date.now()}`;
 
-            // پیامک تاییدیه «بهترین-تلاش» است و نباید ثبت سفارش را شکست بدهد.
-            // پیش‌تر یک throw از اینجا کل مسیر را به «خطا در ثبت سفارش» می‌برد،
-            // که روی موبایل همیشه اتفاق می‌افتاد چون آدرس درخواست خراب بود.
+            // آدرس: این مسیر (سیستماتیک/جامع سازمانی) مرحله‌ی انتخاب آدرس ندارد.
+            // آدرس‌های حساب سازمانی در لاگین (`fetchAddresses`) بارگذاری شده‌اند؛
+            // همان آدرسِ انتخاب‌شده‌ی مسیر عادی را در نبودش، اولین آدرس ذخیره‌شده
+            // را استفاده می‌کنیم. بدون هیچ آدرسی، ادامه نمی‌دهیم.
+            const pickedAddress = Array.isArray(savedAddresses)
+              ? savedAddresses.find((item) => String(item?.id) === String(selectedAddressId))
+              : null;
+            const resolvedAddressId = pickedAddress?.id ?? savedAddresses?.[0]?.id ?? null;
+            if (!resolvedAddressId) {
+              showToastOrAlert('برای ثبت سفارش، ابتدا یک آدرس در پروفایل خود ثبت کنید.');
+              setIsSubmitting(false);
+              return;
+            }
+
+            // category_id واقعی بک‌اند: «جامع» عدد ثابت ۳ را می‌فرستد و «سیستماتیک»
+            // id عددی همان کاشی API را که کاربر رویش زده. بک‌اند فقط عدد صحیح
+            // می‌پذیرد، پس هر چیز دیگری (مثل کلید محلی 'laptop') همین‌جا رد می‌شود.
+            const resolvedCategoryId = Number(categoryId);
+            if (categoryId == null || !Number.isInteger(resolvedCategoryId)) {
+              showToastOrAlert(
+                source === 'systematic'
+                  ? 'شناسه‌ی این دسته از سرور دریافت نشده است. صفحه‌ی دسته‌ها را دوباره باز کنید و مجدداً تلاش کنید.'
+                  : 'دسته‌بندی سفارش نامعتبر است.'
+              );
+              setIsSubmitting(false);
+              return;
+            }
+
+            const parsedDate = parsePickerDate(scheduleDate);
+            const apiDate = parsedDate
+              ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
+              : null;
+            const slotOption = TIME_SLOT_OPTIONS.find((opt) => opt.id === scheduleSlot);
+            const apiTime = slotOption ? `${String(slotOption.start).padStart(2, '0')}:00` : null;
+
+            let realOrderId = null;
+            try {
+              const response = await apiClient.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, {
+                address_id: resolvedAddressId,
+                category_id: resolvedCategoryId,
+                // این مسیرها هنوز مراحل قیمت‌دار واقعی (steps/fetch) را نمی‌خوانند،
+                // پس فعلاً همان قیمتِ محاسبه‌شده‌ی محلی (یا ۰ برای سفارش استعلامی)
+                // فرستاده می‌شود - در انتظار تأیید بک‌اند برای این دسته‌ها.
+                total_price: price > 0 ? price : 0,
+                date: apiDate,
+                time: apiTime,
+                description: summaryLines.map((line) => `${line.label}: ${line.value}`).join('\n'),
+                platform: Platform.OS,
+                steps: [],
+                file_paths: [],
+              });
+
+              const body = response?.data;
+              const orderCreated =
+                (response.status === 200 || response.status === 201) && body?.success !== false;
+              if (!orderCreated) {
+                showToastOrAlert(body?.message || 'ثبت سفارش ناموفق بود.');
+                setIsSubmitting(false);
+                return;
+              }
+              realOrderId = body?.data?.order_id ?? body?.data?.order?.id ?? null;
+            } catch (error) {
+              showToastOrAlert(describeApiError(error, describeErrorFa));
+              setIsSubmitting(false);
+              return;
+            }
+
+            const orderNumber = String(realOrderId ?? '');
+
+            // پیامک تاییدیه «بهترین-تلاش» است و نباید ثبت سفارشِ واقعی (که بالا
+            // انجام شد) را شکست بدهد.
             let smsSent = true;
             try {
               await notificationAPI.sendOrderConfirmation(orderNumber, {
@@ -215,9 +298,9 @@ export default function OrderSummaryScreen({ navigation, route }) {
             );
 
             // پس از ثبت، کاربر باید رسید را ببیند - نه صفحه‌ی رهگیری. رسیدِ
-            // ساخته‌شده در صفحه‌ی مبدا فقط شماره‌ی سفارش کم دارد، که همین‌جا
-            // تولید شده است. اگر صفحه‌ی مبدا رسیدی نفرستاده باشد، رفتار قبلی
-            // (رهگیری سفارش) حفظ می‌شود.
+            // ساخته‌شده در صفحه‌ی مبدا فقط شماره‌ی سفارشِ واقعی را کم دارد، که
+            // همین‌جا از پاسخ سرور پر می‌شود. اگر صفحه‌ی مبدا رسیدی نفرستاده
+            // باشد، رفتار قبلی (رهگیری سفارش) حفظ می‌شود.
             if (receipt) {
               navigation.replace('OrderReceipt', {
                 receipt: { ...receipt, order: { ...receipt.order, number: orderNumber } },

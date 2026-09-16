@@ -320,9 +320,14 @@ function Preview({ navigation }) {
         setPending(true);
         try {
             const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CHECK_DISCOUNT}`, { discount_code: discountCode, category_id: category?.id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
-            if (response?.status == 200) {
-                setDiscountPercent(response?.data?.discount_code_percent)
-                showToastOrAlert(response?.data?.message || t('Discount code applied.'))
+            // پاسخ طبق ORGANIZATION_ORDER_API.md: `{ success, message, data: { discount_percent, discount_code_id } }`
+            // (نه `discount_code_percent` در سطح بالا) و می‌تواند با 2xx و success:false برگردد.
+            const body = response?.data;
+            if (body?.success !== false) {
+                setDiscountPercent(body?.data?.discount_percent)
+                showToastOrAlert(body?.message || t('Discount code applied.'))
+            } else {
+                showToastOrAlert(body?.message || t('Invalid discount code.'))
             }
         } catch (error) {
             const message = describeApiError(error, t);

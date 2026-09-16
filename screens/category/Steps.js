@@ -62,11 +62,13 @@ function Steps({ navigation, route }) {
     useEffect(() => {
         if (!systematicRedirect) return;
         const go = navigation.replace || navigation.navigate;
+        const backendId = Number(categoryId);
         go.call(navigation, 'SystematicDeviceScreen', {
             categoryId: systematicRedirect,
             categoryTitle,
+            backendCategoryId: Number.isInteger(backendId) ? backendId : null,
         });
-    }, [systematicRedirect, categoryTitle, navigation]);
+    }, [systematicRedirect, categoryId, categoryTitle, navigation]);
 
     // بازیابی داده‌ها در صورت ریلود صفحه در وب
     useEffect(() => {

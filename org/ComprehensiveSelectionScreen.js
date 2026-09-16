@@ -347,6 +347,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       }
       navigation.navigate('OrderSummaryScreen', {
         source: 'comprehensive',
+        // «جامع سازمانی» در بک‌اند category_id ثابت ۳ دارد (طبق ORGANIZATION_ORDER_API.md)،
+        // برخلاف «سیستماتیک» که هر کاشی زیرشاخه‌ی متفاوتی است.
+        categoryId: 3,
         orderTitle: L('انتخاب جامع - خدمات سازمانی'),
         // هر سه بخش انتخاب‌شده در یک فهرست خلاصه‌ی واحد.
         summaryLines: [

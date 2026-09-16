@@ -159,9 +159,13 @@ const SystematicCategoryScreen = ({ navigation }) => {
     }
 
     if (systematicId && getFlow(systematicId).length) {
+      // کاشی از API آمده و id عددی واقعی بک‌اند را دارد؛ همان را برای ثبت سفارش
+      // همراه می‌فرستیم. کاشی‌های محلی (وقتی API در دسترس نبود) id عددی ندارند.
+      const backendId = Number(source?.id);
       navigation.navigate('SystematicDeviceScreen', {
         categoryId: systematicId,
         categoryTitle: entry.title,
+        backendCategoryId: Number.isInteger(backendId) ? backendId : null,
       });
       return;
     }

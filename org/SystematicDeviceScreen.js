@@ -221,7 +221,9 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       const scheduleStep = steps.find((step) => step.type === 'schedule');
       navigation.navigate('OrderSummaryScreen', {
         source: 'systematic',
-        categoryId,
+        // categoryId اینجا کلید محلی مسیر است ('laptop'...)؛ category_id واقعی
+        // بک‌اند در backendCategoryId از صفحه‌ی کاشی‌ها رسیده است.
+        categoryId: route?.params?.backendCategoryId ?? null,
         categoryTitle: category?.title,
         orderTitle: category?.title ? `${L('انتخاب سیستماتیک')} - ${L(category.title)}` : undefined,
         summaryLines,

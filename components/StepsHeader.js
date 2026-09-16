@@ -62,14 +62,15 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         // width: 50,
-        height: 50,
+        height: 56,
         justifyContent: "center",
         alignItems: "center",
         ...NewStyles.row,
     },
+    // GIF های یوزپلنگ حاشیه‌ی سفیدشان بریده شده (93x52)؛ قاب هم‌نسبت با آن‌هاست
     arrow: {
-        width: 50,
-        height: 50,
+        width: 100,
+        height: 56,
         resizeMode: "contain",
     },
     titleContainer: {
