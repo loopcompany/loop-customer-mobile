@@ -13,8 +13,11 @@ import { setCategory } from "@slices/categorySlice";
 import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
 import FooterSpacer from '@components/FooterSpacer';
+import { useTranslation } from 'react-i18next';
+import { describeApiError } from '@utils/apiErrorHandler';
 
 const SubCategories = ({ navigation, route }) => {
+  const { t } = useTranslation();
   const { categoryId, categoryTitle } = route.params;
   const [subCategories, setSubCategories] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -35,7 +38,10 @@ const SubCategories = ({ navigation, route }) => {
         if (mounted) setSubCategories(categories);
       } catch (err) {
         console.error('Failed to load subcategories:', err);
-        showToastOrAlert('خطا در دریافت زیردسته‌ها');
+        // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
+        if (err?.response?.status !== 401) {
+          showToastOrAlert(`${t('Error fetching subcategories')} — ${describeApiError(err, t)}`);
+        }
       } finally {
         setRefreshing(false);
         setLoader(false);
@@ -84,6 +90,11 @@ const SubCategories = ({ navigation, route }) => {
                   try {
                     dispatch(setCategory(item));
                     const result = await dispatch(fetchSteps({ categoryId: item.id, token }));
+                    // dispatch خطای thunk را پرتاب نمی‌کند؛ بدون این بررسی کاربر بی‌پیام به مراحلِ خالی می‌رفت.
+                    if (fetchSteps.rejected.match(result)) {
+                      showToastOrAlert(result.payload || t('An unexpected error occurred!'));
+                      return;
+                    }
 
                     navigation.navigate('Steps', { categoryId: item.id, categoryTitle: item.title });
                   } catch (error) {

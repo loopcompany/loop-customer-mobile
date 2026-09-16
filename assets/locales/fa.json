@@ -1573,5 +1573,12 @@
   "Share": "اشتراک‌گذاری",
   "Receipt gallery": "گالری رسیدها",
   "Receipt link copied": "لینک رسید کپی شد",
-  "Sharing is not available on this device.": "اشتراک‌گذاری روی این دستگاه در دسترس نیست."
+  "Sharing is not available on this device.": "اشتراک‌گذاری روی این دستگاه در دسترس نیست.",
+  "Error fetching categories": "خطا در دریافت دسته‌ها",
+  "Error fetching subcategories": "خطا در دریافت زیردسته‌ها",
+  "Please complete this field:": "لطفاً این فیلد را تکمیل کنید:",
+  "Please fill in the required fields.": "لطفاً فیلدهای الزامی را تکمیل کنید.",
+  "The selected time for today must be at least 4 hours from now.": "ساعت انتخابی برای امروز باید حداقل ۴ ساعت بعد از الان باشد.",
+  "Please complete the maintenance and service schedule fields.": "لطفاً فیلدهای زمان نگهداری و سرویس را تکمیل کنید.",
+  "Discount code applied.": "کد تخفیف اعمال شد."
 }

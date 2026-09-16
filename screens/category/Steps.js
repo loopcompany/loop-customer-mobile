@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Image } from 'expo-image';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 import { imageUri } from '@services/URL';
 import NewStyles from '@styles/NewStyles';
@@ -30,6 +31,7 @@ import FileStep from '@components/File';
 import FooterSpacer from '@components/FooterSpacer';
 function Steps({ navigation, route }) {
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const [step, setStep] = useState(0);
     const steps = useSelector(state => state.step);
@@ -102,21 +104,29 @@ function Steps({ navigation, route }) {
 
 
 
-    function required(step) {
+    // اولین مشکلِ مرحله را با پیامِ مخصوص خودش برمی‌گرداند (null یعنی مرحله کامل است).
+    // قبلاً فقط true/false برمی‌گشت و پیامِ «فیلدهای الزامی» هم در شرطی بود که هرگز
+    // برقرار نمی‌شد؛ پس دکمه‌ی «بعدی» بی‌هیچ توضیحی کار نمی‌کرد.
+    function getStepError(step) {
+        const missing = (title) => title
+            ? `${t('Please complete this field:')} ${title}`
+            : t('Please fill in the required fields.');
+        const timeError = t('The selected time for today must be at least 4 hours from now.');
 
-        const result = steps.data?.[step].every(item => {
-
+        for (const item of steps.data?.[step] || []) {
+            // وقتی «فوری» فعال است تاریخ و ساعت نمایش داده نمی‌شوند؛ نباید اجباری باشند.
+            if (steps?.isUrgent === 1 && ["date", "time"].includes(item.type)) {
+                continue;
+            }
             if (["date", "time", "address", "gender"].includes(item.type) && item.is_required == 1) {
-                const isValid = !!item.value;
-                return isValid;
+                if (!item.value) return missing(item.title);
             }
             if (["checkbox", "radioButton", "counter"].includes(item.type) && item.is_required == 1) {
-                const hasValue = item.field_details.some(dataItem => dataItem.value > 0);
-                return hasValue;
+                if (!item.field_details?.some(dataItem => dataItem.value > 0)) return missing(item.title);
             }
             if (item.type == "input") {
-                const hasEmptyRequired = item.field_details.some(dataItem => dataItem.is_required == 1 && dataItem.value == "");
-                return !hasEmptyRequired;
+                const emptyRequired = item.field_details?.find(dataItem => dataItem.is_required == 1 && !String(dataItem.value ?? '').trim());
+                if (emptyRequired) return missing(emptyRequired.title || item.title);
             }
             // Validation برای service_schedule (فقط برای کاربران سازمانی)
             if (item.type == "service_schedule" && item.is_required == 1) {
@@ -126,7 +136,7 @@ function Steps({ navigation, route }) {
                 const selectedOption = mainField?.options?.find(opt => opt.value > 0);
 
                 if (!selectedOption) {
-                    return false; // اگر انتخابی نشده
+                    return missing(mainField?.title || item.title);
                 }
 
                 // بررسی فیلدهای شرطی
@@ -135,72 +145,53 @@ function Steps({ navigation, route }) {
                 );
 
                 // بررسی که همه فیلدهای شرطی اجباری پر شده باشند
-                const isValid = conditionalFields?.every(field => {
+                const emptyField = conditionalFields?.find(field => {
                     if (field.type === 'radioButton') {
-                        return field.options?.some(opt => opt.value > 0);
+                        return !field.options?.some(opt => opt.value > 0);
                     }
                     if (field.type === 'date' || field.type === 'time') {
-                        return !!field.value;
+                        return !field.value;
                     }
-                    if (field.type === 'file') {
-                        return true;
-                    }
-                    return true;
+                    return false;
                 });
 
                 // اگر فیلدها کامل پر نشده‌اند، نیازی به بررسی 4 ساعت نیست
-                if (!isValid) return false;
+                if (emptyField) return missing(emptyField.title);
 
-                // --- اضافه شدن بررسی 4 ساعت ---
+                // --- بررسی 4 ساعت ---
                 const dateField = conditionalFields?.find(f => f.type === 'date');
                 const timeField = conditionalFields?.find(f =>
                     f.type === 'radioButton' &&
                     f.options?.some(opt => opt.hasOwnProperty('start_time'))
                 );
                 if (dateField && timeField) {
-                    const selectedDate = dateField.value;
+                    const scheduleDate = dateField.value;
                     const selectedTimeOption = timeField.options?.find(opt => opt.value > 0);
 
-                    if (selectedDate && selectedTimeOption && selectedTimeOption.start_time) {
-                        const selectedTime = selectedTimeOption.start_time;
-
-
-                        // بررسی شرط 4 ساعت
-                        const isTimeValid = isMoreThan4HoursFromNow(selectedDate, selectedTime);
-                        if (!isTimeValid) {
-                            showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+                    if (scheduleDate && selectedTimeOption && selectedTimeOption.start_time) {
+                        if (!isMoreThan4HoursFromNow(scheduleDate, selectedTimeOption.start_time)) {
                             setTimeValidationError(true);
-                            return false;
-                        } else {
-                            setTimeValidationError(false)
+                            return timeError;
                         }
+                        setTimeValidationError(false);
                     }
                 }
-                // --------------------------------
-
-                return true;
             }
+        }
 
-            return true;
-        });
-
-        return result;
+        return null;
     }
 
     const handleNextStep = () => {
         // بررسی خطای validation زمان
         if (timeValidationError) {
-            showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+            showToastOrAlert(t('The selected time for today must be at least 4 hours from now.'));
             return;
         }
 
-
-        if (!required(step)) {
-            const message = 'لطفا فیلدهای الزامی را تکمیل نمایید.';
-            if (timeValidationError) {
-
-                showToastOrAlert(message);
-            }
+        const stepError = getStepError(step);
+        if (stepError) {
+            showToastOrAlert(stepError);
             return;
         }
         if (step < length - 1) {
@@ -219,7 +210,7 @@ function Steps({ navigation, route }) {
             if (!result) {
                 dispatch(removeTime());
                 setTimeValidationError(true);
-                showToastOrAlert('ساعت انتخابی به تاریخ امروز باید برای حداقل 4 ساعت آینده باشد.');
+                showToastOrAlert(t('The selected time for today must be at least 4 hours from now.'));
             } else {
                 setTimeValidationError(false);
             }

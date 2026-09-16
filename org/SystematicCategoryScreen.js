@@ -29,6 +29,7 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import categoriesAPI from '@services/CategoriesApi';
 import { imageUri } from '@services/URL';
 import { fetchSteps } from '@slices/stepSlice';
+import { describeApiError } from '@utils/apiErrorHandler';
 import { setCategory } from '@slices/categorySlice';
 import { showAlert, showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
@@ -93,7 +94,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
       // 401 یعنی نشست منقضی شده و interceptor خودش هشدار «ورود مجدد» را
       // نشان می‌دهد؛ پیام دوم ندهیم.
       if (err?.response?.status !== 401) {
-        showToastOrAlert(L('خطا در دریافت دسته‌ها'));
+        showToastOrAlert(`${L('خطا در دریافت دسته‌ها')} — ${describeApiError(err, t)}`);
       }
       setFolders([]);
     } finally {
@@ -175,7 +176,12 @@ const SystematicCategoryScreen = ({ navigation }) => {
     }
 
     try {
-      await dispatch(fetchSteps({ categoryId: source?.id, token }));
+      const result = await dispatch(fetchSteps({ categoryId: source?.id, token }));
+      // dispatch خطای thunk را پرتاب نمی‌کند؛ بدون این بررسی کاربر بی‌پیام به مراحلِ خالی می‌رفت.
+      if (fetchSteps.rejected.match(result)) {
+        showToastOrAlert(result.payload || t('An unexpected error occurred!'));
+        return;
+      }
       dispatch(setCategory(source));
       navigation.navigate('Steps', {
         categoryId: source?.id,

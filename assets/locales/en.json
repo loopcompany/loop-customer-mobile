@@ -1573,5 +1573,12 @@
   "Reorder": "Reorder",
   "Receipt gallery": "Receipt gallery",
   "Receipt link copied": "Receipt link copied",
-  "Sharing is not available on this device.": "Sharing is not available on this device."
+  "Sharing is not available on this device.": "Sharing is not available on this device.",
+  "Error fetching categories": "Error fetching categories",
+  "Error fetching subcategories": "Error fetching subcategories",
+  "Please complete this field:": "Please complete this field:",
+  "Please fill in the required fields.": "Please fill in the required fields.",
+  "The selected time for today must be at least 4 hours from now.": "The selected time for today must be at least 4 hours from now.",
+  "Please complete the maintenance and service schedule fields.": "Please complete the maintenance and service schedule fields.",
+  "Discount code applied.": "Discount code applied."
 }

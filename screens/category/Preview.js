@@ -76,6 +76,21 @@ function Preview({ navigation }) {
     const isFixed = (Number(category?.is_fixed) > 0 && totalPrice > 0) ? 1 : 0;
     console.log(showPrice);
 
+    // state.step.time نمایشیِ بازه‌ای است (مثلاً "9 - 10" یا "9:30 - 10:30")،
+    // اما ORGANIZATION_ORDER_API.md یک مقدار ساعت تکی به‌شکل "HH:MM" (مثل "09:00")
+    // می‌خواهد. تبدیل فقط همین‌جا، برای payload خروجی، انجام می‌شود؛ مقدار داخل
+    // Redux/UI (که در Time.js و Steps.js برای نمایش و مقایسه استفاده می‌شود) دست‌نخورده می‌ماند.
+    const formatTimeForApi = (timeRange) => {
+        if (!timeRange) return timeRange;
+        const start = String(timeRange).split('-')[0]?.trim();
+        if (!start) return timeRange;
+        const [hourStr, minuteStr] = start.split(':');
+        const hour = parseInt(hourStr, 10);
+        const minute = parseInt(minuteStr, 10) || 0;
+        if (isNaN(hour)) return timeRange;
+        return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    };
+
     /**
      * تبدیل ساختار service_schedule از Redux به فرمت API
      * فقط برای کاربران سازمانی که مرحله service_schedule دارند
@@ -199,7 +214,7 @@ function Preview({ navigation }) {
                 category_id: category?.id,
                 total_price: totalPrice,
                 date: date,
-                time: time,
+                time: formatTimeForApi(time),
                 is_urgent: isUrgent,
                 is_fixed: isFixed,
                 female_count: femaleCount,
@@ -224,7 +239,7 @@ function Preview({ navigation }) {
                 if (serviceSchedule) {
                     payload.service_schedule = serviceSchedule;
                 } else {
-                    showToastOrAlert('لطفاً فیلدهای زمان نگهداری و سرویس را تکمیل کنید.');
+                    showToastOrAlert(t('Please complete the maintenance and service schedule fields.'));
                     setLoading(false);
                     return;
                 }
@@ -280,10 +295,10 @@ function Preview({ navigation }) {
             dispatch(emptyCategory());
             dispatch(emptyAddress());
 
-            // پس از ثبت، کاربر باید رسید همان سفارش را ببیند. شناسه‌ی سفارش از
-            // پاکتِ `{ success, message, order }` می‌آید؛ اگر سرور آن را برنگرداند
-            // به فهرست سفارش‌ها برمی‌گردیم تا کاربر بدون بازخورد نماند.
-            const createdOrderId = body?.order?.id ?? body?.order_id ?? body?.id ?? null;
+            // پس از ثبت، کاربر باید رسید همان سفارش را ببیند. شناسه‌ی سفارش طبق
+            // ORGANIZATION_ORDER_API.md داخل `data.order_id` است، نه در سطح بالای پاکت؛
+            // اگر سرور آن را برنگرداند به فهرست سفارش‌ها برمی‌گردیم تا کاربر بدون بازخورد نماند.
+            const createdOrderId = body?.data?.order_id ?? body?.data?.order?.id ?? body?.order?.id ?? body?.order_id ?? body?.id ?? null;
             if (createdOrderId != null) {
                 navigation.replace('OrderReceipt', { orderId: createdOrderId });
             } else {
@@ -304,10 +319,10 @@ function Preview({ navigation }) {
         }
         setPending(true);
         try {
-            const response = await axios.post(`${uri}/discounts/check`, { categoryId: category?.id, discountCode }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
+            const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CHECK_DISCOUNT}`, { discount_code: discountCode, category_id: category?.id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response?.status == 200) {
                 setDiscountPercent(response?.data?.discount_code_percent)
-                showToastOrAlert(response?.data?.message)
+                showToastOrAlert(response?.data?.message || t('Discount code applied.'))
             }
         } catch (error) {
             const message = describeApiError(error, t);

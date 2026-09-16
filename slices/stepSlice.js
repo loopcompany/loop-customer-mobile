@@ -3,8 +3,9 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { uri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from 'i18next';
+import { describeApiError } from '@utils/apiErrorHandler';
 
-export const fetchSteps = createAsyncThunk('steps/steps', async ({ categoryId, token }) => {
+export const fetchSteps = createAsyncThunk('steps/steps', async ({ categoryId, token }, { rejectWithValue }) => {
     return await axios
         .post(`${uri}/steps/fetch`,
             { categoryId: categoryId },
@@ -24,7 +25,8 @@ export const fetchSteps = createAsyncThunk('steps/steps', async ({ categoryId, t
         .catch(error => {
             console.log('❌ [fetchSteps] خطا در دریافت مراحل:', error);
             console.log('❌ [fetchSteps] پاسخ خطا:', error.response?.data);
-            throw new Error(error.response?.data?.message || error.message);
+            // پیامِ قابل نمایش (نه متن خام axios مثل «Network Error») تا صفحه‌ها نشانش دهند.
+            return rejectWithValue(describeApiError(error, i18next.t));
         })
 })
 
@@ -58,7 +60,7 @@ const stepSlice = createSlice({
         builder.addCase(fetchSteps.rejected, (state, action) => {
             state.loading = false
             state.data = []
-            state.error = action.error.message
+            state.error = action.payload || action.error.message
         })
     },
     reducers: {

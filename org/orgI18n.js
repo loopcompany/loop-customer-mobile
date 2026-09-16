@@ -177,7 +177,10 @@ const EN = {
   'انصراف': 'Dismiss',
   'سفارش لغو شد': 'Order canceled',
   'پیش‌رسید صادر شد': 'Pre-receipt issued',
-  'لطفاً اطلاعات اپراتور را کامل کنید.': 'Please complete the operator information.',
+  'عنوان شغلی اپراتور را وارد کنید.': "Enter the operator's job title.",
+  'نام و نام خانوادگی اپراتور را وارد کنید.': "Enter the operator's full name.",
+  'کد ملی اپراتور': 'Operator national ID',
+  'موبایل اپراتور': 'Operator mobile',
   'خطا در بارگذاری فایل': 'Error uploading file',
   'خطا در دریافت دسته‌ها': 'Error fetching categories',
 

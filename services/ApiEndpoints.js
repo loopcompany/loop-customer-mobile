@@ -36,6 +36,7 @@ export const API_ENDPOINTS = {
     CREATE: '/orders/submit', // POST /api/orders/submit — verified against the live API.
     // NOTE: '/orders/' 301-redirects to '/orders', which only accepts GET/HEAD,
     // so a POST there always fails with 405. docs/ORDER_SUBMIT_API_QUICK_GUIDE.md is wrong.
+    CHECK_DISCOUNT: '/orders/check-discount', // POST — per ORGANIZATION_ORDER_API.md
     DETAILS: '/orders/{id}',
     CANCEL: '/orders/{id}/cancel',
     TRACK: '/orders/{id}/track',

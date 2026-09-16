@@ -20,6 +20,7 @@ import { setCategory } from "@slices/categorySlice";
 import Loader from "@components/Loader";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
+import { describeApiError } from "@utils/apiErrorHandler";
 import { createStyles } from "@styles/NewStyles";
 import { imageUri } from "@services/URL";
 import { Text } from "react-native";
@@ -58,7 +59,7 @@ function FolderScreen({ navigation }) {
       console.error("Failed to load categories:", err);
       // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
       if (err?.response?.status !== 401) {
-        showToastOrAlert("خطا در دریافت دسته‌ها");
+        showToastOrAlert(`${t("Error fetching categories")} — ${describeApiError(err, t)}`);
       }
     } finally {
       setRefreshing(false);
@@ -136,7 +137,12 @@ function FolderScreen({ navigation }) {
                         });
                       } else {
                         try {
-                          await dispatch(fetchSteps({ categoryId: item.id, token }));
+                          const result = await dispatch(fetchSteps({ categoryId: item.id, token }));
+                          // dispatch خطای thunk را پرتاب نمی‌کند؛ بدون این بررسی کاربر بی‌پیام به مراحلِ خالی می‌رفت.
+                          if (fetchSteps.rejected.match(result)) {
+                            showToastOrAlert(result.payload || t("An unexpected error occurred!"));
+                            return;
+                          }
 
                           dispatch(setCategory(item));
                           navigation.navigate("Steps", {

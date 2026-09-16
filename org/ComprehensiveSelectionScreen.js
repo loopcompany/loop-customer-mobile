@@ -35,7 +35,7 @@ import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
 import { fontSize } from '@theme/Typography';
-import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
+import { showAlert, showToastOrAlert, validateMelicode, validatePhone } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
@@ -254,15 +254,20 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     }
   };
 
-  const validateOperatorInfo = () => {
-    if (!operatorInfo.jobTitle || !operatorInfo.fullName || !operatorInfo.mobile) {
-      return false;
+  // اولین مشکلِ «اطلاعات اپراتور» را با پیامِ دقیق برمی‌گرداند (null یعنی مشکلی نیست).
+  // قبلاً برای هر نوع خطا - حتی کد ملیِ پر ولی نامعتبر - فقط «اطلاعات اپراتور را کامل
+  // کنید» نمایش داده می‌شد و کاربر نمی‌دانست کدام فیلد ایراد دارد.
+  const getOperatorInfoError = () => {
+    if (!operatorInfo.jobTitle.trim()) return L('عنوان شغلی اپراتور را وارد کنید.');
+    if (!operatorInfo.fullName.trim()) return L('نام و نام خانوادگی اپراتور را وارد کنید.');
+    // کد ملی اختیاری است، ولی اگر وارد شده باید معتبر باشد.
+    if (operatorInfo.nationalId.trim()) {
+      const { isValid, message } = validateMelicode(operatorInfo.nationalId);
+      if (!isValid) return `${L('کد ملی اپراتور')}: ${message}`;
     }
-    if (operatorInfo.nationalId) {
-      const { isValid } = validateMelicode(operatorInfo.nationalId);
-      if (!isValid) return false;
-    }
-    return true;
+    const { isValid, message } = validatePhone(operatorInfo.mobile);
+    if (!isValid) return `${L('موبایل اپراتور')}: ${message}`;
+    return null;
   };
 
   const softwareSummaryLines = useMemo(() => {
@@ -333,8 +338,9 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       return;
     }
     if (action === 'submit_order') {
-      if (!validateOperatorInfo()) {
-        showToastOrAlert(L('لطفاً اطلاعات اپراتور را کامل کنید.'));
+      const operatorError = getOperatorInfoError();
+      if (operatorError) {
+        showToastOrAlert(operatorError);
         setExpanded('operator_info');
         requestScrollTo('operator_info');
         return;

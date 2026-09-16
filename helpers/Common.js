@@ -298,25 +298,24 @@ export const showToastOrAlert = (message) => {
 };
 
 // Validation functions for forgot password
+// ورودی ممکن است با کیبورد فارسی/عربی تایپ شده باشد. `\D` ارقام فارسی را هم حذف
+// می‌کرد و کد ملی/موبایلِ درست همیشه «باید ۱۰ رقم باشد» می‌گرفت.
+const onlyDigits = (value) => convertToEnglish(value).replace(/\D/g, '');
+
 export const validateMelicode = (melicode) => {
-  if (!melicode) {
-    return { isValid: false, message: 'کد ملی الزامی است' };
+  if (!melicode || !String(melicode).trim()) {
+    return { isValid: false, message: i18n.t('National ID is required') };
   }
 
-  const cleanMelicode = melicode.toString().replace(/\D/g, '');
+  const cleanMelicode = onlyDigits(melicode);
 
   if (cleanMelicode.length !== 10) {
-    return { isValid: false, message: 'کد ملی باید 10 رقم باشد' };
+    return { isValid: false, message: i18n.t('National ID must be 10 digits') };
   }
 
   // Check for invalid patterns
-  const invalidPatterns = [
-    '0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
-    '5555555555', '6666666666', '7777777777', '8888888888', '9999999999'
-  ];
-
-  if (invalidPatterns.includes(cleanMelicode)) {
-    return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
+  if (/^(\d)\1{9}$/.test(cleanMelicode)) {
+    return { isValid: false, message: i18n.t('The entered national ID is not valid') };
   }
 
   // Check sum validation
@@ -327,47 +326,42 @@ export const validateMelicode = (melicode) => {
 
   const remainder = sum % 11;
   const checkDigit = parseInt(cleanMelicode.charAt(9));
+  const expected = remainder < 2 ? remainder : 11 - remainder;
 
-  if (remainder < 2) {
-    if (checkDigit === remainder) {
-      return { isValid: true, message: '' };
-    }
-  } else {
-    if (checkDigit === 11 - remainder) {
-      return { isValid: true, message: '' };
-    }
+  if (checkDigit === expected) {
+    return { isValid: true, message: '' };
   }
 
-  return { isValid: false, message: 'کد ملی وارد شده معتبر نیست' };
+  return { isValid: false, message: i18n.t('The entered national ID is not valid') };
 };
 
 export const validatePhone = (phone) => {
-  if (!phone) {
-    return { isValid: false, message: 'شماره موبایل الزامی است' };
+  if (!phone || !String(phone).trim()) {
+    return { isValid: false, message: i18n.t('Mobile number is required') };
   }
 
-  const cleanPhone = phone.toString().replace(/\D/g, '');
+  const cleanPhone = onlyDigits(phone);
 
   if (cleanPhone.length !== 11) {
-    return { isValid: false, message: 'شماره موبایل باید 11 رقم باشد' };
+    return { isValid: false, message: i18n.t('Phone number must be 11 digits') };
   }
 
   if (!cleanPhone.startsWith('09')) {
-    return { isValid: false, message: 'شماره موبایل باید با 09 شروع شود' };
+    return { isValid: false, message: i18n.t('Phone number must start with 09') };
   }
 
   return { isValid: true, message: '' };
 };
 
 export const validateEmail = (email) => {
-  if (!email) {
-    return { isValid: false, message: 'آدرس ایمیل الزامی است' };
+  if (!email || !String(email).trim()) {
+    return { isValid: false, message: i18n.t('Email address is required') };
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailRegex.test(email)) {
-    return { isValid: false, message: 'فرمت ایمیل صحیح نیست' };
+  if (!emailRegex.test(String(email).trim())) {
+    return { isValid: false, message: i18n.t('Email format is incorrect') };
   }
 
   return { isValid: true, message: '' };
