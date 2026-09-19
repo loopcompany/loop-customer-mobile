@@ -119,7 +119,10 @@ export default function AddNewAddress({ navigation }) {
                         onChangeText={(text) => { dispatch(setLname(text)) }}
                     />
 
-                    <Text style={NewStyles.text}>{t('Landline')}</Text>
+                    <Text style={NewStyles.text}>
+                        {t('Landline')}
+                        <Text style={styles.required}>* </Text>
+                    </Text>
                     <View style={styles.row}>
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, { flex: 1 }]}
@@ -128,7 +131,13 @@ export default function AddNewAddress({ navigation }) {
                             placeholderTextColor={themeColor3.bgColor(1)}
                             value={address?.telephone ? address.telephone.replace(/^021/, '') : ''}
                             maxLength={8}
-                            onChangeText={(text) => { dispatch(setTelephone('021' + text)) }}
+                            // پیش‌شماره فقط وقتی به state می‌چسبد که شماره‌ای وارد شده
+                            // باشد؛ وگرنه «۰۲۱»ِ تنها ذخیره می‌شد و بعداً روی رسید
+                            // به‌جای تلفن ثابت چاپ می‌شد.
+                            onChangeText={(text) => {
+                                const digits = convertToEnglish(text).replace(/\D/g, '');
+                                dispatch(setTelephone(digits ? '021' + digits : ''));
+                            }}
                         />
                         <TextInput
                             style={[NewStyles.textInput, NewStyles.text10, NewStyles.border10, styles.prefixInput]}
@@ -251,10 +260,15 @@ export default function AddNewAddress({ navigation }) {
                 </ScrollView>
                 <View style={[NewStyles.row, NewStyles.nav, { alignItems: 'center', justifyContent: 'center', marginBottom: footerSpace }]}>
                     <Button title={t('Next Step')} onPress={() => {
-                        if (!address?.fname || !address?.lname || !address?.mobile || !address?.city || !address?.region || !address?.title || !address?.address || !address?.unit || !address?.number || !address?.floor) {
+                        if (!address?.fname || !address?.lname || !address?.mobile || !address?.telephone || !address?.city || !address?.region || !address?.title || !address?.address || !address?.unit || !address?.number || !address?.floor) {
                             showToastOrAlert(t('Please fill in all the required fields.'))
                             return;
                         };
+                        // تلفن ثابت روی رسید چاپ می‌شود و باید کامل باشد: «۰۲۱» + ۸ رقم.
+                        if (!/^021\d{8}$/.test(convertToEnglish(address.telephone))) {
+                            showToastOrAlert(t('Invalid telephone number format'))
+                            return;
+                        }
                         if (Number(convertToEnglish(address?.region)) > 22) {
                             showToastOrAlert(t('You can only choose from twenty-two regions.'))
                             return;

@@ -9,7 +9,9 @@ import { receiptFromSystematic } from '../fromSystematic';
 import { ORDER_KIND, RECEIPT_STATE } from '../receiptModel';
 
 const user = {
-  id: 211866545,
+  id: 28,
+  // همان کدی که داکِ پایین اپ نشان می‌دهد؛ رسید باید همین را چاپ کند نه id.
+  code: '211866545',
   fname: 'احمد',
   lname: 'زارعی',
   mobile: '09121234567',
@@ -159,6 +161,33 @@ describe('receiptFromSystematic', () => {
     expect(receipt.customer.name).toBe('احمد زارعی');
     expect(receipt.customer.nationalId).toBe('0084403507');
     expect(receipt.order.userStatus).toBe('کاربر عادی');
+  });
+
+  it('کد کاربری، همان کدِ داکِ اپ است نه id دیتابیس', () => {
+    const receipt = receiptFromSystematic({ categoryId: 'laptop', answers: {}, user });
+    expect(receipt.order.userCode).toBe('211866545');
+  });
+
+  it('بدون پروفایل سازمان، آدرس و تلفن ثابت از آدرس‌های ذخیره‌شده می‌آید', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'laptop',
+      answers: {},
+      user,
+      // در عمل همیشه null است: setProfileData هیچ‌جای اپ dispatch نمی‌شود.
+      orgProfile: null,
+      addresses: [
+        { id: 7, city: 'تهران', region: 'ونک', address: 'خیابان گاندی', telephone: '02188889999' },
+      ],
+      selectedAddressId: 7,
+    });
+
+    expect(receipt.customer.address).toBe('تهران، ونک، خیابان گاندی');
+    expect(receipt.customer.landline).toBe('02188889999');
+  });
+
+  it('پیش‌رسید شماره‌ی سفارش ندارد - بک‌اند موقع ثبت می‌سازدش', () => {
+    const receipt = receiptFromSystematic({ categoryId: 'laptop', answers: {}, user });
+    expect(receipt.order.number).toBeNull();
   });
 
   it('پیش‌فرض، حالتِ «جزئیات سفارش» است', () => {

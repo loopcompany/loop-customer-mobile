@@ -138,4 +138,8 @@ export const assets = {
   stateDone: require('@assets/icons/receipt/state_done.png'),
   stateFailed: require('@assets/icons/receipt/state_failed.png'),
   statePending: require('@assets/icons/receipt/state_pending.png'),
+  // QR ثابتِ شرکت. قبلاً با react-native-qrcode-svg از روی لینکِ رسید ساخته
+  // می‌شد؛ کارفرما تصویرِ رسمی را جایگزین کرد تا همان کدی چاپ شود که روی بقیه‌ی
+  // اقلام چاپیِ شرکت هست.
+  qr: require('@assets/qrcode.jpg'),
 };

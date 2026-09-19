@@ -492,10 +492,79 @@ export const routes = [
 export const INITIAL_ROUTE = 'Landing';
 
 /**
- * Routes on which the Android back button should offer to exit the app.
- * `List` is the home page every cold start lands on, so it belongs here —
- * otherwise back from home pops to an empty stack.
+ * مسیرهایی که بدون ورود به حساب هم قابل مشاهده‌اند.
+ *
+ * The routes a signed-out visitor is allowed to open.
+ *
+ * This is an **allowlist, not a blocklist** — `requiresAuth(name)` below denies
+ * anything that is not on it. That direction is deliberate (`fail secure`, the
+ * same principle `docs/SECURITY_FIX_ACCESS_CONTROL.md` sets out for
+ * organization access): forgetting to list a new screen makes it ask for a
+ * login, which is a visible annoyance, whereas forgetting to *block* one hands
+ * a guest a screen whose every request 401s and whose UI assumes a user object.
+ *
+ * Only three kinds of route belong here: the splash, the sign-in/sign-up flows
+ * (a guest obviously cannot be asked to log in before logging in), and the
+ * static informational pages a guest may legitimately want to read.
  */
-export const ROOT_ROUTES = ['Landing', 'Welcome', 'List'];
+export const PUBLIC_ROUTES = new Set([
+  /* Splash */
+  'Landing',
+  'Welcome',
+
+  /* Customer authentication */
+  'SignInLanding',
+  'MainSignIn',
+  'LoginScreen',
+  'RegistrationVerificationScreen',
+  'ForgotPassword',
+  'ResetPasswordScreen',
+  'AccessRestrictedScreen',
+
+  /* Organization authentication (`org/logreg/*`) */
+  'Login',
+  'Register',
+  'OTPVerification',
+  'OrganizationForgotPassword',
+  'OrganizationResetPassword',
+  'OrgPrivacy',
+  'Grouping',
+  'Method',
+  'TestConnection',
+
+  /* Static / informational — readable without an account */
+  'AboutScreen',
+  'PrivacyScreen',
+  'OrganizationTermsScreen',
+  'LearnMoreScreen',
+  'FAQScreen',
+  'ArticlesScreen',
+  'GuideScreen',
+  'WebView',
+
+  /* Dev-only */
+  'ReceiptGallery',
+]);
+
+/**
+ * Does this route need a signed-in user?
+ *
+ * @param {string} routeName
+ * @returns {boolean}
+ */
+export const requiresAuth = (routeName) => !PUBLIC_ROUTES.has(routeName);
+
+/** Where a signed-out visitor is sent when they reach for a guarded route. */
+export const AUTH_ROUTE = 'SignInLanding';
+
+/**
+ * Routes on which the Android back button should offer to exit the app.
+ *
+ * `List` is the home page a signed-in cold start lands on and `SignInLanding`
+ * is where a signed-out one lands, so both belong here — otherwise back from
+ * either pops to an empty stack. (`Landing` replaces itself with one of the
+ * two, so neither ever has a screen beneath it.)
+ */
+export const ROOT_ROUTES = ['Landing', 'Welcome', 'List', 'SignInLanding'];
 
 export default routes;

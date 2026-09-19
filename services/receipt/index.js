@@ -10,6 +10,7 @@ export {
   ISSUER,
   PRICE_ON_REQUEST,
   NOT_SET,
+  ORDER_NUMBER_PENDING,
   buildReceipt,
   deriveOrderKind,
   accountTypeLabel,
@@ -18,6 +19,14 @@ export {
 } from './receiptModel';
 
 export { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
+
+export {
+  formatAddressEntry,
+  pickSavedAddress,
+  resolveAddressInfo,
+  resolveCustomer,
+  resolveUserCode,
+} from './receiptCustomer';
 
 export { receiptFromSystematic } from './fromSystematic';
 export { receiptFromComprehensive } from './fromComprehensive';

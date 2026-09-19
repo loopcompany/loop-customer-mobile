@@ -22,6 +22,7 @@ import {
   accountTypeLabel,
   isOrganizationAccount,
 } from './receiptModel';
+import { resolveCustomer, resolveUserCode } from './receiptCustomer';
 import { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
@@ -66,6 +67,8 @@ export const receiptFromComprehensive = ({
   timeSlot = null,
   user = null,
   orgProfile = null,
+  addresses = null,
+  selectedAddressId = null,
   state = RECEIPT_STATE.PENDING,
   orderNumber = null,
 }) => {
@@ -103,7 +106,7 @@ export const receiptFromComprehensive = ({
     issuedAt: todayReceiptDate(),
     order: {
       number: orderNumber,
-      userCode: user?.id ?? null,
+      userCode: resolveUserCode(user),
       userName:
         (operatorInfo.fullName || '').trim() ||
         [user?.fname, user?.lname].filter(Boolean).join(' ') ||
@@ -113,18 +116,17 @@ export const receiptFromComprehensive = ({
       registeredDate: todayReceiptDate(),
       registeredTime: toReceiptTime(new Date()),
     },
-    customer: {
+    customer: resolveCustomer({
       isOrganization: isOrg,
-      name: isOrg
-        ? orgProfile?.organization_name || user?.name || null
-        : (operatorInfo.fullName || '').trim() || user?.name || null,
-      nationalId: isOrg
-        ? orgProfile?.national_id || user?.national_id || null
-        : (operatorInfo.nationalId || '').trim() || user?.national_code || null,
+      // اپراتور، نام و کد ملیِ واردشده در همین فرم را دارد - بر پروفایل مقدم است.
+      name: isOrg ? null : (operatorInfo.fullName || '').trim() || null,
+      nationalId: isOrg ? null : (operatorInfo.nationalId || '').trim() || null,
       phone: contactPhone,
-      landline: orgProfile?.phone || null,
-      address: orgProfile?.address || null,
-    },
+      addresses,
+      selectedAddressId,
+      orgProfile,
+      user,
+    }),
     // جامع برند/مدل ندارد - بخش «مشخصات محصول» حذف می‌شود.
     product: null,
     items,

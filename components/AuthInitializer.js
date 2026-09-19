@@ -9,7 +9,7 @@ import {
   notifySessionExpired,
   SESSION_EXPIRY_REASON,
 } from '@services/sessionExpiry';
-import { setToken, setUserType } from '@slices/authSlice';
+import { setAuthRestored, setToken, setUserType } from '@slices/authSlice';
 
 /**
  * بازیابی نشست ذخیره‌شده هنگام راه‌اندازی + بررسی اعتبار آن.
@@ -55,9 +55,19 @@ const AuthInitializer = ({ children }) => {
 
   useEffect(() => {
     const restoreAuth = async () => {
+      let token = null;
       try {
         // بازیابی token
-        const token = await AsyncStorage.getItem('userToken');
+        //
+        // از TokenManager می‌خوانیم نه مستقیم از AsyncStorage، تا کلیدِ نشستِ
+        // موقت هم دیده شود.
+        //
+        // Read through `TokenManager`, not the raw `'userToken'` key: it also
+        // looks at the session-scoped key, and the route guards decide from the
+        // token in Redux. Reading fewer places here than `isAuthenticated()`
+        // does would let a signed-in user land on a guarded screen with an
+        // empty Redux token and get bounced to the login page.
+        token = await TokenManager.getToken();
         if (token) {
           dispatch(setToken(token));
         }
@@ -68,10 +78,22 @@ const AuthInitializer = ({ children }) => {
           dispatch(setUserType(userType));
         }
 
-        if (token) await verifyStoredSession();
       } catch (error) {
         console.error('خطا در بازیابی اطلاعات احراز هویت:', error);
+      } finally {
+        // Announce that storage has been read, whatever the outcome — and do it
+        // *before* the server round-trip below. The route guards block on this
+        // flag, because until it flips "no token" is indistinguishable from
+        // "not looked yet"; making them wait on `verifyStoredSession` too would
+        // park every guarded screen behind a spinner for the length of an
+        // axios timeout on a slow network.
+        dispatch(setAuthRestored());
       }
+
+      // Now that the UI can proceed, check with the server whether the token we
+      // just restored is still good. A failure here goes to the session-expiry
+      // bus, not to a guard.
+      if (token) await verifyStoredSession();
     };
 
     restoreAuth();

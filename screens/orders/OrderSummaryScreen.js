@@ -38,6 +38,7 @@ import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { createDirectionalStyles } from '@styles/directionalStyles';
 import OrderReceipt from '@components/receipt/OrderReceipt';
+import { formatAddressEntry, pickSavedAddress } from '@services/receipt';
 import FooterSpacer from '@components/FooterSpacer';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
@@ -49,19 +50,6 @@ const describeErrorFa = (key) => ({
 }[key] || key);
 
 const NOT_SET = 'ثبت نشده';
-
-// آدرس ذخیره‌شده یا در حال ویرایش را به یک رشته‌ی خوانا تبدیل می‌کند.
-const formatAddress = (entry) => {
-  if (!entry) return '';
-  const parts = [
-    entry.city,
-    entry.region,
-    entry.address,
-    entry.number ? `پلاک ${entry.number}` : '',
-    entry.unit ? `واحد ${entry.unit}` : '',
-  ];
-  return parts.filter((part) => String(part || '').trim()).join('، ');
-};
 
 export default function OrderSummaryScreen({ navigation, route }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,13 +91,18 @@ export default function OrderSummaryScreen({ navigation, route }) {
     return TIME_SLOT_OPTIONS.find((opt) => opt.id === scheduleSlot)?.title || scheduleSlot;
   }, [scheduleSlot]);
 
-  // آدرس: آدرس انتخاب‌شده‌ی سفارش، سپس آدرس در حال ویرایش، سپس آدرس سازمان.
-  const address = useMemo(() => {
-    const picked = Array.isArray(savedAddresses)
-      ? savedAddresses.find((item) => String(item?.id) === String(selectedAddressId))
-      : null;
-    return formatAddress(picked) || formatAddress(addressDraft) || orgProfile?.address || NOT_SET;
-  }, [savedAddresses, selectedAddressId, addressDraft, orgProfile?.address]);
+  // آدرسِ سفارش: همان آدرسی که موقع ثبت به‌عنوان `address_id` فرستاده می‌شود
+  // (انتخاب‌شده، وگرنه اولین آدرسِ ذخیره‌شده)، سپس آدرسِ در حال ویرایش، سپس
+  // آدرس سازمان. pickSavedAddress مشترک است تا این نمایش و آن ثبت از هم جدا
+  // نیفتند.
+  const address = useMemo(
+    () =>
+      formatAddressEntry(pickSavedAddress(savedAddresses, selectedAddressId)) ||
+      formatAddressEntry(addressDraft) ||
+      orgProfile?.address ||
+      NOT_SET,
+    [savedAddresses, selectedAddressId, addressDraft, orgProfile?.address]
+  );
 
   const phone =
     contact?.mobile ||
@@ -203,10 +196,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
             // آدرس‌های حساب سازمانی در لاگین (`fetchAddresses`) بارگذاری شده‌اند؛
             // همان آدرسِ انتخاب‌شده‌ی مسیر عادی را در نبودش، اولین آدرس ذخیره‌شده
             // را استفاده می‌کنیم. بدون هیچ آدرسی، ادامه نمی‌دهیم.
-            const pickedAddress = Array.isArray(savedAddresses)
-              ? savedAddresses.find((item) => String(item?.id) === String(selectedAddressId))
-              : null;
-            const resolvedAddressId = pickedAddress?.id ?? savedAddresses?.[0]?.id ?? null;
+            const resolvedAddressId =
+              pickSavedAddress(savedAddresses, selectedAddressId)?.id ?? null;
             if (!resolvedAddressId) {
               showToastOrAlert('برای ثبت سفارش، ابتدا یک آدرس در پروفایل خود ثبت کنید.');
               setIsSubmitting(false);

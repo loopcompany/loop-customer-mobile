@@ -16,6 +16,7 @@ import {
   accountTypeLabel,
   isOrganizationAccount,
 } from './receiptModel';
+import { resolveCustomer, resolveUserCode } from './receiptCustomer';
 import { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
 
 // کدهای وضعیت، از buttonConfig در components/OrderItem.js:
@@ -39,20 +40,6 @@ export const receiptStateForStatus = (status) => {
 const toPrice = (value) => {
   const num = Number(value);
   return Number.isFinite(num) && String(value ?? '').trim() !== '' ? num : null;
-};
-
-/** آدرس کاربر را از شیء user_address به یک رشته‌ی خوانا تبدیل می‌کند. */
-const formatAddress = (entry) => {
-  if (!entry) return null;
-  const parts = [
-    entry.city,
-    entry.region,
-    entry.address,
-    entry.number ? `پلاک ${entry.number}` : '',
-    entry.floor ? `طبقه ${entry.floor}` : '',
-  ];
-  const text = parts.filter((part) => String(part || '').trim()).join('، ');
-  return text || null;
 };
 
 /**
@@ -91,9 +78,14 @@ const servicesFromOrderDetails = (sections, categoryTitle) => {
  * @param {object} [context]
  * @param {object} [context.user] state.user.data - برای وضعیت کاربری و شناسه‌ی ملی.
  * @param {object} [context.orgProfile] state.organization.profileData
+ * @param {object[]} [context.addresses] state.address.data - پشتیبانِ آدرسِ سفارش.
+ * @param {string|number} [context.selectedAddressId] state.step.addressId
  * @returns {object} رسید نرمال‌شده.
  */
-export const receiptFromOrderApi = (data, { user = null, orgProfile = null } = {}) => {
+export const receiptFromOrderApi = (
+  data,
+  { user = null, orgProfile = null, addresses = null, selectedAddressId = null } = {}
+) => {
   const state = receiptStateForStatus(data?.status);
 
   const basePrice = toPrice(data?.technician_price ?? data?.pakar_price);
@@ -118,29 +110,30 @@ export const receiptFromOrderApi = (data, { user = null, orgProfile = null } = {
   const isOrg = isOrganizationAccount(user?.account_type);
   const addressName = [address?.fname, address?.lname].filter(Boolean).join(' ');
 
+  // آدرسِ خودِ سفارش منبع اصلی است؛ آدرس‌های ذخیره‌شده فقط وقتی به کار می‌آیند
+  // که پاسخِ سرور `user_address` نداشته باشد (سفارش‌های قدیمی‌تر).
+  const customer = resolveCustomer({
+    isOrganization: isOrg,
+    name: isOrg ? null : addressName || null,
+    addressEntry: address,
+    addresses,
+    selectedAddressId,
+    orgProfile,
+    user,
+  });
+
   return buildReceipt({
     state,
     issuedAt: todayReceiptDate(),
     order: {
       number: data?.id ?? null,
-      userCode: user?.id ?? null,
+      userCode: resolveUserCode(user),
       userName: addressName || [user?.fname, user?.lname].filter(Boolean).join(' ') || null,
       userStatus: accountTypeLabel(user?.account_type),
       registeredDate: toReceiptDate(data?.created_at),
       registeredTime: toReceiptTime(data?.created_at),
     },
-    customer: {
-      isOrganization: isOrg,
-      name: isOrg
-        ? orgProfile?.organization_name || user?.name || null
-        : addressName || user?.name || null,
-      nationalId: isOrg
-        ? orgProfile?.national_id || user?.national_id || null
-        : user?.national_code || user?.national_id || null,
-      phone: user?.mobile || user?.phone || null,
-      landline: address?.telephone || null,
-      address: formatAddress(address),
-    },
+    customer,
     // مسیر دسته‌بندی برند/مدل دستگاه را نمی‌پرسد؛ بخش «مشخصات محصول» حذف می‌شود.
     product: null,
     items: [],

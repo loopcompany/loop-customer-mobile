@@ -96,6 +96,10 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید.
   const user = useSelector((state) => state?.user?.data);
   const orgProfile = useSelector((state) => state?.organization?.profileData);
+  // آدرس و تلفن ثابتِ رسید از همین آدرس‌ها می‌آید - `organization.profileData`
+  // هیچ‌جای اپ پر نمی‌شود و به‌تنهایی رسید را «نامشخص» می‌کرد.
+  const savedAddresses = useSelector((state) => state?.address?.data);
+  const selectedAddressId = useSelector((state) => state?.step?.addressId);
 
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
@@ -213,6 +217,8 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         answers,
         user,
         orgProfile,
+        addresses: savedAddresses,
+        selectedAddressId,
         state: RECEIPT_STATE.PENDING,
       });
 

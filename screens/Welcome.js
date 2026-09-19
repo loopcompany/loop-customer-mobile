@@ -12,18 +12,33 @@ import { themeColor0, themeColor10 } from "@theme/Color";
 import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { fetchContacts } from "@slices/contactSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Welcome({ navigation }) {
   const { t } = useTranslation()
   const dispatch = useDispatch();
-  const navigateToMainApp = () => {
-    setTimeout(() => {
-      navigation.replace('OrderMenuScreen');
-    }, 4000);
-  };
+  const token = useSelector((state) => state.auth.token);
+  const isRestored = useSelector((state) => state.auth.isRestored);
+
+  // این صفحه مقصدِ بعد از خروج از حساب هم هست، پس نباید بی‌قید به صفحه‌ی
+  // نیازمندِ ورود برود.
+  //
+  // `useLogout` lands here, so this screen is shown to signed-out users as
+  // often as to signed-in ones. Sending everyone on to `OrderMenuScreen` put a
+  // just-logged-out user straight back into a guarded screen, which then
+  // bounced them again — a visible round trip through the wrong page. Pick the
+  // destination from the session instead.
   useEffect(() => {
-    navigateToMainApp()
+    if (!isRestored) return undefined;
+
+    const timer = setTimeout(() => {
+      navigation.replace(token ? 'OrderMenuScreen' : 'SignInLanding');
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [isRestored, token, navigation]);
+
+  useEffect(() => {
     dispatch(fetchContacts());
   }, [])
   return (

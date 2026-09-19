@@ -15,6 +15,7 @@ import {
   accountTypeLabel,
   isOrganizationAccount,
 } from './receiptModel';
+import { resolveCustomer, resolveUserCode } from './receiptCustomer';
 import { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
@@ -113,6 +114,8 @@ const buildItems = (procurementAnswer) => {
  * @param {object} input.answers پاسخ‌های مراحل، کلید = شناسه‌ی مرحله.
  * @param {object} [input.user] state.user.data
  * @param {object} [input.orgProfile] state.organization.profileData
+ * @param {object[]} [input.addresses] state.address.data - منبع آدرس و تلفن ثابت.
+ * @param {string|number} [input.selectedAddressId] state.step.addressId
  * @param {string} [input.state] حالت رسید؛ پیش‌فرض «جزئیات سفارش».
  * @param {string|number} [input.orderNumber]
  * @returns {object} رسید نرمال‌شده.
@@ -122,6 +125,8 @@ export const receiptFromSystematic = ({
   answers = {},
   user = null,
   orgProfile = null,
+  addresses = null,
+  selectedAddressId = null,
   state = RECEIPT_STATE.PENDING,
   orderNumber = null,
 }) => {
@@ -190,24 +195,19 @@ export const receiptFromSystematic = ({
     issuedAt: todayReceiptDate(),
     order: {
       number: orderNumber,
-      userCode: user?.id ?? null,
+      userCode: resolveUserCode(user),
       userName: [user?.fname, user?.lname].filter(Boolean).join(' ') || user?.name || null,
       userStatus: accountTypeLabel(user?.account_type),
       registeredDate: todayReceiptDate(),
       registeredTime: toReceiptTime(new Date()),
     },
-    customer: {
+    customer: resolveCustomer({
       isOrganization: isOrg,
-      name: isOrg
-        ? orgProfile?.organization_name || user?.name || null
-        : [user?.fname, user?.lname].filter(Boolean).join(' ') || user?.name || null,
-      nationalId: isOrg
-        ? orgProfile?.national_id || user?.national_id || null
-        : user?.national_code || user?.national_id || null,
-      phone: user?.mobile || user?.phone || null,
-      landline: orgProfile?.phone || user?.landline || null,
-      address: orgProfile?.address || null,
-    },
+      addresses,
+      selectedAddressId,
+      orgProfile,
+      user,
+    }),
     product,
     items,
     services,

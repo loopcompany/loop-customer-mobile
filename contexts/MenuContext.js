@@ -40,6 +40,7 @@ import { createStyles } from '@styles/NewStyles';
 import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLanguage } from '@slices/languageSlice';
+import { AUTH_ROUTE, requiresAuth } from '@navigation/routes';
 // Create Context
 const MenuContext = createContext();
 
@@ -507,10 +508,25 @@ export const MenuProvider = ({ children }) => {
     const closeMenu = useCallback(() => {
         setMenuVisible(false);
     }, []);
+    // منوی داک روی صفحه‌های عمومی هم دیده می‌شود، پس ورودی‌های نیازمندِ حساب باید
+    // کاربرِ خارج‌شده را به صفحه‌ی ورود ببرند، نه به صفحه‌ای که بلافاصله پس می‌زند.
+    //
+    // The dock is visible on public screens too, so a signed-out user can tap
+    // "Orders" or "Loop Wallet". `RequireAuth` would bounce them anyway, but
+    // bouncing means a visible flash of the wrong screen — send them straight
+    // to sign-in instead. The guard stays as the backstop for every other way
+    // in (deep links, push notifications); this is the layer that makes the
+    // common path look deliberate.
     const navigateToScreen = useCallback((screenName) => {
+        if (!token && requiresAuth(screenName)) {
+            navigation.navigate(AUTH_ROUTE);
+            closeMenu();
+            return;
+        }
+
         navigation.navigate(screenName);
         closeMenu();
-    }, [navigation, closeMenu]);
+    }, [navigation, closeMenu, token]);
 
     const callSupport = useCallback(() => {
         Linking.openURL(`tel:02191693909`);

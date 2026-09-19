@@ -48,6 +48,9 @@ function OrderReceiptScreen({ route, navigation }) {
 
   const user = useSelector((state) => state?.user?.data);
   const orgProfile = useSelector((state) => state?.organization?.profileData);
+  // پشتیبانِ آدرس/تلفن ثابت وقتی پاسخِ سرور `user_address` ندارد.
+  const savedAddresses = useSelector((state) => state?.address?.data);
+  const selectedAddressId = useSelector((state) => state?.step?.addressId);
 
   const [fetched, setFetched] = useState(null);
   const [loading, setLoading] = useState(Boolean(orderId) && !prebuilt);
@@ -88,8 +91,13 @@ function OrderReceiptScreen({ route, navigation }) {
   const receipt = useMemo(() => {
     if (prebuilt) return prebuilt;
     if (!fetched) return null;
-    return receiptFromOrderApi(fetched, { user, orgProfile });
-  }, [prebuilt, fetched, user, orgProfile]);
+    return receiptFromOrderApi(fetched, {
+      user,
+      orgProfile,
+      addresses: savedAddresses,
+      selectedAddressId,
+    });
+  }, [prebuilt, fetched, user, orgProfile, savedAddresses, selectedAddressId]);
 
   const onShare = useCallback(async () => {
     if (!receipt) return;

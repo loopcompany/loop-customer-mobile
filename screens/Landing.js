@@ -108,21 +108,33 @@ export default function Landing({ navigation }) {
     }
   };
 
-  // `List` is the app's home page (web: /list). Every cold start lands there,
-  // signed in or not, so closing and reopening the app always returns to the
-  // same place. Screens reachable from List that need a session send the user
-  // to Login themselves.
-  const goHome = () => {
+  // مقصد بعد از اسپلش. هر دو مسیر از این می‌گذرند تا فقط یک بار جابه‌جایی رخ دهد.
+  //
+  // Both auth branches funnel through here so the "settle once" guard covers
+  // them equally — `playToEnd` and either timeout can all reach this point.
+  const settle = (routeName) => {
     if (settledRef.current) return;
     settledRef.current = true;
     setChecking(false);
-    navigation.replace('List');
+    navigation.replace(routeName);
   };
 
-  // Kept as separate names so the auth branches below stay readable; both
-  // destinations are now the same home page.
-  const navigateToWelcome = goHome;
-  const navigateToMainApp = goHome;
+  // `List` is the app's home page (web: /list) and the same place `LoginScreen`
+  // lands on a successful sign-in, so a signed-in cold start returns the user
+  // exactly where they left off.
+  const navigateToMainApp = () => settle('List');
+
+  // A signed-out visitor gets the sign-in / sign-up chooser instead.
+  //
+  // These two used to be the same call. Sending an unauthenticated user to
+  // `List` meant a fresh install — where AsyncStorage is empty, so
+  // `isAuthenticated()` returns `no_token` — dropped the user into the
+  // signed-in UI with no session: every request went out without an
+  // Authorization header, and because `axiosConfig` only raises the
+  // session-expiry sheet for requests that *carried* a token, the resulting
+  // 401s were silently swallowed. The user saw a working home page that
+  // misbehaved everywhere instead of a login prompt.
+  const navigateToWelcome = () => settle('SignInLanding');
 
 
   useEffect(() => {
@@ -146,13 +158,31 @@ export default function Landing({ navigation }) {
       }
     }, SPLASH_TIMEOUT_MS);
 
-    // goHome() با settledRef محافظت شده، پس اگر بررسیِ توکن زودتر تمام شود این
+    // اگر بررسیِ توکن هم طول بکشد، مقصد را از روی *وجودِ* توکن انتخاب می‌کنیم،
+    // نه از روی نتیجه‌ی تأییدِ آن؛ کاربری که توکن دارد نباید به‌خاطر کندیِ شبکه
+    // دوباره به صفحه‌ی ورود فرستاده شود.
+    //
+    // If the auth check itself overruns, pick the destination from whether a
+    // token *exists*, not from whether it was verified. A user who has a stored
+    // token is signed in as far as this screen is concerned: bouncing them to
+    // the login page because the network was slow is exactly the regression
+    // this splash screen must not cause. Entering the app is safe here because
+    // nothing downstream trusts this decision — `RequireAuth` still gates every
+    // guarded route, and the 401 interceptor still raises the session-expiry
+    // sheet the moment a real request proves the token is dead.
+    //
+    // settle() با settledRef محافظت شده، پس اگر بررسیِ توکن زودتر تمام شود این
     // فراخوانی بی‌اثر است.
-    const hardTimer = setTimeout(() => {
-      if (!settledRef.current) {
-        console.warn('[Landing] auth check exceeded budget — entering app anyway');
-        goHome();
-      }
+    const hardTimer = setTimeout(async () => {
+      if (settledRef.current) return;
+
+      const storedToken = await TokenManager.getToken();
+      console.warn(
+        `[Landing] auth check exceeded budget — continuing as ${storedToken ? 'signed in' : 'guest'}`
+      );
+
+      if (storedToken) navigateToMainApp();
+      else navigateToWelcome();
     }, SPLASH_MAX_MS);
 
     return () => {

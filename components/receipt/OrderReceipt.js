@@ -12,11 +12,16 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import QRCode from 'react-native-qrcode-svg';
 import { getFontFamily } from '@theme/Typography';
 import { formatPrice } from '@helpers/Common';
-import { mainUri } from '@services/URL';
-import { RECEIPT_STATE, ORDER_KIND, ISSUER, PRICE_ON_REQUEST, NOT_SET } from '@services/receipt';
+import {
+  RECEIPT_STATE,
+  ORDER_KIND,
+  ISSUER,
+  PRICE_ON_REQUEST,
+  NOT_SET,
+  ORDER_NUMBER_PENDING,
+} from '@services/receipt';
 import ReceiptTable from './ReceiptTable';
 import {
   receiptColors as C,
@@ -122,11 +127,15 @@ function Section({ title, icon, children, s, style }) {
  *
  * چیدمان اپ LTR است، پس در یک `row` فرزند اول سمت چپ می‌نشیند: ترتیب JSX
  * «مقدار، برچسب، آیکون» یعنی مقدار چپ و آیکونِ طلایی در انتهای راست - مثل طرح.
+ *
+ * `small` برای مقادیری است که جمله‌اند نه داده (مثل «پس از ثبت نهایی نمایش داده
+ * می‌شود»): در ستونِ نصف‌عرضِ رسید با قلمِ عادی سه خط می‌شکنند و ارتفاع دو ستون
+ * را به‌هم می‌ریزند.
  */
-function Row({ icon, label, value, s, tone, last }) {
+function Row({ icon, label, value, s, tone, last, small }) {
   return (
     <View style={[s.row, last && s.rowLast]}>
-      <Text style={[s.rowValue, tone && { color: tone }]}>
+      <Text style={[s.rowValue, small && s.rowValueSmall, tone && { color: tone }]}>
         {value == null || value === '' ? NOT_SET : value}
       </Text>
       <Text style={s.rowLabel}>{label}</Text>
@@ -196,14 +205,6 @@ function OrderReceipt({ receipt }) {
           ? 'خدمات'
           : null;
 
-  // QR به صفحه‌ی وبِ همین رسید اشاره می‌کند (navigation/routes.js مسیر `receipt`
-  // را می‌شناسد)، پس اسکن‌کننده خودِ رسید را می‌بیند.
-  //
-  // پیش‌رسیدهای مسیر سازمانی هنوز روی سرور ثبت نشده‌اند و شماره‌ی سفارش ندارند؛
-  // برای آن‌ها QR به سایت شرکت می‌رود تا کادر پاورقی - که در طرح همیشه QR دارد -
-  // خالی نماند و کد اسکن‌شده هم بن‌بست نباشد.
-  const receiptUrl = order.number != null ? `${mainUri}/receipt?orderId=${order.number}` : mainUri;
-
   return (
     <View
       style={s.page}
@@ -228,7 +229,6 @@ function OrderReceipt({ receipt }) {
           />
           <Text style={s.issuerName}>حلقه بی نهایت</Text>
           <Text style={s.issuerName}>رایانه ایرانیان</Text>
-          <Text style={s.issuerMeta}>شناسه ملی : {ISSUER.nationalId}</Text>
           <Text style={s.issuerMeta}>شماره ثبت : {ISSUER.registrationNumber}</Text>
           <Image
             source={assets.divider}
@@ -282,7 +282,14 @@ function OrderReceipt({ receipt }) {
           <VRule s={s} />
 
           <View style={s.col}>
-            <Row icon="list-outline" label="شماره سفارش" value={order.number} s={s} />
+            {/* پیش‌رسید هنوز شماره ندارد؛ شماره را بک‌اند موقع ثبت می‌سازد. */}
+            <Row
+              icon="list-outline"
+              label="شماره سفارش"
+              value={order.number ?? ORDER_NUMBER_PENDING}
+              small={order.number == null}
+              s={s}
+            />
             <Row icon="person-outline" label="کد کاربری" value={order.userCode} s={s} />
             <Row icon="person-circle-outline" label="نام کاربری" value={order.userName} s={s} />
             <Row icon="phone-portrait-outline" label="ثبت سفارش" value={order.channel} s={s} last />
@@ -425,7 +432,8 @@ function OrderReceipt({ receipt }) {
           <Text style={s.footerTitle}>با تشکر از اعتماد شما</Text>
           <Text style={s.footerSubtitle}>با لوپ تا بی نهایت در کنار شما هستیم</Text>
         </View>
-        <QRCode value={receiptUrl} size={56} color={C.tabNavy} backgroundColor={C.cardBg} />
+        {/* QR رسمیِ شرکت - تصویرِ ثابت، نه کدِ تولیدشده از لینکِ رسید. */}
+        <Image source={assets.qr} style={s.qr} resizeMode="contain" />
       </View>
     </View>
   );
@@ -559,6 +567,7 @@ const createStyles = (lang) => {
       color: C.textBody,
       textAlign: 'left',
     },
+    rowValueSmall: { fontSize: F.tableCell - 1 },
 
     // --- پرداخت + تحویل کنار هم ---
     pairRow: { flexDirection: 'row', alignItems: 'flex-start' },
@@ -579,6 +588,10 @@ const createStyles = (lang) => {
       backgroundColor: C.cardBg,
     },
     ribbon: { marginTop: -18 },
+    // بزرگ‌تر از QRِ تولیدشده‌ی قبلی (۵۶): تصویرِ تحویلی ماژول‌های ریزتری دارد و
+    // در ۵۶pt با دوربین خوانده نمی‌شد. گوشه‌ی گرد، کادرِ تیره‌ی تصویر را روی
+    // کارتِ روشن به یک کاشیِ عمدی تبدیل می‌کند.
+    qr: { width: 72, height: 72, borderRadius: L.cardRadius },
     footerText: { flex: 1, alignItems: 'center' },
     footerTitle: { fontFamily: bold, fontSize: F.footerTitle, color: C.textNavy },
     footerSubtitle: {
