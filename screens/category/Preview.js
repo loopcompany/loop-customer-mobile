@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
 import OrderCodesSection from '@components/OrderCodesSection';
-import useDiscountCode from '@hooks/useDiscountCode';
+import usePromoCode from '@hooks/usePromoCode';
 import useReferralCode from '@hooks/useReferralCode';
 import { LinearGradient } from 'expo-linear-gradient';
 import { spacing } from '@theme/Spacing';
@@ -74,10 +74,11 @@ function Preview({ navigation }) {
     // دومی با ثبت، مصرف می‌شود. بک‌اند هر دو را جدا حساب می‌کند و می‌توان هر دو
     // را همزمان روی یک سفارش فرستاد.
     //
-    // Two independent systems. The discount check is free; registering a
-    // referral code consumes it. The backend calculates them separately and an
-    // order may carry both.
-    const discount = useDiscountCode({ token, categoryId: category?.id });
+    // Two independent systems. The promo check is free; registering a referral
+    // code consumes it. The backend calculates them separately and an order may
+    // carry both. The promo endpoint validates the code on its own — unlike the
+    // club/gem check it replaced, it takes no category.
+    const promo = usePromoCode({ token });
     const referral = useReferralCode({ token });
 
     const addresses = useSelector(state => state.address?.data);
@@ -222,7 +223,7 @@ function Preview({ navigation }) {
         // A typed-but-unverified code is neither dropped silently (the user
         // would lose the discount without being told) nor sent blind (the
         // server may reject the whole order over it).
-        if (discount.needsCheck) {
+        if (promo.needsCheck) {
             showToastOrAlert(t('Please verify your discount code or clear it before submitting.'));
             return;
         }
@@ -266,7 +267,9 @@ function Preview({ navigation }) {
             if (files?.length > 0) payload.file_paths = files;
             // فقط کدهای تأییدشده ارسال می‌شوند — دقیقاً همان رشته‌ای که سرور
             // به رسمیت شناخته، نه متن خام ورودی.
-            if (discount.appliedCode) payload.discount_code = discount.appliedCode;
+            // کد تخفیف فقط در `promo_code` می‌رود - قرارداد FRONTEND_PROMO_CODES.md
+            // صراحتاً می‌گوید کد جدید نباید در `discount_code` فرستاده شود.
+            if (promo.appliedCode) payload.promo_code = promo.appliedCode;
             if (referral.appliedCode) payload.referral_code = referral.appliedCode;
             // اضافه کردن service_schedule فقط اگر:
             // 1. کاربر سازمانی باشد
@@ -315,6 +318,11 @@ function Preview({ navigation }) {
                 if (body?.error_code === 'INVALID_REFERRAL_CODE') {
                     referral.reject(body?.message);
                 }
+                // سرور کد تخفیف را هنگام ثبت دوباره و به‌صورت اتمیک بررسی می‌کند؛
+                // ممکن است بین «بررسی کد» و «ثبت سفارش» منقضی یا مصرف شده باشد.
+                if (body?.error_code === 'INVALID_PROMO_CODE') {
+                    promo.reject(body?.message);
+                }
                 // سبد را نگه می‌داریم و روی همین صفحه می‌مانیم تا کاربر بتواند دوباره تلاش کند.
                 showToastOrAlert(
                     (typeof body?.message === 'string' && body.message.trim())
@@ -352,6 +360,9 @@ function Preview({ navigation }) {
             // شاخه‌ی بالا. هر دو مسیر باید فیلد را به حالت خطا ببرند.
             if (error?.response?.data?.error_code === 'INVALID_REFERRAL_CODE') {
                 referral.reject(error?.response?.data?.message);
+            }
+            if (error?.response?.data?.error_code === 'INVALID_PROMO_CODE') {
+                promo.reject(error?.response?.data?.message);
             }
             const message = describeApiError(error, t);
             showToastOrAlert(message);
@@ -589,7 +600,7 @@ function Preview({ navigation }) {
                     عنوانِ تصویریِ قبلی حذف شد: خودِ ردیف همان عنوان را دارد و
                     تصویرش حالا در هدرِ کشو است. */}
                 <View style={[NewStyles.seperator, { paddingHorizontal: spacing.lg, paddingTop: '5%' }]}>
-                    <OrderCodesSection discount={discount} referral={referral} available={codesAvailable} />
+                    <OrderCodesSection promo={promo} referral={referral} available={codesAvailable} />
                 </View>
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: footerSpace }]}>

@@ -1,5 +1,5 @@
 /**
- * The two promo-code hooks encode rules that are invisible until money is
+ * The two code-entry hooks encode rules that are invisible until money is
  * involved, so they are pinned here rather than trusted to review:
  *
  *   - a displayed discount percentage must always belong to the code currently
@@ -14,14 +14,14 @@
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
 
-import useDiscountCode from '../useDiscountCode';
+import usePromoCode from '../usePromoCode';
 import useReferralCode from '../useReferralCode';
-import { checkOrderDiscount } from '@services/DiscountApi';
+import { checkPromoCode } from '@services/PromoApi';
 import { checkReferralCode } from '@services/ReferralApi';
 
-jest.mock('@services/DiscountApi', () => ({
-  ...jest.requireActual('@services/DiscountApi'),
-  checkOrderDiscount: jest.fn(),
+jest.mock('@services/PromoApi', () => ({
+  ...jest.requireActual('@services/PromoApi'),
+  checkPromoCode: jest.fn(),
 }));
 
 jest.mock('@services/ReferralApi', () => ({
@@ -57,33 +57,35 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('useDiscountCode', () => {
-  const args = { token: 'tok', categoryId: 10 };
+describe('usePromoCode', () => {
+  const args = { token: 'tok' };
 
   it('applies a percentage returned by the backend', async () => {
-    checkOrderDiscount.mockResolvedValue({
+    checkPromoCode.mockResolvedValue({
       ok: true,
-      data: { discount_percent: 20 },
+      data: { code: 'SUMMER20', discount_percent: 20, expires_at: null },
       message: 'applied',
     });
 
-    const hook = renderHook(useDiscountCode, args);
-    act(() => hook.current.onChangeText('abc-123456'));
+    const hook = renderHook(usePromoCode, args);
+    act(() => hook.current.onChangeText(' summer20 '));
     await act(async () => {
       await hook.current.check();
     });
 
     expect(hook.current.percent).toBe(20);
     expect(hook.current.applied).toBe(true);
-    // The normalized code is what the order must carry, not the raw input.
-    expect(hook.current.appliedCode).toBe('ABC-123456');
+    // The code the backend echoed is what the order must carry, not the raw input.
+    expect(hook.current.appliedCode).toBe('SUMMER20');
     expect(hook.current.needsCheck).toBe(false);
+    // A code with no expiry date is a valid state, not missing data.
+    expect(hook.current.expiresAt).toBeNull();
   });
 
   it('drops a validated percentage as soon as the code is edited', async () => {
-    checkOrderDiscount.mockResolvedValue({ ok: true, data: { discount_percent: 20 } });
+    checkPromoCode.mockResolvedValue({ ok: true, data: { discount_percent: 20 } });
 
-    const hook = renderHook(useDiscountCode, args);
+    const hook = renderHook(usePromoCode, args);
     act(() => hook.current.onChangeText('CODE-A'));
     await act(async () => {
       await hook.current.check();
@@ -99,10 +101,10 @@ describe('useDiscountCode', () => {
   });
 
   it('drops a validated percentage when a later check fails', async () => {
-    checkOrderDiscount.mockResolvedValueOnce({ ok: true, data: { discount_percent: 20 } });
-    checkOrderDiscount.mockResolvedValueOnce({ ok: false, message: 'nope' });
+    checkPromoCode.mockResolvedValueOnce({ ok: true, data: { discount_percent: 20 } });
+    checkPromoCode.mockResolvedValueOnce({ ok: false, message: 'nope' });
 
-    const hook = renderHook(useDiscountCode, args);
+    const hook = renderHook(usePromoCode, args);
     act(() => hook.current.onChangeText('CODE-A'));
     await act(async () => {
       await hook.current.check();
@@ -118,9 +120,9 @@ describe('useDiscountCode', () => {
   });
 
   it('refuses a 2xx success that carries no percentage', async () => {
-    checkOrderDiscount.mockResolvedValue({ ok: true, data: {} });
+    checkPromoCode.mockResolvedValue({ ok: true, data: {} });
 
-    const hook = renderHook(useDiscountCode, args);
+    const hook = renderHook(usePromoCode, args);
     act(() => hook.current.onChangeText('CODE'));
     await act(async () => {
       await hook.current.check();
@@ -131,13 +133,36 @@ describe('useDiscountCode', () => {
   });
 
   it('does not call the endpoint for an empty code', async () => {
-    const hook = renderHook(useDiscountCode, args);
+    const hook = renderHook(usePromoCode, args);
     await act(async () => {
       await hook.current.check();
     });
 
-    expect(checkOrderDiscount).not.toHaveBeenCalled();
+    expect(checkPromoCode).not.toHaveBeenCalled();
     expect(hook.current.needsCheck).toBe(false);
+  });
+
+  it('reject() clears an applied code when the order endpoint refuses it', async () => {
+    // The order submit re-validates atomically: a code can expire or be spent
+    // between the check and the submit, and the field must stop promising it.
+    checkPromoCode.mockResolvedValue({
+      ok: true,
+      data: { code: 'SUMMER20', discount_percent: 20 },
+    });
+
+    const hook = renderHook(usePromoCode, args);
+    act(() => hook.current.onChangeText('SUMMER20'));
+    await act(async () => {
+      await hook.current.check();
+    });
+    expect(hook.current.applied).toBe(true);
+
+    act(() => hook.current.reject('کد تخفیف معتبر نیست.'));
+
+    expect(hook.current.applied).toBe(false);
+    expect(hook.current.appliedCode).toBeNull();
+    expect(hook.current.percent).toBeNull();
+    expect(hook.current.status).toBe('error');
   });
 });
 

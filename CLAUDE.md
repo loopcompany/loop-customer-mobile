@@ -178,7 +178,7 @@ with a **2xx** status and `success:false`, so branching on the HTTP status (or r
 `catch`) silently reads "code already used" as success. `WalletApi` / `DiscountApi` /
 `ReferralApi` all go through it. Full write-up: `docs/DISCOUNT_REFERRAL_WALLET_IMPLEMENTATION.md`.
 
-Three things not to undo:
+Four things not to undo:
 
 - **The wallet balance lives in `slices/walletSlice.js`, not `state.user.data.wallet`.**
   The latter is a snapshot from token validation and goes stale the moment an order is paid.
@@ -186,6 +186,15 @@ Three things not to undo:
   never on change, on blur, or in an effect.
 - **`other_referral_code` (registration) and `referral_code` (`LOOP-XXXXXX`, order) are
   separate systems.** Same name, nothing else in common. Don't merge them.
+- **The order screen's «کد تخفیف» field is the *promo* system (`services/PromoApi.js`,
+  `hooks/usePromoCode.js`), and its code travels in `promo_code` only.** There are three
+  code fields on an order — `promo_code` (admin-generated, one use per user, validated by
+  `/promo-codes/check`), `discount_code` (club/gem codes, `/orders/check-discount`, no
+  longer checked at checkout) and `referral_code`. The backend keeps them apart and
+  `FRONTEND_PROMO_CODES.md` is explicit that a promo code must not be sent as
+  `discount_code`. `checkPromoCode` does its own response normalisation rather than going
+  through `apiResponse.request`, because a 200 with a top-level `valid:false` is a
+  rejection and `request` only keeps `data`.
 
 **Known landmine:** the order-submission endpoint is documented inconsistently across
 `docs/ORDER_SUBMIT_API_COMPLETE_DOCS.md`, `docs/ORDER_SUBMIT_UPDATES.md`, and

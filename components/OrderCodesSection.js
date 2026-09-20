@@ -1,4 +1,8 @@
-// Discount-code + referral-code entry for any screen that submits an order.
+// Promo-code + referral-code entry for any screen that submits an order.
+//
+// The «کد تخفیف» box collects an admin-generated promo code (`promo_code`,
+// validated by `/promo-codes/check`), not the club/gem code it used to —
+// see `services/PromoApi.js`.
 //
 // Shape: a compact summary row on the order screen, and a bottom drawer for the
 // actual typing. Two text inputs, two buttons and two paragraphs of explanation
@@ -13,9 +17,9 @@
 // row too, because submitting is blocked on it and the field that explains why
 // is behind a tap.
 //
-// Purely presentational: the screen owns `useDiscountCode` / `useReferralCode`
+// Purely presentational: the screen owns `usePromoCode` / `useReferralCode`
 // (it needs `needsCheck` before submitting, `appliedCode` for the payload and
-// `referral.reject` on a 409) and passes the two hook results in. Shared by
+// `reject` on a 409) and passes the two hook results in. Shared by
 // `screens/category/Preview.js` and `screens/orders/OrderSummaryScreen.js` so
 // every "ثبت سفارش" path offers the same two fields.
 import React, { useCallback, useMemo, useState } from 'react';
@@ -31,6 +35,7 @@ import {
   View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 
 import PromoCodeField from '@components/PromoCodeField';
@@ -42,11 +47,11 @@ import { shadow } from '@theme/Shadows';
 import { fontSize, getFontFamily } from '@theme/Typography';
 
 /**
- * @param {object} discount - result of useDiscountCode
+ * @param {object} promo - result of usePromoCode
  * @param {object} referral - result of useReferralCode
  * @param {boolean} [available] - false shows the "not available" notice instead
  */
-export default function OrderCodesSection({ discount, referral, available = true }) {
+export default function OrderCodesSection({ promo, referral, available = true }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const styles = useMemo(() => createStyles(i18n.language, isRTL), [i18n.language, isRTL]);
@@ -55,12 +60,12 @@ export default function OrderCodesSection({ discount, referral, available = true
   const close = useCallback(() => setOpen(false), []);
 
   const applied = [
-    discount.applied && {
-      key: 'discount',
+    promo.applied && {
+      key: 'promo',
       icon: 'ticket-outline',
       label: t('Discount Code'),
-      code: discount.appliedCode,
-      percent: discount.percent,
+      code: promo.appliedCode,
+      percent: promo.percent,
     },
     referral.applied && {
       key: 'referral',
@@ -74,7 +79,7 @@ export default function OrderCodesSection({ discount, referral, available = true
   // A typed-but-unverified code blocks submission, so it has to be visible from
   // the outside — otherwise the user is stopped by a toast about a field they
   // cannot see.
-  const unverified = discount.needsCheck || referral.needsCheck;
+  const unverified = promo.needsCheck || referral.needsCheck;
 
   if (!available) {
     return (
@@ -89,57 +94,66 @@ export default function OrderCodesSection({ discount, referral, available = true
 
   return (
     <>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setOpen(true)}
-        style={({ pressed }) => [
+      {/* The whole card is the frosted surface, not a panel inside it: the
+          header row, the applied codes and the unverified warning all sit on
+          one blur, so every line in the section reads against the same
+          backdrop instead of one block standing out from the rest. */}
+      <BlurView
+        intensity={40}
+        tint="light"
+        style={[
           styles.trigger,
           applied.length > 0 && styles.triggerApplied,
           unverified && styles.triggerUnverified,
-          pressed && styles.pressed,
         ]}
       >
-        <View style={styles.triggerRow}>
-          <Ionicons
-            name={applied.length > 0 ? 'pricetag' : 'pricetag-outline'}
-            size={20}
-            color={applied.length > 0 ? colors.success.bgColor(1) : colors.primary.bgColor(1)}
-          />
-          <Text style={styles.triggerLabel}>{t('Discount & referral codes')}</Text>
-          <Text style={styles.triggerAction}>
-            {applied.length > 0 ? t('Edit') : t('Add code')}
-          </Text>
-          <Ionicons
-            name={isRTL ? 'chevron-back' : 'chevron-forward'}
-            size={16}
-            color={colors.textMuted.bgColor(1)}
-          />
-        </View>
-
-        {applied.map((item) => (
-          <View key={item.key} style={styles.appliedRow}>
-            <Ionicons name="checkmark-circle" size={16} color={colors.success.bgColor(1)} />
-            <Text style={styles.appliedLabel} numberOfLines={1}>
-              {item.label}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setOpen(true)}
+          style={({ pressed }) => [styles.triggerInner, pressed && styles.pressed]}
+        >
+          <View style={styles.triggerRow}>
+            <Ionicons
+              name={applied.length > 0 ? 'pricetag' : 'pricetag-outline'}
+              size={20}
+              color={applied.length > 0 ? colors.success.bgColor(1) : colors.primary.bgColor(1)}
+            />
+            <Text style={styles.triggerLabel}>{t('Discount & referral codes')}</Text>
+            <Text style={styles.triggerAction}>
+              {applied.length > 0 ? t('Edit') : t('Add code')}
             </Text>
-            <Text style={styles.appliedCode} numberOfLines={1}>
-              {item.code}
-            </Text>
-            {item.percent != null && (
-              <Text style={styles.appliedPercent}>{item.percent + t(' percent')}</Text>
-            )}
+            <Ionicons
+              name={isRTL ? 'chevron-back' : 'chevron-forward'}
+              size={16}
+              color={colors.textMuted.bgColor(1)}
+            />
           </View>
-        ))}
 
-        {unverified && (
-          <View style={styles.appliedRow}>
-            <Ionicons name="alert-circle" size={16} color={colors.warning.bgColor(1)} />
-            <Text style={styles.unverifiedText}>
-              {t('A code has been entered but not verified.')}
-            </Text>
-          </View>
-        )}
-      </Pressable>
+          {applied.map((item) => (
+            <View key={item.key} style={styles.appliedRow}>
+              <Ionicons name="checkmark-circle" size={16} color={colors.success.bgColor(1)} />
+              <Text style={styles.appliedLabel} numberOfLines={1}>
+                {item.label}
+              </Text>
+              <Text style={styles.appliedCode} numberOfLines={1}>
+                {item.code}
+              </Text>
+              {item.percent != null && (
+                <Text style={styles.appliedPercent}>{item.percent + t(' percent')}</Text>
+              )}
+            </View>
+          ))}
+
+          {unverified && (
+            <View style={styles.appliedRow}>
+              <Ionicons name="alert-circle" size={16} color={colors.warning.bgColor(1)} />
+              <Text style={styles.unverifiedText}>
+                {t('A code has been entered but not verified.')}
+              </Text>
+            </View>
+          )}
+        </Pressable>
+      </BlurView>
 
       <Modal
         visible={open}
@@ -179,19 +193,19 @@ export default function OrderCodesSection({ discount, referral, available = true
                 icon="ticket-outline"
                 label={t('Discount Code')}
                 placeholder={t('Enter your discount code.')}
-                value={discount.code}
-                onChangeText={discount.onChangeText}
-                onSubmit={discount.check}
-                onClear={discount.clear}
+                value={promo.code}
+                onChangeText={promo.onChangeText}
+                onSubmit={promo.check}
+                onClear={promo.clear}
                 submitLabel={t('Check Code')}
-                pending={discount.pending}
-                disabled={discount.applied}
-                status={discount.status}
-                statusMessage={discount.message}
-                note={t("Dear user, to receive a discount code, you can visit the promotions section and participate in Loop's lucky wheel every week!")}
+                pending={promo.pending}
+                disabled={promo.applied}
+                status={promo.status}
+                statusMessage={promo.message}
+                note={t(
+                  'Each discount code can be used only once per account, and the discount is applied when the order is submitted.'
+                )}
               />
-
-              <View style={styles.divider} />
 
               <PromoCodeField
                 icon="people-outline"
@@ -210,16 +224,18 @@ export default function OrderCodesSection({ discount, referral, available = true
                     ? `${referral.message} (${t('Referrer')}: ${referral.referrerName})`
                     : referral.message
                 }
-                note={t('A referral code is registered to your account the first time you submit it, and cannot then be used by anyone else.')}
+                note={t(
+                  'A referral code is registered to your account the first time you submit it, and cannot then be used by anyone else.'
+                )}
               />
 
-              {(discount.percent != null || referral.percent != null) && (
+              {(promo.percent != null || referral.percent != null) && (
                 <View style={styles.summary}>
-                  {discount.percent != null && (
+                  {promo.percent != null && (
                     <SummaryRow
                       styles={styles}
                       label={t('Your Final Discount Percentage')}
-                      value={discount.percent + t(' percent')}
+                      value={promo.percent + t(' percent')}
                     />
                   )}
                   {referral.percent != null && (
@@ -262,25 +278,32 @@ const createStyles = (lang, isRTL) => {
   return StyleSheet.create({
     // ── trigger ──────────────────────────────────────────────────────────────
     trigger: {
-      gap: spacing.sm,
-      padding: spacing.md,
       borderWidth: 1,
       borderStyle: 'dashed',
       borderColor: colors.border.bgColor(1),
       borderRadius: radius.md,
-      backgroundColor: colors.surface.bgColor(1),
+      // Translucent, or the blur behind it has nothing to show through.
+      backgroundColor: colors.surface.bgColor(0.45),
+      // BlurView has to clip to its own radius or the blur squares off the
+      // rounded corners.
+      overflow: 'hidden',
+    },
+    // Padding lives on the pressable inside so the press target fills the card.
+    triggerInner: {
+      gap: spacing.sm,
+      padding: spacing.md,
     },
     // Once a code is on the order this stops being a call to action and becomes
     // a statement of fact, so it loses the dashed "empty slot" look.
     triggerApplied: {
       borderStyle: 'solid',
       borderColor: colors.success.bgColor(0.5),
-      backgroundColor: colors.success.bgColor(0.06),
+      backgroundColor: colors.success.bgColor(0.1),
     },
     triggerUnverified: {
       borderStyle: 'solid',
       borderColor: colors.warning.bgColor(0.6),
-      backgroundColor: colors.warning.bgColor(0.06),
+      backgroundColor: colors.warning.bgColor(0.1),
     },
     triggerRow: {
       flexDirection: row,
@@ -411,10 +434,6 @@ const createStyles = (lang, isRTL) => {
     sheetBody: {
       gap: spacing.lg,
       paddingBottom: spacing.lg,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: colors.border.bgColor(0.6),
     },
     summary: {
       borderTopWidth: 1,

@@ -98,7 +98,12 @@ export const getUserCodes = (token) =>
   );
 
 /**
- * اعتبارسنجی کد تخفیف پیش از ثبت سفارش — کد را مصرف نمی‌کند
+ * اعتبارسنجی کد تخفیفِ باشگاه پیش از ثبت سفارش — کد را مصرف نمی‌کند
+ *
+ * **No longer used at checkout.** The order screen's «کد تخفیف» field moved to
+ * the admin-generated promo codes of `services/PromoApi.js`, which submit as
+ * `promo_code`. Kept because the backend still serves this endpoint and club
+ * codes are still issued; nothing in the app calls it today.
  *
  * Unlike the referral check, this is safe to call repeatedly: the usage count
  * is only decremented when the order is actually submitted.

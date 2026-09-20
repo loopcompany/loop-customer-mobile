@@ -47,7 +47,7 @@ import {
 import useReceiptSources from '@hooks/useReceiptSources';
 import FooterSpacer from '@components/FooterSpacer';
 import OrderCodesSection from '@components/OrderCodesSection';
-import useDiscountCode from '@hooks/useDiscountCode';
+import usePromoCode from '@hooks/usePromoCode';
 import useReferralCode from '@hooks/useReferralCode';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
@@ -126,14 +126,10 @@ export default function OrderSummaryScreen({ navigation, route }) {
 
   const orderType = orderTitle || categoryTitle || NOT_SET;
 
-  // کد تخفیف و کد معرف، مثل صفحه‌ی پیش‌نمایش سفارشِ دسته‌های عادی. category_id
-  // فقط وقتی عدد صحیح باشد به بک‌اند می‌رسد (همان قاعده‌ی ثبت پایین).
+  // کد تخفیف و کد معرف، مثل صفحه‌ی پیش‌نمایش سفارشِ دسته‌های عادی. بررسی کد
+  // تخفیف به category_id نیاز ندارد؛ `/promo-codes/check` فقط خود کد را می‌گیرد.
   const token = useSelector((state) => state?.auth?.token);
-  const numericCategoryId = Number.isInteger(Number(categoryId)) ? Number(categoryId) : null;
-  const discount = useDiscountCode({
-    token,
-    categoryId: categoryId == null ? null : numericCategoryId,
-  });
+  const promo = usePromoCode({ token });
   const referral = useReferralCode({ token });
 
   return (
@@ -198,7 +194,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
         )}
 
         <View style={styles.codesCard}>
-          <OrderCodesSection discount={discount} referral={referral} />
+          <OrderCodesSection promo={promo} referral={referral} />
         </View>
 
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
@@ -212,7 +208,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
 
             // کدِ تایپ‌شده ولی تأییدنشده نه بی‌صدا حذف می‌شود و نه کور ارسال؛
             // ثبت متوقف می‌شود و دلیلش گفته می‌شود.
-            if (discount.needsCheck) {
+            if (promo.needsCheck) {
               showToastOrAlert('لطفاً کد تخفیف را تأیید کنید یا آن را پاک کنید.');
               return;
             }
@@ -272,7 +268,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 file_paths: [],
               };
               // فقط کدهای تأییدشده، دقیقاً همان رشته‌ای که سرور به رسمیت شناخته.
-              if (discount.appliedCode) orderPayload.discount_code = discount.appliedCode;
+              // کد تخفیف فقط در `promo_code` — قرارداد FRONTEND_PROMO_CODES.md.
+              if (promo.appliedCode) orderPayload.promo_code = promo.appliedCode;
               if (referral.appliedCode) orderPayload.referral_code = referral.appliedCode;
               const response = await apiClient.post(
                 `${uri}${API_ENDPOINTS.ORDERS.CREATE}`,
@@ -284,6 +281,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 (response.status === 200 || response.status === 201) && body?.success !== false;
               if (!orderCreated) {
                 if (body?.error_code === 'INVALID_REFERRAL_CODE') referral.reject(body?.message);
+                // سرور کد تخفیف را هنگام ثبت دوباره بررسی می‌کند و می‌تواند ردش کند.
+                if (body?.error_code === 'INVALID_PROMO_CODE') promo.reject(body?.message);
                 showToastOrAlert(body?.message || 'ثبت سفارش ناموفق بود.');
                 setIsSubmitting(false);
                 return;
@@ -293,6 +292,9 @@ export default function OrderSummaryScreen({ navigation, route }) {
               // ۴۰۹ (کد معرفِ نامعتبر) در catch می‌افتد نه در شاخه‌ی بالا.
               if (error?.response?.data?.error_code === 'INVALID_REFERRAL_CODE') {
                 referral.reject(error?.response?.data?.message);
+              }
+              if (error?.response?.data?.error_code === 'INVALID_PROMO_CODE') {
+                promo.reject(error?.response?.data?.message);
               }
               showToastOrAlert(describeApiError(error, describeErrorFa));
               setIsSubmitting(false);

@@ -1,17 +1,18 @@
 // A code box with a submit button and an inline result line.
 //
-// Shared by the discount code and the referral code on the order preview so the
+// Shared by the promo code and the referral code on the order preview so the
 // two read as one feature rather than two bolted-on inputs. Purely
 // presentational: it owns no request and no validity rules. The screen (via
-// `useDiscountCode` / `useReferralCode`) decides what submitting means, which
-// matters because the two are not symmetric — checking a discount code is
-// free, while checking a referral code consumes it.
+// `usePromoCode` / `useReferralCode`) decides what submitting means, which
+// matters because the two are not symmetric — checking a promo code is free,
+// while checking a referral code consumes it.
 //
 // Styled from `theme/*` tokens rather than the literals used elsewhere in
 // `screens/category/`, per the design-token rule in CLAUDE.md.
 import React, { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '@theme/Color';
@@ -66,23 +67,39 @@ export default function PromoCodeField({
   const borderColor = statusColor || colors.border.bgColor(1);
 
   return (
-    <View style={styles.wrapper}>
+    // The frost is on the whole field — label, box, result line and note — so
+    // the section reads as one surface. Blurring only the box left the sentence
+    // that explains the result sitting outside the panel it belongs to.
+    <BlurView intensity={40} tint="light" style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
 
-      <View style={[styles.inputRow, { borderColor }]}>
-        <Ionicons name={icon} size={20} color={colors.primary.bgColor(1)} />
-
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.textMuted.bgColor(1)}
-          editable={!disabled && !pending}
-          autoCapitalize="characters"
-          autoCorrect={false}
-          keyboardType="default"
+      <View style={[styles.inputRow, disabled && styles.inputRowApplied, { borderColor }]}>
+        <Ionicons
+          name={icon}
+          size={20}
+          color={disabled ? colors.success.bgColor(1) : colors.primary.bgColor(1)}
         />
+
+        {disabled ? (
+          // A non-editable TextInput renders its value dimmed (and on web the
+          // browser dims it again), which is the one moment the code most needs
+          // to be readable. Plain text instead, so nothing fades it.
+          <Text style={styles.appliedValue} numberOfLines={1} selectable>
+            {value}
+          </Text>
+        ) : (
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={colors.textMuted.bgColor(1)}
+            editable={!pending}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            keyboardType="default"
+          />
+        )}
 
         {disabled && onClear ? (
           <Pressable onPress={onClear} hitSlop={spacing.sm} accessibilityRole="button">
@@ -116,7 +133,7 @@ export default function PromoCodeField({
       )}
 
       {!!note && <Text style={styles.note}>{note}</Text>}
-    </View>
+    </BlurView>
   );
 }
 
@@ -124,6 +141,13 @@ const createStyles = (lang, isRTL) =>
   StyleSheet.create({
     wrapper: {
       gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: radius.md,
+      // Translucent, or the blur behind it has nothing to show through.
+      backgroundColor: colors.surface.bgColor(0.4),
+      // BlurView has to clip to its own radius or the blur squares off the
+      // rounded corners.
+      overflow: 'hidden',
     },
     label: {
       fontSize: fontSize.sm,
@@ -140,7 +164,26 @@ const createStyles = (lang, isRTL) =>
       paddingVertical: spacing.xs,
       borderWidth: 1,
       borderRadius: radius.md,
-      backgroundColor: colors.surface.bgColor(1),
+      // More opaque than the card it sits on, so the box still reads as the
+      // thing you type into rather than dissolving into the frosted panel.
+      backgroundColor: colors.surface.bgColor(0.75),
+    },
+    // Translucent so the blur behind it actually shows through; BlurView has to
+    // clip to its own radius or the blur squares off the rounded corners.
+    inputRowApplied: {
+      backgroundColor: colors.success.bgColor(0.08),
+    },
+    appliedValue: {
+      flex: 1,
+      minHeight: 44,
+      lineHeight: 44,
+      fontSize: fontSize.sm,
+      fontFamily: getFontFamily('bold', lang),
+      color: colors.textPrimary.color,
+      textAlign: isRTL ? 'right' : 'left',
+      // Codes are always Latin (LOOP-AB7K92), so they stay LTR in a Persian
+      // layout even though the label above them does not.
+      writingDirection: 'ltr',
     },
     input: {
       flex: 1,
