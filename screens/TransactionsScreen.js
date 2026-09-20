@@ -10,7 +10,7 @@ import { createStyles } from '@styles/NewStyles';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '@helpers/Common';
 import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
-import { getTransactions } from '@services/WalletApi';
+import { getTransactions, selectTransactions, TRANSACTION_STATUS, TRANSACTION_TYPE } from '@services/WalletApi';
 import FooterSpacer from '@components/FooterSpacer';
 
 export default function TransactionsScreen() {
@@ -24,7 +24,6 @@ export default function TransactionsScreen() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [pagination, setPagination] = useState(null);
 
   // فیلتر تاریخ
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -46,16 +45,15 @@ export default function TransactionsScreen() {
       if (fromDate) params.from_date = fromDate;
       if (toDate) params.to_date = toDate;
 
-      // استفاده از service
-      const data = await getTransactions(token, params);
+      const result = await getTransactions(token, params);
 
-      if (data?.success) {
-        setTransactions(data.data.transactions || []);
-        setPagination(data.data.pagination);
+      if (result.ok) {
+        // بک‌اند گاهی `{data:{transactions}}` و گاهی خود مجموعه را برمی‌گرداند
+        // و متادیتای pagination واقعی ندارد؛ هر دو شکل باید کار کند.
+        setTransactions(selectTransactions(result.data));
+      } else {
+        showToastOrAlert(result.message || t('Error retrieving transactions'));
       }
-    } catch (error) {
-      const message = error?.response?.data?.message || t('Error retrieving transactions');
-      showToastOrAlert(message);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -102,12 +100,12 @@ export default function TransactionsScreen() {
 
   // تبدیل type به متن فارسی
   const getTypeText = (type) => {
-    switch (type) {
-      case '1':
+    switch (Number(type)) {
+      case TRANSACTION_TYPE.CHARGE:
         return t('Wallet recharge');
-      case '2':
+      case TRANSACTION_TYPE.ORDER_GATEWAY:
         return t('Online Payment');
-      case '3':
+      case TRANSACTION_TYPE.ORDER_WALLET:
         return t('Wallet Deduction');
       default:
         return t('Unknown');
@@ -116,12 +114,12 @@ export default function TransactionsScreen() {
 
   // رنگ بر اساس وضعیت (status)
   const getStatusColor = (status) => {
-    switch (status) {
-      case '100':
+    switch (Number(status)) {
+      case TRANSACTION_STATUS.SUCCESS:
         return themeColor7.bgColor(1); // موفق - سبز
-      case '-1':
+      case TRANSACTION_STATUS.FAILED:
         return themeColor11.bgColor(1); // ناموفق - قرمز
-      case '0':
+      case TRANSACTION_STATUS.PENDING:
         return themeColor8.bgColor(1); // در انتظار - آبی
       default:
         return themeColor11.bgColor(1);
@@ -130,12 +128,12 @@ export default function TransactionsScreen() {
 
   // متن وضعیت
   const getStatusText = (status) => {
-    switch (status) {
-      case '100':
+    switch (Number(status)) {
+      case TRANSACTION_STATUS.SUCCESS:
         return t('Successful');
-      case '-1':
+      case TRANSACTION_STATUS.FAILED:
         return t('Failed');
-      case '0':
+      case TRANSACTION_STATUS.PENDING:
         return t('Pending');
       default:
         return t('Unknown');
@@ -222,12 +220,12 @@ export default function TransactionsScreen() {
                 key={item.id || index}
                 style={[
                   styles.transactionBox,
-                  { backgroundColor: getStatusColor(item.status?.toString()) }
+                  { backgroundColor: getStatusColor(item.status) }
                 ]}
               >
                 <View style={styles.transactionRow}>
                   <Text style={[NewStyles.text4, { flex: 1 }]}>{formatDateTime(item.created_at)}</Text>
-                  <Text style={[NewStyles.text4, styles.statusBadge]}>{getStatusText(item.status?.toString())}</Text>
+                  <Text style={[NewStyles.text4, styles.statusBadge]}>{getStatusText(item.status)}</Text>
                 </View>
 
                 <View style={styles.transactionRow}>
@@ -237,7 +235,7 @@ export default function TransactionsScreen() {
 
                 <View style={styles.transactionRow}>
                   <Text style={[NewStyles.text4]}>{t("Type")}:</Text>
-                  <Text style={[NewStyles.text4]}>{getTypeText(item.type?.toString())}</Text>
+                  <Text style={[NewStyles.text4]}>{getTypeText(item.type)}</Text>
                 </View>
 
                 {item.referenceId && (
@@ -454,10 +452,6 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 5,
-  },
-  paginationInfo: {
-    marginTop: 20,
-    marginBottom: 10,
   },
   filterContainer: {
     paddingHorizontal: 20,

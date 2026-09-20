@@ -29,6 +29,7 @@ import { imageUri, uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
 import FooterSpacer from '@components/FooterSpacer';
+import { clearAccountProfileCache } from '@services/receipt/receiptProfile';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '@helpers/Common';
 
@@ -291,6 +292,9 @@ const OrganizationProfile = () => {
           setProfileImage({ uri: newImageUrl, uploaded: true });
         }
 
+        // رسید آدرس/تلفن ثابت/شناسه ملی را از همین پروفایل می‌خواند و نتیجه را
+        // کش می‌کند؛ بدون این، رسید تا ری‌لود بعدی مقدار قدیمی را نشان می‌داد.
+        clearAccountProfileCache();
         showAlert(t('Success'), t('Profile updated successfully.'));
         setIsEditing(false);
         // بارگذاری مجدد اطلاعات

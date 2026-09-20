@@ -119,22 +119,33 @@ export default function Landing({ navigation }) {
     navigation.replace(routeName);
   };
 
-  // `List` is the app's home page (web: /list) and the same place `LoginScreen`
-  // lands on a successful sign-in, so a signed-in cold start returns the user
-  // exactly where they left off.
-  const navigateToMainApp = () => settle('List');
-
-  // A signed-out visitor gets the sign-in / sign-up chooser instead.
+  // یک شروعِ واردشده از اسپلش «خوش آمدید» رد می‌شود و بعد روی منوی چهارگزینه‌ای
+  // (`OrderMenuScreen`) می‌نشیند — سفارش سیستماتیک / سفارش فوری / هوش مصنوعی /
+  // سازمانی و شرکتی.
   //
-  // These two used to be the same call. Sending an unauthenticated user to
-  // `List` meant a fresh install — where AsyncStorage is empty, so
-  // `isAuthenticated()` returns `no_token` — dropped the user into the
-  // signed-in UI with no session: every request went out without an
-  // Authorization header, and because `axiosConfig` only raises the
-  // session-expiry sheet for requests that *carried* a token, the resulting
-  // 401s were silently swallowed. The user saw a working home page that
-  // misbehaved everywhere instead of a login prompt.
-  const navigateToWelcome = () => settle('SignInLanding');
+  // A signed-in cold start goes through the `Welcome` splash, which then lands
+  // on `OrderMenuScreen` — the four-way entry menu.
+  //
+  // `Welcome` had been orphaned: it is the only screen that navigates to
+  // `OrderMenuScreen`, and nothing navigated to *it*, so the whole entry menu
+  // (and the organisation login behind it) was unreachable from a cold start.
+  // `Welcome` re-checks the session itself before choosing where to go, so the
+  // signed-out case stays covered even if the token is dropped in between.
+  const navigateToMainApp = () => settle('Welcome');
+
+  // کاربر خارج‌شده هم به همان اسپلش و منوی ورودی می‌رود — آنجا هر دو مسیر ورود
+  // (مشتری و سازمانی) در دسترس است.
+  //
+  // A signed-out visitor goes to the same place: the entry menu is public and
+  // is where both sign-in paths start.
+  //
+  // The hazard this branch was split to avoid was sending an unauthenticated
+  // user to `List` — a signed-in UI whose every request then went out with no
+  // Authorization header, and whose 401s `axiosConfig` swallows precisely
+  // because they carried no token. `OrderMenuScreen` is not that: it makes no
+  // authenticated request at all, so routing a guest there reintroduces
+  // nothing.
+  const navigateToWelcome = () => settle('Welcome');
 
 
   useEffect(() => {

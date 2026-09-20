@@ -1,9 +1,8 @@
 import { FlatList, View } from 'react-native';
 import React, { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import { uri } from '@services/URL';
 import { showToastOrAlert } from '@helpers/Common';
+import { getUserCodes, selectList, getCodeState } from '@services/DiscountApi';
 import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
 import UserDiscountItem from './UserDiscountItem';
@@ -23,19 +22,26 @@ export default function UserDiscounts({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(true);
     const token = useSelector((state) => state?.auth?.token)
-    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const [data, setData] = useState([]);
+
     const fetchData = async () => {
-        try {
-            const response = await axios.get(`${uri}/user/discounts`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
-            setData(response?.data);
-        } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
-            showToastOrAlert(message);
-        } finally {
-            setRefreshing(false);
-            setLoading(false);
+        const result = await getUserCodes(token);
+
+        if (result.ok) {
+            // این اندپوینت خود مجموعه را برمی‌گرداند نه پاکت `{success,data}`؛
+            // `selectList` هر دو شکل را می‌پذیرد تا FlatList هیچ‌وقت آرایه نگیرد.
+            //
+            // کدهای قابل استفاده بالا می‌آیند: یک کد منقضی یا تمام‌شده نباید
+            // بالای فهرست بنشیند و کد معتبر را از دید کاربر پایین ببرد.
+            const codes = selectList(result.data);
+            const rank = { usable: 0, used_up: 1, expired: 2 };
+            setData([...codes].sort((a, b) => rank[getCodeState(a)] - rank[getCodeState(b)]));
+        } else {
+            showToastOrAlert(result.message || t('An unexpected error occurred!'));
         }
+
+        setRefreshing(false);
+        setLoading(false);
     };
     useEffect(() => {
         fetchData();

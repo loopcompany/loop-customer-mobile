@@ -36,6 +36,24 @@ export const receiptStateForStatus = (status) => {
   return RECEIPT_STATE.PENDING;
 };
 
+/**
+ * `payment_status` گاهی عددِ ۰/۱ است (همان چیزی که screens/orders/Details.js با
+ * `> 0` می‌سنجد) و گاهی متنِ آماده‌ی سرور. عدد را نباید خام روی رسید چاپ کرد -
+ * ردیف «وضعیت پرداخت» یک «۰» نشان می‌داد.
+ *
+ * @param {number|string} value مقدار payment_status.
+ * @returns {{paid: boolean|null, label: string|null}}
+ */
+const readPaymentStatus = (value) => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return { paid: null, label: null };
+  if (/^\d+$/.test(raw)) {
+    const paid = Number(raw) > 0;
+    return { paid, label: paid ? 'پرداخت شده' : 'پرداخت نشده' };
+  }
+  return { paid: null, label: raw };
+};
+
 /** عددِ قیمت یا null - رشته‌ی خالی و undefined نباید صفر شوند. */
 const toPrice = (value) => {
   const num = Number(value);
@@ -78,19 +96,28 @@ const servicesFromOrderDetails = (sections, categoryTitle) => {
  * @param {object} [context]
  * @param {object} [context.user] state.user.data - برای وضعیت کاربری و شناسه‌ی ملی.
  * @param {object} [context.orgProfile] state.organization.profileData
+ * @param {object} [context.profile] پروفایل نرمال‌شده‌ی حساب (`receiptProfile.js`).
  * @param {object[]} [context.addresses] state.address.data - پشتیبانِ آدرسِ سفارش.
  * @param {string|number} [context.selectedAddressId] state.step.addressId
  * @returns {object} رسید نرمال‌شده.
  */
 export const receiptFromOrderApi = (
   data,
-  { user = null, orgProfile = null, addresses = null, selectedAddressId = null } = {}
+  {
+    user = null,
+    orgProfile = null,
+    profile = null,
+    addresses = null,
+    selectedAddressId = null,
+  } = {}
 ) => {
   const state = receiptStateForStatus(data?.status);
 
   const basePrice = toPrice(data?.technician_price ?? data?.pakar_price);
   const extraPrice = toPrice(data?.extra_price);
   const discount = toPrice(data?.discount_price);
+  const discountCode = String(data?.discount_code ?? data?.discount?.code ?? '').trim() || null;
+  const payment = readPaymentStatus(data?.payment_status);
 
   const categoryTitle = data?.category?.title || null;
   const services = servicesFromOrderDetails(data?.order_details, categoryTitle);
@@ -118,6 +145,7 @@ export const receiptFromOrderApi = (
     addressEntry: address,
     addresses,
     selectedAddressId,
+    profile,
     orgProfile,
     user,
   });
@@ -141,12 +169,27 @@ export const receiptFromOrderApi = (
     delivery: {
       receiverName: addressName || null,
       date: toReceiptDate(data?.finished_at || data?.arrived_at || data?.date),
-      status: data?.finished_at ? DELIVERY_STATUS.BY_LOOP : DELIVERY_STATUS.UNKNOWN,
+      // تا وقتی سفارش تمام نشده تحویلی رخ نداده - «در انتظار تحویل»، نه
+      // «نامشخص»؛ و سفارشِ لغوشده اصلاً تحویلی ندارد.
+      status: data?.finished_at
+        ? DELIVERY_STATUS.BY_LOOP
+        : state === RECEIPT_STATE.FAILED
+          ? DELIVERY_STATUS.CANCELLED
+          : DELIVERY_STATUS.PENDING,
     },
     payment: {
+      // نبودِ کد را کامپوننت «ندارد» چاپ می‌کند.
+      discountCode,
       discountAmount: discount,
-      status: data?.payment_status,
-      method: data?.payment_status,
+      status: payment.label,
+      // سرور روش پرداخت را برنمی‌گرداند؛ تنها چیزی که قطعی است این است که
+      // پرداخت در خودِ اپ انجام می‌شود (کیف پول یا درگاه) - نه نقدی.
+      method:
+        payment.paid === true
+          ? 'پرداخت آنلاین'
+          : payment.paid === false
+            ? 'در انتظار پرداخت'
+            : payment.label,
     },
   });
 };

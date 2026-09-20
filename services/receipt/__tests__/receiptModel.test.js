@@ -109,3 +109,26 @@ describe('buildReceipt', () => {
     expect(buildReceipt({ state: RECEIPT_STATE.PENDING }).product).toBeNull();
   });
 });
+
+describe('تخفیفِ غایب', () => {
+  it('null به «۰ تومان کسر شده» تبدیل نمی‌شود', () => {
+    const receipt = buildReceipt({
+      state: RECEIPT_STATE.PENDING,
+      services: [{ title: 'نصب ویندوز', qty: 1, totalPrice: 500000 }],
+      payment: { discountAmount: null },
+    });
+    expect(receipt.payment.discountAmount).toBeNull();
+    // مبلغ قابل پرداخت هم نباید از تخفیفِ غایب ضربه بخورد.
+    expect(receipt.payment.payable).toBe(500000);
+  });
+
+  it('تخفیفِ واقعی هنوز کسر می‌شود', () => {
+    const receipt = buildReceipt({
+      state: RECEIPT_STATE.PENDING,
+      services: [{ title: 'نصب ویندوز', qty: 1, totalPrice: 500000 }],
+      payment: { discountAmount: 50000 },
+    });
+    expect(receipt.payment.discountAmount).toBe(50000);
+    expect(receipt.payment.payable).toBe(450000);
+  });
+});

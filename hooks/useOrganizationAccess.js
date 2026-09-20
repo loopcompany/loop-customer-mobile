@@ -278,6 +278,7 @@ export const useOrganizationAccess = () => {
       // صفحات مربوط به مدیریت حساب شخصی
       'AddressScreen',
       'PaymentScreen',
+      'Wallet', // مشاهده‌ی کیف پول — دسترسی کمتری از شارژ کردن لازم دارد
       'Increase', // افزایش اعتبار
       
       // صفحات عمومی

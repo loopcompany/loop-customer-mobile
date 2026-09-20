@@ -67,6 +67,7 @@ export const receiptFromComprehensive = ({
   timeSlot = null,
   user = null,
   orgProfile = null,
+  profile = null,
   addresses = null,
   selectedAddressId = null,
   state = RECEIPT_STATE.PENDING,
@@ -124,6 +125,7 @@ export const receiptFromComprehensive = ({
       phone: contactPhone,
       addresses,
       selectedAddressId,
+      profile,
       orgProfile,
       user,
     }),
@@ -133,7 +135,9 @@ export const receiptFromComprehensive = ({
     services,
     delivery: {
       date: visitDate ? toReceiptDate(visitDate) : null,
-      status: slotTitle ? `${DELIVERY_STATUS.UNKNOWN} (${slotTitle})` : DELIVERY_STATUS.UNKNOWN,
+      // سفارش هنوز ثبت نشده، پس تحویلی هم رخ نداده: «در انتظار تحویل»، نه
+      // «نامشخص». بازه‌ی ساعتِ انتخابی کاربر داخل پرانتز می‌آید.
+      status: slotTitle ? `${DELIVERY_STATUS.PENDING} (${slotTitle})` : DELIVERY_STATUS.PENDING,
     },
     payment: {
       // مسیر سازمانی قیمت ندارد: «پس از بررسی کارشناس اعلام می‌شود».

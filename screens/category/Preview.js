@@ -1,12 +1,12 @@
-import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, ActivityIndicator, I18nManager, Image, SectionList, FlatList, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, I18nManager, Image, SectionList, FlatList, Platform } from 'react-native';
 import React, { useState, useMemo } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStyles } from '@styles/NewStyles';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
-import { formatDate, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { colors, themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
+import { formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
 import { describeApiError } from '@utils/apiErrorHandler';
 import { emptySteps, selectTotalPrice } from '@slices/stepSlice';
 import Button from '@components/Button';
@@ -21,7 +21,13 @@ import Loader from '@components/Loader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
+import OrderCodesSection from '@components/OrderCodesSection';
+import useDiscountCode from '@hooks/useDiscountCode';
+import useReferralCode from '@hooks/useReferralCode';
 import { LinearGradient } from 'expo-linear-gradient';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
 import { useMenu } from '@contexts/MenuContext';
 function Preview({ navigation }) {
     const dispatch = useDispatch();
@@ -29,15 +35,20 @@ function Preview({ navigation }) {
     const { footerSpace } = useMenu();
     // const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
+    // apple_check == 1 یعنی حسابِ بازبینیِ اپل؛ فقط همان حالت نباید کد بگیرد.
+    // شرطِ قبلی `== 0` بود و چون پاسخ validate-token این فیلد را همیشه ندارد،
+    // `undefined == 0` غلط می‌شد و بخشِ کدها برای کاربرِ عادی هم پنهان می‌ماند.
+    // بقیه‌ی اپ (OrdersScreen، OrderItem، MenuContext) از همین `!= 1` استفاده می‌کند.
+    // TEMP: بررسیِ apple_check برای بخش کدها موقتاً غیرفعال است تا فیلدها همیشه دیده شوند.
+    // const codesAvailable = user?.apple_check != 1
+    const codesAvailable = true
     const { t, i18n } = useTranslation();
-    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
     const [loading, setLoading] = useState(false);
-    const [pending, setPending] = useState(false);
     const userType = useSelector(state => state.auth?.userType)
     const token = useSelector((state) => state?.auth?.token);
 
@@ -59,8 +70,15 @@ function Preview({ navigation }) {
     const maleCount = steps?.maleCount;
     const unspecifiedCount = steps?.unspecifiedCount;
 
-    const [discountCode, setDiscountCode] = useState(null);
-    const [discountPercent, setDiscountPercent] = useState(null);
+    // کد تخفیف و کد معرف دو سیستم مستقل‌اند: اولی رایگان اعتبارسنجی می‌شود و
+    // دومی با ثبت، مصرف می‌شود. بک‌اند هر دو را جدا حساب می‌کند و می‌توان هر دو
+    // را همزمان روی یک سفارش فرستاد.
+    //
+    // Two independent systems. The discount check is free; registering a
+    // referral code consumes it. The backend calculates them separately and an
+    // order may carry both.
+    const discount = useDiscountCode({ token, categoryId: category?.id });
+    const referral = useReferralCode({ token });
 
     const addresses = useSelector(state => state.address?.data);
     const address = addresses?.find(item => item?.id == addressId);
@@ -197,6 +215,23 @@ function Preview({ navigation }) {
             return;
         }
 
+        // کدی که تایپ شده ولی تأیید نشده، نه باید بی‌صدا حذف شود (کاربر تخفیفش
+        // را از دست می‌دهد بدون اینکه بفهمد) و نه بی‌صدا ارسال شود (سرور ممکن
+        // است کل سفارش را رد کند). پس ثبت را متوقف می‌کنیم و می‌گوییم چرا.
+        //
+        // A typed-but-unverified code is neither dropped silently (the user
+        // would lose the discount without being told) nor sent blind (the
+        // server may reject the whole order over it).
+        if (discount.needsCheck) {
+            showToastOrAlert(t('Please verify your discount code or clear it before submitting.'));
+            return;
+        }
+
+        if (referral.needsCheck) {
+            showToastOrAlert(t('Please register your referral code or clear it before submitting.'));
+            return;
+        }
+
         setLoading(true);
         try {
 
@@ -229,7 +264,10 @@ function Preview({ navigation }) {
             if (des) payload.description = des;
             if (imagePath) payload.image_path = imagePath;
             if (files?.length > 0) payload.file_paths = files;
-            if (discountCode) payload.discount_code = discountCode;
+            // فقط کدهای تأییدشده ارسال می‌شوند — دقیقاً همان رشته‌ای که سرور
+            // به رسمیت شناخته، نه متن خام ورودی.
+            if (discount.appliedCode) payload.discount_code = discount.appliedCode;
+            if (referral.appliedCode) payload.referral_code = referral.appliedCode;
             // اضافه کردن service_schedule فقط اگر:
             // 1. کاربر سازمانی باشد
             // 2. مرحله service_schedule در steps موجود باشد
@@ -272,6 +310,11 @@ function Preview({ navigation }) {
                 body?.error_code == null;
 
             if (!isSuccess) {
+                // اگر سرور کد معرف را رد کرد، فیلد باید همان را نشان بدهد؛
+                // وگرنه کاربر «ثبت شد» را می‌بیند و دلیل شکست را نمی‌فهمد.
+                if (body?.error_code === 'INVALID_REFERRAL_CODE') {
+                    referral.reject(body?.message);
+                }
                 // سبد را نگه می‌داریم و روی همین صفحه می‌مانیم تا کاربر بتواند دوباره تلاش کند.
                 showToastOrAlert(
                     (typeof body?.message === 'string' && body.message.trim())
@@ -305,6 +348,11 @@ function Preview({ navigation }) {
                 navigation.replace('OrdersScreen');
             }
         } catch (error) {
+            // کد معرف نامعتبر با 409 برمی‌گردد، یعنی در catch می‌افتد نه در
+            // شاخه‌ی بالا. هر دو مسیر باید فیلد را به حالت خطا ببرند.
+            if (error?.response?.data?.error_code === 'INVALID_REFERRAL_CODE') {
+                referral.reject(error?.response?.data?.message);
+            }
             const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
@@ -312,30 +360,6 @@ function Preview({ navigation }) {
         }
     };
 
-    const checkDiscount = async () => {
-        if (!discountCode?.trim()) {
-            showToastOrAlert(t("Please enter a discount code!"));
-            return
-        }
-        setPending(true);
-        try {
-            const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CHECK_DISCOUNT}`, { discount_code: discountCode, category_id: category?.id }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
-            // پاسخ طبق ORGANIZATION_ORDER_API.md: `{ success, message, data: { discount_percent, discount_code_id } }`
-            // (نه `discount_code_percent` در سطح بالا) و می‌تواند با 2xx و success:false برگردد.
-            const body = response?.data;
-            if (body?.success !== false) {
-                setDiscountPercent(body?.data?.discount_percent)
-                showToastOrAlert(body?.message || t('Discount code applied.'))
-            } else {
-                showToastOrAlert(body?.message || t('Invalid discount code.'))
-            }
-        } catch (error) {
-            const message = describeApiError(error, t);
-            showToastOrAlert(message);
-        } finally {
-            setPending(false);
-        }
-    };
     const organTime = buildServiceSchedulePayload();
     const renderRow = (text1, text2, textStyle1, textStyle2) => (
         <View style={NewStyles.rowWrapper}>
@@ -361,7 +385,13 @@ function Preview({ navigation }) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20, backgroundColor: themeColor4.bgColor(1), width: '95%', alignSelf: 'center', borderRadius: 20, maxWidth: 800, marginTop: 20 }}>
                 <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
                     <View style={[]}>
-                        {user?.apple_check == 0 &&
+                        {/* apple_check == 1 یعنی حسابِ بازبینیِ اپل؛ فقط آن حالت باید
+                            بخش‌های مالی را پنهان کند. شرطِ قبلی `== 0` بود و چون
+                            پاسخ validate-token این فیلد را همیشه ندارد،
+                            `undefined == 0` غلط می‌شد و بخش برای کاربرِ عادی هم
+                            پنهان می‌ماند. بقیه‌ی اپ (OrdersScreen، OrderItem،
+                            MenuContext) از همین `!= 1` استفاده می‌کند. */}
+                        {user?.apple_check != 1 &&
                             <View
                                 style={[NewStyles.center, {
                                     backgroundColor: themeColor0.bgColor(1),
@@ -394,58 +424,6 @@ function Preview({ navigation }) {
                         <Text style={[NewStyles.text10, { textAlign: 'center', fontSize: 11 }]}>{t('Dear user, your order information will be finalized after review by Loop technicians and specialized evaluations.')}</Text>
                     </LinearGradient>
                 </View>
-                {user?.apple_check == 0 && <View style={[NewStyles.seperator, { gap: 10, paddingTop: '5%' }]}>
-
-                    <View
-                        style={[NewStyles.center, {
-                            backgroundColor: themeColor0.bgColor(1),
-                            paddingVertical: 10,
-                            ...NewStyles.border10
-                        }]}
-
-                    >
-                        <View style={[NewStyles.row, { gap: 10 }]}>
-                            <Image
-                                source={require('@assets/images/discount.png')}
-                                style={{ height: 60, width: 60, resizeMode: 'contain' }}
-                            />
-                            <Text style={NewStyles.title4}> {t('Discount Code')} </Text>
-                        </View>
-                    </View>
-
-                    {/* <LinearGradient colors={[themeColor4.bgColor(1), themeColor3.bgColor(1)]} style={[{ alignSelf: 'center', backgroundColor: themeColor3.bgColor(1), paddingHorizontal: 40, paddingVertical: 10, borderWidth: 1, borderColor: themeColor4.bgColor(1), gap: 5, maxWidth: '100%' }, NewStyles.border10, NewStyles.row]}>
-                        <Ionicons
-                            name={'help-circle-outline'}
-                            size={20}
-                            color={themeColor10.bgColor(1)}
-                        />
-                        <Text style={[NewStyles.text10, { textAlign: 'center', fontSize:11 }]}>{t("Dear user, to receive a discount code, you can visit the promotions section and participate in Loop's lucky wheel every week!")}</Text>
-                    </LinearGradient> */}
-                    <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>
-                        <View
-                            style={[
-                                {
-                                    gap: 5, flex: 2, minHeight: 50,
-                                    paddingHorizontal: '5%',
-                                },
-                                NewStyles.row
-                            ]}
-                        >
-                            <Ionicons name={'ticket-outline'} size={20} color={themeColor0.bgColor(1)} />
-                            <TextInput style={[styles.textInput, NewStyles.text10, { flex: 1, textAlign: langIsRTL(lang) ? 'right' : 'left', writingDirection: langIsRTL(lang) ? 'rtl' : 'ltr' }]} keyboardType='default' placeholder={t('Enter your discount code.')} placeholderTextColor={themeColor3.bgColor(1)} value={discountCode} onChangeText={(text) => { setDiscountCode(text) }} />
-                        </View>
-                        <Pressable
-                            style={[
-                                { gap: 5, flex: 1, backgroundColor: themeColor0.bgColor(1), height: 50 },
-                                NewStyles.border10,
-                                NewStyles.center
-                            ]}
-                            onPress={() => checkDiscount()}>
-                            {!pending && <Text style={[NewStyles.text4, { fontSize: 12 }]}>{t('Check Code')}</Text>}
-                            {pending && <ActivityIndicator color={themeColor4.bgColor(1)} size='small' />}
-                        </Pressable>
-                    </View>
-                </View>}
                 <View style={[NewStyles.seperator, { gap: 10, padding: '5%' }]}>
                     <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]}>
                         <View style={[NewStyles.row, { gap: 5 }]}>
@@ -478,7 +456,6 @@ function Preview({ navigation }) {
                     {isAddressSelected
                         ? renderRow(address?.full_name + ' - ' + address?.city + ' - ' + t("Region") + ' ' + address?.region + ' - ' + t("Number") + ' ' + address?.number + ' - ' + t("Unit") + ' ' + address?.unit + ' - ' + t("Floor") + ' ' + address?.floor + ' - ' + address?.address, '', NewStyles.text10)
                         : renderRow(t('No address selected'), '', [NewStyles.text10, { color: themeColor6.bgColor(1) }])}
-                    {discountPercent && renderRow(t('Your Final Discount Percentage'), discountPercent + t(' percent'), NewStyles.text10)}
                 </View>
 
                 {steps?.data?.map((previewItem, index) => (
@@ -606,6 +583,14 @@ function Preview({ navigation }) {
                         title={t('Preview')}
                     />
                 </View>
+                {/* بخش کدها همیشه رندر می‌شود. قبلاً وقتی حساب نمی‌توانست کد وارد
+                    کند کلِ بخش ناپدید می‌شد و کاربر دنبال چیزی می‌گشت که اصلاً روی
+                    صفحه نبود - بدون هیچ سرنخی از دلیلش.
+                    عنوانِ تصویریِ قبلی حذف شد: خودِ ردیف همان عنوان را دارد و
+                    تصویرش حالا در هدرِ کشو است. */}
+                <View style={[NewStyles.seperator, { paddingHorizontal: spacing.lg, paddingTop: '5%' }]}>
+                    <OrderCodesSection discount={discount} referral={referral} available={codesAvailable} />
+                </View>
             </ScrollView>
             <View style={[NewStyles.row, NewStyles.nav, { backgroundColor: 'transparent', marginBottom: footerSpace }]}>
                 <View style={{ flex: 1, alignItems: 'center' }}>
@@ -616,7 +601,7 @@ function Preview({ navigation }) {
     )
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, lang) => StyleSheet.create({
     textInput: {
         width: '100%',
         height: 50,

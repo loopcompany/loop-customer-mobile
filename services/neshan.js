@@ -108,7 +108,7 @@ export const searchPlaces = async (term, near = DEFAULT_CENTER) => {
  * `municipality_zone` arrives as things like "منطقه ۶" or "6". The address form
  * stores a bare number, so pull one out when there is one.
  */
-function extractZoneNumber(zone) {
+export function extractZoneNumber(zone) {
   if (!zone) return '';
   const latin = String(zone).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
   const match = latin.match(/\d+/);
@@ -130,6 +130,7 @@ export const distanceInMeters = (lat1, lon1, lat2, lon2) => {
 };
 
 export default {
+  extractZoneNumber,
   NESHAN_WEB_KEY,
   NESHAN_SERVICE_KEY,
   hasNeshanServiceKey,

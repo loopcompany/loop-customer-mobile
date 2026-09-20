@@ -10,6 +10,9 @@ import { clearOrganizationData } from '@slices/organizationSlice';
 import { showAlert } from '@helpers/Common';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLanguage } from '@slices/languageSlice';
+import { emptyUser } from '@slices/userSlice';
+import { clearWallet } from '@slices/walletSlice';
+import { clearAccountProfileCache } from '@services/receipt/receiptProfile';
 
 // Custom hook for logout functionality
 export const useLogout = () => {
@@ -30,6 +33,10 @@ export const useLogout = () => {
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
+        dispatch(emptyUser());
+        dispatch(clearWallet());
+        // پروفایلِ کش‌شده‌ی رسید در Redux نیست، پس با clear‌های بالا پاک نمی‌شود.
+        clearAccountProfileCache();
 
         return result;
       } else {
@@ -54,7 +61,9 @@ export const useLogout = () => {
           logout()
             .then((result) => {
               if (typeof options.onSuccess === 'function') {
-                try { options.onSuccess(); } catch { }
+                try {
+                  options.onSuccess();
+                } catch {}
               }
               if (window.alert) {
                 window.alert(result.message || t('You have successfully logged out!'));
@@ -81,7 +90,9 @@ export const useLogout = () => {
         logout()
           .then(() => {
             if (typeof options.onSuccess === 'function') {
-              try { options.onSuccess(); } catch { }
+              try {
+                options.onSuccess();
+              } catch {}
             }
             if (navigation.replace) {
               navigation.replace('Welcome');
@@ -92,53 +103,51 @@ export const useLogout = () => {
               });
             }
           })
-          .catch(error => console.error('Logout error:', error));
+          .catch((error) => console.error('Logout error:', error));
       }
     } else {
       // Use Alert.alert for mobile
-      showAlert(
-        t('Log Out'),
-        t('Are you sure you want to log out?'),
-        [
-          {
-            text: t('Cancel'),
-            style: 'cancel',
-          },
-          {
-            text: t('Log Out'),
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                const result = await logout();
-                if (typeof options.onSuccess === 'function') {
-                  try { options.onSuccess(); } catch { }
-                }
-                showAlert(t('Successful'), result.message, [
-                  {
-                    text: t('Ok'),
-                    onPress: async () => {
-                      // Navigate to Welcome screen after showing alert
-                      await AsyncStorage.removeItem("language")
-                      dispatch(setLanguage("fa"))
-                      await i18n.changeLanguage("fa");
-                      if (navigation.replace) {
-                        navigation.replace('Welcome');
-                      } else {
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: 'Welcome' }],
-                        });
-                      }
-                    }
-                  }
-                ]);
-              } catch (error) {
-                showAlert(t('Error'), error.message || t('Unexpected error during logout'));
+      showAlert(t('Log Out'), t('Are you sure you want to log out?'), [
+        {
+          text: t('Cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('Log Out'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await logout();
+              if (typeof options.onSuccess === 'function') {
+                try {
+                  options.onSuccess();
+                } catch {}
               }
-            },
+              showAlert(t('Successful'), result.message, [
+                {
+                  text: t('Ok'),
+                  onPress: async () => {
+                    // Navigate to Welcome screen after showing alert
+                    await AsyncStorage.removeItem('language');
+                    dispatch(setLanguage('fa'));
+                    await i18n.changeLanguage('fa');
+                    if (navigation.replace) {
+                      navigation.replace('Welcome');
+                    } else {
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Welcome' }],
+                      });
+                    }
+                  },
+                },
+              ]);
+            } catch (error) {
+              showAlert(t('Error'), error.message || t('Unexpected error during logout'));
+            }
           },
-        ]
-      );
+        },
+      ]);
     }
   };
 
@@ -154,6 +163,7 @@ export const useLogout = () => {
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
+        clearAccountProfileCache();
 
         return result;
       } else {
@@ -172,7 +182,9 @@ export const useLogout = () => {
     if (Platform.OS === 'web') {
       // Use window.confirm for web
       if (typeof window !== 'undefined' && window.confirm) {
-        const confirmed = window.confirm(t('Do you want to log out from all devices logged in with this account?'));
+        const confirmed = window.confirm(
+          t('Do you want to log out from all devices logged in with this account?')
+        );
 
         if (confirmed) {
           logoutFromAllDevices()
@@ -198,7 +210,9 @@ export const useLogout = () => {
         }
       } else {
         // Fallback: just logout without confirmation
-        console.warn('window.confirm not available, logging out from all devices without confirmation');
+        console.warn(
+          'window.confirm not available, logging out from all devices without confirmation'
+        );
         logoutFromAllDevices()
           .then(() => {
             if (navigation.replace) {
@@ -210,7 +224,7 @@ export const useLogout = () => {
               });
             }
           })
-          .catch(error => console.error('Logout all error:', error));
+          .catch((error) => console.error('Logout all error:', error));
       }
     } else {
       // Use Alert.alert for mobile
@@ -241,11 +255,14 @@ export const useLogout = () => {
                           routes: [{ name: 'Welcome' }],
                         });
                       }
-                    }
-                  }
+                    },
+                  },
                 ]);
               } catch (error) {
-                showAlert(t('Error'), error.message || t('Unexpected error logging out from all devices'));
+                showAlert(
+                  t('Error'),
+                  error.message || t('Unexpected error logging out from all devices')
+                );
               }
             },
           },

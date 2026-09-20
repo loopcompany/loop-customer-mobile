@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
+import { NESHAN_WEB_KEY } from '@services/neshan';
+
 const NESHAN_SDK_JS_URL = 'https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.js';
 const NESHAN_SDK_CSS_URL = 'https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.css';
 
-const DEFAULT_NESHAN_API_KEY =
-  typeof process !== 'undefined'
-    ? process.env.EXPO_PUBLIC_NESHAN_API_KEY
-    : '';
+// کلیدِ وبِ نشان از یک جا می‌آید. قبلاً اینجا فقط `process.env` خوانده می‌شد و
+// چون آن متغیر در این مخزن ست نیست، مقدارِ پیش‌فرض `undefined` بود و نقشه با
+// «Neshan API key is missing» بالا نمی‌آمد مگر اینکه صداکننده کلید را دستی
+// پاس می‌داد — یعنی هر مصرف‌کننده‌ی تازه‌ای به‌طور پیش‌فرض خراب بود.
+const DEFAULT_NESHAN_API_KEY = NESHAN_WEB_KEY;
 
 let neshanScriptPromise = null;
 let neshanCssLoaded = false;
@@ -429,6 +432,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+/**
+ * بارگذاریِ یک‌باره‌ی SDK وبِ نشان (CSS + JS) و برگرداندنِ `window.L`.
+ *
+ * `NeshanCanvas.web.js` هم از همین استفاده می‌کند تا هر دو نقشه یک نسخه‌ی SDK
+ * و یک promise مشترک داشته باشند، نه دو بارگذاریِ موازی.
+ */
+export async function loadNeshanSdk() {
+  loadCssOnce(NESHAN_SDK_CSS_URL);
+  return loadScriptOnce(NESHAN_SDK_JS_URL);
+}
 
 export default WebMapView;
 export { WebMarker as Marker, WebPolyline as Polyline, WebCircle as Circle };

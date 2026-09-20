@@ -21,6 +21,32 @@ export const fetchAddresses = createAsyncThunk('addresses/addresses', async (tok
         })
 })
 
+/** شهرِ پیش‌فرضِ فرم — سرویس فعلاً فقط تهران را پوشش می‌دهد. */
+export const DEFAULT_CITY = 'تهران';
+
+/** فیلدهایی که فرمِ آدرس مالکشان است (برخلاف `data`/`loading`/`error`). */
+const emptyForm = {
+    title: '',
+    fname: '',
+    lname: '',
+    unit: '',
+    number: '',
+    floor: '',
+    telephone: '',
+    mobile: '',
+    city: '',
+    region: '',
+    address: '',
+    // آخرین متنی که از نقشه در «آدرس» نشست. با آن می‌شود فهمید متنِ فعلی
+    // نوشته‌ی کاربر است یا نتیجه‌ی ژئوکدینگ — و نوشته‌ی کاربر را بازنویسی نکرد.
+    addressFromMap: '',
+    latitude: null,
+    longitude: null,
+    // نقشه همیشه یک مرکز دارد؛ این پرچم می‌گوید کاربر واقعاً نقطه‌ای را انتخاب
+    // کرده یا فقط نقشه باز شده است.
+    locationPicked: false,
+};
+
 export const addressSlice = createSlice({
     name: 'address',
     initialState: {
@@ -35,11 +61,13 @@ export const addressSlice = createSlice({
         floor: '',
         telephone: '',
         mobile: '',
-        city: 'تهران',
+        city: DEFAULT_CITY,
         region: '',
         address: '',
+        addressFromMap: '',
         latitude: null,
-        longitude: null
+        longitude: null,
+        locationPicked: false
     },
     extraReducers: builder => {
         builder.addCase(fetchAddresses.pending, state => {
@@ -96,21 +124,64 @@ export const addressSlice = createSlice({
         setLongitude: (state, action) => {
             state.longitude = action.payload;
         },
+        /**
+         * هر دو مختصات با هم — نقطه‌ی نقشه یک چیز است، نه دو تا.
+         * دو dispatchِ جدا یعنی یک رندرِ میانی با عرضِ جغرافیاییِ جدید و طولِ
+         * قدیمی، که اعتبارسنجیِ «داخل محدوده» را روی یک نقطه‌ی بی‌معنا اجرا می‌کرد.
+         */
+        setLocation: (state, action) => {
+            const { latitude, longitude } = action.payload || {};
+            const valid = Number.isFinite(latitude) && Number.isFinite(longitude);
+            state.latitude = valid ? latitude : null;
+            state.longitude = valid ? longitude : null;
+            // این اکشن فقط از مسیرِ انتخابِ آگاهانه صدا زده می‌شود (کشیدنِ نقشه،
+            // دکمه‌ی موقعیتِ من، نتیجه‌ی جست‌وجو، تاییدِ تمام‌صفحه).
+            state.locationPicked = valid;
+        },
+        /**
+         * پر کردنِ چند فیلد با یک اکشن — نتیجه‌ی ژئوکدینگِ معکوسِ نقشه از این
+         * راه می‌آید. فقط کلیدهای شناخته‌شده پذیرفته می‌شوند تا `data` یا
+         * `loading` تصادفاً بازنویسی نشوند.
+         */
+        setAddressFields: (state, action) => {
+            const patch = action.payload || {};
+            Object.keys(emptyForm).forEach((key) => {
+                if (patch[key] !== undefined) state[key] = patch[key];
+            });
+        },
+        /**
+         * فرم را به حالتِ اول برمی‌گرداند.
+         *
+         * `emptyAddress` این کار را ناقص می‌کرد: «واحد»، «پلاک» و «طبقه» را جا
+         * می‌گذاشت، پس آدرسِ بعدی با واحد و طبقه‌ی آدرسِ قبلی شروع می‌شد.
+         */
+        resetAddressForm: (state) => {
+            Object.assign(state, emptyForm, { city: DEFAULT_CITY });
+        },
         emptyAddress: (state) => {
-            state.title = '';
-            state.fname = '';
-            state.lname = '';
-            state.telephone = '';
-            state.mobile = '';
-            state.city = '';
-            state.region = '';
-            state.address = '';
-            state.latitude = null;
-            state.longitude = null;
+            Object.assign(state, emptyForm);
         }
     }
 })
 
-export const { setTitle, setFname, setLname, setTelephone, setMobile, setCity, setRegion, setAddress, setLatitude, setLongitude, emptyAddress, setUnit, setNumber, setFloor } = addressSlice.actions
+export const {
+    setTitle,
+    setFname,
+    setLname,
+    setTelephone,
+    setMobile,
+    setCity,
+    setRegion,
+    setAddress,
+    setLatitude,
+    setLongitude,
+    setLocation,
+    setAddressFields,
+    resetAddressForm,
+    emptyAddress,
+    setUnit,
+    setNumber,
+    setFloor,
+} = addressSlice.actions
 
 export default addressSlice.reducer

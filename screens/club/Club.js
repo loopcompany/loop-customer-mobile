@@ -7,9 +7,8 @@ import moment from 'moment-jalaali';
 import { createStyles } from '@styles/NewStyles';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor4, themeColor5, themeColor14 } from '@theme/Color';
-import { imageUri, mainUri, uri } from '@services/URL';
+import { imageUri } from '@services/URL';
 import OfferItem from './OfferItem';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import Filters from '@components/Filters';
 import DiscountItem from './DiscountItem';
@@ -18,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LuckyWheel from '@components/LuckyWheel';
 import WinnerModal from '@components/WinnerModal';
 import { getGemActions, spinWheel, canPlayWheel } from '@services/GemApi';
+import { getOffers, getCategories, getPlans, selectList } from '@services/DiscountApi';
 import { showToastOrAlert } from '@helpers/Common';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { langIsRTL } from '@helpers/Common';
@@ -29,7 +29,6 @@ export default function Club({ navigation }) {
     () => createStyles(i18n.language),
     [i18n.language]
   );
-  const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
   const isRtl = langIsRTL(i18n.language)
   // const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
   const token = useSelector(state => state.auth.token);
@@ -172,25 +171,31 @@ export default function Club({ navigation }) {
     setWonPrize(null);
   };
   const fetchData = async () => {
+    const [offersResult, categoriesResult, plansResult] = await Promise.all([
+      getOffers(token),
+      getCategories(token),
+      getPlans(token),
+    ]);
 
-    try {
-      const [response, response1, response2] = await Promise.all([
-        axios.get(`${uri}/discounts/offers`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
-        axios.get(`${uri}/discounts/categories`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
-        axios.get(`${uri}/discounts/list`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } }),
-      ]);
-      setOffers(response.data);
-      const allCategory = { id: '0', title: t('All') };
-      const updatedCategories = [allCategory, ...response1.data];
-      setCategories(updatedCategories);
-      setData(response2.data);
-    } catch (error) {
-      const message = error.response ? t('An unexpected error occurred!') : t('Network error!');
-      showToastOrAlert(message);
-    } finally {
-      setRefreshing(false);
-      setLoading(false);
+    // این سه اندپوینت مجموعه را مستقیم برمی‌گردانند. `selectList` تضمین می‌کند
+    // که همیشه آرایه بگیریم — قبلاً یک پاسخ غیرآرایه‌ای، spread را می‌ترکاند و
+    // کل صفحه سفید می‌شد.
+    setOffers(selectList(offersResult.data));
+
+    const allCategory = { id: '0', title: t('All') };
+    setCategories([allCategory, ...selectList(categoriesResult.data)]);
+
+    setData(selectList(plansResult.data));
+
+    // یک خطا نباید بقیه‌ی صفحه را هم خالی نشان بدهد: هرچه آمد را نمایش می‌دهیم
+    // و فقط یک بار به کاربر اطلاع می‌دهیم.
+    const failed = [offersResult, categoriesResult, plansResult].find((r) => !r.ok);
+    if (failed) {
+      showToastOrAlert(failed.message || t('An unexpected error occurred!'));
     }
+
+    setRefreshing(false);
+    setLoading(false);
   };
   useEffect(() => {
     fetchData();

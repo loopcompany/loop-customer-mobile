@@ -10,6 +10,12 @@
 //
 // این فایل همه‌ی آن منابع را پشت یک زنجیره‌ی fallback جمع می‌کند تا رسید هر سه
 // مسیر یک رفتار داشته باشد.
+//
+// آخرین حلقه‌ی زنجیره `profile` است: پروفایلِ واقعیِ حساب که `receiptProfile.js`
+// از `GET /profile` یا `GET /organization/profile` می‌گیرد. بدون آن، کاربری که
+// هنوز آدرسی در اپ ثبت نکرده بود (ولی آدرس و تلفن ثابتش در پروفایل بود) باز هم
+// روی رسید «نامشخص» می‌دید، چون `state.user.data` از `validate-token` می‌آید و
+// آن پاسخ این فیلدها را ندارد.
 
 const text = (value) => {
   const trimmed = String(value ?? '').trim();
@@ -76,6 +82,7 @@ export const pickSavedAddress = (addresses, selectedAddressId) => {
  * @param {object[]} [input.addresses] `state.address.data`
  * @param {string|number} [input.selectedAddressId] `state.step.addressId`
  * @param {object} [input.addressDraft] `state.address` - فرمِ در حال پر شدن.
+ * @param {object} [input.profile] پروفایل نرمال‌شده‌ی حساب (`receiptProfile.js`).
  * @param {object} [input.orgProfile] `state.organization.profileData`
  * @param {object} [input.user] `state.user.data`
  */
@@ -84,6 +91,7 @@ export const resolveAddressInfo = ({
   addresses = null,
   selectedAddressId = null,
   addressDraft = null,
+  profile = null,
   orgProfile = null,
   user = null,
 } = {}) => {
@@ -94,6 +102,9 @@ export const resolveAddressInfo = ({
       formatAddressEntry(addressEntry),
       formatAddressEntry(saved),
       formatAddressEntry(addressDraft),
+      // پروفایل حساب: تنها منبعی که برای کاربری که هنوز آدرسی ثبت نکرده هم
+      // مقدار دارد (`home_address`/`organization_address`).
+      profile?.address,
       orgProfile?.address,
       // پروفایل کاربر (`/user/profile`) آدرس را در این دو فیلد نگه می‌دارد.
       user?.home_address,
@@ -104,6 +115,7 @@ export const resolveAddressInfo = ({
       toLandline(addressEntry?.telephone) ||
       toLandline(saved?.telephone) ||
       toLandline(addressDraft?.telephone) ||
+      toLandline(profile?.landline) ||
       toLandline(orgProfile?.phone) ||
       toLandline(user?.phone_number) ||
       toLandline(user?.telephone) ||
@@ -134,24 +146,51 @@ export const resolveCustomer = ({
   nationalId = null,
   ...addressInput
 }) => {
-  const { user = null, orgProfile = null } = addressInput;
+  const { user = null, orgProfile = null, profile = null } = addressInput;
   const info = resolveAddressInfo(addressInput);
 
   return {
     isOrganization,
     name: isOrganization
-      ? firstOf(name, orgProfile?.organization_name, user?.organization_name, user?.name)
+      ? firstOf(
+          name,
+          profile?.name,
+          orgProfile?.organization_name,
+          user?.organization_name,
+          user?.name
+        )
       : firstOf(
           name,
           info.receiverName,
+          profile?.name,
           [user?.fname, user?.lname].filter(Boolean).join(' '),
           [user?.name, user?.last_name].filter(Boolean).join(' '),
           user?.name
         ),
+    // کد/شناسه‌ی ملی فقط روی پروفایل هست - `validate-token` آن را برنمی‌گرداند.
     nationalId: isOrganization
-      ? firstOf(nationalId, orgProfile?.national_id, user?.national_id, user?.melicode)
-      : firstOf(nationalId, user?.national_code, user?.melicode, user?.national_id),
-    phone: firstOf(phone, user?.mobile, user?.mobile_number, user?.phone, info.mobile),
+      ? firstOf(
+          nationalId,
+          profile?.nationalId,
+          orgProfile?.national_id,
+          user?.national_id,
+          user?.melicode
+        )
+      : firstOf(
+          nationalId,
+          profile?.nationalId,
+          user?.national_code,
+          user?.melicode,
+          user?.national_id
+        ),
+    phone: firstOf(
+      phone,
+      user?.mobile,
+      user?.mobile_number,
+      user?.phone,
+      profile?.mobile,
+      info.mobile
+    ),
     landline: info.landline,
     address: info.address,
   };

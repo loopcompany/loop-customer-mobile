@@ -23,6 +23,7 @@ import { createStyles } from '@styles/NewStyles';
 import LocationPicker from '@components/LocationPicker';
 import { fetchUser } from '@slices/userSlice';
 import FooterSpacer from '@components/FooterSpacer';
+import { clearAccountProfileCache } from '@services/receipt/receiptProfile';
 export default function Profile() {
     const { t, i18n } = useTranslation();
     const isRTL = langIsRTL(i18n.language);
@@ -341,6 +342,10 @@ export default function Profile() {
 
                     if (response.success) {
                         showToastOrAlert(response.message);
+                        // رسید آدرس/تلفن ثابت/کد ملی را از همین پروفایل می‌خواند
+                        // و نتیجه را کش می‌کند؛ بدون این، رسید تا ری‌لود بعدی
+                        // مقدار قدیمی را نشان می‌داد.
+                        clearAccountProfileCache();
 
 
                         // بروزرسانی state محلی
@@ -414,6 +419,10 @@ export default function Profile() {
 
                     if (response.success) {
                         showToastOrAlert(response.message);
+                        // رسید آدرس/تلفن ثابت/کد ملی را از همین پروفایل می‌خواند
+                        // و نتیجه را کش می‌کند؛ بدون این، رسید تا ری‌لود بعدی
+                        // مقدار قدیمی را نشان می‌داد.
+                        clearAccountProfileCache();
 
                         setBirthDateChanged(false);
 

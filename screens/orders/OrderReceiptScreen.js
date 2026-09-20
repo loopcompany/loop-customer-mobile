@@ -10,7 +10,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, ScrollView, RefreshControl, ImageBackground } from 'react-native';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenHeaders from '@components/ScreenHeaders';
@@ -18,12 +17,13 @@ import Loader from '@components/Loader';
 import Button from '@components/Button';
 import OrderReceipt from '@components/receipt/OrderReceipt';
 import { useMenu } from '@contexts/MenuContext';
+import useReceiptSources from '@hooks/useReceiptSources';
 import { showToastOrAlert } from '@helpers/Common';
 import { describeApiError } from '@utils/apiErrorHandler';
 import { shareContent, SHARE_RESULT } from '@utils/shareContent';
 import axiosInstance from '@services/axiosConfig';
 import { mainUri, uri } from '@services/URL';
-import { RECEIPT_STATE, receiptFromOrderApi } from '@services/receipt';
+import { RECEIPT_STATE, asReceipt, receiptFromOrderApi } from '@services/receipt';
 import { spacing } from '@theme/Spacing';
 
 /** متن اشتراک‌گذاری - خلاصه‌ی رسید، نه کل جدول‌ها. */
@@ -41,16 +41,15 @@ function OrderReceiptScreen({ route, navigation }) {
   const { t } = useTranslation();
   const { footerSpace } = useMenu();
 
-  const prebuilt = route?.params?.receipt ?? null;
+  // asReceipt: بعد از refreshِ صفحه روی وب، این param یک رشته است نه رسید.
+  const prebuilt = asReceipt(route?.params?.receipt);
   const orderId = route?.params?.orderId ?? null;
   // مقصد «ثبت مجدد» را صفحه‌ی مبدا تعیین می‌کند؛ بدون آن دکمه رندر نمی‌شود.
   const reorder = route?.params?.reorder ?? null;
 
-  const user = useSelector((state) => state?.user?.data);
-  const orgProfile = useSelector((state) => state?.organization?.profileData);
-  // پشتیبانِ آدرس/تلفن ثابت وقتی پاسخِ سرور `user_address` ندارد.
-  const savedAddresses = useSelector((state) => state?.address?.data);
-  const selectedAddressId = useSelector((state) => state?.step?.addressId);
+  // پشتیبانِ آدرس/تلفن ثابت/شماره ملی وقتی پاسخِ سرور `user_address` ندارد یا
+  // آن رکورد ناقص است - شامل پروفایلِ واقعیِ حساب.
+  const receiptSources = useReceiptSources();
 
   const [fetched, setFetched] = useState(null);
   const [loading, setLoading] = useState(Boolean(orderId) && !prebuilt);
@@ -91,13 +90,8 @@ function OrderReceiptScreen({ route, navigation }) {
   const receipt = useMemo(() => {
     if (prebuilt) return prebuilt;
     if (!fetched) return null;
-    return receiptFromOrderApi(fetched, {
-      user,
-      orgProfile,
-      addresses: savedAddresses,
-      selectedAddressId,
-    });
-  }, [prebuilt, fetched, user, orgProfile, savedAddresses, selectedAddressId]);
+    return receiptFromOrderApi(fetched, receiptSources);
+  }, [prebuilt, fetched, receiptSources]);
 
   const onShare = useCallback(async () => {
     if (!receipt) return;

@@ -38,16 +38,26 @@ import { radius } from '@theme/Radius';
 import { fontSize, getFontFamily } from '@theme/Typography';
 import { createDirectionalStyles } from '@styles/directionalStyles';
 import OrderReceipt from '@components/receipt/OrderReceipt';
-import { formatAddressEntry, pickSavedAddress } from '@services/receipt';
+import {
+  asReceipt,
+  isOrganizationAccount,
+  pickSavedAddress,
+  resolveCustomer,
+} from '@services/receipt';
+import useReceiptSources from '@hooks/useReceiptSources';
 import FooterSpacer from '@components/FooterSpacer';
+import OrderCodesSection from '@components/OrderCodesSection';
+import useDiscountCode from '@hooks/useDiscountCode';
+import useReferralCode from '@hooks/useReferralCode';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
 // صفحه از i18next استفاده نمی‌کند (L()/LO() فارسی محلی‌اش را دارد) پس یک
 // مترجم کوچک محلی برای همین دو مورد کافی است.
-const describeErrorFa = (key) => ({
-  'Network error!': 'اتصال به اینترنت برقرار نیست. لطفاً دوباره تلاش کنید.',
-  'An unexpected error occurred!': 'خطای غیرمنتظره‌ای رخ داد.',
-}[key] || key);
+const describeErrorFa = (key) =>
+  ({
+    'Network error!': 'اتصال به اینترنت برقرار نیست. لطفاً دوباره تلاش کنید.',
+    'An unexpected error occurred!': 'خطای غیرمنتظره‌ای رخ داد.',
+  })[key] || key;
 
 const NOT_SET = 'ثبت نشده';
 
@@ -67,14 +77,17 @@ export default function OrderSummaryScreen({ navigation, route }) {
     price = null,
     currency = 'تومان',
     // رسیدِ از پیش ساخته‌شده توسط صفحه‌ی مبدا (مسیرهای سازمانی).
-    receipt = null,
+    receipt: receiptParam = null,
   } = params;
 
-  const user = useSelector((state) => state?.user?.data);
-  const savedAddresses = useSelector((state) => state?.address?.data);
+  // بعد از refreshِ صفحه روی وب این param رشته‌ی «[object Object]» است، نه رسید.
+  const receipt = asReceipt(receiptParam);
+
+  // همان منابعی که رسید از آن‌ها ساخته می‌شود - تا این خلاصه و رسیدِ بعدش یک
+  // آدرس و یک شماره نشان دهند.
+  const receiptSources = useReceiptSources();
+  const { user, addresses: savedAddresses, selectedAddressId } = receiptSources;
   const addressDraft = useSelector((state) => state?.address);
-  const selectedAddressId = useSelector((state) => state?.step?.addressId);
-  const orgProfile = useSelector((state) => state?.organization?.profileData);
 
   // تاریخ و ساعت مراجعه از همان انتخابگری که کاربر پر کرده است.
   const scheduleDate = schedule?.date;
@@ -91,35 +104,37 @@ export default function OrderSummaryScreen({ navigation, route }) {
     return TIME_SLOT_OPTIONS.find((opt) => opt.id === scheduleSlot)?.title || scheduleSlot;
   }, [scheduleSlot]);
 
-  // آدرسِ سفارش: همان آدرسی که موقع ثبت به‌عنوان `address_id` فرستاده می‌شود
-  // (انتخاب‌شده، وگرنه اولین آدرسِ ذخیره‌شده)، سپس آدرسِ در حال ویرایش، سپس
-  // آدرس سازمان. pickSavedAddress مشترک است تا این نمایش و آن ثبت از هم جدا
-  // نیفتند.
-  const address = useMemo(
+  // آدرس/شماره/نام از همان زنجیره‌ی fallbackی می‌آیند که رسید استفاده می‌کند
+  // (آدرسِ انتخاب‌شده → اولین آدرسِ ذخیره‌شده → فرمِ در حال ویرایش → پروفایل
+  // حساب). قبلاً این صفحه زنجیره‌ی خودش را داشت و ته آن `state.user.data` بود،
+  // که آدرس و تلفن ثابت ندارد.
+  const customer = useMemo(
     () =>
-      formatAddressEntry(pickSavedAddress(savedAddresses, selectedAddressId)) ||
-      formatAddressEntry(addressDraft) ||
-      orgProfile?.address ||
-      NOT_SET,
-    [savedAddresses, selectedAddressId, addressDraft, orgProfile?.address]
+      resolveCustomer({
+        ...receiptSources,
+        isOrganization: isOrganizationAccount(receiptSources.user?.account_type),
+        name: contact?.fullName || null,
+        phone: contact?.mobile || null,
+        addressDraft,
+      }),
+    [receiptSources, contact?.fullName, contact?.mobile, addressDraft]
   );
 
-  const phone =
-    contact?.mobile ||
-    user?.mobile ||
-    user?.phone ||
-    addressDraft?.mobile ||
-    orgProfile?.phone ||
-    NOT_SET;
-
-  const customerName =
-    contact?.fullName ||
-    [user?.fname, user?.lname].filter(Boolean).join(' ') ||
-    user?.name ||
-    orgProfile?.organization_name ||
-    '';
+  const address = customer.address || NOT_SET;
+  const phone = customer.phone || NOT_SET;
+  const customerName = customer.name || '';
 
   const orderType = orderTitle || categoryTitle || NOT_SET;
+
+  // کد تخفیف و کد معرف، مثل صفحه‌ی پیش‌نمایش سفارشِ دسته‌های عادی. category_id
+  // فقط وقتی عدد صحیح باشد به بک‌اند می‌رسد (همان قاعده‌ی ثبت پایین).
+  const token = useSelector((state) => state?.auth?.token);
+  const numericCategoryId = Number.isInteger(Number(categoryId)) ? Number(categoryId) : null;
+  const discount = useDiscountCode({
+    token,
+    categoryId: categoryId == null ? null : numericCategoryId,
+  });
+  const referral = useReferralCode({ token });
 
   return (
     <ImageBackground
@@ -182,6 +197,10 @@ export default function OrderSummaryScreen({ navigation, route }) {
           </>
         )}
 
+        <View style={styles.codesCard}>
+          <OrderCodesSection discount={discount} referral={referral} />
+        </View>
+
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
           <Text style={NewStyles.text4}>ویرایش اطلاعات</Text>
         </TouchableOpacity>
@@ -190,6 +209,17 @@ export default function OrderSummaryScreen({ navigation, route }) {
           style={[styles.submitButton, isSubmitting && { opacity: 0.6 }]}
           onPress={async () => {
             if (isSubmitting) return;
+
+            // کدِ تایپ‌شده ولی تأییدنشده نه بی‌صدا حذف می‌شود و نه کور ارسال؛
+            // ثبت متوقف می‌شود و دلیلش گفته می‌شود.
+            if (discount.needsCheck) {
+              showToastOrAlert('لطفاً کد تخفیف را تأیید کنید یا آن را پاک کنید.');
+              return;
+            }
+            if (referral.needsCheck) {
+              showToastOrAlert('لطفاً کد معرف را ثبت کنید یا آن را پاک کنید.');
+              return;
+            }
             setIsSubmitting(true);
 
             // آدرس: این مسیر (سیستماتیک/جامع سازمانی) مرحله‌ی انتخاب آدرس ندارد.
@@ -227,7 +257,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
 
             let realOrderId = null;
             try {
-              const response = await apiClient.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, {
+              const orderPayload = {
                 address_id: resolvedAddressId,
                 category_id: resolvedCategoryId,
                 // این مسیرها هنوز مراحل قیمت‌دار واقعی (steps/fetch) را نمی‌خوانند،
@@ -240,18 +270,30 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 platform: Platform.OS,
                 steps: [],
                 file_paths: [],
-              });
+              };
+              // فقط کدهای تأییدشده، دقیقاً همان رشته‌ای که سرور به رسمیت شناخته.
+              if (discount.appliedCode) orderPayload.discount_code = discount.appliedCode;
+              if (referral.appliedCode) orderPayload.referral_code = referral.appliedCode;
+              const response = await apiClient.post(
+                `${uri}${API_ENDPOINTS.ORDERS.CREATE}`,
+                orderPayload
+              );
 
               const body = response?.data;
               const orderCreated =
                 (response.status === 200 || response.status === 201) && body?.success !== false;
               if (!orderCreated) {
+                if (body?.error_code === 'INVALID_REFERRAL_CODE') referral.reject(body?.message);
                 showToastOrAlert(body?.message || 'ثبت سفارش ناموفق بود.');
                 setIsSubmitting(false);
                 return;
               }
               realOrderId = body?.data?.order_id ?? body?.data?.order?.id ?? null;
             } catch (error) {
+              // ۴۰۹ (کد معرفِ نامعتبر) در catch می‌افتد نه در شاخه‌ی بالا.
+              if (error?.response?.data?.error_code === 'INVALID_REFERRAL_CODE') {
+                referral.reject(error?.response?.data?.message);
+              }
               showToastOrAlert(describeApiError(error, describeErrorFa));
               setIsSubmitting(false);
               return;
@@ -300,7 +342,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
               navigation.replace('OrderTrackingScreen', {
                 orderData: {
                   orderNumber,
-                  userId: user?.id ?? orgProfile?.id ?? null,
+                  userId: user?.id ?? receiptSources.orgProfile?.id ?? null,
                   phone,
                   date: scheduleDate || '',
                 },
@@ -363,6 +405,15 @@ const styles = createDirectionalStyles((isRTL) => ({
     fontSize: fontSize.sm,
     color: colors.textPrimary.color,
     marginRight: spacing.sm,
+  },
+  // کارتِ کدها فقط ردیفِ جمع‌وجورِ OrderCodesSection را نگه می‌دارد؛ padding
+  // و پس‌زمینه‌ی کارتِ خلاصه اینجا اضافی است و ردیف را دوقاب می‌کند.
+  // marginTop مثل editButton لازم است: رسیدِ بالای این ردیف حاشیه‌ی پایین ندارد
+  // و بدون آن، ردیف به لبه‌ی رسید می‌چسبد.
+  codesCard: {
+    width: '100%',
+    marginTop: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   editButton: {
     backgroundColor: colors.warning.bgColor(1),

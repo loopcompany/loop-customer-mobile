@@ -37,6 +37,9 @@ describe('public route allowlist', () => {
       'Login',
       'Register',
       'OTPVerification',
+      // The entry menu is the only route to the organisation login; guarding it
+      // removed organisation sign-in from the app.
+      'OrderMenuScreen',
     ]) {
       expect(requiresAuth(name)).toBe(false);
     }
@@ -45,13 +48,13 @@ describe('public route allowlist', () => {
   it('guards the screens that assume a session', () => {
     for (const name of [
       'List',
-      'OrderMenuScreen',
       'OrdersScreen',
       'TransactionsScreen',
       'MessageScreen',
       'AddressScreen',
       'Profile',
       'Increase',
+      'Wallet',
       'ComprehensiveSelectionScreen',
       'SystematicCategoryScreen',
       'Preview',

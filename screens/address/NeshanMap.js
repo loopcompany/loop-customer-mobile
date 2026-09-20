@@ -1,5 +1,12 @@
 // انتخاب موقعیت روی نقشه‌ی نشان.
 //
+// این کامپوننت هیچ چیزی را ذخیره یا ثبت نمی‌کند: نقطه را می‌گیرد و با
+// `onConfirm` به والد می‌دهد. همه‌ی کارِ Redux و سرور در صفحه‌ی والد است.
+//
+// خودِ نقشه در `@components/NeshanCanvas` است (نیتیو: WebView، وب: لِفلِت)،
+// پس این صفحه روی هر دو سکو یکی است. قبلاً وب یک صفحه‌ی جداگانه داشت که نه
+// جست‌وجو داشت نه ژئوکدینگ.
+//
 // نسخه‌ی قبلی فقط یک WebView خام بود: هیچ جست‌وجویی نداشت، آدرسِ نقطه‌ی
 // انتخاب‌شده را به کاربر نشان نمی‌داد، و روی هر فریمِ حرکتِ نقشه یک اکشن Redux
 // dispatch می‌کرد. این نسخه یک انتخابگرِ کامل است:
@@ -24,17 +31,16 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useMenu } from '@contexts/MenuContext';
 
-import { setLatitude, setLongitude } from '@slices/addressSlice';
 import Button from '@components/Button';
+import NeshanCanvas from '@components/NeshanCanvas';
 import MarkerIcon from '@assets/svg/MarkerIcon';
 import { langIsRTL, showToastOrAlert } from '@helpers/Common';
 import { colors } from '@theme/Color';
@@ -44,38 +50,41 @@ import { fontSize, getFontFamily } from '@theme/Typography';
 import { shadow } from '@theme/Shadows';
 import {
   DEFAULT_CENTER,
-  NESHAN_WEB_KEY,
   distanceInMeters,
   hasNeshanServiceKey,
-  reverseGeocode,
   searchPlaces,
 } from '@services/neshan';
+import { isReverseGeocodeAvailable, resolvePoint } from '@services/geocoding';
 
 const REVERSE_DEBOUNCE_MS = 500;
 const SEARCH_DEBOUNCE_MS = 350;
 
 /**
  * @param {object} props
- * @param {() => void} props.submitAddress            تاییدِ نهایی (ثبت آدرس)
- * @param {boolean} [props.loading]                   وضعیتِ ارسالِ فرم
+ * @param {(picked: {latitude: number, longitude: number, resolved: object|null}) => void} props.onConfirm
+ *   نقطه‌ی تاییدشده. تا وقتی کاربر دکمه را نزده هیچ چیزی به بیرون نشت نمی‌کند —
+ *   نسخه‌ی قبلی روی هر `moveend` (و حتی روی بالا آمدنِ نقشه) مختصات را در Redux
+ *   می‌نوشت، پس بازکردن و بستنِ نقشه هم «موقعیت انتخاب شد» حساب می‌شد.
+ * @param {boolean} [props.loading]                   وضعیتِ ارسالِ والد
  * @param {object} [props.radii]                      {latitude, longitude, radius} محدوده‌ی سرویس
- * @param {(r: object) => void} [props.onResolvedAddress] آدرسِ ژئوکدشده به والد
+ * @param {{latitude: number, longitude: number}} [props.initialCoords]
+ *   نقطه‌ای که قبلاً انتخاب شده؛ نقشه روی همان باز می‌شود نه روی مرکزِ شهر.
+ * @param {string} [props.confirmLabel]
  */
 export default function NeshanMap({
-  submitAddress,
+  onConfirm,
   loading = false,
   radii,
-  onResolvedAddress,
+  initialCoords,
   confirmLabel,
 }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
-  const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   // داکِ شناورِ پایین صفحه روی همه‌ی صفحات رندر می‌شود؛ بدون این فاصله،
   // دکمه‌ی «تایید» زیرِ آن پنهان می‌ماند.
   const { footerSpace } = useMenu();
-  const webViewRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const storeRadii = useSelector((state) => state.radius?.data);
   const effectiveRadii = useMemo(() => {
@@ -98,6 +107,9 @@ export default function NeshanMap({
   const pinLift = useMemo(() => new Animated.Value(0), []);
   const styles = useMemo(() => createStyles(isRTL), [isRTL]);
   const searchEnabled = hasNeshanServiceKey();
+  // ژئوکدینگِ معکوس حتی بدونِ کلیدِ نشان هم کار می‌کند (ژئوکدرِ سیستم‌عامل)،
+  // ولی جست‌وجو فقط با کلید.
+  const reverseEnabled = isReverseGeocodeAvailable();
   // «جست‌وجوی معنادار» — هم نمایشِ نتایج و هم اسپینر به این وابسته‌اند.
   const hasQuery = searchTerm.trim().length >= 2;
 
@@ -128,79 +140,16 @@ export default function NeshanMap({
     );
   }, [coords, serviceArea]);
 
-  const initialCenter = serviceArea || DEFAULT_CENTER;
-
-  // ---------------------------------------------------------------------------
-  // نقشه (WebView + SDK لِـفلِتِ نشان)
-  //
-  // با useMemo ساخته می‌شود تا هر رندر باعثِ ری‌لودِ کاملِ نقشه نشود.
-  // ---------------------------------------------------------------------------
-  const mapHtml = useMemo(
-    () => `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link href="https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.css" rel="stylesheet" type="text/css">
-  <script src="https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.js" type="text/javascript"></script>
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; background: #e9eef3; }
-    #map { height: 100%; width: 100%; }
-    .leaflet-control-attribution { font-size: 9px; opacity: .65; }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-  <script>
-    var send = function (payload) {
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify(payload));
-      }
-    };
-
-    var myMap = new L.Map('map', {
-      key: '${NESHAN_WEB_KEY}',
-      maptype: 'dreamy',
-      poi: true,
-      traffic: false,
-      zoomControl: false,
-      center: [${initialCenter.latitude}, ${initialCenter.longitude}],
-      zoom: 15
-    });
-
-    ${
-      serviceArea
-        ? `L.circle([${serviceArea.latitude}, ${serviceArea.longitude}], {
-             color: '#2563eb',
-             weight: 2,
-             fillColor: '#3b82f6',
-             fillOpacity: 0.12,
-             radius: ${serviceArea.radius}
-           }).addTo(myMap);`
-        : ''
+  // اگر کاربر قبلاً نقطه‌ای انتخاب کرده، نقشه همان‌جا باز می‌شود؛ وگرنه مرکزِ
+  // محدوده‌ی سرویس و در نهایت مرکزِ پیش‌فرض.
+  const pickedLatitude = initialCoords?.latitude;
+  const pickedLongitude = initialCoords?.longitude;
+  const initialCenter = useMemo(() => {
+    if (Number.isFinite(pickedLatitude) && Number.isFinite(pickedLongitude)) {
+      return { latitude: pickedLatitude, longitude: pickedLongitude };
     }
-
-    // فقط شروع و پایانِ حرکت گزارش می‌شود، نه تک‌تکِ فریم‌ها.
-    myMap.on('movestart', function () { send({ type: 'MOVE_START' }); });
-    myMap.on('moveend', function () {
-      var c = myMap.getCenter();
-      send({ type: 'MOVE_END', lat: c.lat, lng: c.lng });
-    });
-
-    myMap.whenReady(function () {
-      var c = myMap.getCenter();
-      send({ type: 'READY', lat: c.lat, lng: c.lng });
-    });
-
-    window.moveToLocation = function (lat, lng, zoom) {
-      myMap.setView([lat, lng], zoom || 17);
-    };
-    true;
-  </script>
-</body>
-</html>`,
-    [initialCenter.latitude, initialCenter.longitude, serviceArea]
-  );
+    return serviceArea || DEFAULT_CENTER;
+  }, [pickedLatitude, pickedLongitude, serviceArea]);
 
   const animatePin = useCallback(
     (up) => {
@@ -214,55 +163,40 @@ export default function NeshanMap({
     [pinLift]
   );
 
-  const onMessage = useCallback(
-    (event) => {
-      let data;
-      try {
-        data = JSON.parse(event.nativeEvent.data);
-      } catch {
-        return;
-      }
+  const handleMoveStart = useCallback(() => {
+    setMoving(true);
+    animatePin(true);
+  }, [animatePin]);
 
-      if (data.type === 'MOVE_START') {
-        setMoving(true);
-        animatePin(true);
-        return;
-      }
-
-      if (data.type === 'MOVE_END' || data.type === 'READY') {
-        setMoving(false);
-        animatePin(false);
-        setCoords({ latitude: data.lat, longitude: data.lng });
-        dispatch(setLatitude(data.lat));
-        dispatch(setLongitude(data.lng));
-      }
+  const handleSettled = useCallback(
+    ({ latitude, longitude }) => {
+      setMoving(false);
+      animatePin(false);
+      setCoords({ latitude, longitude });
     },
-    [animatePin, dispatch]
+    [animatePin]
   );
 
   // ژئوکدینگِ معکوس، با تاخیر تا نقشه آرام بگیرد.
   useEffect(() => {
-    if (!coords || !searchEnabled) return undefined;
+    if (!coords || !reverseEnabled) return undefined;
 
     let cancelled = false;
 
     const timer = setTimeout(async () => {
       if (cancelled) return;
       setResolving(true);
-      const result = await reverseGeocode(coords.latitude, coords.longitude);
+      const result = await resolvePoint(coords.latitude, coords.longitude);
       if (cancelled) return;
       setResolved(result);
       setResolving(false);
-      if (result && typeof onResolvedAddress === 'function') {
-        onResolvedAddress({ ...result, ...coords });
-      }
     }, REVERSE_DEBOUNCE_MS);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [coords, searchEnabled, onResolvedAddress]);
+  }, [coords, reverseEnabled]);
 
   // جست‌وجو، با تاخیر تا هر حرف یک درخواست نسازد.
   useEffect(() => {
@@ -291,10 +225,19 @@ export default function NeshanMap({
   }, [searchTerm, searchEnabled, coords, initialCenter]);
 
   const flyTo = useCallback((latitude, longitude, zoom = 17) => {
-    webViewRef.current?.injectJavaScript(
-      `window.moveToLocation && window.moveToLocation(${latitude}, ${longitude}, ${zoom}); true;`
-    );
+    canvasRef.current?.flyTo(latitude, longitude, zoom);
   }, []);
+
+  // محدوده‌ی سرویس با تاخیر از سرور می‌رسد. اگر نقطه‌ای از قبل انتخاب نشده،
+  // نقشه همان لحظه روی مرکزِ محدوده می‌رود — وگرنه کاربر از مرکزِ پیش‌فرضِ
+  // کشور شروع می‌کند و باید دستی تا شهرِ خودش بکشد.
+  const centredOnService = useRef(false);
+  useEffect(() => {
+    if (!serviceArea || centredOnService.current) return;
+    if (Number.isFinite(pickedLatitude) && Number.isFinite(pickedLongitude)) return;
+    centredOnService.current = true;
+    flyTo(serviceArea.latitude, serviceArea.longitude, 15);
+  }, [flyTo, pickedLatitude, pickedLongitude, serviceArea]);
 
   const pickResult = useCallback(
     (item) => {
@@ -336,8 +279,10 @@ export default function NeshanMap({
       showToastOrAlert(t('Please select a location within the specified area!'));
       return;
     }
-    submitAddress?.();
-  }, [coords, inServiceArea, submitAddress, t]);
+    // `resolved` می‌تواند null باشد (بدونِ کلید/بدونِ اینترنت)؛ والد در آن حالت
+    // فقط مختصات را می‌گیرد و کاربر آدرس را خودش می‌نویسد.
+    onConfirm?.({ ...coords, resolved });
+  }, [coords, inServiceArea, onConfirm, resolved, t]);
 
   // متنِ کارتِ پایین: آدرسِ ژئوکدشده، وگرنه مختصات.
   const addressLine = (() => {
@@ -352,22 +297,15 @@ export default function NeshanMap({
 
   return (
     <View style={styles.root}>
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: mapHtml }}
-        onMessage={onMessage}
+      <NeshanCanvas
+        ref={canvasRef}
+        initialCenter={initialCenter}
+        zoom={15}
+        serviceArea={serviceArea}
+        onMoveStart={handleMoveStart}
+        onMoveEnd={handleSettled}
+        onReady={handleSettled}
         style={styles.map}
-        javaScriptEnabled
-        domStorageEnabled
-        androidLayerType="hardware"
-        setSupportMultipleWindows={false}
-        startInLoadingState
-        renderLoading={() => (
-          <View style={styles.mapLoading}>
-            <ActivityIndicator size="large" color={colors.primary.bgColor(1)} />
-          </View>
-        )}
       />
 
       {/* ---------- نوار جست‌وجو ----------
@@ -484,6 +422,15 @@ export default function NeshanMap({
             </View>
           </View>
 
+          {/* وقتی آدرسِ متنی در دسترس نیست کاربر باید بداند که باید خودش
+              بنویسد — وگرنه فکر می‌کند صفحه خراب است. */}
+          {!reverseEnabled && !!coords && (
+            <Text style={styles.hint}>آدرسِ خودکار در دسترس نیست؛ متنِ آدرس را در فرم بنویسید.</Text>
+          )}
+          {reverseEnabled && !!resolved?.formatted && (
+            <Text style={styles.hint}>این آدرس در فرم پر می‌شود و قابل ویرایش است.</Text>
+          )}
+
           {!!serviceArea && !inServiceArea && coords && (
             <View style={styles.warning}>
               <Ionicons name="warning-outline" size={15} color={colors.error.bgColor(1)} />
@@ -514,13 +461,6 @@ const createStyles = (isRTL) =>
     map: {
       flex: 1,
     },
-    mapLoading: {
-      ...StyleSheet.absoluteFillObject,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.background.bgColor(1),
-    },
-
     // ---- جست‌وجو ----
     searchWrap: {
       position: 'absolute',
@@ -680,6 +620,13 @@ const createStyles = (isRTL) =>
       fontFamily: getFontFamily('bold', isRTL ? 'fa' : 'en'),
       color: colors.textPrimary.color,
       marginTop: 2,
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
+    },
+    hint: {
+      fontSize: fontSize.xs,
+      fontFamily: getFontFamily('light', isRTL ? 'fa' : 'en'),
+      color: colors.textMuted.color,
       textAlign: isRTL ? 'right' : 'left',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },

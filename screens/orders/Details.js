@@ -25,6 +25,8 @@ import OrderReturnTimeSection from './OrderReturnTimeSection';
 import AccordionHeader from '@components/AccordionHeader';
 import { fetchUser } from '@slices/userSlice';
 import { fetchOrders } from '@slices/orderSlice';
+import { payOrderViaGateway, describeWalletError } from '@services/WalletApi';
+import { fetchWalletBalance, payOrderWithWallet, seedBalance, selectWalletBalance } from '@slices/walletSlice';
 import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from '@components/ShowMapDetailComponent';
 import FooterSpacer from '@components/FooterSpacer';
@@ -195,6 +197,8 @@ function Details({ route, navigation }) {
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
+    // موجودی از walletSlice، نه از snapshot پروفایل — بعد از هر پرداخت تازه می‌شود.
+    const walletBalance = useSelector(selectWalletBalance)
 
     const [refreshing, setRefreshing] = useState(true)
     const [showDetails, setShowDetails] = useState(false);
@@ -397,31 +401,24 @@ function Details({ route, navigation }) {
 
     const walletPayment = async () => {
         setLoadingWallet(true);
-        try {
-            const response = await axios.post(
-                `${uri}/wallet/pay-order`,
-                { orderId: orderId },
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'Accept-Language': lang
-                    }
-                }
-            );
 
-            if (response.status == 200 || response.status == 201) {
-                showToastOrAlert(response?.data?.message || t("Payment completed successfully"));
-                dispatch(fetchOrders(token));
-                dispatch(fetchUser(token));
-                setRefreshing(true);
-            }
-        } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
-            showToastOrAlert(message);
-        } finally {
-            setLoadingWallet(false);
+        // مبلغ را سرور حساب می‌کند (تخفیف و تخفیف معرف هم لحاظ می‌شود) و
+        // موجودی جدید را در `remaining_balance` برمی‌گرداند، پس نیازی به
+        // درخواست دوم برای خواندن موجودی نیست.
+        const action = await dispatch(payOrderWithWallet({ token, orderId }));
+        setLoadingWallet(false);
+
+        if (payOrderWithWallet.fulfilled.match(action)) {
+            showToastOrAlert(t("Payment completed successfully"));
+            dispatch(fetchOrders(token));
+            dispatch(fetchUser(token));
+            setRefreshing(true);
+            return;
         }
+
+        // خطاهای مستندشده (موجودی کافی نیست، قبلاً پرداخت شده، ...) با
+        // error_code می‌آیند و باید پیام مشخص خودشان را داشته باشند.
+        showToastOrAlert(describeWalletError(action.payload, t));
     };
 
     const redirectUrl = Linking.createURL("/?");
@@ -437,6 +434,7 @@ function Details({ route, navigation }) {
             if (queryParams?.status == 'OK') {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
+                dispatch(fetchWalletBalance(token));
                 setRefreshing(true);
                 showToastOrAlert(t("Payment completed successfully"));
                 // Cleanup listener after handling
@@ -458,34 +456,23 @@ function Details({ route, navigation }) {
 
     const gatewayPayment = async () => {
         setLoadingGateway(true);
-        try {
-            const response = await axios.post(
-                `${uri}/orders/gateway-payment`,
-                {
-                    order_id: orderId,
-                    linking_url: redirectUrl
-                },
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'Accept-Language': lang
-                    }
-                }
-            );
 
-            if (response.status == 200 && response.data?.data?.payment_url) {
-                _addLinkingListener();
-                await Linking.openURL(response.data.data.payment_url);
-            } else {
-                showToastOrAlert(t("Error connecting to payment gateway"));
-                setLoadingGateway(false);
-            }
-        } catch (error) {
-            const message = error?.response ? (error?.response?.data?.message || t("Error connecting to payment gateway")) : t("Network error!");
-            showToastOrAlert(message);
+        const result = await payOrderViaGateway(token, { orderId, linkingUrl: redirectUrl });
+        const paymentUrl = result.data?.payment_url;
+
+        if (!result.ok || !paymentUrl) {
+            showToastOrAlert(result.message || t("Error connecting to payment gateway"));
             setLoadingGateway(false);
-        } finally {
+            return;
+        }
+
+        // شنونده پیش از باز شدن درگاه نصب می‌شود تا بازگشت سریع کاربر از دست نرود.
+        _addLinkingListener();
+
+        try {
+            await Linking.openURL(paymentUrl);
+        } catch {
+            showToastOrAlert(t("Error connecting to payment gateway"));
             setLoadingGateway(false);
         }
     };
@@ -494,6 +481,9 @@ function Details({ route, navigation }) {
         () => {
             fetchData();
             dispatch(fetchUser(token));
+            // موجودی تازه، چون کاربر ممکن است از صفحه‌ی شارژ برگشته باشد.
+            dispatch(seedBalance(user?.wallet));
+            if (token) dispatch(fetchWalletBalance(token));
         }, [refreshing]
     ));
 
@@ -808,7 +798,7 @@ function Details({ route, navigation }) {
 
                             {user?.apple_check == 0 && <View style={NewStyles.rowWrapper}>
                                 <Text style={NewStyles.text}>{t("Your wallet balance")}</Text>
-                                <Text style={NewStyles.text10}>{formatPrice(user?.wallet ?? 0)} {t("Tomans")}</Text>
+                                <Text style={NewStyles.text10}>{formatPrice(walletBalance)} {t("Tomans")}</Text>
                             </View>}
 
                             {data?.payment_status == 0 ? (

@@ -17,26 +17,30 @@ import { useDispatch, useSelector } from "react-redux";
 export default function Welcome({ navigation }) {
   const { t } = useTranslation()
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.token);
   const isRestored = useSelector((state) => state.auth.isRestored);
 
-  // این صفحه مقصدِ بعد از خروج از حساب هم هست، پس نباید بی‌قید به صفحه‌ی
-  // نیازمندِ ورود برود.
+  // این صفحه هم مقصدِ بعد از اسپلش است و هم مقصدِ بعد از خروج از حساب، و در هر
+  // دو حالت به منوی ورودی می‌رود — چون همان منو است که هر دو مسیر ورود (مشتری و
+  // سازمانی) از آن باز می‌شوند.
   //
-  // `useLogout` lands here, so this screen is shown to signed-out users as
-  // often as to signed-in ones. Sending everyone on to `OrderMenuScreen` put a
-  // just-logged-out user straight back into a guarded screen, which then
-  // bounced them again — a visible round trip through the wrong page. Pick the
-  // destination from the session instead.
+  // Both the cold start and `useLogout` land here, and both continue to the
+  // entry menu. Branching on the token used to send signed-out visitors
+  // straight to `SignInLanding`, which skipped the menu — and with it the only
+  // route to the organisation login. `OrderMenuScreen` is a public route now,
+  // so there is no guard to bounce off and no round trip to avoid.
+  //
+  // `isRestored` is still waited on: `token: null` means "not read yet" as much
+  // as "signed out" on a cold start, and the menu's own contents do not depend
+  // on it, but anything downstream does.
   useEffect(() => {
     if (!isRestored) return undefined;
 
     const timer = setTimeout(() => {
-      navigation.replace(token ? 'OrderMenuScreen' : 'SignInLanding');
+      navigation.replace('OrderMenuScreen');
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [isRestored, token, navigation]);
+  }, [isRestored, navigation]);
 
   useEffect(() => {
     dispatch(fetchContacts());

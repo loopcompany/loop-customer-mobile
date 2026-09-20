@@ -7,6 +7,8 @@ import { useDispatch } from 'react-redux';
 import { setToken, setUserType } from '@slices/authSlice';
 import { setOrganizationData } from '@slices/organizationSlice';
 import { fetchAddresses } from '@slices/addressSlice';
+import { emptyUser, fetchUser } from '@slices/userSlice';
+import { clearWallet } from '@slices/walletSlice';
 import Footer from '@screens/Footer';
 import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
@@ -131,6 +133,12 @@ const Login = ({ navigation }) => {
         dispatch(setToken(response.data.data.token));
 
         dispatch(setUserType('organization'));
+
+        // Drop whatever account was in `state.user` before, then load this one —
+        // the menu and footer dock read the code/name from it.
+        dispatch(emptyUser());
+        dispatch(clearWallet());
+        dispatch(fetchUser(response.data.data.token));
 
         dispatch(setOrganizationData(response.data.data.organization));
         console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);

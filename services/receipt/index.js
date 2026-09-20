@@ -10,8 +10,10 @@ export {
   ISSUER,
   PRICE_ON_REQUEST,
   NOT_SET,
+  NOT_APPLICABLE,
   ORDER_NUMBER_PENDING,
   buildReceipt,
+  asReceipt,
   deriveOrderKind,
   accountTypeLabel,
   isOrganizationAccount,
@@ -19,6 +21,12 @@ export {
 } from './receiptModel';
 
 export { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
+
+export {
+  fetchAccountProfile,
+  normalizeUserProfile,
+  normalizeOrganizationProfile,
+} from './receiptProfile';
 
 export {
   formatAddressEntry,

@@ -85,6 +85,45 @@ describe('receiptFromOrderApi', () => {
     expect(receipt.payment.total).toBeNull();
   });
 
+  it('payment_status عددی به برچسب تبدیل می‌شود، نه «۰» خام', () => {
+    // Details.js این فیلد را با `> 0` می‌سنجد، یعنی سرور عدد می‌فرستد؛ رسید
+    // همان عدد را خام چاپ می‌کرد.
+    const paid = receiptFromOrderApi({ ...order, payment_status: 1 }, {});
+    expect(paid.payment.status).toBe('پرداخت شده');
+    expect(paid.payment.method).toBe('پرداخت آنلاین');
+
+    const unpaid = receiptFromOrderApi({ ...order, payment_status: 0 }, {});
+    expect(unpaid.payment.status).toBe('پرداخت نشده');
+    expect(unpaid.payment.method).toBe('در انتظار پرداخت');
+  });
+
+  it('متنِ آماده‌ی سرور دست‌نخورده می‌ماند', () => {
+    const receipt = receiptFromOrderApi(order, {});
+    expect(receipt.payment.status).toBe('پرداخت کامل');
+  });
+
+  it('سفارشِ بی‌تخفیف کدِ null می‌گیرد (کامپوننت «ندارد» چاپ می‌کند)', () => {
+    const receipt = receiptFromOrderApi({ ...order, discount_price: null }, {});
+    expect(receipt.payment.discountCode).toBeNull();
+    expect(receipt.payment.discountAmount).toBeNull();
+  });
+
+  it('کد تخفیفِ سفارش روی رسید می‌آید', () => {
+    const receipt = receiptFromOrderApi({ ...order, discount_code: 'LOOP10' }, {});
+    expect(receipt.payment.discountCode).toBe('LOOP10');
+  });
+
+  it('وضعیت تحویلِ سفارشِ در جریان «در انتظار تحویل» است، نه «نامشخص»', () => {
+    const pending = receiptFromOrderApi({ ...order, status: 1, finished_at: null }, {});
+    expect(pending.delivery.status).toBe('در انتظار تحویل');
+
+    const cancelled = receiptFromOrderApi({ ...order, status: 3, finished_at: null }, {});
+    expect(cancelled.delivery.status).toBe('لغو شده');
+
+    const done = receiptFromOrderApi({ ...order, finished_at: '2025-10-28T10:00:00' }, {});
+    expect(done.delivery.status).toBe('توسط لوپ');
+  });
+
   it('تاریخ ثبت به شمسیِ صفرپرشده تبدیل می‌شود', () => {
     const receipt = receiptFromOrderApi(order, { user: { account_type: 'individual' } });
     expect(receipt.order.registeredDate).toMatch(/^\d{4} \/ \d{2} \/ \d{2}$/);

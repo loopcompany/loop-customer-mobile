@@ -8,7 +8,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
@@ -45,6 +44,7 @@ import { useMenu } from '@contexts/MenuContext';
 import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
 import { RECEIPT_STATE, receiptFromSystematic } from '@services/receipt';
+import useReceiptSources from '@hooks/useReceiptSources';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -93,13 +93,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const category = getCategory(categoryId);
   const steps = getFlow(categoryId);
 
-  // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید.
-  const user = useSelector((state) => state?.user?.data);
-  const orgProfile = useSelector((state) => state?.organization?.profileData);
-  // آدرس و تلفن ثابتِ رسید از همین آدرس‌ها می‌آید - `organization.profileData`
-  // هیچ‌جای اپ پر نمی‌شود و به‌تنهایی رسید را «نامشخص» می‌کرد.
-  const savedAddresses = useSelector((state) => state?.address?.data);
-  const selectedAddressId = useSelector((state) => state?.step?.addressId);
+  // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید. آدرس و تلفن ثابت از
+  // آدرس‌های ذخیره‌شده و - در نبودشان - از پروفایلِ سازمان می‌آید؛
+  // `organization.profileData` هیچ‌جای اپ پر نمی‌شود و به‌تنهایی رسید را
+  // «نامشخص» می‌کرد.
+  const receiptSources = useReceiptSources();
 
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
@@ -215,10 +213,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       receiptFromSystematic({
         categoryId,
         answers,
-        user,
-        orgProfile,
-        addresses: savedAddresses,
-        selectedAddressId,
+        ...receiptSources,
         state: RECEIPT_STATE.PENDING,
       });
 

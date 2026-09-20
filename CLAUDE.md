@@ -170,6 +170,23 @@ the order-creation wizard state.
 - `services/Api.js` is large and central — check it before assuming an endpoint doesn't
   exist yet.
 
+### Wallet / discount / referral (added 2026-09)
+
+`services/apiResponse.js` normalises every call in these three domains to
+`{ ok, data, message, code }` and never throws — these backends report business failures
+with a **2xx** status and `success:false`, so branching on the HTTP status (or relying on
+`catch`) silently reads "code already used" as success. `WalletApi` / `DiscountApi` /
+`ReferralApi` all go through it. Full write-up: `docs/DISCOUNT_REFERRAL_WALLET_IMPLEMENTATION.md`.
+
+Three things not to undo:
+
+- **The wallet balance lives in `slices/walletSlice.js`, not `state.user.data.wallet`.**
+  The latter is a snapshot from token validation and goes stale the moment an order is paid.
+- **`/referral-codes/check` consumes the code.** Call it only from an explicit user press —
+  never on change, on blur, or in an effect.
+- **`other_referral_code` (registration) and `referral_code` (`LOOP-XXXXXX`, order) are
+  separate systems.** Same name, nothing else in common. Don't merge them.
+
 **Known landmine:** the order-submission endpoint is documented inconsistently across
 `docs/ORDER_SUBMIT_API_COMPLETE_DOCS.md`, `docs/ORDER_SUBMIT_UPDATES.md`, and
 `docs/API_ENDPOINT_FIX.md` — variously `/api/orders/`, `/api/orders/submit`, `/orders/`.

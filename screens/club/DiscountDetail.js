@@ -1,11 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, RefreshControl, Platform } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { cleanText, formatPrice, handleError, showToastOrAlert } from '@helpers/Common';
-import { imageUri, uri } from '@services/URL';
+import { cleanText, formatPrice, showToastOrAlert } from '@helpers/Common';
+import { imageUri } from '@services/URL';
+import { getPlanDetail, claimPlan, describeDiscountError } from '@services/DiscountApi';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor3, themeColor5 } from '@theme/Color';
 import Button from '@components/Button';
@@ -24,7 +24,6 @@ export default function DiscountDetail({ route, navigation }) {
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const discountId = route?.params?.discountId;
     const dispatch = useDispatch();
@@ -37,17 +36,15 @@ export default function DiscountDetail({ route, navigation }) {
 
     const [data, setData] = useState({});
     const fetchData = async () => {
-        try {
-            const response = await axios.post(`${uri}/discounts/detail`, { discountId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
-            if (response.status == 200) {
-                setData(response?.data?.data);
-            }
-        } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
-            showToastOrAlert(message);
-        } finally {
-            setRefreshing(false);
+        const result = await getPlanDetail(token, discountId);
+
+        if (result.ok) {
+            setData(result.data || {});
+        } else {
+            showToastOrAlert(result.message || t('An unexpected error occurred!'));
         }
+
+        setRefreshing(false);
     };
     useEffect(() => {
         fetchData();
@@ -55,82 +52,24 @@ export default function DiscountDetail({ route, navigation }) {
 
     const getDiscount = async () => {
         setLoading(true);
-        try {
-            const response = await axios.post(
-                `${uri}/discounts/claim`,
-                { discountId },
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
+        const result = await claimPlan(token, discountId);
+        setLoading(false);
 
-            if (response.status == 200) {
-                dispatch(fetchUser(token));
-                setCode(response?.data?.data?.code);
-                setDiscountModal(true);
-            }
-        } catch (error) {
-            // ✅ بهبود یافته: استخراج دقیق پیام خطا از سرور
-            let errorMessage = t('An unexpected error occurred!');
-
-            if (error?.response) {
-                // سرور پاسخ داده (4xx یا 5xx)
-                const status = error.response.status;
-                const serverMessage = error.response.data?.message;
-
-                // اگر سرور پیام خاصی فرستاده، از آن استفاده کن
-                if (serverMessage) {
-                    errorMessage = serverMessage;
-                } else {
-                    // پیام‌های پیش‌فرض برای status code های مختلف
-                    switch (status) {
-                        case 400:
-                            // کاربر امتیاز کافی ندارد
-                            errorMessage = t('You don\'t have enough points to claim this discount');
-                            break;
-                        case 403:
-                            // کاربر مجوز دریافت ندارد (قبلاً دریافت کرده یا VIP نیست)
-                            errorMessage = t('You are not authorized to claim this discount');
-                            break;
-                        case 404:
-                            // تخفیف یافت نشد
-                            errorMessage = t('Discount not found');
-                            break;
-                        case 422:
-                            // داده‌های ارسالی نامعتبر
-                            errorMessage = t('Invalid data submitted');
-                            break;
-                        default:
-                            if (status >= 500) {
-                                // خطای سرور
-                                errorMessage = t('Server error. Please try again later');
-                            }
-                            break;
-                    }
-                }
-
-                console.log('❌ [DiscountDetail.getDiscount] خطا در دریافت تخفیف:', {
-                    status,
-                    serverMessage,
-                    displayMessage: errorMessage,
-                    fullError: error.response.data
-                });
-            } else if (error?.request) {
-                // درخواست ارسال شده اما پاسخی دریافت نشد (مشکل شبکه)
-                errorMessage = t('Network error!');
-                console.log('❌ [DiscountDetail.getDiscount] خطای شبکه - پاسخی از سرور دریافت نشد');
-            } else {
-                // خطای دیگر (مثلاً خطای ساخت request)
-                console.log('❌ [DiscountDetail.getDiscount] خطای نامشخص:', error.message);
-            }
-
-            showToastOrAlert(errorMessage);
-        } finally {
-            setLoading(false);
+        if (!result.ok) {
+            // خطاها با error_code می‌آیند: INVALID_DISCOUNT_ID (404)،
+            // ALREADY_CLAIMED (409)، INSUFFICIENT_GEMS (403).
+            //
+            // نگاشت قبلی بر اساس وضعیت HTTP بود و ۴۰۳ را «مجوز ندارید» معنا
+            // می‌کرد، در حالی که ۴۰۳ همان «جم کافی نداری» است — یعنی کاربری که
+            // امتیاز کم داشت، پیام کاملاً بی‌ربطی می‌دید.
+            showToastOrAlert(describeDiscountError(result, t));
+            return;
         }
+
+        // موجودی جم کاربر با خرج شدن تغییر کرده است.
+        dispatch(fetchUser(token));
+        setCode(result.data?.code);
+        setDiscountModal(true);
     }
 
     return (

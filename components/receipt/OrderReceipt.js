@@ -20,6 +20,7 @@ import {
   ISSUER,
   PRICE_ON_REQUEST,
   NOT_SET,
+  NOT_APPLICABLE,
   ORDER_NUMBER_PENDING,
 } from '@services/receipt';
 import ReceiptTable from './ReceiptTable';
@@ -378,11 +379,20 @@ function OrderReceipt({ receipt }) {
             value={payment.total == null ? PRICE_ON_REQUEST : formatPrice(payment.total)}
             s={s}
           />
-          <Row icon="pricetag-outline" label="کد تشویقی" value={payment.discountCode} s={s} />
+          {/* نبودنِ تخفیف یعنی «ندارد»، نه «نامشخص» - مسیرهای سازمانی اصلاً
+              جایی برای وارد کردن کد تشویقی ندارند و همیشه به اینجا می‌رسند. */}
+          <Row
+            icon="pricetag-outline"
+            label="کد تشویقی"
+            value={payment.discountCode ?? NOT_APPLICABLE}
+            s={s}
+          />
           <Row
             icon="remove-circle-outline"
             label="مبلغ کسر شده"
-            value={payment.discountAmount == null ? null : formatPrice(payment.discountAmount)}
+            value={
+              payment.discountAmount == null ? NOT_APPLICABLE : formatPrice(payment.discountAmount)
+            }
             s={s}
           />
           <Row

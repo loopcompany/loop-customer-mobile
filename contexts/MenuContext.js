@@ -35,7 +35,8 @@ import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import useLogout from '@hooks/useLogout';
 import { fetchContacts } from '@slices/contactSlice';
-import { fetchUser } from '@slices/userSlice';
+import { fetchUser, emptyUser } from '@slices/userSlice';
+import { clearWallet } from '@slices/walletSlice';
 import { createStyles } from '@styles/NewStyles';
 import { imageUri, mainUri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -450,8 +451,15 @@ export const MenuProvider = ({ children }) => {
         dispatch(fetchContacts());
         loadLanguage()
     }, [])
+    // `state.user.data` feeds the dock's code and the menu's name. It must
+    // never outlive the session it was fetched for: on sign-out (any path —
+    // logout button, expired-session sheet) drop it, so the next account can't
+    // be shown the previous account's code and name while its own loads.
     useEffect(() => {
-        if (!user && token) {
+        if (!token) {
+            dispatch(emptyUser());
+            dispatch(clearWallet());
+        } else if (!user) {
             dispatch(fetchUser(token))
         }
     }, [token])
@@ -468,7 +476,7 @@ export const MenuProvider = ({ children }) => {
             
             
             { id: 3, title: t("Orders"), screen: "OrdersScreen", image: `${imageUri}/userfolder/Orders.png` },
-            { id: 4, title: t("Transactions"), screen: "TransactionsScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/TransactionsScreen.png` },
+            { id: 22, title: t("Loop Wallet"), screen: "Wallet", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/Increase.png` },
             { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/CanceledOrdersScreen.png` },
             { id: 6, title: t("Messages"), screen: "MessageScreen", image: `${imageUri}/userfolder/MessageScreen.png` },
             { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true, image: `${imageUri}/userfolder/OrganizationContract.png` },
@@ -488,7 +496,6 @@ export const MenuProvider = ({ children }) => {
                 screen: userType === 'organization' ? "OrganizationTermsScreen" : "AboutScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/AboutScreen.png`
             },
             { id: 21, title: t("Privacy"), screen: "PrivacyScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/PrivacyScreen.png` },
-            { id: 22, title: t("Loop Wallet"), screen: "Increase", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/Increase.png` },
         ];
 
         if (userType === 'organization') {

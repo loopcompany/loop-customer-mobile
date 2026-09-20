@@ -16,6 +16,7 @@ import radiusSlice from './slices/radiusSlice';
 import pdfSlice from './slices/pdfDocumentSlice';
 import minPriceSlice from './slices/minPriceSlice';
 import hashAppSlice from './slices/hashAppSlice';
+import walletSlice from './slices/walletSlice';
 
 // Redux state persistence functions for web platform
 const loadState = () => {
@@ -69,6 +70,7 @@ const store = configureStore({
     pdf: pdfSlice,
     minPrice: minPriceSlice,
     hashApp: hashAppSlice,
+    wallet: walletSlice,
   },
   preloadedState,
 });

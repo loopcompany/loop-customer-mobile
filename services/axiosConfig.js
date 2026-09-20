@@ -12,7 +12,7 @@ let navigationRef = null;
 
 /**
  * تنظیم navigation reference برای استفاده در error handling
- * 
+ *
  * @param {Object} navRef - Navigation reference
  */
 export const setNavigationRef = (navRef) => {
@@ -32,8 +32,8 @@ const apiClient = axios.create({
   timeout: 15000, // 15 seconds timeout
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Accept-Language': i18next.language || 'en' // Default language header
+    Accept: 'application/json',
+    'Accept-Language': i18next.language || 'en', // Default language header
   },
 });
 
@@ -54,7 +54,7 @@ apiClient.interceptors.request.use(
         console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
           headers: config.headers,
           data: config.data ? 'Has data' : 'No data',
-          timeout: config.timeout
+          timeout: config.timeout,
         });
       }
 
@@ -77,11 +77,14 @@ apiClient.interceptors.response.use(
   (response) => {
     // لاگ موفقیت‌آمیز responses در محیط development
     if (__DEV__) {
-      console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-        status: response.status,
-        success: response.data?.success,
-        hasData: !!response.data?.data
-      });
+      console.log(
+        `✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+        {
+          status: response.status,
+          success: response.data?.success,
+          hasData: !!response.data?.data,
+        }
+      );
     }
     return response;
   },
@@ -92,7 +95,7 @@ apiClient.interceptors.response.use(
       method: error.config?.method?.toUpperCase(),
       status: error.response?.status,
       errorCode: error.response?.data?.error_code,
-      message: error.response?.data?.message
+      message: error.response?.data?.message,
     });
 
     // بعضی از درخواست‌ها background و best-effort هستند و خودشان خطا را
@@ -155,7 +158,7 @@ const wasAuthenticatedRequest = (config) => {
 
 /**
  * تشخیص API های مربوط به سازمان
- * 
+ *
  * @param {string} url - URL درخواست
  * @returns {boolean} - آیا مربوط به سازمان است یا نه
  */
@@ -168,10 +171,10 @@ const isOrganizationRelatedAPI = (url) => {
     '/contracts',
     '/technicians',
     '/payments',
-    '/reviews'
+    '/reviews',
   ];
 
-  return organizationAPIs.some(api => url.includes(api));
+  return organizationAPIs.some((api) => url.includes(api));
 };
 
 /**
@@ -183,7 +186,7 @@ const isOrganizationRelatedAPI = (url) => {
  * @param {string} url - URL درخواست
  * @returns {boolean} - آیا درخواست silent است یا نه
  */
-const isSilentAPI = (url) => {
+export const isSilentAPI = (url) => {
   if (!url) return false;
 
   const silentAPIs = [
@@ -191,14 +194,29 @@ const isSilentAPI = (url) => {
     // تاییدیه. صدازننده خودش خطا را مدیریت می‌کند، پس interceptor نباید alert
     // دوم نشان بدهد یا کاربر را وسط ثبت سفارش به صفحه‌ی دیگری بفرستد.
     '/notifications/',
+
+    // خواندنِ پس‌زمینه‌ی کیف پول: موجودی و تاریخچه روی focus هر صفحه‌ی مرتبط
+    // تازه می‌شوند. یک refresh ناموفق نباید نشست کاربر را تمام کند و او را
+    // وسط کار به صفحه‌ی ورود بیندازد — صفحه خودش خطا را نمایش می‌دهد و موجودیِ
+    // قبلی سر جایش می‌ماند.
+    //
+    // Background wallet reads. `/wallet/balance` and `/wallet/transactions`
+    // refresh on focus, so a failing one would otherwise raise the
+    // session-expiry sheet every time the user opens the wallet, the invoice or
+    // an order — turning a read that nobody asked for into a forced logout.
+    // The money actions below are deliberately NOT here: `/wallet/charge`,
+    // `/wallet/pay-order` and `/orders/gateway-payment` are user-initiated, and
+    // a dead session on those must be reported properly.
+    '/wallet/balance',
+    '/wallet/transactions',
   ];
 
-  return silentAPIs.some(api => url.includes(api));
+  return silentAPIs.some((api) => url.includes(api));
 };
 
 /**
  * Helper function برای ایجاد درخواست با retry mechanism
- * 
+ *
  * @param {Function} apiCall - تابع API call
  * @param {number} maxRetries - حداکثر تعداد تلاش مجدد
  * @param {number} retryDelay - تأخیر بین تلاش‌ها (میلی‌ثانیه)
@@ -224,7 +242,7 @@ export const withRetry = async (apiCall, maxRetries = 3, retryDelay = 1000) => {
       }
 
       // منتظر بمان قبل از تلاش بعدی
-      await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
+      await new Promise((resolve) => setTimeout(resolve, retryDelay * (attempt + 1)));
 
       console.log(`🔄 Retrying API call, attempt ${attempt + 2}/${maxRetries}`);
     }
@@ -235,7 +253,7 @@ export const withRetry = async (apiCall, maxRetries = 3, retryDelay = 1000) => {
 
 /**
  * Helper function برای timeout سفارشی
- * 
+ *
  * @param {Function} apiCall - تابع API call
  * @param {number} timeoutMs - timeout به میلی‌ثانیه
  * @returns {Promise} - نتیجه API call یا timeout error
@@ -243,9 +261,7 @@ export const withRetry = async (apiCall, maxRetries = 3, retryDelay = 1000) => {
 export const withTimeout = (apiCall, timeoutMs = 10000) => {
   return Promise.race([
     apiCall(),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
-    )
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeoutMs)),
   ]);
 };
 
@@ -260,7 +276,7 @@ export const withCache = (cacheKey, apiCall, ttlMs = 5 * 60 * 1000) => {
     const cached = responseCache.get(cacheKey);
 
     // اگر cache معتبر است، آن را برگردان
-    if (cached && (now - cached.timestamp) < ttlMs) {
+    if (cached && now - cached.timestamp < ttlMs) {
       console.log(`📦 Using cached response for: ${cacheKey}`);
       return cached.data;
     }
@@ -272,7 +288,7 @@ export const withCache = (cacheKey, apiCall, ttlMs = 5 * 60 * 1000) => {
       // Response را cache کن
       responseCache.set(cacheKey, {
         data: response,
-        timestamp: now
+        timestamp: now,
       });
 
       console.log(`💾 Cached response for: ${cacheKey}`);

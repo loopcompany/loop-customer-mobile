@@ -11,6 +11,8 @@ import Button from '@components/Button';
 import { imageUri, mainUri, uri } from '@services/URL';
 import { fetchUser } from '@slices/userSlice';
 import { fetchOrders } from '@slices/orderSlice';
+import { payOrderViaGateway, describeWalletError } from '@services/WalletApi';
+import { fetchWalletBalance, payOrderWithWallet, seedBalance, selectWalletBalance } from '@slices/walletSlice';
 
 import Loader from '@components/Loader';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +34,8 @@ function Invoice({ route, navigation }) {
     const orderId = route?.params?.orderId;
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
+    // موجودی از walletSlice می‌آید و بعد از هر پرداخت تازه می‌شود.
+    const walletBalance = useSelector(selectWalletBalance)
     const [refreshing, setRefreshing] = useState(true)
     const [loading1, setLoading1] = useState(false)
     const [loading2, setLoading2] = useState(false)
@@ -80,6 +84,10 @@ function Invoice({ route, navigation }) {
         fetchData();
         fetchExtraServices();
         dispatch(fetchUser(token))
+        // موجودی پروفایل فقط مقدار اولیه است؛ عدد معتبر از /wallet/balance می‌آید.
+        dispatch(seedBalance(user?.wallet))
+        if (token) dispatch(fetchWalletBalance(token))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshing]);
 
     const totalDiscountedPrice = useMemo(() => {
@@ -104,20 +112,21 @@ function Invoice({ route, navigation }) {
 
     const walletPayment = async () => {
         setLoading1(true);
-        try {
-            const response = await axios.post(`${uri}/wallet/pay-order`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
-            if (response.status == 201) {
-                showToastOrAlert(response?.data?.message);
-                dispatch(fetchOrders(token));
-                dispatch(fetchUser(token));
-                setRefreshing(true);
-            }
-        } catch (error) {
-            const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t('An unexpected error occurred!')) : t('Network error!');
-            showToastOrAlert(message);
-        } finally {
-            setLoading1(false);
+
+        // قبلاً فقط 201 موفق شمرده می‌شد و هر پاسخ دیگری بی‌صدا رد می‌شد —
+        // کاربر نه پیام موفقیت می‌دید و نه پیام خطا. حالا هر دو شاخه پیام دارند.
+        const action = await dispatch(payOrderWithWallet({ token, orderId }));
+        setLoading1(false);
+
+        if (payOrderWithWallet.fulfilled.match(action)) {
+            showToastOrAlert(t('Payment completed successfully'));
+            dispatch(fetchOrders(token));
+            dispatch(fetchUser(token));
+            setRefreshing(true);
+            return;
         }
+
+        showToastOrAlert(describeWalletError(action.payload, t));
     };
 
     const redirectUrl = Linking.createURL("/?");
@@ -133,6 +142,7 @@ function Invoice({ route, navigation }) {
             if (queryParams?.status == 'OK') {
                 dispatch(fetchOrders(token));
                 dispatch(fetchUser(token));
+                dispatch(fetchWalletBalance(token));
                 setRefreshing(true);
                 showToastOrAlert(t('Payment completed successfully'));
                 // Cleanup listener after handling
@@ -154,33 +164,23 @@ function Invoice({ route, navigation }) {
 
     const gatewayPayment = async () => {
         setLoadingGateway(true);
-        try {
-            const response = await axios.post(
-                `${uri}/orders/gateway-payment`,
-                {
-                    order_id: orderId,
-                    linking_url: redirectUrl
-                },
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
 
-            if (response.status == 200 && response.data?.data?.payment_url) {
-                _addLinkingListener();
-                await Linking.openURL(response.data.data.payment_url);
-            } else {
-                showToastOrAlert(t('Error connecting to payment gateway'));
-                setLoadingGateway(false);
-            }
-        } catch (error) {
-            const message = error?.response ? (error?.response?.data?.message || t('Error connecting to payment gateway')) : t('Network error!');
-            showToastOrAlert(message);
+        const result = await payOrderViaGateway(token, { orderId, linkingUrl: redirectUrl });
+        const paymentUrl = result.data?.payment_url;
+
+        if (!result.ok || !paymentUrl) {
+            showToastOrAlert(result.message || t('Error connecting to payment gateway'));
             setLoadingGateway(false);
-        } finally {
+            return;
+        }
+
+        // شنونده پیش از باز شدن درگاه نصب می‌شود تا بازگشت سریع کاربر از دست نرود.
+        _addLinkingListener();
+
+        try {
+            await Linking.openURL(paymentUrl);
+        } catch {
+            showToastOrAlert(t('Error connecting to payment gateway'));
             setLoadingGateway(false);
         }
     };
@@ -222,7 +222,7 @@ function Invoice({ route, navigation }) {
                             ((data?.status > 0 && data?.technician_price && totalDiscountedPrice < minPrice?.price) || (data?.status == 4 && data?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (data?.status == 3 && data?.arrived_at)) &&
                             renderRow(t('Travel and tuition fees'), formatPrice('200000') + ' ' + t('Toman'))
                         }
-                        {renderRow(`${t('Your wallet balance')}:`, formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
+                        {renderRow(`${t('Your wallet balance')}:`, formatPrice(walletBalance) + ' ' + t('Toman'))}
 
                         {/* Extra Services Display */}
                         {extraServices.length > 0 && (

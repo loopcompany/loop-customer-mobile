@@ -38,8 +38,41 @@ export const API_ENDPOINTS = {
     // so a POST there always fails with 405. docs/ORDER_SUBMIT_API_QUICK_GUIDE.md is wrong.
     CHECK_DISCOUNT: '/orders/check-discount', // POST — per ORGANIZATION_ORDER_API.md
     DETAILS: '/orders/{id}',
+    GATEWAY_PAYMENT: '/orders/gateway-payment', // POST { order_id, linking_url }
     CANCEL: '/orders/{id}/cancel',
     TRACK: '/orders/{id}/track',
+  },
+
+  // Wallet & transactions — contract: FRONTEND_WALLET.md
+  // Amounts are integer tomans. Charge accepts 10,000 .. 50,000,000.
+  WALLET: {
+    BALANCE: '/wallet/balance',
+    CHARGE: '/wallet/charge',
+    TRANSACTIONS: '/wallet/transactions',
+    // NOTE: the body key is `orderId` (camelCase), unlike /orders/gateway-payment
+    // which takes `order_id`. This asymmetry is the backend's, not a typo.
+    PAY_ORDER: '/wallet/pay-order',
+  },
+
+  // Discount codes (club / gem plans) — contract: FRONTEND_DISCOUNT_CODES.md
+  DISCOUNT: {
+    OFFERS: '/discounts/offers',
+    CATEGORIES: '/discounts/categories',
+    LIST: '/discounts/list',
+    DETAIL: '/discounts/detail', // POST { discountId }
+    CLAIM: '/discounts/claim', // POST { discountId }
+    USER_CODES: '/user/discounts',
+    // NOTE: do NOT use '/discounts/check'. It is a second validation endpoint
+    // with different field names (discountCode/categoryId), a flat
+    // `discount_code_percent` response and 409 on invalid. The app standardises
+    // on ORDERS.CHECK_DISCOUNT below, which is the wrapped//data variant.
+  },
+
+  // Referral codes (admin-assigned `LOOP-XXXXXX`) — contract: FRONTEND_REFERRAL_CODES.md
+  // Unrelated to `other_referral_code` collected at registration, which is a
+  // plain stored field with no discount attached. Do not merge the two.
+  REFERRAL: {
+    CHECK: '/referral-codes/check', // POST { code } — CONSUMES the code
   },
 
   // Push notifications (FCM device tokens) — see services/notifications/

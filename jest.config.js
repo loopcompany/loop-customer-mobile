@@ -26,7 +26,10 @@ module.exports = {
     '^@theme/(.*)$': '<rootDir>/theme/$1',
     '^@utils/(.*)$': '<rootDir>/utils/$1',
   },
+  // `immer` (وابسته‌ی Redux Toolkit) فقط ESM می‌فرستد، پس بدون transform هر تستی
+  // که یک slice را ایمپورت کند با «Unexpected token 'export'» از کار می‌افتد —
+  // و چون سوئیت اصلاً بالا نمی‌آید، در شمارش تست‌ها هم دیده نمی‌شود.
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|@react-native-firebase/.*|firebase|@firebase/.*))',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|@react-native-firebase/.*|firebase|@firebase/.*|immer|react-redux))',
   ],
 };

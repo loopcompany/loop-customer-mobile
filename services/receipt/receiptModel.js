@@ -90,6 +90,10 @@ export const DELIVERY_STATUS = {
   BY_COURIER_LOOP: 'توسط پیک / لوپ',
   BY_USER: 'توسط کاربر',
   BY_LOOP: 'توسط لوپ',
+  /** سفارش ثبت شده ولی هنوز تحویلی رخ نداده - «نامشخص» اینجا غلط‌انداز است. */
+  PENDING: 'در انتظار تحویل',
+  /** سفارش لغو شده؛ تحویلی در کار نیست. */
+  CANCELLED: 'لغو شده',
   UNKNOWN: 'نامشخص',
 };
 
@@ -113,6 +117,12 @@ export const PRICE_ON_REQUEST = 'استعلام';
 export const NOT_SET = 'نامشخص';
 
 /**
+ * فیلدی که *موضوعیت* ندارد - مثل «کد تشویقی» روی سفارشی که اصلاً تخفیفی
+ * نداشته. «نامشخص» آنجا یعنی داده‌ای گم شده؛ «ندارد» یعنی چیزی نبوده.
+ */
+export const NOT_APPLICABLE = 'ندارد';
+
+/**
  * جای «شماره سفارش» تا وقتی سفارش روی سرور ثبت نشده است.
  *
  * پیش‌رسیدها (هر دو مسیر سازمانی و پیش‌نمایشِ ثبت نهایی) هنوز شماره ندارند -
@@ -124,6 +134,20 @@ export const ORDER_NUMBER_PENDING = 'پس از ثبت نهایی نمایش دا
 // ---------------------------------------------------------------------------
 // ساخت شیء رسید
 // ---------------------------------------------------------------------------
+
+/**
+ * رسیدی که به‌صورت route param پاس داده شده، فقط اگر واقعاً یک رسید باشد.
+ *
+ * روی وب، linking پارامترهای ناوبری را داخل URL می‌نویسد و یک object به رشته‌ی
+ * «[object Object]» تبدیل می‌شود. تا وقتی کاربر در همان نشست بماند params در
+ * حافظه‌اند و مشکلی نیست، ولی اگر همان URL را refresh کند رسید یک *رشته* است و
+ * کامپوننت سرِ `receipt.order.userStatus` می‌ترکید.
+ *
+ * @param {unknown} value مقدار `route.params.receipt`.
+ * @returns {object|null} خودِ رسید، یا null اگر رسید نیست.
+ */
+export const asReceipt = (value) =>
+  value && typeof value === 'object' && !Array.isArray(value) && value.order ? value : null;
 
 /** جمع یک ستون قیمت؛ اگر هیچ ردیفی قیمت نداشته باشد null برمی‌گرداند. */
 export const sumPrices = (rows) => {
@@ -161,9 +185,13 @@ export const buildReceipt = ({
       ? null
       : Number(itemsTotal || 0) + Number(servicesTotal || 0);
 
-  const discountAmount = Number.isFinite(Number(payment.discountAmount))
-    ? Number(payment.discountAmount)
-    : null;
+  // `Number(null)` صفر است، پس شرطِ ساده‌ی Number.isFinite یک تخفیفِ غایب را به
+  // «۰ تومان کسر شده» تبدیل می‌کرد - به‌جای اینکه بگوید تخفیفی در کار نبوده.
+  const hasDiscount =
+    payment.discountAmount != null &&
+    String(payment.discountAmount).trim() !== '' &&
+    Number.isFinite(Number(payment.discountAmount));
+  const discountAmount = hasDiscount ? Number(payment.discountAmount) : null;
 
   const payable = grandTotal == null ? null : grandTotal - Number(discountAmount || 0);
 

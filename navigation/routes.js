@@ -166,6 +166,11 @@ export const routes = [
     path: 'receipt',
   },
   {
+    name: 'Wallet',
+    getComponent: () => require('@screens/account/Wallet').default,
+    path: 'wallet',
+  },
+  {
     name: 'Increase',
     getComponent: () => require('@screens/account/Increase').default,
     path: 'increase',
@@ -531,6 +536,22 @@ export const PUBLIC_ROUTES = new Set([
   'Grouping',
   'Method',
   'TestConnection',
+
+  /* منوی ورودی اپ — دروازه‌ی هر دو مسیر ورود است */
+  //
+  // The four-way entry menu (systematic order / urgent order / AI /
+  // organisation-company) is how a signed-out visitor reaches *either* login
+  // flow: the customer chooser (`SignInLanding`) and the organisation login
+  // (`Grouping` → `Login`) both hang off it. Guarding it made `RequireAuth`
+  // bounce every signed-out visitor to `SignInLanding`, which removed the
+  // organisation login from the app entirely — you could not sign in to an
+  // organisation account at all.
+  //
+  // It is safe to expose: the screen renders four navigation buttons and a
+  // support phone number from the public contacts endpoint, reads nothing off
+  // the user and issues no authenticated request. `OrderMenuScreen.js` has said
+  // so in a comment since it was written; the route table simply never agreed.
+  'OrderMenuScreen',
 
   /* Static / informational — readable without an account */
   'AboutScreen',

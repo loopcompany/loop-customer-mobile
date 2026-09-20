@@ -114,6 +114,7 @@ const buildItems = (procurementAnswer) => {
  * @param {object} input.answers پاسخ‌های مراحل، کلید = شناسه‌ی مرحله.
  * @param {object} [input.user] state.user.data
  * @param {object} [input.orgProfile] state.organization.profileData
+ * @param {object} [input.profile] پروفایل نرمال‌شده‌ی حساب (`receiptProfile.js`).
  * @param {object[]} [input.addresses] state.address.data - منبع آدرس و تلفن ثابت.
  * @param {string|number} [input.selectedAddressId] state.step.addressId
  * @param {string} [input.state] حالت رسید؛ پیش‌فرض «جزئیات سفارش».
@@ -125,6 +126,7 @@ export const receiptFromSystematic = ({
   answers = {},
   user = null,
   orgProfile = null,
+  profile = null,
   addresses = null,
   selectedAddressId = null,
   state = RECEIPT_STATE.PENDING,
@@ -205,6 +207,7 @@ export const receiptFromSystematic = ({
       isOrganization: isOrg,
       addresses,
       selectedAddressId,
+      profile,
       orgProfile,
       user,
     }),
@@ -215,7 +218,9 @@ export const receiptFromSystematic = ({
       // تاریخ مراجعه‌ی انتخابی کاربر، نه تاریخ تحویل واقعی - تا وقتی سفارش
       // روی سرور ثبت نشده تحویلی هم رخ نداده است.
       date: schedule?.date ? toReceiptDate(schedule.date) : null,
-      status: slotTitle ? `${DELIVERY_STATUS.UNKNOWN} (${slotTitle})` : DELIVERY_STATUS.UNKNOWN,
+      // سفارش هنوز ثبت نشده، پس تحویلی هم رخ نداده: «در انتظار تحویل»، نه
+      // «نامشخص». بازه‌ی ساعتِ انتخابی کاربر داخل پرانتز می‌آید.
+      status: slotTitle ? `${DELIVERY_STATUS.PENDING} (${slotTitle})` : DELIVERY_STATUS.PENDING,
     },
     payment: {
       // مسیر سازمانی قیمت ندارد: «پس از بررسی کارشناس اعلام می‌شود».

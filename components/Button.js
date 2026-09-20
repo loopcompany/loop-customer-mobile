@@ -1,19 +1,36 @@
 import {
-  View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import React from "react";
-import { themeColor0, themeColor10, themeColor4 } from "@theme/Color";
+import { themeColor0, themeColor3, themeColor4 } from "@theme/Color";
 import NewStyles from "@styles/NewStyles";
 
-export default function Button({ onPress, title, style, loading , textStyle}) {
+/**
+ * `disabled` قبلاً در props گرفته نمی‌شد.
+ *
+ * چند صفحه (انتخابگرِ نقشه، نظرسنجی، یادداشت‌ها) آن را پاس می‌دادند و انتظار
+ * داشتند دکمه خاموش شود، ولی prop نادیده گرفته می‌شد: دکمه هم ظاهرِ فعال داشت
+ * هم واقعاً کار می‌کرد. حالا هم غیرفعال می‌شود هم کم‌رنگ.
+ */
+export default function Button({ onPress, title, style, loading, disabled, textStyle }) {
+  const inactive = Boolean(loading || disabled);
+
   return (
     <TouchableOpacity
-      disabled={loading}
-      style={[styles.button, NewStyles.shadow, NewStyles.border10,NewStyles.center, style]}
+      disabled={inactive}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: inactive, busy: Boolean(loading) }}
+      style={[
+        styles.button,
+        NewStyles.shadow,
+        NewStyles.border10,
+        NewStyles.center,
+        disabled && !loading && styles.disabled,
+        style,
+      ]}
       onPress={onPress}
     >
       {loading && (
@@ -34,5 +51,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     maxWidth:400
   },
-  
+  disabled: {
+    backgroundColor: themeColor3.bgColor(1),
+    opacity: 0.8,
+  },
 });
