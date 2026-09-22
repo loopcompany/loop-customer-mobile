@@ -9,7 +9,9 @@
 //   summaryLines  : [{label, value}] - خلاصه‌ی واقعی انتخاب‌های کاربر
 //   schedule      : {date, slot} - تاریخ (قالب DatePicker) و شناسه‌ی بازه‌ی ساعتی
 //   contact       : {fullName, mobile} - اطلاعات تماس واردشده در همان فرم
-//   price         : number|null - اگر مبلغ قطعی نیست null بماند تا «استعلام» نمایش داده شود
+//   price         : number|null - مبلغِ از پیش‌معلوم. صفحه‌های سازمانی نرخ ندارند
+//                   و آن را نمی‌فرستند؛ در نبودش این صفحه خودش نرخ‌های دسته را
+//                   از `/steps/fetch` می‌گیرد (useCategoryRates).
 
 import React, { useMemo, useState } from 'react';
 import {
@@ -43,12 +45,14 @@ import {
   isOrganizationAccount,
   pickSavedAddress,
   resolveCustomer,
+  withReceiptTotal,
 } from '@services/receipt';
 import useReceiptSources from '@hooks/useReceiptSources';
 import FooterSpacer from '@components/FooterSpacer';
 import OrderCodesSection from '@components/OrderCodesSection';
 import usePromoCode from '@hooks/usePromoCode';
 import useReferralCode from '@hooks/useReferralCode';
+import useCategoryRates from '@hooks/useCategoryRates';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
 // صفحه از i18next استفاده نمی‌کند (L()/LO() فارسی محلی‌اش را دارد) پس یک
@@ -132,6 +136,23 @@ export default function OrderSummaryScreen({ navigation, route }) {
   const promo = usePromoCode({ token });
   const referral = useReferralCode({ token });
 
+  // نرخِ واقعیِ دسته. مسیرهای سازمانی فرمِ محلی دارند و قیمتی همراهشان نیست،
+  // پس مبلغ از روی مراحلِ همان دسته در بک‌اند محاسبه می‌شود. اگر دسته‌ای
+  // شناسه‌ی عددی نداشته باشد یا هیچ گزینه‌ای نخورَد، سفارش مثل قبل استعلامی
+  // می‌ماند (مبلغ ۰) - عددِ من‌درآوردی ساخته نمی‌شود.
+  const rates = useCategoryRates({ categoryId, selections: summaryLines });
+
+  // `price`ِ route اولویت دارد: صفحه‌ای که مبلغ را می‌داند، خودش می‌فرستد.
+  const resolvedPrice = Number(price) > 0 ? Math.round(Number(price)) : rates.total;
+
+  // رسید در صفحه‌ی مبدا ساخته شده، قبل از اینکه نرخ‌ها برسند؛ همان مبلغ را
+  // روی ردیف خدمتش می‌نشانیم تا کاربر پیش از «ثبت نهایی» همان عددی را ببیند
+  // که ارسال می‌شود.
+  const pricedReceipt = useMemo(
+    () => withReceiptTotal(receipt, resolvedPrice),
+    [receipt, resolvedPrice]
+  );
+
   return (
     <ImageBackground
       source={require('@assets/moon.jpg')}
@@ -147,8 +168,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
             «پیش‌نمایش نهایی» دقیقاً همان چیزی باشد که کاربر بعد از ثبت می‌بیند.
             ورودی‌های دیگرِ این صفحه (مثلاً نوتیفیکیشن) رسید ندارند و خلاصه‌ی
             قبلی برایشان می‌ماند. */}
-        {receipt ? (
-          <OrderReceipt receipt={receipt} />
+        {pricedReceipt ? (
+          <OrderReceipt receipt={pricedReceipt} />
         ) : (
           <>
             <View style={styles.card}>
@@ -169,9 +190,11 @@ export default function OrderSummaryScreen({ navigation, route }) {
 
               <Text style={NewStyles.title10}>هزینه:</Text>
               <Text style={[NewStyles.text11, styles.priceText]}>
-                {price > 0
-                  ? `${price.toLocaleString('fa-IR')} ${currency}`
-                  : 'پس از بررسی کارشناس اعلام می‌شود'}
+                {rates.loading
+                  ? 'در حال دریافت نرخ خدمات...'
+                  : resolvedPrice > 0
+                    ? `${resolvedPrice.toLocaleString('fa-IR')} ${currency}`
+                    : 'پس از بررسی کارشناس اعلام می‌شود'}
               </Text>
 
               <Text style={NewStyles.title10}>وضعیت سفارش:</Text>
@@ -216,6 +239,12 @@ export default function OrderSummaryScreen({ navigation, route }) {
               showToastOrAlert('لطفاً کد معرف را ثبت کنید یا آن را پاک کنید.');
               return;
             }
+            // نرخ‌ها هنوز در راه‌اند: یک ثانیه صبر، جلوی ثبتِ سفارشی را می‌گیرد
+            // که مبلغش صفر می‌رفت چون پاسخ `/steps/fetch` نرسیده بود.
+            if (rates.loading) {
+              showToastOrAlert('در حال دریافت نرخ خدمات است؛ یک لحظه صبر کنید.');
+              return;
+            }
             setIsSubmitting(true);
 
             // آدرس: این مسیر (سیستماتیک/جامع سازمانی) مرحله‌ی انتخاب آدرس ندارد.
@@ -256,15 +285,18 @@ export default function OrderSummaryScreen({ navigation, route }) {
               const orderPayload = {
                 address_id: resolvedAddressId,
                 category_id: resolvedCategoryId,
-                // این مسیرها هنوز مراحل قیمت‌دار واقعی (steps/fetch) را نمی‌خوانند،
-                // پس فعلاً همان قیمتِ محاسبه‌شده‌ی محلی (یا ۰ برای سفارش استعلامی)
-                // فرستاده می‌شود - در انتظار تأیید بک‌اند برای این دسته‌ها.
-                total_price: price > 0 ? price : 0,
+                // مبلغ پایه از نرخ‌های همان دسته (`/steps/fetch`) حساب شده است؛
+                // بک‌اند بازمحاسبه نمی‌کند و همین را در `pakar_price` می‌نویسد.
+                // صفرِ اینجا یعنی «نرخی پیدا نشد» → سفارش استعلامی.
+                total_price: resolvedPrice > 0 ? resolvedPrice : 0,
                 date: apiDate,
                 time: apiTime,
                 description: summaryLines.map((line) => `${line.label}: ${line.value}`).join('\n'),
                 platform: Platform.OS,
-                steps: [],
+                // انتخاب‌های کاربر، نشسته روی ساختارِ خودِ API - بک‌اند
+                // `order_details` را از همین می‌سازد (§۵ سند). تا پیش از این
+                // آرایه‌ی خالی می‌رفت و سفارشِ سازمانی هیچ ردیفی نداشت.
+                steps: rates.steps,
                 file_paths: [],
               };
               // فقط کدهای تأییدشده، دقیقاً همان رشته‌ای که سرور به رسمیت شناخته.
@@ -314,7 +346,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 time: visitTime,
                 address,
                 customerName,
-                price,
+                price: resolvedPrice,
                 items: summaryLines,
               });
             } catch (error) {
@@ -336,9 +368,12 @@ export default function OrderSummaryScreen({ navigation, route }) {
             // ساخته‌شده در صفحه‌ی مبدا فقط شماره‌ی سفارشِ واقعی را کم دارد، که
             // همین‌جا از پاسخ سرور پر می‌شود. اگر صفحه‌ی مبدا رسیدی نفرستاده
             // باشد، رفتار قبلی (رهگیری سفارش) حفظ می‌شود.
-            if (receipt) {
+            if (pricedReceipt) {
               navigation.replace('OrderReceipt', {
-                receipt: { ...receipt, order: { ...receipt.order, number: orderNumber } },
+                receipt: {
+                  ...pricedReceipt,
+                  order: { ...pricedReceipt.order, number: orderNumber },
+                },
               });
             } else {
               navigation.replace('OrderTrackingScreen', {

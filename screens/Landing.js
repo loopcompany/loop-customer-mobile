@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ActivityIndicator, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '@slices/authSlice';
@@ -10,7 +9,6 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import { themeColor0, themeColor10 } from '@theme/Color';
 import { fetchAddresses } from '@slices/addressSlice';
 import { ImageBackground } from 'expo-image';
-import NewStyles, { deviceHeight, deviceWidth } from '@styles/NewStyles';
 import { fetchRadii } from '@slices/radiusSlice';
 import i18n from 'i18next';
 import { setLanguage } from '@slices/languageSlice';
@@ -32,8 +30,20 @@ const SPLASH_TIMEOUT_MS = 6000;
 // axios)، کاربر بعد از این مدت به هر حال وارد صفحه‌ی خانه می‌شود.
 const SPLASH_MAX_MS = 15000;
 
+// ابعاد واقعی فایل ویدیو (۷۲۰×۱۲۸۰). برای اینکه ویدیو دقیقاً وسط صفحه بنشیند،
+// اندازه‌ی کادر را خودمان از روی همین نسبت حساب می‌کنیم؛ با `flex: 1` کادر به
+// اندازه‌ی ناحیه‌ی امن کشیده می‌شد و ویدیو نسبت به *کل* صفحه پایین/بالا می‌افتاد.
+//
+// The splash video is 720x1280. Sizing the box from that ratio ourselves — and
+// centring it against the full window rather than the safe area — is what puts
+// it in the middle of the screen; `flex: 1` inside `SafeAreaView` centred it
+// inside the inset area instead, which is visibly off on any device whose top
+// and bottom insets differ.
+const VIDEO_ASPECT_RATIO = 720 / 1280;
+
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [checking, setChecking] = useState(true);
   // نگهبان‌های تک‌بار-بودن: هم playToEnd و هم تایم‌اوت می‌توانند مسیر را ادامه دهند.
   const startedRef = React.useRef(false);
@@ -223,18 +233,40 @@ export default function Landing({ navigation }) {
     }
   }, [player, isPlaying])
 
-  return (
-    <SafeAreaView style={NewStyles.container}>
-      <CustomStatusBar />
-      <LinearGradient colors={['#1c2833', '#0b0d11', '#0b0d11']} style={{ flex: 1 }}>
+  // کادر ویدیو: بزرگ‌ترین اندازه‌ای که با حفظ نسبت داخل صفحه جا می‌شود.
+  const videoWidth = Math.min(windowWidth, windowHeight * VIDEO_ASPECT_RATIO);
+  const videoHeight = videoWidth / VIDEO_ASPECT_RATIO;
 
-        <VideoView style={{ flex: 1 }} nativeControls={false} player={player} contentFit='contain' allowsFullscreen allowsPictureInPicture />
-      </LinearGradient>
-    </SafeAreaView >
+  return (
+    <View style={styles.root}>
+      <CustomStatusBar />
+      <LinearGradient colors={SPLASH_GRADIENT} style={StyleSheet.absoluteFill} />
+
+      <View style={styles.videoCenter} pointerEvents="none">
+        <VideoView
+          style={{ width: videoWidth, height: videoHeight }}
+          nativeControls={false}
+          player={player}
+          contentFit="contain"
+        />
+      </View>
+    </View>
   );
 }
 
+// رنگ‌های اختصاصی اسپلش (در پالت theme/Color.js معادل ندارند).
+const SPLASH_GRADIENT = ['#1c2833', '#0b0d11', '#0b0d11'];
+
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: SPLASH_GRADIENT[1],
+  },
+  videoCenter: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   background: {
     flex: 1,
     resizeMode: 'cover',

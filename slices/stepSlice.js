@@ -4,6 +4,7 @@ import { uri } from '@services/URL';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18next from 'i18next';
 import { describeApiError } from '@utils/apiErrorHandler';
+import { calculateStepsPrice } from '@services/orderPricing';
 
 export const fetchSteps = createAsyncThunk('steps/steps', async ({ categoryId, token }, { rejectWithValue }) => {
     return await axios
@@ -428,31 +429,10 @@ const stepSlice = createSlice({
 });
 const selectStepData = (state) => state.step.data;
 
-export const selectTotalPrice = createSelector(
-    [selectStepData],
-    (data) => {
-        let total = 0;
-        let showPrice = true;
-        data.forEach(step => {
-            step.forEach(field => {
-                if (field.field_details) {
-                    field.field_details.forEach(detail => {
-                        const count = typeof detail.value === 'number' ? detail.value : detail.value ? 1 : 0;
-                        const price = detail.price || 0;
-                        if (field?.is_package == 0 && count * detail?.affect_on_price != 0) {
-                            console.log('====================================');
-                            console.log("affect_on_price:", detail?.affect_on_price, field?.id);
-                            console.log('====================================');
-                            showPrice = false;
-                        }
-                        total += count * price;
-                    });
-                }
-            });
-        });
-        return { total, showPrice };
-    }
-);
+// جمعِ مبلغ در `services/orderPricing.js` زندگی می‌کند، نه اینجا، چون مسیرِ
+// سازمانی (OrderSummaryScreen) هم باید دقیقاً همین محاسبه را بکند —
+// دو نسخه‌ی جدا، دو مبلغِ متفاوت برای یک سفارش یعنی.
+export const selectTotalPrice = createSelector([selectStepData], calculateStepsPrice);
 
 export const {
     removeTime,

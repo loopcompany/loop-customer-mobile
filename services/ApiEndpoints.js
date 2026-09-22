@@ -46,6 +46,14 @@ export const API_ENDPOINTS = {
     TRACK: '/orders/{id}/track',
   },
 
+  // Service steps & rates — contract: FRONTEND_SERVICE_RATES.md
+  // `field_details[].price` is the per-option rate; the front sums the selected
+  // ones into `total_price` and the backend stores that as-is (no recompute).
+  STEPS: {
+    FETCH: '/steps/fetch', // POST { categoryId }
+    FETCH_CONDITIONAL: '/steps/fetch-conditional', // POST { categoryId, fieldId, fieldDetailId }
+  },
+
   // Wallet & transactions — contract: FRONTEND_WALLET.md
   // Amounts are integer tomans. Charge accepts 10,000 .. 50,000,000.
   WALLET: {

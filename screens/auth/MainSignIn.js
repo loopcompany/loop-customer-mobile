@@ -85,8 +85,8 @@ export default function MainSignIn({ navigation }) {
         () => createStyles(i18n.language),
         [i18n.language]
     );
+    const isRtl = langIsRTL(i18n.language);
     const styles = useMemo(() => createLocalStyles(NewStyles, isRtl), [NewStyles, isRtl]);
-    const isRtl = langIsRTL(i18n.language)
 
     // Form validation
     const validateForm = () => {

@@ -11,6 +11,8 @@ import {
   isOrganizationAccount,
   sumPrices,
   buildReceipt,
+  withReceiptTotal,
+  BASE_PRICE_ROW,
   RECEIPT_STATE,
 } from '../receiptModel';
 
@@ -130,5 +132,48 @@ describe('تخفیفِ غایب', () => {
     });
     expect(receipt.payment.discountAmount).toBe(50000);
     expect(receipt.payment.payable).toBe(450000);
+  });
+});
+
+describe('withReceiptTotal', () => {
+  // رسیدِ مسیرهای سازمانی یک صفحه زودتر از رسیدنِ نرخ‌ها ساخته می‌شود؛ بدون
+  // این تابع کاربر «استعلام» می‌بیند در حالی که مبلغ دارد ارسال می‌شود.
+  const pendingReceipt = (services) =>
+    buildReceipt({
+      state: RECEIPT_STATE.PENDING,
+      services,
+      order: { number: null },
+    });
+
+  it('مبلغ را روی ردیفِ خدمتِ یکه می‌نشاند و جمع‌ها را بازحساب می‌کند', () => {
+    const priced = withReceiptTotal(pendingReceipt([{ title: 'لپ تاپ', qty: 1 }]), 400000);
+    expect(priced.services[0].totalPrice).toBe(400000);
+    expect(priced.services[0].unitPrice).toBe(400000);
+    expect(priced.servicesTotal).toBe(400000);
+    expect(priced.payment.total).toBe(400000);
+    expect(priced.payment.payable).toBe(400000);
+  });
+
+  it('وقتی ردیف خدمت یکه نیست، مبلغ پایه ردیف خودش را می‌گیرد', () => {
+    const priced = withReceiptTotal(
+      pendingReceipt([{ title: 'الف', qty: 1 }, { title: 'ب', qty: 1 }]),
+      250000
+    );
+    expect(priced.services).toHaveLength(3);
+    expect(priced.services[2].title).toBe(BASE_PRICE_ROW);
+    expect(priced.payment.total).toBe(250000);
+  });
+
+  it('رسیدی که خودش قیمت دارد دست‌نخورده می‌ماند', () => {
+    const already = pendingReceipt([{ title: 'لپ تاپ', qty: 1, totalPrice: 900000 }]);
+    expect(withReceiptTotal(already, 400000)).toBe(already);
+  });
+
+  it('مبلغِ صفر یا نامعتبر رسید را «استعلام» نگه می‌دارد', () => {
+    const receipt = pendingReceipt([{ title: 'لپ تاپ', qty: 1 }]);
+    expect(withReceiptTotal(receipt, 0)).toBe(receipt);
+    expect(withReceiptTotal(receipt, null)).toBe(receipt);
+    expect(withReceiptTotal(null, 400000)).toBeNull();
+    expect(receipt.payment.total).toBeNull();
   });
 });

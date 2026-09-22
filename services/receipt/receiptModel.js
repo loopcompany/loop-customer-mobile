@@ -246,3 +246,42 @@ export const buildReceipt = ({
     },
   };
 };
+
+
+/** عنوان ردیفی که مبلغ پایه را نگه می‌دارد، وقتی رسید ردیف خدمتِ یکه ندارد. */
+export const BASE_PRICE_ROW = 'مبلغ پایه خدمات';
+
+/**
+ * مبلغِ محاسبه‌شده را روی یک رسیدِ از پیش‌ساخته می‌نشاند.
+ *
+ * مسیرهای سازمانی رسیدشان را در صفحه‌ی فرم می‌سازند، ولی نرخ‌ها یک صفحه
+ * بعدتر (در پیش‌نمایشِ ثبت) از `/steps/fetch` می‌رسند. بدون این تابع، کاربر
+ * «استعلام» می‌بیند در حالی که همان لحظه مبلغ به `/orders/submit` می‌رود.
+ *
+ * مبلغ روی ردیفِ خدمت می‌نشیند (نه مستقیم روی `payment.total`) تا جمع‌ها و
+ * «مبلغ قابل پرداخت» را همان `buildReceipt` مثل هر رسید دیگری حساب کند.
+ *
+ * @param {object|null} receipt رسیدِ نرمال‌شده.
+ * @param {number} total مبلغ پایه به تومان.
+ * @returns {object|null} رسیدِ قیمت‌خورده، یا همان ورودی اگر مبلغی در کار نیست.
+ */
+export const withReceiptTotal = (receipt, total) => {
+  const amount = Number(total);
+  if (!receipt || !Number.isFinite(amount) || amount <= 0) return receipt;
+  // رسیدی که خودش قیمت دارد (مثلاً از API سفارش آمده) دست‌نخورده می‌ماند.
+  if (receipt.payment?.total != null) return receipt;
+
+  const services = Array.isArray(receipt.services) ? receipt.services : [];
+  const pricedServices =
+    services.length === 1
+      ? [
+          {
+            ...services[0],
+            unitPrice: Number(services[0]?.qty) === 1 ? amount : services[0]?.unitPrice ?? null,
+            totalPrice: amount,
+          },
+        ]
+      : [...services, { title: BASE_PRICE_ROW, qty: 1, unitPrice: amount, totalPrice: amount }];
+
+  return buildReceipt({ ...receipt, services: pricedServices });
+};

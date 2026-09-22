@@ -18,6 +18,8 @@ export {
   accountTypeLabel,
   isOrganizationAccount,
   sumPrices,
+  withReceiptTotal,
+  BASE_PRICE_ROW,
 } from './receiptModel';
 
 export { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';

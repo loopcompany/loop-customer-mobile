@@ -93,7 +93,11 @@ function Preview({ navigation }) {
     const isAddressSelected = Boolean(addressId) && Boolean(address);
     
     const isFixed = (Number(category?.is_fixed) > 0 && totalPrice > 0) ? 1 : 0;
-    console.log(showPrice);
+
+    // بک‌اند `total_price` را بدون بازمحاسبه در `orders.pakar_price` ذخیره می‌کند
+    // (FRONTEND_SERVICE_RATES.md §۶)، پس هرگز نباید undefined/NaN/اعشاری برود.
+    // محاسبه‌ی اصلی در `selectTotalPrice` است؛ این‌جا فقط گارد نهایی است.
+    const basePrice = Number.isFinite(Number(totalPrice)) ? Math.max(0, Math.round(Number(totalPrice))) : 0;
 
     // state.step.time نمایشیِ بازه‌ای است (مثلاً "9 - 10" یا "9:30 - 10:30")،
     // اما ORGANIZATION_ORDER_API.md یک مقدار ساعت تکی به‌شکل "HH:MM" (مثل "09:00")
@@ -248,7 +252,7 @@ function Preview({ navigation }) {
             const payload = {
                 address_id: addressId,
                 category_id: category?.id,
-                total_price: totalPrice,
+                total_price: basePrice,
                 date: date,
                 time: formatTimeForApi(time),
                 is_urgent: isUrgent,
@@ -288,6 +292,9 @@ function Preview({ navigation }) {
 
             } else {
             }
+
+            // مبلغی که می‌فرستیم همان چیزی است که در سفارش ثبت می‌شود — در بیلد production حذف می‌شود.
+            console.log('[Preview] total_price =', basePrice, '| showPrice =', showPrice, '| is_fixed =', isFixed);
 
             // Route صحیح: POST /api/orders/submit — services/ApiEndpoints.js
             const response = await axios.post(`${uri}${API_ENDPOINTS.ORDERS.CREATE}`, payload, {
