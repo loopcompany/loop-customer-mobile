@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TextInput } from 'react-native'
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -13,7 +13,7 @@ import ConfirmationModal from '@components/ConfirmationModal'
 import { useNavigation } from '@react-navigation/native'
 import { fetchOrders } from '@slices/orderSlice'
 import { fetchUser } from '@slices/userSlice'
-import * as Linking from "expo-linking";
+import { createPaymentRedirectUrl, openPaymentGateway } from '@utils/paymentGateway';
 
 const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
 
@@ -21,7 +21,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
     const navigation = useNavigation()
     const [loadingWallet, setLoadingWallet] = useState(false);
     const [loadingGateway, setLoadingGateway] = useState(false);
-    const paymentSubscriptionRef = useRef(null);
+    const paymentSessionRef = useRef(null);
 
     const user = useSelector((state) => state?.user?.data);
     const { t, i18n } = useTranslation();
@@ -147,38 +147,28 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
         }
     };
 
-    const redirectUrl = Linking.createURL("/?");
+    const redirectUrl = createPaymentRedirectUrl();
 
-    const _addLinkingListener = () => {
-        // Remove existing listener if any
-        if (paymentSubscriptionRef.current) {
-            paymentSubscriptionRef.current.remove();
+    // بازگشت از درگاه. `null` یعنی کاربر بدون نتیجه برگشت.
+    const handlePaymentResult = (status) => {
+        if (status === 'OK') {
+            dispatch(fetchOrders(token));
+            dispatch(fetchUser(token));
+            showToastOrAlert(t("Payment completed successfully"));
+            if (onUpdate) onUpdate()
+        } else if (status === 'NOK') {
+            showToastOrAlert(t("The payment encountered an error."));
         }
-
-        paymentSubscriptionRef.current = Linking.addEventListener("url", ({ url }) => {
-            const { queryParams } = Linking.parse(url);
-            if (queryParams?.status == 'OK') {
-                dispatch(fetchOrders(token));
-                dispatch(fetchUser(token));
-                showToastOrAlert(t("Payment completed successfully"));
-                if (onUpdate) onUpdate()
-                // Cleanup listener after handling
-                if (paymentSubscriptionRef.current) {
-                    paymentSubscriptionRef.current.remove();
-                    paymentSubscriptionRef.current = null;
-                }
-            } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert(t("The payment encountered an error."));
-                // Cleanup listener after handling
-                if (paymentSubscriptionRef.current) {
-                    paymentSubscriptionRef.current.remove();
-                    paymentSubscriptionRef.current = null;
-                }
-            }
-            setLoadingGateway(false);
-        });
+        setLoadingGateway(false);
     };
 
+    // بستن نشستِ پرداخت هنگام unmount تا شنونده‌ی لینک باقی نماند.
+    useEffect(() => {
+        return () => {
+            paymentSessionRef.current?.close();
+            paymentSessionRef.current = null;
+        };
+    }, []);
 
     const gatewayPayment = async () => {
         setLoadingGateway(true);
@@ -199,15 +189,26 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
             );
 
             if (response.status == 200 && response.data?.data?.payment_url) {
-                _addLinkingListener();
-                await Linking.openURL(response.data.data.payment_url);
-            } else {
-                showToastOrAlert(t("Error connecting to payment gateway"));
-                setLoadingGateway(false);
+                // مرورگر درون‌برنامه‌ای: اپ زنده می‌ماند و بعد از پرداخت همین
+                // صفحه ادامه پیدا می‌کند، به‌جای اینکه اپ از اسپلش شروع شود.
+                paymentSessionRef.current = openPaymentGateway({
+                    paymentUrl: response.data.data.payment_url,
+                    redirectUrl,
+                    onResult: handlePaymentResult,
+                });
+
+                if (!(await paymentSessionRef.current.opened)) {
+                    showToastOrAlert(t("Error connecting to payment gateway"));
+                    setLoadingGateway(false);
+                }
+                // حالت loading را نتیجه‌ی پرداخت آزاد می‌کند، نه این تابع.
+                return;
             }
+
+            showToastOrAlert(t("Error connecting to payment gateway"));
+            setLoadingGateway(false);
         } catch (error) {
             handleError(error, t)
-        } finally {
             setLoadingGateway(false);
         }
     };

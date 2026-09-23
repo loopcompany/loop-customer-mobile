@@ -7,13 +7,16 @@ import {
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
 import NewStyles from '@styles/NewStyles';
-import { themeColor10, themeColor3 } from '@theme/Color';
+import { colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
 
 /**
  * Reusable Invite Code Input Component
- * 
+ *
  * @param {string} value - Current invite code value
  * @param {function} onChangeText - Function to handle text change
  * @param {string} prefix - Prefix letter (default: 'L')
@@ -33,7 +36,7 @@ export default function InviteCodeInput({
 }) {
     const { t, i18n } = useTranslation();
     const isRTL = langIsRTL(i18n.language);
-    
+
     // CodeField hooks
     const ref = useBlurOnFulfill({ value, cellCount });
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -42,47 +45,59 @@ export default function InviteCodeInput({
     });
 
     const cellStyle = {
-        width: 27,
-        height: 40,
-        backgroundColor: '#fff',
-        borderRadius: 6,
-        fontSize: 18,
-        color: '#000',
-        fontFamily: 'VazirBold',
+        width: 40,
+        height: 52,
+        backgroundColor: colors.white.bgColor(1),
+        borderRadius: radius.sm,
+        fontSize: fontSize.xl,
+        color: colors.black.bgColor(1),
+        fontFamily: getFontFamily('bold', i18n.language),
         textAlign: 'center',
-        lineHeight: 40,
+        lineHeight: 52,
         borderWidth: hasError ? 2 : 1,
-        borderColor: hasError ? '#ff4444' : '#ccc',
-        marginHorizontal: 2,
+        borderColor: hasError ? colors.error.bgColor(1) : colors.border.bgColor(1),
+        marginHorizontal: 3,
     };
 
     return (
-        <View style={[NewStyles.textInput, { width: '100%', borderRadius: 10, marginTop: 6, marginBottom: 6 }, style]}>
-            <Text style={{ 
-                color: themeColor10.bgColor(1), 
-                fontFamily: 'VazirLight', 
-                marginBottom: 6, 
-                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' 
+        <View style={[NewStyles.textInput, { width: '100%', borderRadius: radius.sm, marginTop: spacing.xs + 2, marginBottom: spacing.xs + 2 }, style]}>
+            <Text style={{
+                color: colors.black.bgColor(1),
+                fontFamily: getFontFamily('light', i18n.language),
+                marginBottom: spacing.xs + 2,
+                textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr'
             }}>
                 {t('Referral code (optional)')}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.xs,
+                // Pin this row to LTR so the prefix box never flips to the right
+                // when the surrounding form renders RTL: on web the parent's
+                // `writingDirection: 'rtl'` becomes CSS `direction: rtl`, which
+                // reverses flex rows. The code itself (L-XXXXX) always reads LTR.
+                writingDirection: 'ltr',
+                width: '100%',
+                justifyContent: 'center',
+            }}>
                 {/* Prefix Box */}
-                <View style={[
-                    NewStyles.codePrefixBox, 
-                    NewStyles.border5, 
-                    { 
-                        backgroundColor: '#ffffff', 
-                        borderColor: hasError ? '#ff4444' : '#ccc', 
-                        width: 36, 
-                        height: 40 
-                    }
-                ]}>
-                    <Text style={{ 
-                        fontFamily: 'VazirBold', 
-                        color: '#000', 
-                        fontSize: 25, 
-                        textAlign: "center" 
+                <View style={{
+                    backgroundColor: colors.white.bgColor(1),
+                    borderWidth: hasError ? 2 : 1,
+                    borderColor: hasError ? colors.error.bgColor(1) : colors.border.bgColor(1),
+                    borderRadius: radius.sm,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    overflow: 'hidden',
+                    width: 52,
+                    height: 52,
+                }}>
+                    <Text style={{
+                        fontFamily: getFontFamily('bold', i18n.language),
+                        color: colors.black.bgColor(1),
+                        fontSize: fontSize.xxl,
+                        textAlign: "center"
                     }}>
                         {prefix}-
                     </Text>
@@ -106,7 +121,7 @@ export default function InviteCodeInput({
                             key={index}
                             style={[
                                 cellStyle,
-                                isFocused && { borderColor: themeColor3.bgColor(1) }
+                                isFocused && { borderColor: colors.primaryLight.bgColor(1) }
                             ]}
                             onLayout={getCellOnLayoutHandler(index)}
                         >
@@ -115,15 +130,15 @@ export default function InviteCodeInput({
                     )}
                 />
             </View>
-            
+
             {/* Error Message */}
             {hasError && errorMessage && (
                 <Text style={{
-                    color: '#ff4444',
-                    fontFamily: 'VazirLight',
-                    fontSize: 12,
+                    color: colors.error.bgColor(1),
+                    fontFamily: getFontFamily('light', i18n.language),
+                    fontSize: fontSize.xs,
                     textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr',
-                    marginTop: 5,
+                    marginTop: spacing.xs + 1,
                 }}>
                     {errorMessage}
                 </Text>

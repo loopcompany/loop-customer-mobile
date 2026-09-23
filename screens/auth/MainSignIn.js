@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useMemo, useEffect } from "react";
+import React, { useState, useReducer, useMemo, useEffect, useCallback } from "react";
 import {
     View,
     Text,
@@ -15,7 +15,10 @@ import {
 // CodeField imports removed - using InviteCodeInput component instead
 import Button from "@components/Button";
 import NewStyles from "@styles/NewStyles";
-import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "@theme/Color";
+import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6, colors } from "@theme/Color";
+import { spacing } from "@theme/Spacing";
+import { radius } from "@theme/Radius";
+import { fontSize, getFontFamily } from "@theme/Typography";
 import { authAPI } from "@services/Api";
 import { showToastOrAlert, langIsRTL } from "@helpers/Common";
 import CustomStatusBar from "@components/CustomStatusBar";
@@ -26,7 +29,9 @@ import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { createStyles } from '@styles/NewStyles';
 import { restartOtpRetriever, stopOtpRetriever } from "./OtpRetriever";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPdfDocs } from "@slices/pdfDocumentSlice";
+import { imageUri } from "@services/URL";
 import FooterSpacer from '@components/FooterSpacer';
 const initialState = {
     melicode: '',
@@ -76,7 +81,10 @@ const formReducer = (state, action) => {
 
 export default function MainSignIn({ navigation }) {
     const [state, dispatch] = useReducer(formReducer, initialState);
+    const storeDispatch = useDispatch();
     const hashApp = useSelector(state => state.hashApp?.hash)
+    // `pdf.user` is the customer-app terms & conditions PDF (see slices/pdfDocumentSlice.js)
+    const termsPdfPath = useSelector(state => state.pdf?.data?.user)
     // console.log(hashApp?.[0]);
 
     const inviteLetter = 'L'; // Static invite letter
@@ -86,7 +94,32 @@ export default function MainSignIn({ navigation }) {
         [i18n.language]
     );
     const isRtl = langIsRTL(i18n.language);
-    const styles = useMemo(() => createLocalStyles(NewStyles, isRtl), [NewStyles, isRtl]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, isRtl, i18n.language), [NewStyles, isRtl, i18n.language]);
+
+    // The PDF list is normally fetched on Landing; refetch when this screen is
+    // opened directly by URL (web) so the terms link still resolves.
+    useEffect(() => {
+        if (!termsPdfPath) {
+            storeDispatch(fetchPdfDocs());
+        }
+    }, [termsPdfPath, storeDispatch]);
+
+    const toggleAcceptTerms = useCallback(() => {
+        dispatch({ type: 'SET_FIELD', field: 'acceptTerms', value: !state.acceptTerms });
+    }, [state.acceptTerms]);
+
+    const openTermsPdf = useCallback(async () => {
+        if (!termsPdfPath) {
+            showToastOrAlert(t('Terms and conditions file is not available.'));
+            return;
+        }
+        try {
+            await Linking.openURL(`${imageUri}/${termsPdfPath}`);
+        } catch (error) {
+            console.warn('Unable to open terms PDF:', error);
+            showToastOrAlert(t('Terms and conditions file is not available.'));
+        }
+    }, [termsPdfPath, t]);
 
     // Form validation
     const validateForm = () => {
@@ -368,20 +401,40 @@ export default function MainSignIn({ navigation }) {
                                 <Text style={styles.fieldErrorText}>{state.errors.captchaInput}</Text>
                             )}
                         </View>
-                        <View style={{ width: '100%', paddingHorizontal: '5%' }}>
+                        <View style={styles.termsSection}>
 
-                            <View style={[NewStyles.row, {}]}>
-                                <TouchableOpacity style={{ padding: 10 }}>
-                                    <Ionicons
-                                        name={state.acceptTerms ? 'checkbox' : 'square-outline'}
-                                        size={24}
-                                        color={themeColor0.bgColor(1)}
-                                        onPress={() => {
-                                            dispatch({ type: 'SET_FIELD', field: 'acceptTerms', value: state.acceptTerms ? false : true })
-                                        }}
-                                    />
+                            <View style={[NewStyles.row, styles.termsRow]}>
+                                <TouchableOpacity
+                                    style={styles.checkboxTouchable}
+                                    onPress={toggleAcceptTerms}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    accessibilityRole="checkbox"
+                                    accessibilityState={{ checked: state.acceptTerms }}
+                                    aria-checked={state.acceptTerms}
+                                    accessibilityLabel={t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")}
+                                >
+                                    <View style={[
+                                        styles.checkbox,
+                                        state.acceptTerms && styles.checkboxChecked,
+                                        !!state.errors.acceptTerms && styles.checkboxError,
+                                    ]}>
+                                        {state.acceptTerms && (
+                                            <Ionicons name="checkmark" size={18} color={colors.primary.color} />
+                                        )}
+                                    </View>
                                 </TouchableOpacity>
-                                <Text style={[NewStyles.text4, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>
+                                <Text style={styles.termsText}>
+                                    {t('By continuing, I accept')}{' '}
+                                    <Text
+                                        style={styles.termsLink}
+                                        onPress={openTermsPdf}
+                                        suppressHighlighting
+                                        accessibilityRole="link"
+                                    >
+                                        {t("Loop's Terms of Use and Privacy Policy")}
+                                    </Text>
+                                    {t('terms acceptance suffix')}
+                                </Text>
                             </View>
                             {state.errors.acceptTerms && (
                                 <Text style={styles.fieldErrorText}>
@@ -428,7 +481,7 @@ export default function MainSignIn({ navigation }) {
     );
 }
 
-const createLocalStyles = (NewStyles, isRtl) => StyleSheet.create({
+const createLocalStyles = (NewStyles, isRtl, lang) => StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: "cover",
@@ -560,9 +613,58 @@ const createLocalStyles = (NewStyles, isRtl) => StyleSheet.create({
     },
     loginLinkText: {
         color: themeColor4.bgColor(1),
-        fontFamily: 'VazirLight',
-        fontSize: 14,
+        fontFamily: getFontFamily('light', lang),
+        fontSize: fontSize.sm,
         textAlign: 'center',
+        textDecorationLine: 'underline',
+    },
+    termsSection: {
+        width: '100%',
+        paddingHorizontal: '5%',
+        marginTop: spacing.sm,
+    },
+    termsRow: {
+        alignItems: 'flex-start',
+        backgroundColor: colors.white.bgColor(0.08),
+        borderWidth: 1,
+        borderColor: colors.white.bgColor(0.25),
+        borderRadius: radius.md,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.md,
+        gap: spacing.sm,
+    },
+    checkboxTouchable: {
+        paddingTop: 2,
+    },
+    checkbox: {
+        width: 24,
+        height: 24,
+        borderRadius: radius.sm - 2,
+        borderWidth: 2,
+        borderColor: colors.white.bgColor(0.9),
+        backgroundColor: colors.white.bgColor(0.12),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxChecked: {
+        backgroundColor: colors.accent.bgColor(1),
+        borderColor: colors.accent.bgColor(1),
+    },
+    checkboxError: {
+        borderColor: colors.error.bgColor(1),
+    },
+    termsText: {
+        flex: 1,
+        color: colors.white.bgColor(1),
+        fontFamily: getFontFamily('light', lang),
+        fontSize: fontSize.xs + 1,
+        lineHeight: 22,
+        textAlign: isRtl ? 'right' : 'left',
+        writingDirection: isRtl ? 'rtl' : 'ltr',
+    },
+    termsLink: {
+        color: colors.accent.bgColor(1),
+        fontFamily: getFontFamily('bold', lang),
         textDecorationLine: 'underline',
     },
 });

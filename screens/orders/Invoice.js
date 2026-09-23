@@ -20,6 +20,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
 import { createStyles } from '@styles/NewStyles';
 import { useMenu } from '@contexts/MenuContext';
+import { createPaymentRedirectUrl, openPaymentGateway } from '@utils/paymentGateway';
 function Invoice({ route, navigation }) {
 
     const dispatch = useDispatch()
@@ -42,7 +43,7 @@ function Invoice({ route, navigation }) {
     const [extraServices, setExtraServices] = useState([])
     const [data, setData] = useState([]);
     const [loadingGateway, setLoadingGateway] = useState(false);
-    const paymentSubscriptionRef = useRef(null);
+    const paymentSessionRef = useRef(null);
     const lang = i18n.resolvedLanguage ?? i18n.language ?? 'en';
     const fetchData = async () => {
         try {
@@ -79,6 +80,14 @@ function Invoice({ route, navigation }) {
             setExtraServices([])
         }
     }
+
+    // بستن نشستِ پرداخت هنگام unmount تا شنونده‌ی لینک باقی نماند.
+    useEffect(() => {
+        return () => {
+            paymentSessionRef.current?.close();
+            paymentSessionRef.current = null;
+        };
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -129,37 +138,20 @@ function Invoice({ route, navigation }) {
         showToastOrAlert(describeWalletError(action.payload, t));
     };
 
-    const redirectUrl = Linking.createURL("/?");
+    const redirectUrl = createPaymentRedirectUrl();
 
-    const _addLinkingListener = () => {
-        // Remove existing listener if any
-        if (paymentSubscriptionRef.current) {
-            paymentSubscriptionRef.current.remove();
+    // بازگشت از درگاه. `null` یعنی کاربر بدون نتیجه برگشت.
+    const handlePaymentResult = (status) => {
+        if (status === 'OK') {
+            dispatch(fetchOrders(token));
+            dispatch(fetchUser(token));
+            dispatch(fetchWalletBalance(token));
+            setRefreshing(true);
+            showToastOrAlert(t('Payment completed successfully'));
+        } else if (status === 'NOK') {
+            showToastOrAlert(t('Payment failed.'));
         }
-
-        paymentSubscriptionRef.current = Linking.addEventListener("url", ({ url }) => {
-            const { queryParams } = Linking.parse(url);
-            if (queryParams?.status == 'OK') {
-                dispatch(fetchOrders(token));
-                dispatch(fetchUser(token));
-                dispatch(fetchWalletBalance(token));
-                setRefreshing(true);
-                showToastOrAlert(t('Payment completed successfully'));
-                // Cleanup listener after handling
-                if (paymentSubscriptionRef.current) {
-                    paymentSubscriptionRef.current.remove();
-                    paymentSubscriptionRef.current = null;
-                }
-            } else if (queryParams?.status == 'NOK') {
-                showToastOrAlert(t('Payment failed.'));
-                // Cleanup listener after handling
-                if (paymentSubscriptionRef.current) {
-                    paymentSubscriptionRef.current.remove();
-                    paymentSubscriptionRef.current = null;
-                }
-            }
-            setLoadingGateway(false);
-        });
+        setLoadingGateway(false);
     };
 
     const gatewayPayment = async () => {
@@ -174,12 +166,15 @@ function Invoice({ route, navigation }) {
             return;
         }
 
-        // شنونده پیش از باز شدن درگاه نصب می‌شود تا بازگشت سریع کاربر از دست نرود.
-        _addLinkingListener();
+        // مرورگر درون‌برنامه‌ای: اپ زنده می‌ماند و بعد از پرداخت همین صفحه
+        // ادامه پیدا می‌کند، به‌جای اینکه برنامه از اسپلش دوباره شروع شود.
+        paymentSessionRef.current = openPaymentGateway({
+            paymentUrl,
+            redirectUrl,
+            onResult: handlePaymentResult,
+        });
 
-        try {
-            await Linking.openURL(paymentUrl);
-        } catch {
+        if (!(await paymentSessionRef.current.opened)) {
             showToastOrAlert(t('Error connecting to payment gateway'));
             setLoadingGateway(false);
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '@slices/authSlice';
@@ -30,20 +30,8 @@ const SPLASH_TIMEOUT_MS = 6000;
 // axios)، کاربر بعد از این مدت به هر حال وارد صفحه‌ی خانه می‌شود.
 const SPLASH_MAX_MS = 15000;
 
-// ابعاد واقعی فایل ویدیو (۷۲۰×۱۲۸۰). برای اینکه ویدیو دقیقاً وسط صفحه بنشیند،
-// اندازه‌ی کادر را خودمان از روی همین نسبت حساب می‌کنیم؛ با `flex: 1` کادر به
-// اندازه‌ی ناحیه‌ی امن کشیده می‌شد و ویدیو نسبت به *کل* صفحه پایین/بالا می‌افتاد.
-//
-// The splash video is 720x1280. Sizing the box from that ratio ourselves — and
-// centring it against the full window rather than the safe area — is what puts
-// it in the middle of the screen; `flex: 1` inside `SafeAreaView` centred it
-// inside the inset area instead, which is visibly off on any device whose top
-// and bottom insets differ.
-const VIDEO_ASPECT_RATIO = 720 / 1280;
-
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [checking, setChecking] = useState(true);
   // نگهبان‌های تک‌بار-بودن: هم playToEnd و هم تایم‌اوت می‌توانند مسیر را ادامه دهند.
   const startedRef = React.useRef(false);
@@ -233,23 +221,29 @@ export default function Landing({ navigation }) {
     }
   }, [player, isPlaying])
 
-  // کادر ویدیو: بزرگ‌ترین اندازه‌ای که با حفظ نسبت داخل صفحه جا می‌شود.
-  const videoWidth = Math.min(windowWidth, windowHeight * VIDEO_ASPECT_RATIO);
-  const videoHeight = videoWidth / VIDEO_ASPECT_RATIO;
-
   return (
     <View style={styles.root}>
       <CustomStatusBar />
       <LinearGradient colors={SPLASH_GRADIENT} style={StyleSheet.absoluteFill} />
 
-      <View style={styles.videoCenter} pointerEvents="none">
-        <VideoView
-          style={{ width: videoWidth, height: videoHeight }}
-          nativeControls={false}
-          player={player}
-          contentFit="contain"
-        />
-      </View>
+      {/* کادر ویدیو دقیقاً هم‌اندازه‌ی صفحه است و `cover` خودش تصویر را وسط
+          نگه می‌دارد — پس روی هر نسبت‌تصویری تمام‌صفحه و بدون نوار سیاه است.
+          اندازه از `useWindowDimensions` حساب نمی‌شود: آن عدد روی اندروید
+          (edge-to-edge، نوار وضعیت/ناوبری، حالت چندپنجره‌ای) با اندازه‌ی واقعی
+          این کادر یکی نیست و همان اختلاف بود که ویدیو را روی بعضی گوشی‌ها از
+          بالا و پایین می‌برید.
+
+          The box is the screen, and `cover` does the centring itself, so the
+          video fills any aspect ratio with nothing letterboxed. Deriving a size
+          from `useWindowDimensions` is what cropped it on some devices: on
+          Android that number does not always match this view's real height
+          (edge-to-edge insets, split screen), so the computed box overflowed. */}
+      <VideoView
+        style={styles.video}
+        nativeControls={false}
+        player={player}
+        contentFit="cover"
+      />
     </View>
   );
 }
@@ -261,11 +255,24 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: SPLASH_GRADIENT[1],
+    // اسپلش هیچ‌وقت نباید اسکرول شود؛ این هر سرریزِ احتمالی را می‌برد.
+    overflow: 'hidden',
   },
-  videoCenter: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
+  // عرض/ارتفاعِ صریح، نه فقط `StyleSheet.absoluteFill`.
+  //
+  // روی وب این استایل مستقیم روی خودِ تگ `<video>` می‌نشیند، و `<video>` یک
+  // replaced element است: طبق CSS، وقتی `width`/`height` برابر `auto` باشند
+  // (چیزی که absoluteFill تنها با top/left/right/bottom باقی می‌گذارد) مرورگر
+  // ابعادِ ذاتیِ فایل را به کار می‌برد — یعنی ۷۲۰×۱۲۸۰ پیکسل. روی پنجره‌ی
+  // کوچکِ موبایل این از صفحه بیرون می‌زد و `#root` (که `overflow: auto` دارد)
+  // اسکرول افقی و عمودی نشان می‌داد. با `100%` این اتفاق نمی‌افتد و روی نیتیو
+  // هم دقیقاً همان absoluteFill است.
+  video: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
   },
   background: {
     flex: 1,

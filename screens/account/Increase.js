@@ -2,8 +2,6 @@ import { Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-n
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import * as Linking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import NewStyles from '@styles/NewStyles';
@@ -17,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { createStyles } from '@styles/NewStyles';
 import FooterSpacer from '@components/FooterSpacer';
+import { createPaymentRedirectUrl, openPaymentGateway } from '@utils/paymentGateway';
 export default function Increase({ navigation, route }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(() => createStyles(i18n.language), [i18n.language]);
@@ -31,9 +30,9 @@ export default function Increase({ navigation, route }) {
   const [amount, setAmount] = useState(
     presetAmount >= MIN_CHARGE_AMOUNT && presetAmount <= MAX_CHARGE_AMOUNT ? presetAmount : null
   );
-  const subscriptionRef = useRef(null);
+  const paymentSessionRef = useRef(null);
 
-  const redirectUrl = Linking.createURL('/?');
+  const redirectUrl = createPaymentRedirectUrl();
 
   useEffect(() => {
     dispatch(seedBalance(user?.wallet));
@@ -43,57 +42,33 @@ export default function Increase({ navigation, route }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, token]);
 
-  // Cleanup listener on unmount
+  // بستن نشستِ پرداخت هنگام unmount تا شنونده‌ی لینک باقی نماند.
   useEffect(() => {
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.remove();
-        subscriptionRef.current = null;
-      }
+      paymentSessionRef.current?.close();
+      paymentSessionRef.current = null;
     };
   }, []);
 
-  const handledRef = useRef(false);
-
-  const removeListener = () => {
-    if (subscriptionRef.current) {
-      subscriptionRef.current.remove();
-      subscriptionRef.current = null;
-    }
-  };
-
-  // بازگشت از درگاه: هم از نتیجهٔ مرورگر درون‌برنامه‌ای می‌آید و هم (به‌عنوان
-  // پشتیبان) از لینک عمیق؛ فقط اولین مورد پردازش می‌شود.
-  const handlePaymentReturn = (url) => {
-    if (handledRef.current || !url) return;
-    const { queryParams } = Linking.parse(url);
-    if (queryParams?.status == 'OK') {
-      handledRef.current = true;
+  // بازگشت از درگاه. `null` یعنی کاربر بدون نتیجه برگشت و فقط باید دکمه آزاد شود.
+  const handlePaymentResult = (status) => {
+    if (status === 'OK') {
       // موجودی را سرور بعد از تأیید callback بالا می‌برد؛ ما فقط
       // دوباره می‌خوانیمش و هرگز محلی اضافه نمی‌کنیم.
       dispatch(fetchUser(token));
       dispatch(fetchWalletBalance(token));
       showToastOrAlert(t('Your wallet has been successfully topped up.'));
       setLoading(false);
-      removeListener();
       if (Platform.OS == 'web') {
         window.history.back();
       } else {
         navigation.goBack();
       }
-    } else if (queryParams?.status == 'NOK') {
-      handledRef.current = true;
-      showToastOrAlert(t('Transaction failed'));
-      setLoading(false);
-      removeListener();
+      return;
     }
-  };
 
-  const _addLinkingListenerWallet = () => {
-    removeListener();
-    subscriptionRef.current = Linking.addEventListener('url', ({ url }) =>
-      handlePaymentReturn(url)
-    );
+    if (status === 'NOK') showToastOrAlert(t('Transaction failed'));
+    setLoading(false);
   };
 
   const increaseWallet = async () => {
@@ -124,26 +99,15 @@ export default function Increase({ navigation, route }) {
       return;
     }
 
-    handledRef.current = false;
+    // مرورگر درون‌برنامه‌ای: اپ در پس‌زمینه زنده می‌ماند و بعد از پرداخت
+    // همان صفحه ادامه پیدا می‌کند، به‌جای اینکه از اسپلش شروع شود.
+    paymentSessionRef.current = openPaymentGateway({
+      paymentUrl,
+      redirectUrl,
+      onResult: handlePaymentResult,
+    });
 
-    // شنونده باید *قبل از* باز شدن درگاه نصب شود، وگرنه بازگشت سریع
-    // کاربر ممکن است پیش از آماده شدن شنونده اتفاق بیفتد.
-    _addLinkingListenerWallet();
-
-    try {
-      if (Platform.OS == 'web') {
-        await Linking.openURL(paymentUrl);
-      } else {
-        // مرورگر درون‌برنامه‌ای: اپ در پس‌زمینه زنده می‌ماند و بعد از پرداخت
-        // همان صفحه ادامه پیدا می‌کند، به‌جای اینکه از اسپلش شروع شود.
-        const res = await WebBrowser.openAuthSessionAsync(paymentUrl, redirectUrl);
-        if (res.type === 'success') {
-          handlePaymentReturn(res.url);
-        }
-        // اگر کاربر بدون نتیجه بسته باشد، دکمه دوباره فعال می‌شود.
-        if (!handledRef.current) setLoading(false);
-      }
-    } catch {
+    if (!(await paymentSessionRef.current.opened)) {
       showToastOrAlert(t('Error connecting to payment gateway'));
       setLoading(false);
     }
