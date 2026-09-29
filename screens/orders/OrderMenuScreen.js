@@ -13,7 +13,8 @@ function OrderMenuScreen({ navigation }) {
   const { t } = useTranslation();
   const contact = useSelector(state => state.contacts?.data?.data?.contact_urgent) 
   const callSupport = () => {
-    Linking.openURL(contact?.link ? `${contact?.link}` : "tel:09012955939");
+    // `contact_urgent` در پنل خالی است (null)، پس همین شماره‌ی پیش‌فرض واقعاً گرفته می‌شود.
+    Linking.openURL(contact?.link ? `${contact?.link}` : "tel:+982191693909");
   };
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
