@@ -27,7 +27,6 @@ import Loader from '@components/Loader';
 import ScreenHeaders from '@components/ScreenHeaders';
 import CustomStatusBar from '@components/CustomStatusBar';
 import categoriesAPI from '@services/CategoriesApi';
-import { imageUri } from '@services/URL';
 import { fetchSteps } from '@slices/stepSlice';
 import { describeApiError } from '@utils/apiErrorHandler';
 import { setCategory } from '@slices/categorySlice';
@@ -37,6 +36,7 @@ import { createStyles } from '@styles/NewStyles';
 import { spacing } from '@theme/Spacing';
 import {
   SYSTEMATIC_CATEGORIES,
+  getCategory,
   getFlow,
   resolveSystematicCategoryId,
 } from './systematicFlows';
@@ -54,9 +54,11 @@ const LEFT_COLUMN_SIZE = 3;
 // (بدون کاشی حساب کاربری) یکی مانده به انتهای ستون چپ است.
 const TRASH_INDEX_IN_CATEGORIES = LEFT_COLUMN_SIZE - 2;
 
-// آیکون اختصاصی «ضایعات». حتی وقتی دسته‌ها از API می‌آیند همین آیکون محلی
-// استفاده می‌شود تا کاشی ضایعات همه‌جا یک شکل باشد.
-const TRASH_ICON = require('@assets/icons/hardware-services/trash.png');
+// آیکون کاشی‌ها از سرور (`image_path` دسته) می‌آید. آیکون محلی همان دسته
+// (systematicFlows.js) فقط جایگزین است: وقتی سرور تصویری نداده یا بارگذاری آن
+// خطا داده (مثلاً 403 از `/storage/...`) تا کاشی خالی نماند — Folder خودش این
+// جایگزینی را انجام می‌دهد. «ضایعات» همیشه آیکون محلی خودش را دارد.
+const localIconFor = (categoryId) => getCategory(categoryId)?.image || null;
 
 const SystematicCategoryScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -211,22 +213,22 @@ const SystematicCategoryScreen = ({ navigation }) => {
     const accountTile = {
       key: 'user_account',
       title: 'حساب کاربری',
-      imageSource: { uri: `${imageUri}/userfolder/Profile.png` },
+      image: 'userfolder/Profile.png',
+      imageSource: localIconFor('user_account'),
       onPress: () => navigation.navigate('Profile'),
     };
 
-    const rest = categories.map((entry) => ({
-      key: entry.key,
-      title: entry.title,
-      image: entry.image,
-      // ضایعات همیشه با آیکون محلی جدید نمایش داده می‌شود.
-      imageSource:
-        resolveSystematicCategoryId(entry.apiItem) === 'trash'
-          ? TRASH_ICON
-          : entry.imageSource,
-      onPress: () => openCategory(entry),
-      isTrash: resolveSystematicCategoryId(entry.apiItem) === 'trash',
-    }));
+    const rest = categories.map((entry) => {
+      const categoryId = resolveSystematicCategoryId(entry.apiItem);
+      return {
+        key: entry.key,
+        title: entry.title,
+        image: categoryId === 'trash' ? undefined : entry.image,
+        imageSource: localIconFor(categoryId) || entry.imageSource,
+        onPress: () => openCategory(entry),
+        isTrash: categoryId === 'trash',
+      };
+    });
 
     // «ضایعات» را به کاشی سومِ ستون چپ می‌بریم؛ بقیه ترتیب خودشان را نگه می‌دارند.
     const trashIndex = rest.findIndex((tile) => tile.isTrash);
