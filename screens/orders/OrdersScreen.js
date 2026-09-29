@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import DatePicker from 'react-native-modern-datepicker';
+import CalendarPicker from '@components/calendar/CalendarPicker';
 import moment from 'moment-jalaali';
 import { useTranslation } from 'react-i18next';
 
@@ -280,27 +280,13 @@ function OrdersScreen({ navigation }) {
                 <View style={[{ width: '100%' }, NewStyles.center]}>
                   {showFromPicker && (
                     <View style={[styles.pickerContainer]}>
-                      <DatePicker
-                        mode="calendar"
-                        isGregorian={false}
-                        options={{
-                          backgroundColor: '#fff',
-                          textHeaderColor: themeColor0.bgColor(1),
-                          textDefaultColor: '#333',
-                          selectedTextColor: '#fff',
-                          mainColor: themeColor0.bgColor(1),
-                          textSecondaryColor: '#999',
-                          defaultFont: 'VazirLight',
-                          headerFont: 'VazirLight',
-                        }}
-                        selected={tempFromDate ? moment(tempFromDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                        onDateChange={() => { }}
-                        onMonthYearChange={() => { }}
-                        onSelectedChange={(date) => {
+                      <CalendarPicker
+                        calendar="jalaali"
+                        value={tempFromDate || ''}
+                        onSelect={(date) => {
                           const gregorian = convertJalaliToGregorian(date);
                           setTempFromDate(gregorian);
                         }}
-                        style={{ borderRadius: 10 }}
                       />
                       <TouchableOpacity
                         style={styles.confirmDateBtn}
@@ -340,27 +326,13 @@ function OrdersScreen({ navigation }) {
                 <View style={[{ width: '100%' }, NewStyles.center]}>
                   {showToPicker && (
                     <View style={[styles.pickerContainer]}>
-                      <DatePicker
-                        mode="calendar"
-                        isGregorian={false}
-                        options={{
-                          backgroundColor: '#fff',
-                          textHeaderColor: themeColor0.bgColor(1),
-                          textDefaultColor: '#333',
-                          selectedTextColor: '#fff',
-                          mainColor: themeColor0.bgColor(1),
-                          textSecondaryColor: '#999',
-                          defaultFont: 'VazirLight',
-                          headerFont: 'VazirLight',
-                        }}
-                        selected={tempToDate ? moment(tempToDate, 'YYYY-MM-DD').format('jYYYY/jMM/jDD') : ''}
-                        onDateChange={() => { }}
-                        onMonthYearChange={() => { }}
-                        onSelectedChange={(date) => {
+                      <CalendarPicker
+                        calendar="jalaali"
+                        value={tempToDate || ''}
+                        onSelect={(date) => {
                           const gregorian = convertJalaliToGregorian(date);
                           setTempToDate(gregorian);
                         }}
-                        style={{ borderRadius: 10 }}
                       />
                       <TouchableOpacity
                         style={styles.confirmDateBtn}

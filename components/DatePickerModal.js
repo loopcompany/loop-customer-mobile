@@ -1,28 +1,18 @@
-import { View, Modal, StyleSheet, TouchableWithoutFeedback, Text, TouchableOpacity } from 'react-native';
-import React, { useMemo, useCallback } from 'react';
+import { View, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
-
-import NewStyles from '@styles/NewStyles';
-import { themeColor1, themeColor10, themeColor4, themeColor6 } from '@theme/Color';
-import Button from './Button';
-import i18n from 'i18next'
 import { Ionicons } from '@expo/vector-icons';
 
-// Pre-calculate colors outside component to prevent re-renders
-const WRAPPER_BG_COLOR = themeColor10.bgColor(0.4);
-const MODAL_BG_COLOR = themeColor4.bgColor(1);
-const BUTTON_BG_COLOR = themeColor1.bgColor(1);
-const BUTTON_TEXT_COLOR = themeColor4.bgColor(1);
-const MAIN_COLOR = themeColor1.bgColor(1);
+import NewStyles from '@styles/NewStyles';
+import { colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import Button from './Button';
+import CalendarPicker from './calendar/CalendarPicker';
 
-// Pre-calculate DatePicker options outside component to prevent re-renders
-const DATE_PICKER_OPTIONS = {
-    defaultFont: 'VazirLight',
-    headerFont: 'VazirLight',
-    mainColor: MAIN_COLOR
-};
-
+// تقویم حالا components/calendar/CalendarPicker است (انتخاب سال به‌صورت شبکه‌ی
+// ردیفی). API این مودال و قالب خروجی تغییری نکرده است:
+//   فارسی  → 'jYYYY/jMM/jDD'    انگلیسی → 'YYYY/MM/DD'
 const DatePickerModal = React.memo(function DatePickerModal({
     datePickerModal,
     setDatePickerModal,
@@ -30,95 +20,55 @@ const DatePickerModal = React.memo(function DatePickerModal({
     setBirthDate,
     isCurrentDate,
     minimumDate = null, // تاریخ حداقل (اختیاری)
-    maximumDate = null,  // تاریخ حداکثر (اختیاری),
-    onDateChange
+    maximumDate = null, // تاریخ حداکثر (اختیاری) - پیش‌فرض امروز
+    onDateChange,
 }) {
     const { t } = useTranslation();
 
-    const date = useMemo(() => new Date(), []);
+    // اگر maximumDate پاس نشده، امروز سقف است (رفتار قبلی).
+    const maxDate = useMemo(() => maximumDate || new Date(), [maximumDate]);
 
-    // محاسبه تاریخ جاری به صورت شمسی
-    const currentDate = useMemo(() =>
-        getFormatedDate(new Date(date.getTime()), i18n.language == 'fa' ? 'jYYYY/jMM/jDD' : 'YYYY-MM-DD'),
-        [date]);
-
-    // اگر maximumDate پاس نشده، از تاریخ امروز استفاده کن
-    const maxDate = useMemo(() => {
-        return maximumDate || currentDate;
-    }, [maximumDate, currentDate]);
-
-    // اگر minimumDate پاس نشده، از undefined استفاده کن (بدون محدودیت)
-    const minDate = useMemo(() => {
-        return minimumDate || undefined;
-    }, [minimumDate]);
-
-    // Memoized callbacks to prevent infinite re-renders
     const handleRequestClose = useCallback(() => {
-        setDatePickerModal(prev => !prev);
+        setDatePickerModal(false);
     }, [setDatePickerModal]);
 
-    // Empty callbacks required by react-native-modern-datepicker
-    // Using empty dependency array to prevent re-renders
-    const handleDateChange = useCallback(() => {
-        // Intentionally empty - required by library
-    }, []);
-
-    const handleMonthYearChange = useCallback(() => {
-        // Intentionally empty - required by library
-    }, []);
-
-    const handleSelectedChange = useCallback((selectedDate) => {
-        console.log('📅 DatePickerModal - تاریخ انتخاب شده:', selectedDate);
-        console.log('📅 DatePickerModal - بعد از slice:', selectedDate.slice(0, 10));
+    const handleSelect = useCallback((selectedDate) => {
         if (onDateChange) {
-            onDateChange(selectedDate)
+            onDateChange(selectedDate);
         }
         setBirthDate(selectedDate.slice(0, 10));
-    }, [setBirthDate]);
-
-    const handleConfirm = useCallback(() => {
-        setDatePickerModal(false);
-
-    }, [setDatePickerModal]);
+    }, [onDateChange, setBirthDate]);
 
     return (
         <Modal animationType='fade' transparent={true} visible={datePickerModal} onRequestClose={handleRequestClose}>
-            {/* <TouchableWithoutFeedback onPress={() => { setDatePickerModal(false) }}> */}
             <View style={[styles.wrapper, NewStyles.center]}>
-                <TouchableWithoutFeedback onPress={() => { }}>
-                    <View style={styles.modalView}>
-                        <TouchableOpacity style={[{ height: 40, width: 40, backgroundColor: themeColor6.bgColor(0.2), marginBottom: 20, alignSelf:'flex-end' }, NewStyles.border10, NewStyles.center]} onPress={()=>{setDatePickerModal(false);}}>
-                            <Ionicons
-                                name={'close'}
-                                size={20}
-                                color={themeColor6.bgColor(1)}
-                            />
-                        </TouchableOpacity>
-                        <View style={styles.calendarContainer}>
-                            <DatePicker
-                                mode='calendar'
-                                isGregorian={i18n.language !== 'fa'}
-                                options={DATE_PICKER_OPTIONS}
-                                style={styles.calendar}
-                                selected={birthDate}
-                                current={isCurrentDate ? isCurrentDate : currentDate}
-                                minimumDate={minDate}
-                                maximumDate={maxDate}
-                                onDateChange={handleDateChange}
-                                onMonthYearChange={handleMonthYearChange}
-                                onSelectedChange={handleSelectedChange}
-                            />
-                        </View>
+                <View style={styles.modalView}>
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={[styles.closeButton, NewStyles.border10, NewStyles.center]}
+                        onPress={handleRequestClose}
+                    >
+                        <Ionicons name={'close'} size={20} color={colors.error.color} />
+                    </TouchableOpacity>
 
-                        {/* دکمه بستن */}
+                    {/* تا وقتی مودال بسته است تقویم ساخته نمی‌شود، پس هر بار باز شدن
+                        از روی مقدار فعلی (یا isCurrentDate) شروع می‌کند. */}
+                    {datePickerModal ? (
+                        <CalendarPicker
+                            value={birthDate}
+                            onSelect={handleSelect}
+                            initialDate={isCurrentDate}
+                            minimumDate={minimumDate}
+                            maximumDate={maxDate}
+                            style={styles.calendar}
+                        />
+                    ) : null}
 
-                        <Button title={t('Confirm')} onPress={handleConfirm} />
-                    </View>
-                </TouchableWithoutFeedback>
+                    <Button title={t('Confirm')} onPress={handleRequestClose} />
+                </View>
             </View>
-            {/* </TouchableWithoutFeedback> */}
         </Modal>
-    )
+    );
 });
 
 // Custom comparison function for React.memo
@@ -140,44 +90,24 @@ export default React.memo(DatePickerModal, arePropsEqual);
 const styles = StyleSheet.create({
     wrapper: {
         flex: 1,
-        backgroundColor: WRAPPER_BG_COLOR,
+        backgroundColor: colors.overlay.bgColor(0.4),
     },
     modalView: {
         width: '90%',
-        backgroundColor: MODAL_BG_COLOR,
-        borderRadius: 10,
-        padding: 15,
+        maxWidth: 400,
+        backgroundColor: colors.surface.bgColor(1),
+        borderRadius: radius.md,
+        padding: spacing.lg,
         alignItems: 'center',
-        maxWidth: 400
-    },
-    calendarContainer: {
-        width: '100%',
-        aspectRatio: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    calendar: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 10,
     },
     closeButton: {
-        width: '100%',
-        backgroundColor: BUTTON_BG_COLOR,
-        paddingVertical: 12,
-        paddingHorizontal: 40,
-        borderRadius: 8,
-        alignItems: 'center',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        height: 40,
+        width: 40,
+        backgroundColor: colors.error.bgColor(0.2),
+        marginBottom: spacing.md,
+        alignSelf: 'flex-end',
     },
-    closeButtonText: {
-        color: BUTTON_TEXT_COLOR,
-        fontSize: 16,
-        fontWeight: 'bold',
-    }
+    calendar: {
+        marginBottom: spacing.lg,
+    },
 });

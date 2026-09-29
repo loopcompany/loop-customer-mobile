@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DatePicker from "react-native-modern-datepicker";
+import CalendarPicker from "@components/calendar/CalendarPicker";
 import moment from "moment-jalaali";
 
 import ScreenHeaders from "@components/ScreenHeaders";
-import { themeColor0, themeColor1, themeColor4 } from "@theme/Color";
+import { themeColor0, themeColor1, themeColor4, colors } from "@theme/Color";
 import { educationRegistrationAPI } from "@services/Api";
 import { showToastOrAlert } from "@helpers/Common";
 import Button from "@components/Button";
@@ -462,30 +462,19 @@ export default function TrainingRegistrationScreen() {
 
           {showBirthDatePicker && (
             <View style={styles.datePickerWrapper}>
-              <DatePicker
-                mode="calendar"
-                isGregorian={false}
-                options={{
-                  backgroundColor: "#fff",
-                  textHeaderColor: themeColor1.bgColor(1),
-                  textDefaultColor: "#333",
-                  selectedTextColor: "#fff",
-                  mainColor: themeColor1.bgColor(1),
-                  textSecondaryColor: "#999",
-                  defaultFont: "VazirLight",
-                  headerFont: "VazirLight",
-                }}
-                selected={form.birth_date}
-                onDateChange={() => { }}
-                onMonthYearChange={() => { }}
-                onSelectedChange={(date) => {
+              <CalendarPicker
+                calendar="jalaali"
+                value={form.birth_date}
+                // تاریخ تولد نمی‌تواند در آینده باشد.
+                maximumDate={new Date()}
+                accentColor={colors.accent.color}
+                onSelect={(date) => {
                   // const gregorian = convertJalaliToGregorian(date);
                   handleChange("birth_date", date);
                   console.log(date);
                   
                   // setShowBirthDatePicker(false);
                 }}
-                style={{ borderRadius: 10 }}
               />
             </View>
           )}
