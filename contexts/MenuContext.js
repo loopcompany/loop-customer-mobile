@@ -708,9 +708,23 @@ export const MenuProvider = ({ children }) => {
                     visible={menuVisible}
                     onRequestClose={closeMenu}
                     animationType="fade"
+                    // روی اندروید (edge-to-edge) مودال زیر نوار ناوبری سیستم کشیده می‌شد و
+                    // ضربدر/خروج پشت دکمه‌های گوشی می‌افتاد و قابل لمس نبود. مودال را روی
+                    // همه‌ی دستگاه‌ها یکسان تمام‌صفحه می‌کنیم و خودمان به اندازه‌ی insets
+                    // فاصله می‌دهیم، تا روی گوشی‌های قدیمی‌تر فاصله دوبار حساب نشود.
+                    statusBarTranslucent
+                    navigationBarTranslucent
                 >
 
-                    <View style={{ flex: 1, alignSelf: 'flex-start' }}>
+                    <View
+                        style={{
+                            flex: 1,
+                            alignSelf: 'flex-start',
+                            paddingTop: insets?.top || 0,
+                            paddingBottom: insets?.bottom || 0,
+                            backgroundColor: themeColor0.bgColor(1),
+                        }}
+                    >
                         <FlatList
                             ListHeaderComponent={() => {
                                 return (
