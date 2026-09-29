@@ -20,6 +20,7 @@ import Footer from './Footer';
 import OrderDropdown from '@components/OrderDropdown';
 import DatePickerModal from '@components/DatePickerModal';
 import { formatDate } from '@helpers/Common';
+import { orderPaidAmount } from '@utils/orderPaidAmount';
 import { faultReportAPI } from '@services/Api';
 import { showToastOrAlert } from '@helpers/Common';
 import { themeColor1, themeColor4 } from '@theme/Color';
@@ -69,7 +70,7 @@ export default function ProductIssueScreen({ navigation }) {
       ...prev,
       orderNumber: item.order_id.toString(),
       techCode: item.technician_referral_code || '',
-      amount: item.final_paid_amount ? item.final_paid_amount.toString() : '',
+      amount: orderPaidAmount(item),
       name: item.product_name || '',
       orderDate: item.created_at ? formatDate(item.created_at) : '',
       completeDate: item.finished_at ? formatDate(item.finished_at) : '',
