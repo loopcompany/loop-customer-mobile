@@ -33,7 +33,7 @@ import {
   TECHNICIAN_GENDER_OPTIONS,
   TIME_SLOT_OPTIONS,
 } from './deviceCatalog';
-import { getCategory, getFlow } from './systematicFlows';
+import { getCategory, getFlow, getVisibleFlow } from './systematicFlows';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -102,7 +102,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const { scrollRef, registerSection, requestScrollTo } = useAccordionScroll();
   const categoryId = route?.params?.categoryId;
   const category = getCategory(categoryId);
-  const steps = getFlow(categoryId);
+  const allSteps = getFlow(categoryId);
 
   // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید. آدرس و تلفن ثابت از
   // آدرس‌های ذخیره‌شده و - در نبودشان - از پروفایلِ سازمان می‌آید؛
@@ -111,7 +111,10 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const receiptSources = useReceiptSources();
 
   const [answers, setAnswers] = useState({});
-  const [expanded, setExpanded] = useState(steps[0]?.id || null);
+  const [expanded, setExpanded] = useState(allSteps[0]?.id || null);
+  // بعضی مراحل به پاسخ مرحله‌ی دیگری وابسته‌اند (پرینتر ↔ دستگاه کپی)؛ شماره‌گذاری،
+  // شمارش «مرحله تکمیل شده»، خلاصه و رسید همه فقط روی مراحل نمایان حساب می‌شوند.
+  const steps = useMemo(() => getVisibleFlow(categoryId, answers), [categoryId, answers]);
 
   const setAnswer = (stepId, patch) =>
     setAnswers((prev) => ({ ...prev, [stepId]: { ...prev[stepId], ...patch } }));
@@ -265,7 +268,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     }
   };
 
-  if (!category || steps.length === 0) {
+  if (!category || allSteps.length === 0) {
     return (
       <ImageBackground source={require('@assets/moon.jpg')} style={{ flex: 1 }} imageStyle={{ width: '100%', height: '100%' }}>
         <CustomStatusBar />

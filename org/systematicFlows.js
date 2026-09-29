@@ -10,6 +10,16 @@
 // انجام می‌شود و از همان کیت رابط کاربری «انتخاب جامع» استفاده می‌کند.
 
 import { PROCUREMENT_ITEMS, SOFTWARE_ITEMS } from './deviceCatalog';
+import {
+  LAPTOP_SOFTWARE_ISSUES,
+  LAPTOP_HARDWARE_ISSUES,
+  CASE_HARDWARE_ISSUES,
+  PRINTER_SOFTWARE_ISSUES,
+  PRINTER_HARDWARE_ISSUES,
+  COPIER_ISSUES,
+  HARD_DISK_SOFTWARE_ISSUES,
+  HARD_DISK_HARDWARE_ISSUES,
+} from './defaultIssues';
 
 const sectionIcon = {
   software: require('@assets/icons/sections/software-services.png'),
@@ -447,20 +457,21 @@ export const SYSTEMATIC_FLOWS = {
       columns: 1,
     },
     {
+      id: 'software_default',
+      title: 'نرم افزار (پیش فرض)',
+      hint: 'مشکلات نرم‌افزاری لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.software,
+      type: 'checklist',
+      options: LAPTOP_SOFTWARE_ISSUES,
+      columns: 1,
+    },
+    {
       id: 'hardware_default',
       title: 'سخت افزار (پیش فرض)',
-      hint: 'مشکلات متداول نرم‌افزاری و سیستمی لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      hint: 'مشکلات سخت‌افزاری لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
-      options: [
-        { id: 'blue_screen', title: 'پیغام صفحه آبی می‌آید' },
-        { id: 'apps_not_running', title: 'برخی برنامه‌ها اجرا نمی‌شوند' },
-        { id: 'software_not_installing', title: 'برخی نرم‌افزارها نصب نمی‌شوند' },
-        { id: 'antivirus_not_updating', title: 'آنتی ویروس، بروزرسانی یا آپدیت نمی‌شود' },
-        { id: 'infected', title: 'ویروسی شدن لپ تاپ' },
-        { id: 'windows_not_installing', title: 'ویندوز نصب نمی‌شود' },
-        { id: 'missing_storage_drivers', title: 'درایورهای هارد در زمان نصب ویندوز نمایش داده نمی‌شوند' },
-      ],
+      options: LAPTOP_HARDWARE_ISSUES,
       columns: 1,
     },
     {
@@ -621,20 +632,7 @@ export const SYSTEMATIC_FLOWS = {
       hint: 'ایرادهای سخت‌افزاری متداول کیس؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
-      options: [
-        { id: 'no_power', title: 'کیس روشن نمی‌شود' },
-        { id: 'not_working', title: 'کیس کار نمی‌کند' },
-        { id: 'slow', title: 'کیس کند است' },
-        { id: 'reset', title: 'کیس ریست می‌شود' },
-        { id: 'hang', title: 'کیس هنگ می‌کند' },
-        { id: 'noise', title: 'کیس صدا دارد' },
-        { id: 'overheat', title: 'کیس داغ می‌شود' },
-        { id: 'no_display', title: 'مانیتور تصویر ندارد' },
-        { id: 'keyboard', title: 'کیبورد کار نمی‌کند' },
-        { id: 'mouse', title: 'ماوس کار نمی‌کند' },
-        { id: 'ports', title: 'پورت‌ها کار نمی‌کنند' },
-        { id: 'other', title: 'سایر مشکلات' },
-      ],
+      options: CASE_HARDWARE_ISSUES,
       columns: 1,
     },
     {
@@ -805,23 +803,36 @@ export const SYSTEMATIC_FLOWS = {
       note: true,
     },
     {
+      id: 'software_default',
+      title: 'نرم افزار (پیش فرض)',
+      hint: 'خطاها و مشکلات نرم‌افزاری پرینتر؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.software,
+      type: 'checklist',
+      options: PRINTER_SOFTWARE_ISSUES,
+      columns: 1,
+      // فهرست پرینتر فقط وقتی «کپی صنعتی» انتخاب نشده باشد.
+      visibleWhen: (answers) => answers.device_type?.selected !== 'industrial_copier',
+    },
+    {
       id: 'hardware_default',
-      title: 'ایراد دستگاه',
-      hint: 'مشکلات مشاهده‌شده روی دستگاه چاپ را انتخاب کنید.',
+      title: 'سخت افزار (پیش فرض)',
+      hint: 'ایرادهای سخت‌افزاری پرینتر؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
-      options: [
-        { id: 'no_power', title: 'دستگاه روشن نمی‌شود' },
-        { id: 'no_print', title: 'چاپ نمی‌کند' },
-        { id: 'paper_jam', title: 'کاغذ گیر می‌کند' },
-        { id: 'low_quality', title: 'کیفیت چاپ پایین است / خط می‌اندازد' },
-        { id: 'toner', title: 'تونر / کارتریج نیاز به شارژ یا تعویض دارد' },
-        { id: 'scanner', title: 'اسکنر یا کپی کار نمی‌کند' },
-        { id: 'network_issue', title: 'در شبکه شناسایی نمی‌شود' },
-        { id: 'driver', title: 'درایور نصب نمی‌شود' },
-        { id: 'other', title: 'سایر مشکلات' },
-      ],
+      options: PRINTER_HARDWARE_ISSUES,
       columns: 1,
+      // فهرست پرینتر فقط وقتی «کپی صنعتی» انتخاب نشده باشد.
+      visibleWhen: (answers) => answers.device_type?.selected !== 'industrial_copier',
+    },
+    {
+      id: 'copier_default',
+      title: 'ایراد دستگاه کپی (پیش فرض)',
+      hint: 'مشکلات دستگاه کپی صنعتی؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.hardware,
+      type: 'checklist',
+      options: COPIER_ISSUES,
+      columns: 1,
+      visibleWhen: (answers) => answers.device_type?.selected === 'industrial_copier',
     },
     deviceStatusStep('وضعیت دستگاه'),
     ...closingSteps(['printer_single', 'printer_multi', 'industrial_copier', 'accessories']),
@@ -871,19 +882,21 @@ export const SYSTEMATIC_FLOWS = {
       noteSatisfies: true,
     },
     {
+      id: 'software_default',
+      title: 'نرم افزار (پیش فرض)',
+      hint: 'مشکلات نرم‌افزاری هارد؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.software,
+      type: 'checklist',
+      options: HARD_DISK_SOFTWARE_ISSUES,
+      columns: 1,
+    },
+    {
       id: 'hardware_default',
-      title: 'ایراد حافظه',
-      hint: 'مشکل مشاهده‌شده روی هارد یا حافظه را انتخاب کنید.',
+      title: 'سخت افزار (پیش فرض)',
+      hint: 'مشکلات سخت‌افزاری هارد؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
-      options: [
-        { id: 'not_detected', title: 'شناسایی نمی‌شود' },
-        { id: 'bad_sector', title: 'بدسکتور دارد / کند است' },
-        { id: 'noise', title: 'صدای غیرعادی می‌دهد' },
-        { id: 'data_loss', title: 'اطلاعات پاک شده است' },
-        { id: 'format_needed', title: 'نیاز به فرمت / پارتیشن‌بندی دارد' },
-        { id: 'other', title: 'سایر مشکلات' },
-      ],
+      options: HARD_DISK_HARDWARE_ISSUES,
       columns: 1,
     },
     deviceStatusStep('وضعیت هارد'),
@@ -963,6 +976,13 @@ export const SYSTEMATIC_FLOWS = {
 };
 
 export const getFlow = (categoryId) => SYSTEMATIC_FLOWS[categoryId] || [];
+
+// مراحلی که با پاسخ‌های فعلی دیده می‌شوند. مرحله‌ی دارای `visibleWhen` فقط وقتی
+// نمایش داده (و در خلاصه/رسید حساب) می‌شود که شرطش برقرار باشد - مثلاً فهرست
+// ایرادهای «دستگاه کپی» فقط وقتی نوع دستگاه «کپی صنعتی» است. پاسخِ مرحله‌ی
+// پنهان در answers می‌ماند ولی جایی خوانده نمی‌شود.
+export const getVisibleFlow = (categoryId, answers = {}) =>
+  getFlow(categoryId).filter((step) => !step.visibleWhen || step.visibleWhen(answers));
 
 export const getCategory = (categoryId) =>
   SYSTEMATIC_CATEGORIES.find((c) => c.id === categoryId) || null;

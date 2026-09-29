@@ -6,7 +6,7 @@
 // همان قرارداد سطح‌به‌سطحی که summaryLines در آن صفحه هم از آن می‌خواند.
 
 import { PROCUREMENT_ITEMS, HARDWARE_ITEMS, OS_ITEMS, TIME_SLOT_OPTIONS } from '@org/deviceCatalog';
-import { getFlow, getCategory } from '@org/systematicFlows';
+import { getVisibleFlow, getCategory } from '@org/systematicFlows';
 import { L, LO } from '@org/orgI18n';
 import {
   RECEIPT_STATE,
@@ -147,7 +147,8 @@ export const receiptFromSystematic = ({
   state = RECEIPT_STATE.PENDING,
   orderNumber = null,
 }) => {
-  const steps = getFlow(categoryId);
+  // مرحله‌ی پنهان (مثلاً ایراد پرینتر وقتی «کپی صنعتی» انتخاب شده) در رسید نمی‌آید.
+  const steps = getVisibleFlow(categoryId, answers);
   const category = getCategory(categoryId);
 
   // --- مشخصات محصول ---------------------------------------------------

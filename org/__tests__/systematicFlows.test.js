@@ -103,3 +103,89 @@ describe('brand logos & OS list — 1405/07/03 assets', () => {
     expect(brandsOf('hard_disk')).toHaveLength(67);
   });
 });
+
+describe('پیش‌فرض‌ها — «پیش فرض ها.pdf»', () => {
+  const { getVisibleFlow } = require('../systematicFlows');
+  const { receiptFromSystematic } = require('@services/receipt');
+  const opts = (categoryId, stepId) => step(categoryId, stepId).options.map((o) => o.title);
+
+  it('لپ تاپ: ۱۷ نرم‌افزاری و ۱۶ سخت‌افزاری، به ترتیب فایل', () => {
+    const sw = opts('laptop', 'software_default');
+    const hw = opts('laptop', 'hardware_default');
+    expect(sw).toHaveLength(17);
+    expect(hw).toHaveLength(16);
+    expect([sw[0], sw[16]]).toEqual(['پیغام صفحه آبی', 'سرعت ویندوز کند شده']);
+    expect([hw[0], hw[15]]).toEqual(['لپتاپ دیر شارژ میشود', 'وای فای روشن نمیشود']);
+    expect(step('laptop', 'software_default').title).toBe('نرم افزار (پیش فرض)');
+    expect(step('laptop', 'hardware_default').title).toBe('سخت افزار (پیش فرض)');
+    // پیش‌فرض‌های قدیمی حذف شده‌اند
+    expect(sw).not.toContain('آنتی ویروس، بروزرسانی یا آپدیت نمی‌شود');
+  });
+
+  it('کیس: فقط سخت‌افزاری، ۱۵ مورد', () => {
+    expect(step('case', 'software_default')).toBeUndefined();
+    const hw = opts('case', 'hardware_default');
+    expect(hw).toHaveLength(15);
+    expect([hw[0], hw[14]]).toEqual(['دمای پردازنده بیش از حد بالا میرود', 'پیام پر شدن فضای هارد']);
+  });
+
+  it('هارد: ۱۵ نرم‌افزاری و ۱۱ سخت‌افزاری', () => {
+    const sw = opts('hard_disk', 'software_default');
+    const hw = opts('hard_disk', 'hardware_default');
+    expect(sw).toHaveLength(15);
+    expect(hw).toHaveLength(11);
+    expect(sw).toContain('هارد به صورت Read Only نمایش داده میشود');
+    expect(hw[hw.length - 1]).toBe('سلامت هارد در حال کاهش است');
+  });
+
+  it('پرینتر ۱۶ + ۱۶ و دستگاه کپی ۱۵ مورد', () => {
+    expect(opts('printer_copy', 'software_default')).toHaveLength(16);
+    expect(opts('printer_copy', 'hardware_default')).toHaveLength(16);
+    expect(opts('printer_copy', 'copier_default')).toHaveLength(15);
+  });
+
+  it('با «کپی صنعتی» فقط ایرادهای دستگاه کپی دیده می‌شود، وگرنه فقط پرینتر', () => {
+    const ids = (answers) => getVisibleFlow('printer_copy', answers).map((s) => s.id);
+    expect(ids({})).toEqual(expect.arrayContaining(['software_default', 'hardware_default']));
+    expect(ids({})).not.toContain('copier_default');
+    expect(ids({ device_type: { selected: 'laser_multi' } })).not.toContain('copier_default');
+
+    const copier = ids({ device_type: { selected: 'industrial_copier' } });
+    expect(copier).toContain('copier_default');
+    expect(copier).not.toContain('software_default');
+    expect(copier).not.toContain('hardware_default');
+  });
+
+  it('پاسخِ مرحله‌ی پنهان وارد رسید نمی‌شود', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'printer_copy',
+      answers: {
+        device_type: { selected: 'industrial_copier' },
+        // کاربر اول پرینتر را انتخاب کرده بود و بعد نوع را عوض کرد
+        software_default: { selected: ['printer_sw_1'] },
+        copier_default: { selected: ['copier_4'] },
+      },
+    });
+    const description = receipt.services[0].description;
+    expect(description).toContain('پودر تونر میریزد');
+    expect(description).not.toContain('نشان دادن وضعیت آفلاین پرینتر');
+  });
+
+  it('همه‌ی گزینه‌ها ترجمه‌ی انگلیسی دارند', () => {
+    const i18n = require('@i18n').default || require('@i18n');
+    const { LO } = require('../orgI18n');
+    const previous = i18n.language;
+    i18n.language = 'en';
+    try {
+      [
+        ['laptop', 'software_default'], ['laptop', 'hardware_default'], ['case', 'hardware_default'],
+        ['printer_copy', 'software_default'], ['printer_copy', 'hardware_default'],
+        ['printer_copy', 'copier_default'], ['hard_disk', 'software_default'], ['hard_disk', 'hardware_default'],
+      ].forEach(([c, s]) => {
+        LO(step(c, s).options).forEach((o) => expect(o.title).toMatch(/^[\x20-\x7E]+$/));
+      });
+    } finally {
+      i18n.language = previous;
+    }
+  });
+});
