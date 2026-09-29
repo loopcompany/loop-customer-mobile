@@ -158,6 +158,13 @@ describe('Wallet screen', () => {
 
     expect(textsOf(tree)).toEqual(expect.arrayContaining(['Quick recharge']));
 
+    // The four amounts the business asked for (1405/07/03 list, item 32).
+    const digits = textsOf(tree).map((text) => String(text).replace(/[^\d]/g, ''));
+    ['500000', '1000000', '2000000', '5000000'].forEach((amount) =>
+      expect(digits).toContain(amount)
+    );
+    expect(digits).not.toContain('100000');
+
     // Tapping a chip must carry that exact amount to the charge form, otherwise
     // the shortcut is decorative and the user retypes it anyway.
     const chip = tree.root
@@ -165,12 +172,12 @@ describe('Wallet screen', () => {
       .find((n) =>
         n
           .findAllByType('Text')
-          .some((node) => node.children.join('').replace(/[^\d]/g, '') === '100000')
+          .some((node) => node.children.join('').replace(/[^\d]/g, '') === '5000000')
       );
 
     expect(chip).toBeTruthy();
     act(() => chip.props.onPress());
-    expect(navigate).toHaveBeenCalledWith('Increase', { amount: 100000 });
+    expect(navigate).toHaveBeenCalledWith('Increase', { amount: 5000000 });
   });
 
   it('still renders the actions when the balance call fails', async () => {

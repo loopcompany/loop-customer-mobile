@@ -51,7 +51,7 @@ const RECENT_COUNT = 5;
  * All sit inside the 10,000 .. 50,000,000 range the backend validates, so a
  * quick-charge tap can never produce a request the server rejects.
  */
-const QUICK_AMOUNTS = [100000, 200000, 500000, 1000000];
+const QUICK_AMOUNTS = [500000, 1000000, 2000000, 5000000];
 
 export default function Wallet({ navigation }) {
   const { t, i18n } = useTranslation();
