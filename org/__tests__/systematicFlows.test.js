@@ -70,3 +70,36 @@ describe('systematic flows — 1405/07/03 edits', () => {
     expect(capacity.notePlaceholder).toContain('حجم هارد');
   });
 });
+
+describe('brand logos & OS list — 1405/07/03 assets', () => {
+  const { OS_ITEMS } = require('../deviceCatalog');
+  const brandsOf = (categoryId) => step(categoryId, 'brand').brands;
+
+  it('۹ سیستم عامل، از جمله ویندوز 11 اورجینال', () => {
+    expect(OS_ITEMS).toHaveLength(9);
+    expect(OS_ITEMS.map((o) => o.id)).toEqual(expect.arrayContaining(['win11_original', 'win11']));
+    OS_ITEMS.forEach((os) => expect(os.image).toBeTruthy());
+  });
+
+  it('همه‌ی برندهای ارسالی لپ تاپ با لوگو هستند (به‌جز HTC که لوگو نداشت)', () => {
+    const brands = brandsOf('laptop');
+    expect(brands).toHaveLength(43);
+    expect(brands.filter((b) => !b.image).map((b) => b.title)).toEqual(['HTC']);
+  });
+
+  it('برندهای آل این وان همان لیست ارسالی است', () => {
+    const titles = brandsOf('all_in_one').map((b) => b.title);
+    expect(titles).toHaveLength(20);
+    expect(titles).not.toContain('TSCO');
+    expect(titles).toEqual(expect.arrayContaining(['Maya', 'NEXT', 'Microsoft Surface', 'Univo']));
+  });
+
+  it('برندهای پرینتر و هارد کامل و بدون تکرار هستند', () => {
+    ['printer_copy', 'hard_disk', 'laptop', 'all_in_one', 'monitor'].forEach((categoryId) => {
+      const ids = brandsOf(categoryId).map((b) => b.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+    expect(brandsOf('printer_copy')).toHaveLength(19);
+    expect(brandsOf('hard_disk')).toHaveLength(67);
+  });
+});

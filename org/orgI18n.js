@@ -306,6 +306,7 @@ const EN = {
   'مدل دقیق / شماره سریال / مشخصات (اختیاری)': 'Exact model / serial number / specs (optional)',
   'ابعاد / اینچ دقیق را بنویسید: ...': 'Size / exact inches: ...',
   'ظرفیت / حجم هارد را بنویسید: ...': 'Capacity / disk size: ...',
+  'ویندوز 11 اورجینال': 'Windows 11 Original',
   'در گارانتی': 'In warranty',
   'خارج از گارانتی': 'Out of warranty',
   'نامشخص': 'Unknown',
