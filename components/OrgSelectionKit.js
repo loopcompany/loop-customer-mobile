@@ -26,6 +26,17 @@ const rtl = () => langIsRTL(i18n.language);
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).
 // innerRef به بیرون داده می‌شود تا صفحه بتواند موقعیت سربرگ را اندازه بگیرد و بعد
 // از باز شدن بخش، خودکار روی همان سربرگ اسکرول کند (hooks/useAccordionScroll.js).
+const STEP_ICON_COLUMN = 44;
+const STEP_BADGE_COLUMN = 30;
+
+const accordionTitleStyle = {
+  color: themeColor4.bgColor(1),
+  fontSize: fontSize.md,
+  fontWeight: 'bold',
+  fontFamily: 'VazirBold',
+  textAlign: 'center',
+};
+
 export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, done, innerRef }) => (
   <View
     ref={innerRef}
@@ -55,21 +66,28 @@ export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, do
           color={themeColor1.bgColor(1)}
         />
       </View>
-      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-        {icon ? <Image source={icon} style={{ width: 36, height: 36, marginHorizontal: spacing.xs }} resizeMode="contain" /> : null}
-        <Text
-          style={{
-            color: themeColor4.bgColor(1),
-            fontSize: fontSize.md,
-            fontWeight: 'bold',
-            fontFamily: 'VazirBold',
-            textAlign: 'center',
-          }}
-        >
-          {title}
-        </Text>
-        {step ? <StepBadge step={step} done={done} /> : null}
-      </View>
+      {step ? (
+        // حالت stepper: آیکون و شماره‌ی مرحله هر کدام ستون با عرض ثابت دارند و
+        // عنوان بین آن‌ها جا می‌گیرد. قبلاً هر سه با هم وسط‌چین می‌شدند و با
+        // عوض‌شدن طول عنوان، شماره‌های زرد و آیکون‌ها در سطرهای مختلف جابه‌جا
+        // می‌افتادند (در یک ستون عمودی نبودند).
+        <>
+          <View style={{ width: STEP_ICON_COLUMN, alignItems: 'center' }}>
+            {icon ? <Image source={icon} style={{ width: 36, height: 36 }} resizeMode="contain" /> : null}
+          </View>
+          <Text style={[accordionTitleStyle, { flex: 1, marginHorizontal: spacing.xs }]}>
+            {title}
+          </Text>
+          <View style={{ width: STEP_BADGE_COLUMN, alignItems: 'center' }}>
+            <StepBadge step={step} done={done} />
+          </View>
+        </>
+      ) : (
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          {icon ? <Image source={icon} style={{ width: 36, height: 36, marginHorizontal: spacing.xs }} resizeMode="contain" /> : null}
+          <Text style={accordionTitleStyle}>{title}</Text>
+        </View>
+      )}
       <View style={{ width: 26, alignItems: 'flex-end' }}>
         <HintBadge hint={hint} title={title} size={22} />
       </View>
@@ -84,7 +102,6 @@ export const StepBadge = ({ step, done }) => (
       width: 22,
       height: 22,
       borderRadius: 11,
-      marginRight: spacing.sm,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: done ? colors.success.bgColor(1) : colors.accent.bgColor(1),
