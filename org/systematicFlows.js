@@ -202,17 +202,47 @@ const HDD_BRANDS = toBrands([
 // ---------------------------------------------------------------------------
 // گزینه‌های مشترک بین چند دسته
 // ---------------------------------------------------------------------------
+// «وضعیت» دستگاه - برای پرینتر/کپی صنعتی، آل این وان، کیس، لپ تاپ، هارد و
+// مانیتور یکسان است (لیست ادیت‌های ۱۴۰۵/۰۷/۰۳): فقط نو/آکبند یا کارکرده، سپس
+// وضعیت گارانتی، و بارگذاری عکس از گالری و دوربین.
 const DEVICE_STATUS_OPTIONS = [
   { id: 'new', title: 'نو / آکبند' },
-  { id: 'used_healthy', title: 'کارکرده و سالم' },
-  { id: 'faulty', title: 'معیوب / نیاز به تعمیر' },
-  { id: 'scrap', title: 'اسقاط / غیرقابل استفاده' },
+  { id: 'used', title: 'کارکرده' },
 ];
 
 const WARRANTY_OPTIONS = [
-  { id: 'in_warranty', title: 'در گارانتی' },
-  { id: 'out_of_warranty', title: 'خارج از گارانتی' },
+  { id: 'in_warranty', title: 'دارای گارانتی' },
+  { id: 'out_of_warranty', title: 'عدم گارانتی' },
   { id: 'unknown', title: 'نامشخص' },
+];
+
+const deviceStatusStep = (title) => ({
+  id: 'device_status',
+  title,
+  hint: 'نو یا کارکرده بودن دستگاه و وضعیت گارانتی آن را انتخاب کنید و در صورت نیاز عکس دستگاه را از گالری یا دوربین بارگذاری کنید.',
+  icon: sectionIcon.equipmentStatus,
+  type: 'options',
+  options: DEVICE_STATUS_OPTIONS,
+  extra: { id: 'warranty', title: 'وضعیت گارانتی', options: WARRANTY_OPTIONS, columns: 3 },
+  // به‌جای کادر توضیح ساده، همان ورودی «عکس از گالری و دوربین» + توضیح.
+  photo: true,
+  notePlaceholder: 'توضیحات دیگری دارید بنویسید...',
+});
+
+// «مدل کیس» - نوع کاربری کیس، نه برند (کیس برند و لوگو ندارد).
+const CASE_MODEL_OPTIONS = [
+  { id: 'office', title: 'کیس اداری' },
+  { id: 'home', title: 'کیس خانگی' },
+  { id: 'gaming', title: 'کیس گیمینگ' },
+  { id: 'workstation', title: 'کیس حرفه‌ای / ورک استیشن' },
+  { id: 'server', title: 'کیس سروری' },
+];
+
+const ALL_IN_ONE_MODEL_OPTIONS = [
+  { id: 'office', title: 'آل‌این‌وان اداری' },
+  { id: 'home', title: 'آل‌این‌وان خانگی' },
+  { id: 'professional', title: 'آل‌این‌وان حرفه‌ای' },
+  { id: 'gaming', title: 'آل‌این‌وان گیمینگ' },
 ];
 
 const APPEARANCE_ISSUE_OPTIONS = [
@@ -346,14 +376,7 @@ export const SYSTEMATIC_FLOWS = {
       type: 'note',
       notePlaceholder: 'در صورتی که لپ تاپ دارای نواقص ظاهری می‌باشد بنویسید...',
     },
-    {
-      id: 'device_status',
-      title: 'وضعیت لپ تاپ',
-      hint: 'عکس مرتبط با وضعیت دستگاه را بارگذاری کنید و در صورت نیاز توضیح دهید.',
-      icon: sectionIcon.equipmentStatus,
-      type: 'photo',
-      notePlaceholder: 'توضیحات دیگری دارید بنویسید...',
-    },
+    deviceStatusStep('وضعیت لپ تاپ'),
     {
       id: 'hard_disk_data',
       title: 'اطلاعات شخصی در هارد دیسک',
@@ -425,6 +448,10 @@ export const SYSTEMATIC_FLOWS = {
         { id: 'in_32', title: '۳۲ اینچ و بالاتر' },
       ],
       columns: 3,
+      note: true,
+      notePlaceholder: 'ابعاد / اینچ دقیق را بنویسید: ...',
+      // نوشتن اینچ دقیق به‌تنهایی هم این مرحله‌ی اجباری را کامل می‌کند.
+      noteSatisfies: true,
       required: true,
     },
     {
@@ -445,40 +472,36 @@ export const SYSTEMATIC_FLOWS = {
       ],
       columns: 1,
     },
-    {
-      id: 'device_status',
-      title: 'وضعیت مانیتور',
-      hint: 'وضعیت کلی مانیتور و شرایط گارانتی آن را انتخاب کنید.',
-      icon: sectionIcon.equipmentStatus,
-      type: 'options',
-      options: DEVICE_STATUS_OPTIONS,
-      extra: { id: 'warranty', title: 'وضعیت گارانتی', options: WARRANTY_OPTIONS, columns: 3 },
-      note: true,
-    },
+    deviceStatusStep('وضعیت مانیتور'),
     ...closingSteps(null),
   ],
 
-  // «کیس» - همان فهرست ایرادهای HardwareIssueScreen موجود در پروژه
+  // «کیس» - همان فهرست ایرادهای HardwareIssueScreen موجود در پروژه.
+  // کیس مرحله‌ی برند/لوگو ندارد؛ به‌جایش «مدل کیس» (نوع کاربری) و مشخصات
+  // سخت‌افزاری اختیاری می‌آید.
   case: [
     {
-      id: 'brand',
-      title: 'برند کیس',
-      hint: 'برند کیس یا مونتاژکننده‌ی آن را انتخاب کنید.',
+      id: 'model',
+      title: 'مدل کیس',
+      hint: 'نوع کیس را بر اساس کاربری آن انتخاب کنید.',
       icon: deviceIcon.case,
-      type: 'brands',
-      brands: CASE_BRANDS,
+      type: 'options',
+      options: CASE_MODEL_OPTIONS,
+      columns: 2,
       required: true,
     },
     {
-      id: 'model',
-      title: 'مدل / مشخصات کیس',
-      hint: 'مدل و مشخصات سخت‌افزاری کیس را وارد کنید.',
-      icon: deviceIcon.case,
+      id: 'specs',
+      title: 'مشخصات کیس',
+      hint: 'اختیاری: در صورت اطلاع، مشخصات سخت‌افزاری کیس را وارد کنید.',
+      icon: sectionIcon.hardware,
       type: 'fields',
       fields: [
-        { id: 'model', placeholder: 'مدل کیس' },
-        { id: 'serial', placeholder: 'شماره سریال' },
-        { id: 'specs', placeholder: 'مشخصات (CPU / RAM / هارد / گرافیک)' },
+        { id: 'cpu', placeholder: 'پردازنده (CPU) - اختیاری' },
+        { id: 'ram', placeholder: 'حافظه رم (RAM) - اختیاری' },
+        { id: 'gpu', placeholder: 'کارت گرافیک - اختیاری' },
+        { id: 'storage', placeholder: 'هارد / SSD - اختیاری' },
+        { id: 'other', placeholder: 'سایر مشخصات (مادربرد، پاور و ...) - اختیاری' },
       ],
     },
     {
@@ -527,16 +550,7 @@ export const SYSTEMATIC_FLOWS = {
       type: 'checklist',
       options: APPEARANCE_ISSUE_OPTIONS,
     },
-    {
-      id: 'device_status',
-      title: 'وضعیت محصول / دستگاه',
-      hint: 'وضعیت کلی دستگاه و شرایط گارانتی آن را انتخاب کنید.',
-      icon: sectionIcon.equipmentStatus,
-      type: 'options',
-      options: DEVICE_STATUS_OPTIONS,
-      extra: { id: 'warranty', title: 'وضعیت گارانتی', options: WARRANTY_OPTIONS, columns: 3 },
-      note: true,
-    },
+    deviceStatusStep('وضعیت کیس'),
     {
       id: 'hard_disk_data',
       title: 'اطلاعات شخصی در هارد دیسک',
@@ -579,14 +593,14 @@ export const SYSTEMATIC_FLOWS = {
     {
       id: 'model',
       title: 'مدل آل این وان',
-      hint: 'مدل، شماره سریال و مشخصات کلی دستگاه را وارد کنید.',
+      hint: 'نوع آل این وان را بر اساس کاربری آن انتخاب کنید و در صورت اطلاع، مدل دقیق را بنویسید.',
       icon: deviceIcon.allInOne,
-      type: 'fields',
-      fields: [
-        { id: 'model', placeholder: 'مدل دستگاه' },
-        { id: 'serial', placeholder: 'شماره سریال' },
-        { id: 'specs', placeholder: 'مشخصات (CPU / RAM / هارد)' },
-      ],
+      type: 'options',
+      options: ALL_IN_ONE_MODEL_OPTIONS,
+      columns: 2,
+      note: true,
+      notePlaceholder: 'مدل دقیق / شماره سریال / مشخصات (اختیاری)',
+      required: true,
     },
     {
       id: 'os',
@@ -630,16 +644,7 @@ export const SYSTEMATIC_FLOWS = {
       type: 'checklist',
       options: APPEARANCE_ISSUE_OPTIONS,
     },
-    {
-      id: 'device_status',
-      title: 'وضعیت محصول / دستگاه',
-      hint: 'وضعیت کلی دستگاه و شرایط گارانتی آن را انتخاب کنید.',
-      icon: sectionIcon.equipmentStatus,
-      type: 'options',
-      options: DEVICE_STATUS_OPTIONS,
-      extra: { id: 'warranty', title: 'وضعیت گارانتی', options: WARRANTY_OPTIONS, columns: 3 },
-      note: true,
-    },
+    deviceStatusStep('وضعیت آل این وان'),
     {
       id: 'hard_disk_data',
       title: 'اطلاعات شخصی در هارد دیسک',
@@ -723,16 +728,7 @@ export const SYSTEMATIC_FLOWS = {
       ],
       columns: 1,
     },
-    {
-      id: 'device_status',
-      title: 'وضعیت دستگاه',
-      hint: 'وضعیت کلی دستگاه و شرایط گارانتی آن را انتخاب کنید.',
-      icon: sectionIcon.equipmentStatus,
-      type: 'options',
-      options: DEVICE_STATUS_OPTIONS,
-      extra: { id: 'warranty', title: 'وضعیت گارانتی', options: WARRANTY_OPTIONS, columns: 3 },
-      note: true,
-    },
+    deviceStatusStep('وضعیت دستگاه'),
     ...closingSteps(['printer_single', 'printer_multi', 'industrial_copier', 'accessories']),
   ],
 
@@ -775,6 +771,9 @@ export const SYSTEMATIC_FLOWS = {
         { id: 'c_4t', title: '۴ ترابایت و بالاتر' },
       ],
       columns: 3,
+      note: true,
+      notePlaceholder: 'ظرفیت / حجم هارد را بنویسید: ...',
+      noteSatisfies: true,
     },
     {
       id: 'hardware_default',
@@ -792,6 +791,7 @@ export const SYSTEMATIC_FLOWS = {
       ],
       columns: 1,
     },
+    deviceStatusStep('وضعیت هارد'),
     {
       id: 'hard_disk_data',
       title: 'اطلاعات شخصی در هارد دیسک',

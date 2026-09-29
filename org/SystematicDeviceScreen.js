@@ -51,6 +51,9 @@ const itemsByIds = (source, ids) =>
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
 
+const filledFieldValues = (step, value) =>
+  (step.fields || []).map((field) => (value?.[field.id] || '').trim()).filter(Boolean);
+
 // آیا این مرحله پر شده است؟ - هم برای تیک سبز کنار شماره‌ی مرحله و هم برای
 // اعتبارسنجی مراحلی که required هستند استفاده می‌شود.
 const isStepFilled = (step, value) => {
@@ -58,11 +61,19 @@ const isStepFilled = (step, value) => {
     case 'brands':
       return Boolean(value?.brand || (value?.other || '').trim());
     case 'fields':
-      return Boolean((value?.[step.fields[0].id] || '').trim());
+      // مرحله‌هایی مثل «مشخصات کیس» همه‌ی فیلدهایشان اختیاری است؛ هر فیلدی پر
+      // شود مرحله کامل حساب می‌شود.
+      return filledFieldValues(step, value).length > 0;
     case 'osGrid':
       return Boolean(value);
-    case 'options':
-      return step.multi ? Boolean(value?.selected?.length) : Boolean(value?.selected);
+    case 'options': {
+      const hasSelection = step.multi ? Boolean(value?.selected?.length) : Boolean(value?.selected);
+      const hasExtra = step.extra ? Boolean(value?.[step.extra.id]) : false;
+      const hasPhotos = step.photo ? Boolean(value?.photos?.length) : false;
+      // «اینچ دقیق» / «حجم هارد»: نوشتن مقدار دقیق جای انتخاب گزینه را می‌گیرد.
+      const hasNote = step.noteSatisfies ? Boolean((value?.note || '').trim()) : false;
+      return hasSelection || hasExtra || hasPhotos || hasNote;
+    }
     case 'checklist':
       return Boolean(value?.selected?.length);
     case 'note':
@@ -128,19 +139,32 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           lines.push({ label: L(step.title), value: value.brand ? titleOf(LO(step.brands), value.brand) : value.other });
           break;
         case 'fields':
-          lines.push({ label: L(step.title), value: value[step.fields[0].id] });
+          lines.push({ label: L(step.title), value: filledFieldValues(step, value).join(' / ') });
           break;
         case 'osGrid':
           lines.push({ label: L(step.title), value: titleOf(LO(OS_ITEMS), value) });
           break;
-        case 'options':
-          lines.push({
-            label: L(step.title),
-            value: step.multi
-              ? value.selected.length
-              : titleOf(LO(step.options), value.selected),
-          });
+        case 'options': {
+          const hasSelection = step.multi ? Boolean(value.selected?.length) : Boolean(value.selected);
+          if (hasSelection) {
+            lines.push({
+              label: L(step.title),
+              value: step.multi
+                ? value.selected.length
+                : titleOf(LO(step.options), value.selected),
+            });
+          }
+          if (step.extra && value[step.extra.id]) {
+            lines.push({ label: L(step.extra.title), value: titleOf(LO(step.extra.options), value[step.extra.id]) });
+          }
+          if (step.photo && value.photos?.length) {
+            lines.push({ label: `${L(step.title)} - ${L('عکس')}`, value: value.photos.length });
+          }
+          if ((value.note || '').trim()) {
+            lines.push({ label: L(step.title), value: value.note.trim() });
+          }
           break;
+        }
         case 'checklist':
           lines.push({ label: L(step.title), value: value.selected.length });
           break;
@@ -323,7 +347,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
                 />
               </>
             ) : null}
-            {step.note ? (
+            {step.photo ? (
+              <PhotoNoteInput
+                photos={value?.photos || []}
+                note={value?.note || ''}
+                onChangePhotos={(photos) => setAnswer(step.id, { photos })}
+                onChangeNote={(note) => setAnswer(step.id, { note })}
+                notePlaceholder={L(step.notePlaceholder)}
+              />
+            ) : step.note ? (
               <DescriptionInput
                 value={value?.note || ''}
                 onChangeText={(note) => setAnswer(step.id, { note })}
@@ -405,7 +437,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
             note={value?.note || ''}
             onChangePhotos={(photos) => setAnswer(step.id, { photos })}
             onChangeNote={(note) => setAnswer(step.id, { note })}
-            notePlaceholder={step.notePlaceholder}
+            notePlaceholder={L(step.notePlaceholder)}
           />
         );
 

@@ -195,3 +195,53 @@ describe('receiptFromSystematic', () => {
     expect(receipt.state).toBe(RECEIPT_STATE.PENDING);
   });
 });
+
+describe('receiptFromSystematic — 1405/07/03 edits', () => {
+  it('مدلِ گزینه‌ای کیس (بدون برند) در مشخصات محصول می‌نشیند', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'case',
+      answers: { model: { selected: 'gaming' } },
+      user,
+      orgProfile,
+    });
+    expect(receipt.product).toMatchObject({ type: 'کیس', brand: null, model: 'کیس گیمینگ' });
+  });
+
+  it('مدل دقیقِ آل این وان کنار نوعش می‌آید', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'all_in_one',
+      answers: { model: { selected: 'office', note: 'HP 24-df' } },
+      user,
+      orgProfile,
+    });
+    expect(receipt.product.model).toBe('آل‌این‌وان اداری - HP 24-df');
+  });
+
+  it('وضعیت، گارانتی، عکس‌ها و مشخصات اختیاری کیس به شرح خدمات می‌رسند', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'case',
+      answers: {
+        model: { selected: 'office' },
+        specs: { cpu: 'i5-12400', ram: '16GB' },
+        device_status: { selected: 'used', warranty: 'out_of_warranty', photos: [{ uri: 'a' }, { uri: 'b' }] },
+      },
+      user,
+      orgProfile,
+    });
+    const description = receipt.services[0].description;
+    expect(description).toContain('مشخصات کیس: i5-12400 / 16GB');
+    expect(description).toContain('وضعیت کیس: کارکرده');
+    expect(description).toContain('وضعیت گارانتی: عدم گارانتی');
+    expect(description).toContain('وضعیت کیس - عکس: 2');
+  });
+
+  it('اینچ دقیقِ مانیتور بدون انتخاب گزینه هم در رسید می‌آید', () => {
+    const receipt = receiptFromSystematic({
+      categoryId: 'monitor',
+      answers: { size: { note: '23.8 اینچ' } },
+      user,
+      orgProfile,
+    });
+    expect(receipt.services[0].description).toContain('ابعاد مانیتور: 23.8 اینچ');
+  });
+});

@@ -44,14 +44,27 @@ const describeStep = (step, value) => {
       return value ? [titleOf(LO(OS_ITEMS), value)] : [];
 
     case 'options': {
+      const parts = [];
       const selected = value.selected;
-      if (selected == null || (Array.isArray(selected) && selected.length === 0)) return [];
-      const options = LO(step.options || []);
-      const titles = Array.isArray(selected)
-        ? selected.map((id) => titleOf(options, id))
-        : [titleOf(options, selected)];
-      // گزینه‌های وضعیتی (مثل «وضعیت دستگاه») بدون عنوانِ مرحله بی‌معنا می‌شوند.
-      return titles.map((title) => `${L(step.title)}: ${title}`);
+      const hasSelection = !(selected == null || (Array.isArray(selected) && selected.length === 0));
+      if (hasSelection) {
+        const options = LO(step.options || []);
+        const titles = Array.isArray(selected)
+          ? selected.map((id) => titleOf(options, id))
+          : [titleOf(options, selected)];
+        // گزینه‌های وضعیتی (مثل «وضعیت دستگاه») بدون عنوانِ مرحله بی‌معنا می‌شوند.
+        titles.forEach((title) => parts.push(`${L(step.title)}: ${title}`));
+      }
+      // گزینه‌ی دوم مرحله (مثل «وضعیت گارانتی») و عکس‌ها/توضیحِ همان مرحله.
+      if (step.extra && value[step.extra.id]) {
+        parts.push(`${L(step.extra.title)}: ${titleOf(LO(step.extra.options || []), value[step.extra.id])}`);
+      }
+      const note = (value.note || '').trim();
+      if (note) parts.push(`${L(step.title)}: ${note}`);
+      if (step.photo && value.photos?.length) {
+        parts.push(`${L(step.title)} - ${L('عکس')}: ${value.photos.length}`);
+      }
+      return parts;
     }
 
     case 'checklist': {
@@ -79,11 +92,13 @@ const describeStep = (step, value) => {
         .filter(([, entry]) => entry?.count > 0)
         .map(([itemId, entry]) => `${titleOf(LO(HARDWARE_ITEMS), itemId)} × ${entry.count}`);
 
-    case 'fields':
-      return (step.fields || [])
+    case 'fields': {
+      // چند فیلدِ یک مرحله (مثل CPU / RAM / گرافیکِ «مشخصات کیس») یک عبارت می‌شوند.
+      const texts = (step.fields || [])
         .map((field) => (value[field.id] || '').trim())
-        .filter(Boolean)
-        .map((text) => `${L(step.title)}: ${text}`);
+        .filter(Boolean);
+      return texts.length ? [`${L(step.title)}: ${texts.join(' / ')}`] : [];
+    }
 
     default:
       return [];
@@ -148,11 +163,21 @@ export const receiptFromSystematic = ({
   // که لوگو ندارند (یا از کادر «برند دیگر» آمده‌اند) به متن برمی‌گردند.
   const brandLogo = brandEntry?.image ?? null;
 
+  // «مدل» در لپ تاپ/پرینتر یک فیلد متنی است، ولی در کیس و آل این وان یک گزینه
+  // (اداری، خانگی، ...) به‌همراه توضیحِ اختیاریِ مدل دقیق.
   const modelStep = steps.find((step) => step.id === 'model');
   const modelAnswer = modelStep ? answers[modelStep.id] : null;
-  const modelTitle = modelStep
-    ? (modelAnswer?.[modelStep.fields?.[0]?.id] || '').trim() || null
-    : null;
+  const modelTitle = (() => {
+    if (!modelStep || !modelAnswer) return null;
+    if (modelStep.type === 'options') {
+      const parts = [
+        modelAnswer.selected ? titleOf(LO(modelStep.options || []), modelAnswer.selected) : null,
+        (modelAnswer.note || '').trim() || null,
+      ].filter(Boolean);
+      return parts.length ? parts.join(' - ') : null;
+    }
+    return (modelAnswer[modelStep.fields?.[0]?.id] || '').trim() || null;
+  })();
 
   const productType = category?.title ? L(category.title) : null;
 
