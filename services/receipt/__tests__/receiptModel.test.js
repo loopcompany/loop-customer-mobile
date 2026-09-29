@@ -5,6 +5,7 @@
  */
 
 import {
+  ISSUER,
   ORDER_KIND,
   deriveOrderKind,
   accountTypeLabel,
@@ -175,5 +176,12 @@ describe('withReceiptTotal', () => {
     expect(withReceiptTotal(receipt, null)).toBe(receipt);
     expect(withReceiptTotal(null, 400000)).toBeNull();
     expect(receipt.payment.total).toBeNull();
+  });
+});
+
+describe('ISSUER', () => {
+  // لیست ادیت‌های ۱۴۰۵/۰۷/۰۳، بند ۲۳: شماره ثبتِ همه‌ی رسیدها.
+  it('شماره ثبت شرکت ۵۹۹۴۱۰ است', () => {
+    expect(ISSUER.registrationNumber).toBe('599410');
   });
 });

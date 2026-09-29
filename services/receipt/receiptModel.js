@@ -106,7 +106,7 @@ export const DELIVERY_STATUS = {
 // (این با «شناسه ملیِ کاربر» در بخش «مشخصات کاربر» فرق دارد - آن سر جایش است.)
 export const ISSUER = {
   companyName: 'حلقه بی نهایت رایانه ایرانیان',
-  registrationNumber: '044915',
+  registrationNumber: '599410',
   website: 'www.clpiran.com',
 };
 
