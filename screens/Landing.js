@@ -21,14 +21,24 @@ import { useEvent } from 'expo';
 import { getSmsHash } from '@screens/auth/OtpRetriever';
 import { setHashApp } from '@slices/hashAppSlice';
 
-// اگر ویدیوی اسپلش پخش نشود (کدک، شبکه، یا نرسیدن رویداد playToEnd روی دستگاه)
-// کاربر برای همیشه روی صفحه‌ی سیاه می‌ماند. این سقف زمانی تضمین می‌کند که در هر
-// شرایطی وارد اپ می‌شود.
-const SPLASH_TIMEOUT_MS = 6000;
+// اگر ویدیوی اسپلش اصلاً شروع به پخش نکند (کدک، شبکه، autoplay) کاربر برای
+// همیشه روی صفحه‌ی سیاه می‌ماند. این سقف فقط تا «شروع پخش» است.
+//
+// قبلاً همین ۶ ثانیه از لحظه‌ی mount شمرده می‌شد، در حالی که لوگوموشن ۸ ثانیه
+// است؛ پس روی همه‌ی دستگاه‌ها ویدیو وسط پخش قطع می‌شد. حالا بعد از شروع پخش،
+// سقف دوباره از روی مدت واقعی ویدیو تنظیم می‌شود (پایین‌تر، اثرِ isPlaying).
+const SPLASH_START_TIMEOUT_MS = 6000;
+
+// مدت لوگوموشن، وقتی player هنوز duration را گزارش نکرده است.
+const SPLASH_VIDEO_FALLBACK_S = 8;
+
+// حاشیه‌ی بعد از پایان ویدیو برای رسیدن رویداد playToEnd؛ فقط اگر آن رویداد
+// نرسد، این تایمر ادامه می‌دهد.
+const SPLASH_END_GRACE_MS = 1500;
 
 // سقفِ مطلق: حتی اگر بررسیِ توکن هم گیر کند (شبکه‌ی کند، تایم‌اوتِ ۱۰ ثانیه‌ای
 // axios)، کاربر بعد از این مدت به هر حال وارد صفحه‌ی خانه می‌شود.
-const SPLASH_MAX_MS = 15000;
+const SPLASH_MAX_MS = 20000;
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
@@ -36,6 +46,8 @@ export default function Landing({ navigation }) {
   // نگهبان‌های تک‌بار-بودن: هم playToEnd و هم تایم‌اوت می‌توانند مسیر را ادامه دهند.
   const startedRef = React.useRef(false);
   const settledRef = React.useRef(false);
+  const fallbackTimerRef = React.useRef(null);
+  const playbackArmedRef = React.useRef(false);
   const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
     console.log("player ready");
     if (Platform.OS === 'web') {
@@ -159,13 +171,18 @@ export default function Landing({ navigation }) {
 
   // Fallback: never let a video that refuses to play (or never emits
   // `playToEnd`) strand the user on the splash screen.
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const armFallback = (ms) => {
+    clearTimeout(fallbackTimerRef.current);
+    fallbackTimerRef.current = setTimeout(() => {
       if (!settledRef.current) {
         console.warn('[Landing] splash video did not finish in time — continuing');
         checkAuthenticationStatus();
       }
-    }, SPLASH_TIMEOUT_MS);
+    }, ms);
+  };
+
+  useEffect(() => {
+    armFallback(SPLASH_START_TIMEOUT_MS);
 
     // اگر بررسیِ توکن هم طول بکشد، مقصد را از روی *وجودِ* توکن انتخاب می‌کنیم،
     // نه از روی نتیجه‌ی تأییدِ آن؛ کاربری که توکن دارد نباید به‌خاطر کندیِ شبکه
@@ -195,7 +212,7 @@ export default function Landing({ navigation }) {
     }, SPLASH_MAX_MS);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(fallbackTimerRef.current);
       clearTimeout(hardTimer);
     };
   }, []);
@@ -211,6 +228,16 @@ export default function Landing({ navigation }) {
     };
   }, []);
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+
+  // به محض شروع پخش، سقف «شروع نشد» را با «باقی‌مانده‌ی ویدیو + حاشیه» عوض
+  // می‌کنیم تا لوگوموشن کامل پخش شود و فقط اگر playToEnd نرسید، ادامه دهیم.
+  useEffect(() => {
+    if (!isPlaying || playbackArmedRef.current || settledRef.current) return;
+    playbackArmedRef.current = true;
+    const duration = player.duration > 0 ? player.duration : SPLASH_VIDEO_FALLBACK_S;
+    const remaining = Math.max(0, duration - (player.currentTime || 0));
+    armFallback(remaining * 1000 + SPLASH_END_GRACE_MS);
+  }, [isPlaying, player]);
 
 
   useEffect(() => {
