@@ -31,7 +31,7 @@ import { imageUri } from '@services/URL';
 import { fetchSteps } from '@slices/stepSlice';
 import { describeApiError } from '@utils/apiErrorHandler';
 import { setCategory } from '@slices/categorySlice';
-import { showAlert, showToastOrAlert } from '@helpers/Common';
+import { showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import { createStyles } from '@styles/NewStyles';
 import { spacing } from '@theme/Spacing';
@@ -141,11 +141,11 @@ const SystematicCategoryScreen = ({ navigation }) => {
       return;
     }
 
-    // «ضایعات» هنوز فعال نیست: به‌جای ورود به مراحل، فقط پیام «به زودی» می‌دهد.
-    // مراحل این دسته در systematicFlows.js آماده است و هر وقت فعال شد، حذف همین
-    // شرط کافی است.
+    // «ضایعات» هنوز فعال نیست: به‌جای ورود به مراحل، فقط «به زودی» نوشته می‌شود
+    // (کارفرما عنوان «ضایعات» را در این پیام نمی‌خواهد). مراحل این دسته در
+    // systematicFlows.js آماده است و هر وقت فعال شد، حذف همین شرط کافی است.
     if (systematicId === 'trash') {
-      showAlert(L('ضایعات'), L('این بخش به زودی فعال می‌شود.'));
+      showToastOrAlert(L('به زودی'));
       return;
     }
 
