@@ -1594,7 +1594,7 @@
   "Register code": "ثبت کد",
   "Referrer": "معرف",
   "Referral discount": "تخفیف معرف",
-  "A referral code is registered to your account the first time you submit it, and cannot then be used by anyone else.": "کد معرف بار اول که ثبتش می‌کنید به حساب شما می‌چسبد و پس از آن کس دیگری نمی‌تواند از آن استفاده کند.",
+  "A referral code is registered to your account the first time you submit it, and cannot then be used by anyone else.": "کد معرف، پس از نخستین ثبت و استفاده، به حساب کاربری شما اختصاص می‌یابد و از آن پس امکان استفاده از آن توسط شخص دیگری وجود نخواهد داشت.",
   "Please enter a referral code!": "لطفاً کد معرف را وارد کنید!",
   "Please sign in before registering a referral code.": "برای ثبت کد معرف ابتدا وارد حساب خود شوید.",
   "Referral code registered successfully.": "کد معرف با موفقیت ثبت شد.",
