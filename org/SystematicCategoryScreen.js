@@ -17,7 +17,8 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { ImageBackground } from 'expo-image';
+import { Image as ExpoImage, ImageBackground } from 'expo-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +35,7 @@ import { showToastOrAlert } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import { createStyles } from '@styles/NewStyles';
 import { spacing } from '@theme/Spacing';
+import { imageUri } from '@services/URL';
 import {
   SYSTEMATIC_CATEGORIES,
   getCategory,
@@ -60,6 +62,36 @@ const TRASH_INDEX_IN_CATEGORIES = LEFT_COLUMN_SIZE - 2;
 // جایگزینی را انجام می‌دهد. «ضایعات» همیشه آیکون محلی خودش را دارد.
 const localIconFor = (categoryId) => getCategory(categoryId)?.image || null;
 
+// آخرین فهرست دسته‌ها که از سرور گرفته شده. با آن صفحه در ورودهای بعدی بدون
+// انتظار برای ‎/categories‎ همان کاشی‌ها و همان آدرس تصاویر را فوراً نشان می‌دهد
+// (تصاویر هم از cache می‌آیند) و درخواست تازه در پس‌زمینه فهرست را به‌روز می‌کند.
+// زبان جزو کلید است چون عنوان دسته‌ها ترجمه‌شده از سرور می‌آید.
+const CATEGORIES_CACHE_KEY = 'systematicCategoriesCache';
+const cacheKeyFor = (lang) => `${CATEGORIES_CACHE_KEY}:${lang || 'fa'}`;
+
+const readCachedCategories = async (lang) => {
+  try {
+    const raw = await AsyncStorage.getItem(cacheKeyFor(lang));
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedCategories = (lang, categories) =>
+  AsyncStorage.setItem(cacheKeyFor(lang), JSON.stringify(categories)).catch(() => {});
+
+// تصاویر همه‌ی کاشی‌ها را هم‌زمان شروع به دانلود می‌کند تا هر کدام که کاشی‌اش
+// render شد از cache خوانده شود.
+const prefetchIcons = (categories) => {
+  const urls = [
+    `${imageUri}/userfolder/Profile.png`,
+    ...categories.map((item) => item?.image_path).filter(Boolean).map((path) => `${imageUri}/${path}`),
+  ];
+  ExpoImage.prefetch(urls, 'memory-disk').catch(() => {});
+};
+
 const SystematicCategoryScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   // فضای رزرو شده زیر شبکه‌ی کاشی‌ها تا ردیف آخر زیر داک شناور پایین پنهان نشود
@@ -74,6 +106,8 @@ const SystematicCategoryScreen = ({ navigation }) => {
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loader, setLoader] = useState(true);
+
+  const lang = i18n.language;
 
   const loadCategories = async () => {
     // ‎/categories یک endpoint احراز هویت‌شده است. توکن را AuthInitializer به صورت
@@ -90,7 +124,9 @@ const SystematicCategoryScreen = ({ navigation }) => {
       const res = await categoriesAPI.getCategories();
       // شکل پاسخ API: { success: true, data: [...] }
       const categories = Array.isArray(res.data) ? res.data : res.data || res.data?.data || [];
+      prefetchIcons(categories);
       setFolders(categories);
+      writeCachedCategories(lang, categories);
     } catch (err) {
       console.error('Failed to load categories:', err);
       // 401 یعنی نشست منقضی شده و interceptor خودش هشدار «ورود مجدد» را
@@ -98,16 +134,32 @@ const SystematicCategoryScreen = ({ navigation }) => {
       if (err?.response?.status !== 401) {
         showToastOrAlert(`${L('خطا در دریافت دسته‌ها')} — ${describeApiError(err, t)}`);
       }
-      setFolders([]);
+      // اگر فهرست قبلی (از cache) روی صفحه است، با خطای شبکه پاکش نکن.
+      setFolders((prev) => (prev.length ? prev : []));
     } finally {
       setRefreshing(false);
       setLoader(false);
     }
   };
 
+  // stale-while-revalidate: اول فهرست ذخیره‌شده (اگر هست) فوراً نمایش داده می‌شود،
+  // بعد درخواست تازه جایگزینش می‌کند.
+  useEffect(() => {
+    let cancelled = false;
+    readCachedCategories(lang).then((cached) => {
+      if (cancelled || !cached?.length) return;
+      prefetchIcons(cached);
+      setFolders((prev) => (prev.length ? prev : cached));
+      setLoader(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
+
   useEffect(() => {
     loadCategories();
-  }, [token]);
+  }, [token, lang]);
 
   const handleRefresh = () => {
     setRefreshing(true);
