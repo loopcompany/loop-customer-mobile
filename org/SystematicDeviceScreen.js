@@ -5,7 +5,7 @@
 // کاربری «انتخاب جامع» (components/OrgSelectionKit.js) رندر می‌کند تا دو مسیر
 // دقیقاً یک ظاهر داشته باشند.
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
 import SchedulePicker from '@components/SchedulePicker';
+import SavedAddressPicker from '@components/SavedAddressPicker';
 import {
   AccordionHeader,
   SectionBody,
@@ -45,6 +46,9 @@ import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
 import { RECEIPT_STATE, receiptFromSystematic } from '@services/receipt';
 import useReceiptSources from '@hooks/useReceiptSources';
+import useOrderDraft from '@hooks/useOrderDraft';
+import { DRAFT_SOURCE } from '@services/orderDrafts';
+import { formatAddressEntry } from '@services/receipt/receiptCustomer';
 
 const itemsByIds = (source, ids) =>
   (ids ? source.filter((item) => ids.includes(item.id)) : source);
@@ -88,6 +92,8 @@ const isStepFilled = (step, value) => {
       return Boolean(value?.date && value?.slot);
     case 'technician':
       return Boolean(value?.gender);
+    case 'address':
+      return value?.addressId != null;
     default:
       return false;
   }
@@ -205,12 +211,45 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           lines.push({ label: L('بازه ساعتی'), value: titleOf(LO(TIME_SLOT_OPTIONS), value.slot) });
           break;
         }
+        case 'address': {
+          const picked = (receiptSources.addresses || []).find(
+            (item) => String(item?.id) === String(value.addressId)
+          );
+          if (picked) {
+            lines.push({ label: L('آدرس'), value: formatAddressEntry(picked) || picked.title || '-' });
+          }
+          break;
+        }
         default:
           break;
       }
     });
     return lines;
-  }, [steps, answers]);
+  }, [steps, answers, receiptSources.addresses]);
+
+  // سفارش نیمه‌کاره به‌صورت پیش‌نویس ذخیره می‌شود و از «سفارشات» قابل ادامه است؛
+  // یک خطا یا مرحله‌ی ناقص دیگر همه‌ی انتخاب‌ها را پاک نمی‌کند.
+  const { draftId, discardDraft } = useOrderDraft({
+    source: DRAFT_SOURCE.SYSTEMATIC,
+    initialDraftId: route?.params?.draftId,
+    meta: {
+      categoryId,
+      categoryTitle: route?.params?.categoryTitle ?? category?.title ?? null,
+      backendCategoryId: route?.params?.backendCategoryId ?? null,
+      title: category?.title ? `${L('انتخاب سیستماتیک')} - ${L(category.title)}` : L('انتخاب سیستماتیک'),
+    },
+    data: answers,
+    hasContent: filledCount > 0,
+    onRestore: (saved) => {
+      if (saved && typeof saved === 'object') setAnswers(saved);
+    },
+  });
+
+  const selectedAddressId = answers.address?.addressId ?? null;
+  const handleAddressChange = useCallback(
+    (addressId) => setAnswers((prev) => ({ ...prev, address: { addressId: addressId ?? null } })),
+    []
+  );
 
   const firstMissingStep = () =>
     steps.find((step) => step.required && !isStepFilled(step, answers[step.id]));
@@ -219,7 +258,16 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     if (action === 'cancel_order') {
       showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
         { text: L('انصراف'), style: 'cancel' },
-        { text: L('لغو سفارش'), style: 'destructive', onPress: () => showToastOrAlert(L('سفارش لغو شد')) },
+        {
+          text: L('لغو سفارش'),
+          style: 'destructive',
+          onPress: async () => {
+            // لغو صریح توسط کاربر - تنها حالتی که پیش‌نویس بدون ثبت سفارش پاک می‌شود.
+            await discardDraft();
+            showToastOrAlert(L('سفارش لغو شد'));
+            if (navigation.canGoBack()) navigation.goBack();
+          },
+        },
       ]);
       return;
     }
@@ -241,6 +289,8 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         categoryId,
         answers,
         ...receiptSources,
+        // آدرسِ همین سفارش (مرحله‌ی «آدرس‌های منتخب»)، نه آدرسِ مسیر عادی.
+        selectedAddressId: selectedAddressId ?? receiptSources.selectedAddressId,
         state: RECEIPT_STATE.PENDING,
       });
 
@@ -257,6 +307,10 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         summaryLines,
         schedule: scheduleStep ? answers[scheduleStep.id] : null,
         answers,
+        // آدرس انتخاب‌شده در مرحله‌ی «آدرس‌های منتخب» - همان که با سفارش ثبت می‌شود.
+        addressId: selectedAddressId,
+        // پس از ثبت موفق روی سرور، OrderSummaryScreen همین پیش‌نویس را پاک می‌کند.
+        draftId,
         // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش
         // تکمیل و نمایش می‌دهد.
         receipt: preReceipt(),
@@ -480,6 +534,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               placeholder={L('توضیح درباره زمان مراجعه (اختیاری)')}
             />
           </>
+        );
+
+      case 'address':
+        return (
+          <SavedAddressPicker
+            value={selectedAddressId}
+            onChange={handleAddressChange}
+            navigation={navigation}
+          />
         );
 
       case 'orderActions':

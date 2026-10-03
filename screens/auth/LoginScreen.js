@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
 import { createStyles } from '@styles/NewStyles';
 import FooterSpacer from '@components/FooterSpacer';
+import { resetToHome } from '@navigation/homeRoute';
 const initialState = {
   phone: '',
   password: '',
@@ -185,8 +186,9 @@ export default function LoginScreen({ navigation }) {
 
         showToastOrAlert(t('Login successful'));
 
-        // Navigate to main app
-        navigation.navigate('List');
+        // مشتری از «سفارش سیستماتیک» وارد شده؛ صفحه‌ی اصلی او «انتخاب سیستماتیک»
+        // است، نه List. reset تا برگشت به صفحه‌ی ورود ممکن نباشد.
+        resetToHome(navigation, 'individual');
 
       } else {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });
@@ -295,8 +297,8 @@ export default function LoginScreen({ navigation }) {
 
               showToastOrAlert(t('Automatic login successful'));
 
-              // Navigate to main app
-              navigation.navigate('List');
+              // صفحه‌ی اصلی مشتری «انتخاب سیستماتیک» است، نه List.
+              resetToHome(navigation, 'individual');
               return;
             }
           } catch (error) {

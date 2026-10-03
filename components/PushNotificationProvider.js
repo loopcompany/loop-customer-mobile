@@ -6,8 +6,11 @@
  * Renders nothing of its own.
  */
 import usePushNotifications from '@hooks/usePushNotifications';
+import useDeviceRegistration from '@hooks/useDeviceRegistration';
 
 export default function PushNotificationProvider({ children }) {
   usePushNotifications();
+  // ثبت دستگاه برای «امنیت حساب › دستگاه‌های واردشده» - همان چرخه‌ی ورود/خروج.
+  useDeviceRegistration();
   return children;
 }

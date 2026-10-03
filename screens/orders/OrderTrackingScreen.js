@@ -14,8 +14,11 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { themeColor0, themeColor4 } from '@theme/Color';
 import FooterSpacer from '@components/FooterSpacer';
+import { useHomeRoute } from '@navigation/homeRoute';
 
 export default function OrderTrackingScreen({ navigation, route }) {
+  // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
+  const homeRoute = useHomeRoute();
   // دریافت اطلاعات سفارش از route params.
   // اگر پارامتری نبود، به جای داده‌ی نمونه، جای خالی نمایش داده می‌شود.
   const orderData = {
@@ -38,7 +41,7 @@ export default function OrderTrackingScreen({ navigation, route }) {
     // به لیست برو برای ثبت سفارش جدید و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'List' }],
+      routes: [{ name: homeRoute }],
     });
   };
 
@@ -46,7 +49,7 @@ export default function OrderTrackingScreen({ navigation, route }) {
     // به لیست برو و stack را پاک کن
     navigation.reset({
       index: 0,
-      routes: [{ name: 'List' }],
+      routes: [{ name: homeRoute }],
     });
   };
   return (

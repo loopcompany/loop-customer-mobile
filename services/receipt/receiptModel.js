@@ -167,6 +167,8 @@ export const sumPrices = (rows) => {
 export const buildReceipt = ({
   state,
   issuedAt = null,
+  // همه‌ی رسیدها باید تاریخ *و ساعت* ثبت را نشان دهند.
+  issuedTime = null,
   order = {},
   customer = {},
   product = null,
@@ -198,6 +200,7 @@ export const buildReceipt = ({
   return {
     state,
     issuedAt,
+    issuedTime,
     order: {
       number: order.number ?? null,
       userCode: order.userCode ?? null,

@@ -58,3 +58,6 @@ export const toReceiptTime = (value) => {
 
 /** تاریخ امروز به قالب رسید - «تاریخ صدور / نمایش». */
 export const todayReceiptDate = () => toReceiptDate(new Date());
+
+/** ساعت همین لحظه به قالب رسید - کنار «تاریخ صدور / نمایش». */
+export const nowReceiptTime = () => toReceiptTime(new Date());

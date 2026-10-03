@@ -109,6 +109,19 @@ const SystematicCategoryScreen = ({ navigation }) => {
 
   const lang = i18n.language;
 
+  // برای مشتری این صفحه «خانه» است (پشته بعد از ورود reset می‌شود) و چیزی زیرش
+  // نیست؛ آنجا «بازگشت» به منوی ورودی می‌رود، نه صفحه‌ی ورود یا List. وقتی صفحه
+  // روی List باز شده (کاربر سازمانی)، همان رفتار پیش‌فرض ScreenHeaders می‌ماند.
+  const handleHeaderBack = () => {
+    if (!navigation.canGoBack()) {
+      navigation.navigate('OrderMenuScreen');
+    } else if (Platform.OS === 'web') {
+      window.history.back();
+    } else {
+      navigation.goBack();
+    }
+  };
+
   const loadCategories = async () => {
     // ‎/categories یک endpoint احراز هویت‌شده است. توکن را AuthInitializer به صورت
     // async از AsyncStorage بازیابی می‌کند، پس در اولین render هنوز null است و
@@ -325,7 +338,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
         contentFit={'cover'}
       >
         <CustomStatusBar />
-        <ScreenHeaders title={L('انتخاب سیستماتیک')} />
+        <ScreenHeaders title={L('انتخاب سیستماتیک')} onBackPress={handleHeaderBack} />
 
         <View style={styles.logoWrapper}>
           <Image source={require('@assets/logo.png')} style={NewStyles.logo} />

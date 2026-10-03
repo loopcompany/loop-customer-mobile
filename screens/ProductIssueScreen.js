@@ -19,11 +19,15 @@ import NewStyles from '@styles/NewStyles';
 import Footer from './Footer';
 import OrderDropdown from '@components/OrderDropdown';
 import DatePickerModal from '@components/DatePickerModal';
-import { formatDate } from '@helpers/Common';
+import { formatDate, formatDateTime } from '@helpers/Common';
 import { orderPaidAmount } from '@utils/orderPaidAmount';
+import { findOrderByNumber, orderProductName } from '@utils/faultReportOrder';
 import { faultReportAPI } from '@services/Api';
 import { showToastOrAlert } from '@helpers/Common';
-import { themeColor1, themeColor4 } from '@theme/Color';
+import { themeColor1, themeColor4, colors } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
 import Button from '@components/Button';
 import { createStyles } from '@styles/NewStyles';
 import FooterSpacer from '@components/FooterSpacer';
@@ -48,6 +52,13 @@ export default function ProductIssueScreen({ navigation }) {
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // لیست سفارش‌ها را OrderDropdown بارگذاری می‌کند و به اینجا می‌دهد؛ جستجوی
+  // شماره‌ی تایپ‌شده روی همین لیست انجام می‌شود.
+  const [orders, setOrders] = useState([]);
+  const [orderNumberInput, setOrderNumberInput] = useState('');
+  // اگر سرور برای سفارش هیچ نامی برنگرداند، فیلد نام باید قابل‌ویرایش بماند؛
+  // وگرنه فیلدی قفل و اجباری، ثبت گزارش را غیرممکن می‌کرد.
+  const [nameAutoFilled, setNameAutoFilled] = useState(false);
 
   // Date picker states
   const [orderDatePickerVisible, setOrderDatePickerVisible] = useState(false);
@@ -63,18 +74,35 @@ export default function ProductIssueScreen({ navigation }) {
 
   const handleOrderSelect = (item) => {
     setSelectedOrder(item);
-    console.log(JSON.stringify(item, null, 2));
+    setOrderNumberInput(String(item.order_id));
+    const productName = orderProductName(item);
+    setNameAutoFilled(Boolean(productName));
 
-    // Auto-fill fields with order information
+    // همه‌ی فیلدها جز «توضیحات» از خودِ سفارش پر می‌شوند.
+    // تاریخ‌های فرم همان قالب قبلی (فقط تاریخ) را برای سرور نگه می‌دارند؛
+    // نمایش با تاریخ و ساعت از خودِ سفارش ساخته می‌شود.
     setForm(prev => ({
       ...prev,
       orderNumber: item.order_id.toString(),
       techCode: item.technician_referral_code || '',
       amount: orderPaidAmount(item),
-      name: item.product_name || '',
+      name: productName,
       orderDate: item.created_at ? formatDate(item.created_at) : '',
       completeDate: item.finished_at ? formatDate(item.finished_at) : '',
     }));
+  };
+
+  const handleOrderNumberLookup = () => {
+    if (!orderNumberInput.trim()) {
+      showToastOrAlert(t('Enter order number'));
+      return;
+    }
+    const found = findOrderByNumber(orders, orderNumberInput);
+    if (!found) {
+      showToastOrAlert(t('No order was found with this number.'));
+      return;
+    }
+    handleOrderSelect(found);
   };
 
   const handleSubmit = async () => {
@@ -124,6 +152,8 @@ export default function ProductIssueScreen({ navigation }) {
           desc: '',
         });
         setSelectedOrder(null);
+        setOrderNumberInput('');
+        setNameAutoFilled(false);
 
         // Navigate back or to reports list
         // navigation.goBack();
@@ -177,26 +207,44 @@ export default function ProductIssueScreen({ navigation }) {
         <ScrollView contentContainerStyle={[NewStyles.wrapper, { paddingBottom: 100 }]}>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')} </Text>
 
+          <View style={styles.lookupRow}>
+            <TextInput
+              placeholder={t('Enter order number')}
+              value={orderNumberInput}
+              onChangeText={setOrderNumberInput}
+              onSubmitEditing={handleOrderNumberLookup}
+              keyboardType="number-pad"
+              returnKeyType="search"
+              style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, styles.lookupInput]}
+              placeholderTextColor={colors.textMuted.color}
+            />
+            <TouchableOpacity style={styles.lookupButton} onPress={handleOrderNumberLookup}>
+              <Text style={styles.lookupButtonText}>{t('Find order')}</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[NewStyles.text10, styles.lookupHint]}>{t('Or select from your orders')}</Text>
+
           <OrderDropdown
             value={selectedOrder?.value}
             onChange={handleOrderSelect}
+            onOrdersLoaded={setOrders}
             placeholder={t('Select Order Number')}
           />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Product / Service Name')} </Text>
 
-          <TextInput placeholder={t('Product / Service Name')} editable={false} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
+          <TextInput placeholder={t('Product / Service Name')} editable={Boolean(selectedOrder) && !nameAutoFilled} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor={colors.textMuted.color} />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Registration Date')} </Text>
 
           <TouchableOpacity disabled={true} style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
-            <Text style={[NewStyles.text10, !form.orderDate && styles.placeholder]}>
-              {form.orderDate || t('Order Registration Date')}
+            <Text style={[NewStyles.text10, !selectedOrder?.created_at && styles.placeholder]}>
+              {formatDateTime(selectedOrder?.created_at) || t('Order Registration Date')}
             </Text>
           </TouchableOpacity>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Delivery / Completion Date')}</Text>
 
           <TouchableOpacity disabled={true} style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setCompleteDatePickerVisible(true)}>
-            <Text style={[NewStyles.text10, !form.completeDate && styles.placeholder]}>
-              {form.completeDate || t('Delivery / Completion Date')}
+            <Text style={[NewStyles.text10, !selectedOrder?.finished_at && styles.placeholder]}>
+              {formatDateTime(selectedOrder?.finished_at) || t('Delivery / Completion Date')}
             </Text>
           </TouchableOpacity>
 
@@ -207,7 +255,7 @@ export default function ProductIssueScreen({ navigation }) {
             value={form.techCode}
             onChangeText={(text) => handleChange('techCode', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted.color}
             editable={false}
           />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Paid Amount')}</Text>
@@ -217,7 +265,7 @@ export default function ProductIssueScreen({ navigation }) {
             value={form.amount?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             onChangeText={(text) => handleChange('amount', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]}
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted.color}
             keyboardType="numeric"
             editable={false}
           />
@@ -228,7 +276,7 @@ export default function ProductIssueScreen({ navigation }) {
             value={form.desc}
             onChangeText={(text) => handleChange('desc', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted.color}
             multiline
           />
 
@@ -262,7 +310,33 @@ export default function ProductIssueScreen({ navigation }) {
 
 const createLocalStyles = (NewStyles) => StyleSheet.create({
   placeholder: {
-    color: '#999',
+    color: colors.textMuted.color,
+  },
+  lookupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  lookupInput: {
+    // NewStyles.textInput عرض ۱۰۰٪ دارد و دکمه را از سطر بیرون می‌انداخت.
+    flex: 1,
+    width: 'auto',
+    minWidth: 0,
+  },
+  lookupButton: {
+    backgroundColor: colors.primary.bgColor(1),
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  lookupButtonText: {
+    color: colors.white.color,
+    fontSize: fontSize.sm,
+    fontFamily: getFontFamily('bold', 'fa'),
+  },
+  lookupHint: {
+    marginBottom: spacing.xs,
+    color: colors.textSecondary.color,
   },
   spacer: {
     height: 20,

@@ -2,7 +2,7 @@
 // «انتخاب سیستماتیک». هر دو کاشی ستونی و در مرکز صفحه چیده می‌شوند: «جامع» بالا
 // و «سیستماتیک» پایین آن، هرکدام با آیکون و عنوان کاملاً هم‌مرکز (افقی و عمودی).
 // علامت راهنما «؟» دقیقاً کنار عنوان قرار می‌گیرد و عنوان در یک خط نمایش داده می‌شود.
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Image, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { ImageBackground } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { spacing } from '@theme/Spacing';
 import { radius } from '@theme/Radius';
 import { L } from './orgI18n';
 import { langIsRTL } from '@helpers/Common';
+import { CUSTOMER_HOME_ROUTE } from '@navigation/homeRoute';
 
 const entryOptions = [
   {
@@ -44,6 +45,16 @@ const List = ({ navigation }) => {
   const organizationName = useSelector(
     (state) => state?.organization?.profile?.company_name
   );
+
+  // این صفحه انتخابگرِ سازمانی است. مشتری‌ای که از «سفارش سیستماتیک» وارد شده
+  // نباید آن را ببیند - از هر راهی که به /list برسد (آدرس وب، اعلان، دکمه‌ی
+  // قدیمی) به صفحه‌ی اصلی خودش، «انتخاب سیستماتیک»، فرستاده می‌شود.
+  const isCustomer = useSelector((state) => state?.auth?.userType) === 'individual';
+  useEffect(() => {
+    if (isCustomer) navigation.replace(CUSTOMER_HOME_ROUTE);
+  }, [isCustomer, navigation]);
+
+  if (isCustomer) return null;
 
   return (
     <SafeAreaView style={NewStyles.container} edges={{ top: 'off', bottom: 'off' }}>

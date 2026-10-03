@@ -6,12 +6,29 @@ import { ImageBackground } from "expo-image";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import FooterSpacer from '@components/FooterSpacer';
+import { CUSTOMER_HOME_ROUTE, resetToHome } from '@navigation/homeRoute';
 
 
 
 function OrderMenuScreen({ navigation }) {
   const { t } = useTranslation();
   const contact = useSelector(state => state.contacts?.data?.data?.contact_urgent) 
+  const token = useSelector(state => state.auth?.token);
+  const userType = useSelector(state => state.auth?.userType);
+
+  // «سفارش سیستماتیک»: کاربرِ واردنشده به صفحه‌ی ورود مشتری می‌رود. مشتریِ
+  // واردشده مستقیم به صفحه‌ی اصلی‌اش («انتخاب سیستماتیک») می‌رود و پشته پاک
+  // می‌شود تا List یا صفحه‌ی ورود پشت آن نماند. کاربر سازمانی همان صفحه را
+  // روی صفحه‌ی اصلی خودش (List) باز می‌کند.
+  const openSystematicOrder = () => {
+    if (!token) {
+      navigation.navigate("SignInLanding");
+    } else if (userType === 'organization') {
+      navigation.navigate(CUSTOMER_HOME_ROUTE);
+    } else {
+      resetToHome(navigation, 'individual');
+    }
+  };
   const callSupport = () => {
     // `contact_urgent` در پنل خالی است (null)، پس همین شماره‌ی پیش‌فرض واقعاً گرفته می‌شود.
     Linking.openURL(contact?.link ? `${contact?.link}` : "tel:+982191693909");
@@ -34,9 +51,7 @@ function OrderMenuScreen({ navigation }) {
             style={{ width: "75%" }}
             title={t("Systematic order")}
             subTitle={t("(Optional)")}
-            onPress={() => {
-              navigation.navigate("SignInLanding");
-            }}
+            onPress={openSystematicOrder}
           />
           <Menuitem
             style={{ width: "75%" }}

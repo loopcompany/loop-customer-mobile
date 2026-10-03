@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,9 @@ import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
 import DatePickerModal from '@components/DatePickerModal';
 import SchedulePicker from '@components/SchedulePicker';
+import SavedAddressPicker from '@components/SavedAddressPicker';
+import useOrderDraft from '@hooks/useOrderDraft';
+import { DRAFT_SOURCE } from '@services/orderDrafts';
 import {
   AccordionHeader,
   SectionBody,
@@ -99,7 +102,7 @@ const SECTIONS = [
   {
     id: 'procurement',
     title: 'تامین تجهیزات / کالا',
-    hint: 'تعداد تجهیزات آکبند یا کارکرده‌ای که نیاز به تامین دارید را برای هر دسته وارد کنید.',
+    hint: 'اگر علاوه بر سرویس، قصد خرید کالا یا قطعه دارید (مثلاً یک پرینتر یا لوازم جانبی)، تعداد آکبند/کارکرده هر مورد را وارد کنید.',
     icon: require('@assets/icons/sections/procurement.png'),
   },
   {
@@ -150,12 +153,20 @@ const SECTIONS = [
     hint: 'پیش از ثبت نهایی می‌توانید پیش‌رسید را صادر یا مشاهده کنید و در نهایت سفارش را ثبت یا لغو نمایید.',
     icon: require('@assets/icons/sections/order-actions.png'),
   },
+  // در JSX درست بعد از «بازه زمانی / رزرو» رندر می‌شود؛ انتهای آرایه آمده تا
+  // اندیس‌های SEC[n] بخش‌های قبلی جابه‌جا نشوند.
+  {
+    id: 'address',
+    title: 'آدرس‌های منتخب',
+    hint: 'آدرس محل ارائه خدمت را از آدرس‌های ذخیره‌شده انتخاب کنید یا از همین‌جا آدرس جدیدی اضافه کنید.',
+    icon: require('@assets/icons/sections/address.png'),
+  },
 ];
 
 
 // ------------------------------------------------------------------------------------------
 
-const ComprehensiveSelectionScreen = ({ navigation }) => {
+const ComprehensiveSelectionScreen = ({ navigation, route }) => {
   // useTranslation subscribes the screen to runtime language switches so L()/LO() re-evaluate.
   const { i18n } = useTranslation();
   // فضای رزرو شده زیر محتوا تا آخرین بخش (نمایش/استعلام/ثبت سفارش) زیر داک شناور پنهان نشود
@@ -167,6 +178,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     () => SECTIONS.map((s) => ({ ...s, title: L(s.title), hint: L(s.hint) })),
     [i18n.language]
   );
+  const SEC_ADDRESS = SEC.find((section) => section.id === 'address');
   // برای «وضعیت کاربری» و «مشخصات کاربر» روی پیش‌رسید. آدرس و تلفن ثابت از
   // آدرس‌های ذخیره‌شده و - در نبودشان - از پروفایلِ سازمان می‌آید؛
   // `organization.profileData` هیچ‌جای اپ پر نمی‌شود و به‌تنهایی رسید را
@@ -203,6 +215,84 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   const [letterFile, setLetterFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const [addressId, setAddressId] = useState(null);
+  const handleAddressChange = useCallback((id) => setAddressId(id ?? null), []);
+
+  // سفارش نیمه‌کاره به‌صورت پیش‌نویس ذخیره می‌شود و از «سفارشات» قابل ادامه است.
+  const draftData = useMemo(
+    () => ({
+      deliveryMode,
+      deviceCounts,
+      osCounts,
+      softwareDeviceCounts,
+      softwareItems,
+      hardwareItems,
+      procurementItems,
+      equipmentStatus,
+      criticalInfra,
+      serviceLevel,
+      visitFrequency,
+      startDate,
+      timeSlot,
+      onceDate,
+      operatorInfo,
+      technicianGender,
+      letterFile: letterFile
+        ? { name: letterFile.name, uri: letterFile.uri, mimeType: letterFile.mimeType, size: letterFile.size }
+        : null,
+      addressId,
+    }),
+    [deliveryMode, deviceCounts, osCounts, softwareDeviceCounts, softwareItems, hardwareItems,
+      procurementItems, equipmentStatus, criticalInfra, serviceLevel, visitFrequency, startDate,
+      timeSlot, onceDate, operatorInfo, technicianGender, letterFile, addressId]
+  );
+
+  const draftHasContent = useMemo(
+    () =>
+      deliveryMode.length > 0 ||
+      equipmentStatus.length > 0 ||
+      [deviceCounts, osCounts, softwareDeviceCounts].some((map) => Object.values(map).some((n) => n > 0)) ||
+      [softwareItems, hardwareItems].some((map) => Object.values(map).some((e) => e?.count > 0)) ||
+      Object.values(procurementItems).some((e) => e?.new > 0 || e?.used > 0) ||
+      Boolean(criticalInfra || serviceLevel || visitFrequency || startDate || onceDate || timeSlot) ||
+      Object.values(operatorInfo).some((v) => String(v || '').trim()) ||
+      Boolean(technicianGender || letterFile || addressId),
+    [deliveryMode, equipmentStatus, deviceCounts, osCounts, softwareDeviceCounts, softwareItems,
+      hardwareItems, procurementItems, criticalInfra, serviceLevel, visitFrequency, startDate,
+      onceDate, timeSlot, operatorInfo, technicianGender, letterFile, addressId]
+  );
+
+  const restoreDraft = (saved) => {
+    if (!saved || typeof saved !== 'object') return;
+    if (Array.isArray(saved.deliveryMode)) setDeliveryMode(saved.deliveryMode);
+    if (saved.deviceCounts) setDeviceCounts(saved.deviceCounts);
+    if (saved.osCounts) setOsCounts(saved.osCounts);
+    if (saved.softwareDeviceCounts) setSoftwareDeviceCounts(saved.softwareDeviceCounts);
+    if (saved.softwareItems) setSoftwareItems(saved.softwareItems);
+    if (saved.hardwareItems) setHardwareItems(saved.hardwareItems);
+    if (saved.procurementItems) setProcurementItems(saved.procurementItems);
+    if (Array.isArray(saved.equipmentStatus)) setEquipmentStatus(saved.equipmentStatus);
+    setCriticalInfra(saved.criticalInfra ?? null);
+    setServiceLevel(saved.serviceLevel ?? null);
+    setVisitFrequency(saved.visitFrequency ?? null);
+    setStartDate(saved.startDate || '');
+    setTimeSlot(saved.timeSlot ?? null);
+    setOnceDate(saved.onceDate || '');
+    if (saved.operatorInfo) setOperatorInfo((prev) => ({ ...prev, ...saved.operatorInfo }));
+    setTechnicianGender(saved.technicianGender ?? null);
+    setLetterFile(saved.letterFile?.uri ? saved.letterFile : null);
+    setAddressId(saved.addressId ?? null);
+  };
+
+  const { draftId, discardDraft } = useOrderDraft({
+    source: DRAFT_SOURCE.COMPREHENSIVE,
+    initialDraftId: route?.params?.draftId,
+    meta: { title: L('انتخاب جامع - خدمات سازمانی') },
+    data: draftData,
+    hasContent: draftHasContent,
+    onRestore: restoreDraft,
+  });
 
   const toggleSection = (id) =>
     setExpanded((prev) => {
@@ -328,17 +418,34 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         onceDate,
         timeSlot,
         ...receiptSources,
+        // آدرسِ همین سفارش (بخش «آدرس‌های منتخب»).
+        selectedAddressId: addressId ?? receiptSources.selectedAddressId,
         state: RECEIPT_STATE.PENDING,
       });
 
     if (action === 'cancel_order') {
       showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
         { text: L('انصراف'), style: 'cancel' },
-        { text: L('لغو سفارش'), style: 'destructive', onPress: () => showToastOrAlert(L('سفارش لغو شد')) },
+        {
+          text: L('لغو سفارش'),
+          style: 'destructive',
+          onPress: async () => {
+            // لغو صریح توسط کاربر - تنها حالتی که پیش‌نویس بدون ثبت سفارش پاک می‌شود.
+            await discardDraft();
+            showToastOrAlert(L('سفارش لغو شد'));
+            if (navigation.canGoBack()) navigation.goBack();
+          },
+        },
       ]);
       return;
     }
     if (action === 'submit_order') {
+      if (addressId == null) {
+        showToastOrAlert(`${L('آدرس‌های منتخب')} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
+        setExpanded('address');
+        requestScrollTo('address');
+        return;
+      }
       const operatorError = getOperatorInfoError();
       if (operatorError) {
         showToastOrAlert(operatorError);
@@ -360,6 +467,8 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         ],
         schedule: { date: isOnceShort ? onceDate : startDate, slot: timeSlot },
         contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
+        addressId,
+        draftId,
         // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش
         // تکمیل و نمایش می‌دهد.
         receipt: preReceipt(),
@@ -638,6 +747,21 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
                 dateTitle={L('تاریخ شروع')}
               />
             )}
+          </SectionBody>
+        )}
+
+        {/* ۸-۱. آدرس‌های منتخب - بعد از «بازه زمانی / رزرو» */}
+        <AccordionHeader
+          title={SEC_ADDRESS.title}
+          hint={SEC_ADDRESS.hint}
+          icon={SEC_ADDRESS.icon}
+          expanded={expanded === 'address'}
+          onPress={() => toggleSection('address')}
+          innerRef={registerSection('address')}
+        />
+        {expanded === 'address' && (
+          <SectionBody>
+            <SavedAddressPicker value={addressId} onChange={handleAddressChange} navigation={navigation} />
           </SectionBody>
         )}
 

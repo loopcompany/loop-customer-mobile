@@ -26,7 +26,8 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { authAPI } from '@services/Api';
 import TokenManager from '@services/TokenManager';
-import { setToken } from '@slices/authSlice';
+import { setToken, setUserType } from '@slices/authSlice';
+import { resetToHome } from '@navigation/homeRoute';
 import { fetchUser } from '@slices/userSlice';
 import { showToastOrAlert, formatTime } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -130,12 +131,18 @@ export default function RegistrationVerificationScreen({ route, navigation }) {
 
           // Update Redux store
           dispatch(setToken(response.data.token));
+          // مثل LoginScreen: بدون نوع حساب، بقیه‌ی اپ نمی‌دانست این کاربر مشتری است
+          // و «خانه» را List (صفحه‌ی سازمانی) حساب می‌کرد.
+          dispatch(setUserType('individual'));
+          await AsyncStorage.setItem('accountType', 'individual');
+          await AsyncStorage.setItem('userType', 'individual');
           dispatch(fetchUser(response.data.token));
         }
 
         stopOtpRetriever({ clearPending: true });
         showToastOrAlert(t('Mobile number successfully verified'));
-        navigation.navigate('List'); // Navigate to main app
+        // صفحه‌ی اصلی مشتری «انتخاب سیستماتیک» است، نه List.
+        resetToHome(navigation, 'individual');
       } else {
         setError(response.message || t('The entered code is not correct!'));
         setVerificationCode('');

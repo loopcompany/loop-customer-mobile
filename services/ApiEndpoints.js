@@ -138,6 +138,44 @@ export const API_ENDPOINTS = {
     LOGOUT: '/organization/logout',
     LOGOUT_ALL: '/organization/logout-all',
     WARRANTY: '/info/warranties',
+    // پیشنهادی - هنوز در بک‌اند پیاده نشده (docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md)
+    DOCUMENTS: '/organization/documents', // GET فهرست / POST بارگذاری (multipart)
+    DOCUMENT: '/organization/documents/{id}', // DELETE
+    USERS: '/organization/users', // GET فهرست / POST افزودن کاربر مجاز
+    USER: '/organization/users/{id}', // DELETE
+  },
+
+  // امنیت حساب - برای هر دو نوع حساب (کاربر عادی و سازمانی/شرکتی) با همان توکن.
+  // همه پیشنهادی‌اند و هنوز در بک‌اند پیاده نشده‌اند؛ قرارداد کامل در
+  // docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md. تا پیاده شدن، هر بخش در اپ
+  // «به‌زودی فعال می‌شود» نشان می‌دهد (404/405/501).
+  ACCOUNT: {
+    SECURITY: '/account/security', // GET خلاصه‌ی وضعیت
+    TWO_FACTOR_SEND_CODE: '/account/security/two-factor/send-code',
+    TWO_FACTOR_ENABLE: '/account/security/two-factor/enable',
+    TWO_FACTOR_DISABLE: '/account/security/two-factor/disable',
+    TWO_FACTOR_RECOVERY_CODES: '/account/security/two-factor/recovery-codes',
+    DEVICES: '/account/devices',
+    DEVICE: '/account/devices/{id}',
+    DEVICES_REGISTER: '/account/devices/register',
+    DEVICES_LOGOUT_OTHERS: '/account/devices/logout-others',
+    ACTIVITIES: '/account/activities',
+    SESSIONS: '/account/sessions',
+    SESSION: '/account/sessions/{id}',
+    MOBILE_SEND_CODE: '/account/mobile/send-code',
+    MOBILE_VERIFY: '/account/mobile/verify',
+    ALERTS: '/account/security-alerts',
+    ALERT_READ: '/account/security-alerts/{id}/read',
+    ALERTS_READ_ALL: '/account/security-alerts/read-all',
+    ALERTS_SETTINGS: '/account/security-alerts/settings',
+    DELETION_REQUEST: '/account/deletion-request',
+    DELETION_SEND_CODE: '/account/deletion-request/send-code',
+    DELETION_CANCEL: '/account/deletion-request/cancel',
+  },
+
+  // نسخه‌ی اپ (پیشنهادی) - برای دکمه‌ی «بروزرسانی اپلیکیشن».
+  APP: {
+    VERSION: '/app/version',
   },
 };
 

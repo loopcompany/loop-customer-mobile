@@ -16,6 +16,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import OrderSummaryScreen from '../OrderSummaryScreen';
 import apiClient from '@services/axiosConfig';
 import { fetchCategorySteps } from '@services/StepsApi';
+import { listDrafts, saveDraft } from '@services/orderDrafts';
 
 jest.mock('@services/StepsApi', () => ({ fetchCategorySteps: jest.fn() }));
 
@@ -107,7 +108,7 @@ const makeStore = () =>
     },
   });
 
-const navigation = { replace: jest.fn(), goBack: jest.fn(), navigate: jest.fn() };
+const navigation = { replace: jest.fn(), goBack: jest.fn(), navigate: jest.fn(), canGoBack: () => true };
 
 const SAFE_AREA_METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -239,5 +240,31 @@ describe('OrderSummaryScreen — مبلغ سفارش سازمانی', () => {
 
     expect(apiClient.post).toHaveBeenCalledTimes(1);
     expect(apiClient.post.mock.calls[0][1].total_price).toBe(0);
+  });
+});
+
+describe('OrderSummaryScreen — آدرس‌های منتخب و پیش‌نویس', () => {
+  it('آدرسِ انتخاب‌شده در مرحله‌ی «آدرس‌های منتخب» را می‌فرستد و پیش‌نویس را پاک می‌کند', async () => {
+    fetchCategorySteps.mockResolvedValue(API_STEPS);
+    await saveDraft('organization:1', { id: 'draft-1', source: 'systematic', data: { a: 1 } });
+
+    const tree = await renderScreen({ ...baseParams, addressId: 7, draftId: 'draft-1' });
+    await submit(tree);
+
+    expect(apiClient.post.mock.calls[0][1].address_id).toBe(7);
+    expect(await listDrafts('organization:1')).toEqual([]);
+  });
+
+  it('آدرسی که دیگر وجود ندارد را نمی‌فرستد و کاربر را به مراحل برمی‌گرداند', async () => {
+    fetchCategorySteps.mockResolvedValue(API_STEPS);
+    await saveDraft('organization:1', { id: 'draft-2', source: 'systematic', data: { a: 1 } });
+
+    const tree = await renderScreen({ ...baseParams, addressId: 99, draftId: 'draft-2' });
+    await submit(tree);
+
+    expect(apiClient.post).not.toHaveBeenCalled();
+    expect(navigation.goBack).toHaveBeenCalled();
+    // ثبت ناموفق پیش‌نویس را پاک نمی‌کند.
+    expect((await listDrafts('organization:1')).map((d) => d.id)).toEqual(['draft-2']);
   });
 });

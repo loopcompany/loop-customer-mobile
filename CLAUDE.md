@@ -202,6 +202,32 @@ Four things not to undo:
 **Before touching order submission, read the actual call site in
 `screens/category/Preview.js`, not the docs** — the docs disagree with each other.
 
+## User / org app brief (2026-10) — drafts, address step, account security
+
+Implemented from the client's «اپ کاربر. سازمانی» documents. Backend contract for
+everything still missing on the server: `docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md`.
+
+- **Org order flows have an «آدرس‌های منتخب» step** (`components/SavedAddressPicker.js`)
+  after «بازه زمانی / رزرو»; the chosen id travels to `OrderSummaryScreen` as
+  `params.addressId`. Don't go back to guessing the first saved address.
+- **Order drafts** (`services/orderDrafts.js`, `hooks/useOrderDraft.js`) are local
+  (AsyncStorage, keyed per account) and listed at the top of `OrdersScreen`. A draft is
+  deleted only after a successful `/orders/submit` or an explicit «لغو سفارش».
+- **Account security** (`screens/account/AccountSecurityScreen.js`,
+  `services/AccountSecurityApi.js`) and the new org-profile sections call endpoints the
+  backend has not built yet. 404/405/501 render «به‌زودی فعال می‌شود» via
+  `isNotImplemented()`; keep that behaviour, never surface those as errors.
+- **`skipGlobalErrorAlert: true`** on an axios config skips the interceptor's global
+  alert (the screen shows its own message) while a 401 still raises the session sheet.
+  Use it for any call whose screen handles errors itself.
+- **Home page depends on account type** (`navigation/homeRoute.js`): a customer (entered via
+  «سفارش سیستماتیک») lands on `SystematicCategoryScreen` (`/systematic-selection`) and must
+  never see `List` (`/list`, the organisation chooser); `List` itself redirects customers.
+  Anything that sends the user "home" uses `useHomeRoute()` / `resetToHome()`, never a
+  hardcoded `'List'` (the org login flow is the only place `List` is named directly).
+- **Payment method/channel** labels live in `services/paymentMethods.js`; they show only
+  once the server sends `payment_method`.
+
 ## Push notifications (Firebase Cloud Messaging)
 
 `services/notifications/` owns the FCM client flow (backend contract:

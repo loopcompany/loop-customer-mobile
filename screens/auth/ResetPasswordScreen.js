@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import NewStyles from "@styles/NewStyles";
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from "react-native-confirmation-code-field";
 import { themeColor0, themeColor1, themeColor3, themeColor10 } from "@theme/Color";
-import { setToken } from "@slices/authSlice";
+import { setToken, setUserType } from "@slices/authSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetToHome } from "@navigation/homeRoute";
 import { authAPI } from "@services/Api";
 import TokenManager from "@services/TokenManager";
 import Button from "@components/Button";
@@ -115,15 +117,18 @@ export default function ResetPasswordScreen({ navigation, route }) {
         if (token && user) {
           await TokenManager.saveAuthData(token, user);
           dispatch(setToken(token));
+          // بازیابی رمز همین صفحه مخصوص مشتری است (سازمان OrganizationResetPassword
+          // را دارد)؛ نوع حساب را مثل LoginScreen ثبت می‌کنیم.
+          dispatch(setUserType('individual'));
+          await AsyncStorage.setItem('accountType', 'individual');
+          await AsyncStorage.setItem('userType', 'individual');
 
           showToastOrAlert(t("Login successful! Redirecting..."));
 
           // Navigate to main app
           setTimeout(() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'List' }],
-            });
+            // صفحه‌ی اصلی مشتری «انتخاب سیستماتیک» است، نه List.
+            resetToHome(navigation, 'individual');
           }, 1500);
         }
       } else {

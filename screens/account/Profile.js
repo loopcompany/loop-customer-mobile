@@ -23,6 +23,7 @@ import { createStyles } from '@styles/NewStyles';
 import LocationPicker from '@components/LocationPicker';
 import { fetchUser } from '@slices/userSlice';
 import FooterSpacer from '@components/FooterSpacer';
+import { AccountActionsCard } from '@components/account/OrganizationAccountSections';
 import { clearAccountProfileCache } from '@services/receipt/receiptProfile';
 export default function Profile() {
     const { t, i18n } = useTranslation();
@@ -888,6 +889,11 @@ export default function Profile() {
                     </View>
 
 
+
+                    {/* امنیت حساب / تأیید دومرحله‌ای / بروزرسانی / حذف حساب */}
+                    <View style={{ width: '100%' }}>
+                        <AccountActionsCard navigation={navigation} isOrganization={false} />
+                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center' }}>
                         <Button

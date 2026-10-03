@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { imageUri, uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles'
 import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
+import { describePayment } from '@services/paymentMethods';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8, themeColor14 } from '@theme/Color';
 import Loader from '@components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
@@ -498,6 +499,7 @@ function Details({ route, navigation }) {
     ), []);
     const minPrice = useSelector(state => state.minPrice?.data)
     if (data.length <= 0) { return <Loader /> }
+    const paymentInfo = describePayment(data);
 
 
     return (
@@ -766,6 +768,15 @@ function Details({ route, navigation }) {
                         <View style={{ paddingHorizontal: '5%', gap: 10 }}>
                             {user?.apple_check == 0 && <View style={styles.noticeBox}>
                                 <Text style={NewStyles.text10}>{t("Payment status")}: {data?.payment_status == 1 ? t("Paid") : t("Not paid")}</Text>
+                            </View>}
+
+                            {/* روش و کانال پرداخت (نقدی / کارت به کارت / شبا / ... - اپ / سایت / حضوری)؛
+                                فقط وقتی سرور `payment_method` را بفرستد. */}
+                            {paymentInfo && <View style={styles.noticeBox}>
+                                <Text style={NewStyles.text10}>{t("Payment method")}: {paymentInfo.label}</Text>
+                                {paymentInfo.remainingAmount != null && (
+                                    <Text style={NewStyles.text10}>{t("Remaining amount")}: {formatPrice(paymentInfo.remainingAmount)} {t("Tomans")}</Text>
+                                )}
                             </View>}
 
                             {user?.apple_check == 0 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>

@@ -147,6 +147,7 @@ const makeFixture = (state, kind) =>
   buildReceipt({
     state,
     issuedAt: '1404 / 08 / 08',
+    issuedTime: '16 : 45',
     order: {
       number: 55689965,
       userCode: 211866545,

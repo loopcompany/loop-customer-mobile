@@ -89,6 +89,15 @@ const EN = {
   'زیر ساخت‌های حیاتی': 'Critical infrastructure',
   'سطح خدمات و تامین تجهیزات': 'Service level & equipment supply',
   'بازه زمانی / رزرو': 'Time slot / booking',
+  'آدرس‌های منتخب': 'Selected addresses',
+  'آدرس محل ارائه خدمت را از آدرس‌های ذخیره‌شده انتخاب کنید یا از همین‌جا آدرس جدیدی اضافه کنید.':
+    'Choose the service address from your saved addresses, or add a new one right here.',
+  'افزودن آدرس جدید': 'Add new address',
+  'هنوز آدرسی ثبت نکرده‌اید. با دکمه‌ی بالا آدرس محل ارائه خدمت را اضافه کنید.':
+    'You have no saved address yet. Use the button above to add the service address.',
+  'دریافت آدرس‌ها ممکن نشد. اتصال اینترنت را بررسی کنید.':
+    'Could not load your addresses. Please check your internet connection.',
+  'آدرس': 'Address',
   'اطلاعات اپراتور': 'Operator information',
   'انتخاب تکنسین': 'Technician selection',
   'بارگزاری نامه / درخواست': 'Upload letter / request',
@@ -105,8 +114,8 @@ const EN = {
     'Specify the number of operating systems and software to install for each item.',
   'تعداد و توضیحات مربوط به سرویس سخت‌افزاری هر دسته از تجهیزات (لپ‌تاپ، کیس، مانیتور و ...) را وارد کنید.':
     'Enter the count and notes for the hardware service of each equipment category (laptop, case, monitor, ...).',
-  'تعداد تجهیزات آکبند یا کارکرده‌ای که نیاز به تامین دارید را برای هر دسته وارد کنید.':
-    'Enter the number of new or used devices you need supplied for each category.',
+  'اگر علاوه بر سرویس، قصد خرید کالا یا قطعه دارید (مثلاً یک پرینتر یا لوازم جانبی)، تعداد آکبند/کارکرده هر مورد را وارد کنید.':
+    'If, besides the service, you want to buy goods or parts (e.g. a printer or accessories), enter the new/used count for each item.',
   'وضعیت کنونی تجهیزات سازمان را از نظر نیاز به بررسی نرم‌افزاری، سخت‌افزاری یا تامین کالا مشخص کنید.':
     'Specify the current state of the organization\'s equipment in terms of needing software review, hardware review or goods supply.',
   'مهم‌ترین زیرساخت سازمان (نرم‌افزار سازمانی، شبکه/اینترنت یا سخت‌افزار) را انتخاب کنید تا در اولویت بررسی قرار گیرد.':

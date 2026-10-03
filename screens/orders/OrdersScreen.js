@@ -17,8 +17,12 @@ import Loader from '@components/Loader';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
 import FooterSpacer from '@components/FooterSpacer';
+import OrderDraftsSection from '@components/OrderDraftsSection';
+import { useHomeRoute } from '@navigation/homeRoute';
 
 function OrdersScreen({ navigation }) {
+  // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
+  const homeRoute = useHomeRoute();
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const dispatch = useDispatch();
@@ -119,7 +123,7 @@ function OrdersScreen({ navigation }) {
       const onBackPress = () => {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'List' }],
+          routes: [{ name: homeRoute }],
         });
         return true;
       };
@@ -127,7 +131,7 @@ function OrdersScreen({ navigation }) {
       const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => subscription.remove(); // ✅ درست
-    }, [])
+    }, [homeRoute])
   );
   if (orderLoader && !refreshing) {
     return (
@@ -142,7 +146,7 @@ function OrdersScreen({ navigation }) {
         onBackPress={() => {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'List' }],
+            routes: [{ name: homeRoute }],
           });
         }}
       />
@@ -180,6 +184,8 @@ function OrdersScreen({ navigation }) {
         </View>
       )}
       <FlatList
+        // سفارش‌های نیمه‌کاره‌ی مسیرهای سازمانی، بالای سفارش‌های ثبت‌شده.
+        ListHeaderComponent={<OrderDraftsSection navigation={navigation} />}
         ListFooterComponent={<FooterSpacer />}
         data={orders}
         keyExtractor={(item) => item.id.toString()}

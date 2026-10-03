@@ -4,6 +4,16 @@
 
 export const PRIVACY_POLICY_TITLE = 'سیاست حریم خصوصی اپلیکیشن کاربران / سازمانی / شرکتی';
 
+// شناسنامه‌ی سند. بخش ۲۰ می‌گوید «تاریخ آخرین به‌روزرسانی در ابتدای این سند درج
+// خواهد شد»؛ پس lastUpdated بالای صفحه و بقیه پایین آن نمایش داده می‌شوند.
+export const PRIVACY_POLICY_META = {
+  lastUpdated: '۱۴۰۵/۰۷/۲۰',
+  version: '1.0',
+  documentNumber: 'LIT-UP-001',
+  preparedBy: 'تهیه، تدوین و تنظیم‌شده توسط گروه فناوری اطلاعات لوپ',
+  copyright: '© کلیه حقوق مادی و معنوی این سند برای شرکت حلقه بی نهایت رایانه ایرانیان (لوپ) محفوظ است.',
+};
+
 const list = (items) => items.map((item) => `• ${item}`).join('\n');
 
 export const PRIVACY_POLICY_SECTIONS = [

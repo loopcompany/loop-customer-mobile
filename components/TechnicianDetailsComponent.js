@@ -21,6 +21,40 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
     const [showQRModal, setShowQRModal] = useState(false);
     const token = useSelector((state) => state?.auth?.token)
     const user = useSelector((state) => state?.user?.data)
+    // سفارش جاری = در انتظار (0) یا در حال انجام (1). بعد از پایان (2) یا لغو،
+    // تماس و پیام بسته است و شماره‌ی تکنسین اصلاً خوانده نمی‌شود.
+    const isOrderActive = data?.status == 0 || data?.status == 1;
+    // قبل از تأیید سفارش توسط کاربر (بخش «بررسی / جایگزینی / رسید») تماس باز نمی‌شود -
+    // همان قاعده‌ی قبلی، فقط حالا با پیام به‌جای پنهان کردن دکمه.
+    const canContact = isOrderActive && Boolean(data?.user_initial_accept);
+    // apple_check == 1 یعنی حساب بازبینی اپل؛ سرور معمولاً این فیلد را نمی‌فرستد
+    // و شرط قبلی (`== 0`) دکمه‌ها را برای همه پنهان می‌کرد.
+    const canShare = user?.apple_check != 1;
+
+    const contactBlockedMessage = () => (isOrderActive
+        ? t('Please confirm your order first to contact the technician.')
+        : t('Due to order cancellation or completion, contacting the technician is not possible.'));
+
+    const handleCall = () => {
+        if (!canContact) {
+            showToastOrAlert(contactBlockedMessage());
+            return;
+        }
+        if (!data?.technician?.phone) {
+            showToastOrAlert(t('The technician\'s phone number is not available.'));
+            return;
+        }
+        Linking.openURL(`tel:${data.technician.phone}`);
+    };
+
+    const handleMessage = () => {
+        if (!canContact) {
+            showToastOrAlert(contactBlockedMessage());
+            return;
+        }
+        navigation.navigate('ChatRoom', { technicianId: data?.technician?.id });
+    };
+
     const handleShare = async () => {
         const message = t('I am satisfied with the performance of {{name}}, Loop technician and I recommend you to use his services too! {{url}}', { name: data?.technician?.name, url: `${mainUri}/technician/${data?.technician?.id}` });
         try {
@@ -53,31 +87,28 @@ const TechnicianDetailsComponent = ({ data, navigation }) => {
                 </View>
 
             </View>
-            {(data?.user_initial_accept && (data?.status == 0 || data?.status == 1)) && <View style={[{ paddingHorizontal: '10%' }]}>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => {
-                    if (data?.status == 0 || data?.status == 1) {
-                        Linking.openURL(`tel:${data?.technician?.phone}`)
-                    } else {
-                        showToastOrAlert(t('Due to order cancellation or completion, contacting the technician is not possible.'))
-                    }
-                }}>
+            {/* چهار دکمه‌ی کارت تکنسین همیشه دیده می‌شوند (طرح «اطلاعات تکنسین»).
+                «تماس» و «پیام» فقط تا وقتی سفارش جاری است کار می‌کنند؛ پس از پایان یا
+                لغو سفارش، شماره‌ی تکنسین در سوابق کاربر نباید در دسترس باشد. */}
+            <View style={[{ paddingHorizontal: '10%' }]}>
+                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }, !canContact && styles.disabledButton]} onPress={handleCall}>
                     <Ionicons name="call-outline" size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Call technician')}</Text>
                 </Pressable>
-                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { navigation.navigate('ChatRoom', { technicianId: data?.technician?.id }) }}>
+                <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }, !canContact && styles.disabledButton]} onPress={handleMessage}>
                     <Ionicons name="chatbubble-ellipses-outline" size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Message to technician')}</Text>
-                    {(data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
+                    {(canContact && data?.unread_messages_count > 0) && <Text style={[NewStyles.text4, styles.chatItemBadge, { position: 'absolute', left: 0, top: -5, backgroundColor: themeColor6.bgColor(1) }]}>{data?.unread_messages_count}</Text>}
                 </Pressable>
-                {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
+                {canShare && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { handleShare() }}>
                     <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Send to friends')}</Text>
                 </Pressable>}
-                {user?.apple_check == 0 && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
-                    <Ionicons name={"share-social-outline"} size={18} color={themeColor0.bgColor(1)} />
+                {canShare && <Pressable style={[NewStyles.row, NewStyles.center, NewStyles.whiteButton, NewStyles.shadow, { gap: 5 }]} onPress={() => { setShowQRModal(true); }}>
+                    <Ionicons name={"qr-code-outline"} size={18} color={themeColor0.bgColor(1)} />
                     <Text style={[NewStyles.text, { fontSize: 12 }]}>{t('Scan QR code')}</Text>
                 </Pressable>}
-            </View>}
+            </View>
 
             {/* QR Code Modal */}
             <Modal
@@ -133,6 +164,9 @@ const createLocalStyles = (NewStyles) => StyleSheet.create({
         fontSize: 20,
         fontFamily: 'VazirBold',
         color: themeColor0.bgColor(1),
+    },
+    disabledButton: {
+        opacity: 0.5,
     },
     chatItemBadge: {
         width: 20,

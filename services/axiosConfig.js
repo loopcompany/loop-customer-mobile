@@ -115,6 +115,13 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // درخواستی که صفحه‌اش خودش پیام خطا را نشان می‌دهد (مثلاً بخش‌های «امنیت حساب»
+    // که endpointهایشان هنوز روی سرور نیست و باید «به‌زودی» نشان دهند، نه alert
+    // «خطا»). برخلاف isSilentAPI، ۴۰۱ بالا همچنان کشوی نشست را باز می‌کند.
+    if (error.config?.skipGlobalErrorAlert) {
+      return Promise.reject(error);
+    }
+
     // اگر navigation reference وجود داره، از error handler استفاده کن
     if (navigationRef?.current) {
       const navigation = navigationRef.current;
@@ -209,6 +216,10 @@ export const isSilentAPI = (url) => {
     // a dead session on those must be reported properly.
     '/wallet/balance',
     '/wallet/transactions',
+
+    // ثبت دستگاه پس از ورود و بررسی نسخه‌ی اپ - هر دو پس‌زمینه و بهترین-تلاش.
+    '/account/devices/register',
+    '/app/version',
   ];
 
   return silentAPIs.some((api) => url.includes(api));

@@ -29,7 +29,14 @@ import { imageUri, uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles';
 import { useSelector } from 'react-redux';
 import FooterSpacer from '@components/FooterSpacer';
+import { spacing } from '@theme/Spacing';
 import { clearAccountProfileCache } from '@services/receipt/receiptProfile';
+import {
+  AccountActionsCard,
+  AuthorizedUsersSection,
+  OrganizationDocumentsSection,
+  VerificationStatusCard,
+} from '@components/account/OrganizationAccountSections';
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '@helpers/Common';
 
@@ -47,6 +54,10 @@ const OrganizationProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [organizationName, setOrganizationName] = useState('');
   const [businessName, setBusinessName] = useState('');
+  // شناسه‌ی ملی سازمان در ثبت‌نام با کلید `melicode` فرستاده می‌شود.
+  const [organizationNationalId, setOrganizationNationalId] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState('');
+  const [economicCode, setEconomicCode] = useState('');
   const [editRequest, setEditRequest] = useState(null);
   const [savedMainData, setSavedMainData] = useState(null);
 
@@ -110,6 +121,9 @@ const OrganizationProfile = () => {
         setSavedMainData(data)
         setOrganizationName(data.organization_name || '');
         setBusinessName(data.business_name || '');
+        setOrganizationNationalId(data.melicode || data.organization_national_id || data.national_id || '');
+        setRegistrationNumber(data.registration_number || '');
+        setEconomicCode(data.economic_code || '');
         setAgentName(data.agent_name || '');
         setAgentPhone(data.agent_phone || '');
         setHistory(data.history || '');
@@ -222,6 +236,9 @@ const OrganizationProfile = () => {
 
         formData.append('organization_name', organizationName);
         formData.append('business_name', businessName);
+        formData.append('melicode', organizationNationalId);
+        formData.append('registration_number', registrationNumber);
+        formData.append('economic_code', economicCode);
         formData.append('agent_name', agentName);
         formData.append('agent_phone', agentPhone);
         formData.append('history', history);
@@ -244,6 +261,9 @@ const OrganizationProfile = () => {
         const jsonData = {
           organization_name: organizationName,
           business_name: businessName,
+          melicode: organizationNationalId,
+          registration_number: registrationNumber,
+          economic_code: economicCode,
           agent_name: agentName,
           agent_phone: agentPhone,
           history: history,
@@ -426,6 +446,11 @@ const OrganizationProfile = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {/* وضعیت احراز هویت سازمان: در حال بررسی / تأیید / معلق / حذف */}
+        <View style={styles.topSection}>
+          <VerificationStatusCard profileData={savedMainData} />
+        </View>
+
         {/* Header با دکمه ویرایش */}
         <View style={styles.headerContainer}>
           <View style={{alignItems: langIsRTL(i18n.language) ? 'flex-end' : 'flex-start'}}>
@@ -445,6 +470,9 @@ const OrganizationProfile = () => {
               if (editRequest && !isEditing) {
                 setOrganizationName(editRequest.organization_name || '');
                 setBusinessName(editRequest.business_name || '');
+                setOrganizationNationalId(editRequest.melicode || editRequest.organization_national_id || editRequest.national_id || '');
+                setRegistrationNumber(editRequest.registration_number || '');
+                setEconomicCode(editRequest.economic_code || '');
                 setAgentName(editRequest.agent_name || '');
                 setAgentPhone(editRequest.agent_phone || '');
                 setHistory(editRequest.history || '');
@@ -468,6 +496,9 @@ const OrganizationProfile = () => {
               } else if (isEditing) {
                 setOrganizationName(savedMainData.organization_name || '');
                 setBusinessName(savedMainData.business_name || '');
+                setOrganizationNationalId(savedMainData.melicode || savedMainData.organization_national_id || savedMainData.national_id || '');
+                setRegistrationNumber(savedMainData.registration_number || '');
+                setEconomicCode(savedMainData.economic_code || '');
                 setAgentName(savedMainData.agent_name || '');
                 setAgentPhone(savedMainData.agent_phone || '');
                 setHistory(savedMainData.history || '');
@@ -547,6 +578,38 @@ const OrganizationProfile = () => {
               value={businessName}
               onChangeText={setBusinessName}
               editable={isEditing}
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+
+          {/* شناسه ملی، شماره ثبت و شماره اقتصادی سازمان / شرکت */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t('Organization national ID')}</Text>
+            <TextInput
+              value={organizationNationalId}
+              onChangeText={setOrganizationNationalId}
+              editable={isEditing}
+              keyboardType="number-pad"
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t('Company registration number')}</Text>
+            <TextInput
+              value={registrationNumber}
+              onChangeText={setRegistrationNumber}
+              editable={isEditing}
+              keyboardType="number-pad"
+              style={[styles.input, !isEditing && styles.inputDisabled]}
+            />
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>{t('Economic code (optional)')}</Text>
+            <TextInput
+              value={economicCode}
+              onChangeText={setEconomicCode}
+              editable={isEditing}
+              keyboardType="number-pad"
               style={[styles.input, !isEditing && styles.inputDisabled]}
             />
           </View>
@@ -710,6 +773,12 @@ const OrganizationProfile = () => {
             </TouchableOpacity>
           )}
 
+          {/* مدارک و کاربران مجاز سازمان */}
+          <View style={styles.accountSections}>
+            <OrganizationDocumentsSection />
+            <AuthorizedUsersSection />
+          </View>
+
           {/* بخش تغییر رمز عبور */}
           <View style={styles.passwordSection}>
             <Text style={styles.sectionTitle}>{t('Change Password')}</Text>
@@ -804,6 +873,11 @@ const OrganizationProfile = () => {
                 <Text style={styles.saveButtonText}>{t('Change Password')}</Text>
               )}
             </TouchableOpacity>
+          </View>
+
+          {/* امنیت حساب / تأیید دومرحله‌ای / بروزرسانی / حذف حساب */}
+          <View style={styles.accountSections}>
+            <AccountActionsCard navigation={navigation} isOrganization />
           </View>
 
           {/* دکمه خروج */}
@@ -1007,6 +1081,14 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     marginBottom: 15,
     alignItems: 'center',
     elevation: 3,
+  },
+  // داخل formContainer (که خودش ۹۰٪ و وسط‌چین است) فقط فاصله‌ی عمودی لازم است.
+  accountSections: {
+    marginTop: spacing.md,
+  },
+  topSection: {
+    width: '90%',
+    alignSelf: 'center',
   },
   logoutButton: {
     backgroundColor: '#f44336',

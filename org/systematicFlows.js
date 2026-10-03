@@ -30,6 +30,7 @@ const sectionIcon = {
   serviceLevel: require('@assets/icons/sections/service-level.png'),
   technician: require('@assets/icons/sections/technician.png'),
   timeRange: require('@assets/icons/sections/time-range.png'),
+  address: require('@assets/icons/sections/address.png'),
   orderActions: require('@assets/icons/sections/order-actions.png'),
   operatorInfo: require('@assets/icons/sections/operator-info.png'),
   criticalInfra: require('@assets/icons/sections/critical-infra.png'),
@@ -374,22 +375,22 @@ const LOANER_OPTIONS = [
 
 const softwareChecklist = SOFTWARE_ITEMS.map((item) => ({ id: item.id, title: item.title }));
 
-// مراحل پایانی مشترک همه‌ی دسته‌ها (تکنسین / بازه زمانی / ثبت سفارش).
+// مراحل پایانی مشترک همه‌ی دسته‌ها (تامین تجهیزات / تکنسین / بازه زمانی / آدرس / ثبت سفارش).
+//
+// «تامین تجهیزات» یعنی خرید کالا یا قطعات، و در همه‌ی دسته‌ها باید یکسان و کامل
+// باشد: کاربری که لپ‌تاپش را برای سرویس می‌دهد ممکن است بخواهد یک پرینتر هم
+// بخرد. پس همه‌ی دسته‌ها کل PROCUREMENT_ITEMS را با همان آیکون‌ها می‌بینند
+// (itemIds تعریف نمی‌شود = همه‌ی اقلام).
 // afterProcurement برای مراحلی است که در طرح دقیقاً بعد از «تامین تجهیزات / کالا»
 // می‌آیند - مثل «لپ تاپ بصورت موقت / امانت».
-const closingSteps = (procurementIds, afterProcurement = []) => [
-  ...(procurementIds
-    ? [
-        {
-          id: 'procurement',
-          title: 'تامین تجهیزات / کالا',
-          hint: 'اگر علاوه بر سرویس، نیاز به تامین دستگاه یا قطعه دارید، تعداد آکبند/کارکرده هر مورد را وارد کنید.',
-          icon: sectionIcon.procurement,
-          type: 'procurement',
-          itemIds: procurementIds,
-        },
-      ]
-    : []),
+const closingSteps = (afterProcurement = []) => [
+  {
+    id: 'procurement',
+    title: 'تامین تجهیزات / کالا',
+    hint: 'اگر علاوه بر سرویس، قصد خرید کالا یا قطعه دارید (مثلاً یک پرینتر یا لوازم جانبی)، تعداد آکبند/کارکرده هر مورد را وارد کنید.',
+    icon: sectionIcon.procurement,
+    type: 'procurement',
+  },
   ...afterProcurement,
   {
     id: 'technician',
@@ -404,6 +405,16 @@ const closingSteps = (procurementIds, afterProcurement = []) => [
     hint: 'تاریخ مراجعه و بازه ساعتی مورد نظر خود را انتخاب کنید.',
     icon: sectionIcon.timeRange,
     type: 'schedule',
+    required: true,
+  },
+  // پیش از این، این مسیر مرحله‌ی آدرس نداشت و صفحه‌ی ثبت نهایی آدرس را حدس می‌زد؛
+  // کاربرِ بدون آدرس در آخرین قدم متوقف می‌شد. حالا آدرس یک مرحله‌ی اجباری است.
+  {
+    id: 'address',
+    title: 'آدرس‌های منتخب',
+    hint: 'آدرس محل ارائه خدمت را از آدرس‌های ذخیره‌شده انتخاب کنید یا از همین‌جا آدرس جدیدی اضافه کنید.',
+    icon: sectionIcon.address,
+    type: 'address',
     required: true,
   },
   {
@@ -499,7 +510,6 @@ export const SYSTEMATIC_FLOWS = {
       required: true,
     },
     ...closingSteps(
-      ['laptop', 'laptop_parts', 'accessories', 'storage_drive'],
       [
         {
           id: 'loaner',
@@ -579,7 +589,7 @@ export const SYSTEMATIC_FLOWS = {
       columns: 1,
     },
     deviceStatusStep('وضعیت مانیتور'),
-    ...closingSteps(null),
+    ...closingSteps(),
   ],
 
   // «کیس» - همان فهرست ایرادهای HardwareIssueScreen موجود در پروژه.
@@ -656,7 +666,6 @@ export const SYSTEMATIC_FLOWS = {
       required: true,
     },
     ...closingSteps(
-      ['case_standard', 'case_professional', 'mini_case', 'case_parts', 'accessories'],
       [
         {
           id: 'loaner',
@@ -749,7 +758,7 @@ export const SYSTEMATIC_FLOWS = {
       note: true,
       required: true,
     },
-    ...closingSteps(['all_in_one', 'accessories', 'storage_drive']),
+    ...closingSteps(),
   ],
 
   // «پرینتر / کپی»
@@ -835,7 +844,7 @@ export const SYSTEMATIC_FLOWS = {
       visibleWhen: (answers) => answers.device_type?.selected === 'industrial_copier',
     },
     deviceStatusStep('وضعیت دستگاه'),
-    ...closingSteps(['printer_single', 'printer_multi', 'industrial_copier', 'accessories']),
+    ...closingSteps(),
   ],
 
   // «هارد دیسک»
@@ -914,7 +923,7 @@ export const SYSTEMATIC_FLOWS = {
       note: true,
       required: true,
     },
-    ...closingSteps(['storage_drive', 'accessories']),
+    ...closingSteps(),
   ],
 
   // «ضایعات» - جمع‌آوری و تحویل اقلام اسقاط سازمان
@@ -971,7 +980,7 @@ export const SYSTEMATIC_FLOWS = {
       note: true,
       required: true,
     },
-    ...closingSteps(null),
+    ...closingSteps(),
   ],
 };
 

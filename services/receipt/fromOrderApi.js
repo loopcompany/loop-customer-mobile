@@ -17,7 +17,8 @@ import {
   isOrganizationAccount,
 } from './receiptModel';
 import { resolveCustomer, resolveUserCode } from './receiptCustomer';
-import { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
+import { toReceiptDate, toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
+import { describePayment } from '@services/paymentMethods';
 
 // کدهای وضعیت، از buttonConfig در components/OrderItem.js:
 //   0 در انتظار بررسی · 1 در حال انجام · 2 انجام شده
@@ -118,6 +119,8 @@ export const receiptFromOrderApi = (
   const discount = toPrice(data?.discount_price);
   const discountCode = String(data?.discount_code ?? data?.discount?.code ?? '').trim() || null;
   const payment = readPaymentStatus(data?.payment_status);
+  // روش/کانال پرداخت (نقدی، کارت به کارت، شبا، ... / اپ، سایت، حضوری) وقتی سرور بفرستد.
+  const paymentInfo = describePayment(data);
 
   const categoryTitle = data?.category?.title || null;
   const services = servicesFromOrderDetails(data?.order_details, categoryTitle);
@@ -153,6 +156,7 @@ export const receiptFromOrderApi = (
   return buildReceipt({
     state,
     issuedAt: todayReceiptDate(),
+    issuedTime: nowReceiptTime(),
     order: {
       number: data?.id ?? null,
       userCode: resolveUserCode(user),
@@ -182,10 +186,12 @@ export const receiptFromOrderApi = (
       discountCode,
       discountAmount: discount,
       status: payment.label,
-      // سرور روش پرداخت را برنمی‌گرداند؛ تنها چیزی که قطعی است این است که
-      // پرداخت در خودِ اپ انجام می‌شود (کیف پول یا درگاه) - نه نقدی.
-      method:
-        payment.paid === true
+      // اگر سرور روش پرداخت را فرستاده باشد همان نمایش داده می‌شود. در غیر این
+      // صورت تنها چیزی که قطعی است این است که پرداخت در خودِ اپ انجام می‌شود
+      // (کیف پول یا درگاه) - نه نقدی.
+      method: paymentInfo
+        ? paymentInfo.label
+        : payment.paid === true
           ? 'پرداخت آنلاین'
           : payment.paid === false
             ? 'در انتظار پرداخت'

@@ -9,6 +9,10 @@
 //   summaryLines  : [{label, value}] - خلاصه‌ی واقعی انتخاب‌های کاربر
 //   schedule      : {date, slot} - تاریخ (قالب DatePicker) و شناسه‌ی بازه‌ی ساعتی
 //   contact       : {fullName, mobile} - اطلاعات تماس واردشده در همان فرم
+//   addressId     : number|null - آدرسی که کاربر در مرحله‌ی «آدرس‌های منتخب»
+//                   انتخاب کرده؛ همان با سفارش ثبت می‌شود.
+//   draftId       : string|null - پیش‌نویسِ همین سفارش (services/orderDrafts.js)
+//                   که بعد از ثبت موفق پاک می‌شود.
 //   price         : number|null - مبلغِ از پیش‌معلوم. صفحه‌های سازمانی نرخ ندارند
 //                   و آن را نمی‌فرستند؛ در نبودش این صفحه خودش نرخ‌های دسته را
 //                   از `/steps/fetch` می‌گیرد (useCategoryRates).
@@ -53,6 +57,7 @@ import OrderCodesSection from '@components/OrderCodesSection';
 import usePromoCode from '@hooks/usePromoCode';
 import useReferralCode from '@hooks/useReferralCode';
 import useCategoryRates from '@hooks/useCategoryRates';
+import { deleteDraft, draftOwnerKey } from '@services/orderDrafts';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
 // صفحه از i18next استفاده نمی‌کند (L()/LO() فارسی محلی‌اش را دارد) پس یک
@@ -82,6 +87,8 @@ export default function OrderSummaryScreen({ navigation, route }) {
     currency = 'تومان',
     // رسیدِ از پیش ساخته‌شده توسط صفحه‌ی مبدا (مسیرهای سازمانی).
     receipt: receiptParam = null,
+    addressId: addressIdParam = null,
+    draftId = null,
   } = params;
 
   // بعد از refreshِ صفحه روی وب این param رشته‌ی «[object Object]» است، نه رسید.
@@ -90,8 +97,11 @@ export default function OrderSummaryScreen({ navigation, route }) {
   // همان منابعی که رسید از آن‌ها ساخته می‌شود - تا این خلاصه و رسیدِ بعدش یک
   // آدرس و یک شماره نشان دهند.
   const receiptSources = useReceiptSources();
-  const { user, addresses: savedAddresses, selectedAddressId } = receiptSources;
+  const { user, addresses: savedAddresses } = receiptSources;
+  // آدرسِ مرحله‌ی «آدرس‌های منتخب» بر آدرسِ انتخاب‌شده‌ی مسیر عادی مقدم است.
+  const selectedAddressId = addressIdParam ?? receiptSources.selectedAddressId;
   const addressDraft = useSelector((state) => state?.address);
+  const userType = useSelector((state) => state?.auth?.userType);
 
   // تاریخ و ساعت مراجعه از همان انتخابگری که کاربر پر کرده است.
   const scheduleDate = schedule?.date;
@@ -116,12 +126,13 @@ export default function OrderSummaryScreen({ navigation, route }) {
     () =>
       resolveCustomer({
         ...receiptSources,
+        selectedAddressId,
         isOrganization: isOrganizationAccount(receiptSources.user?.account_type),
         name: contact?.fullName || null,
         phone: contact?.mobile || null,
         addressDraft,
       }),
-    [receiptSources, contact?.fullName, contact?.mobile, addressDraft]
+    [receiptSources, selectedAddressId, contact?.fullName, contact?.mobile, addressDraft]
   );
 
   const address = customer.address || NOT_SET;
@@ -247,15 +258,33 @@ export default function OrderSummaryScreen({ navigation, route }) {
             }
             setIsSubmitting(true);
 
-            // آدرس: این مسیر (سیستماتیک/جامع سازمانی) مرحله‌ی انتخاب آدرس ندارد.
-            // آدرس‌های حساب سازمانی در لاگین (`fetchAddresses`) بارگذاری شده‌اند؛
-            // همان آدرسِ انتخاب‌شده‌ی مسیر عادی را در نبودش، اولین آدرس ذخیره‌شده
-            // را استفاده می‌کنیم. بدون هیچ آدرسی، ادامه نمی‌دهیم.
-            const resolvedAddressId =
-              pickSavedAddress(savedAddresses, selectedAddressId)?.id ?? null;
+            // آدرس: مسیرهای سازمانی حالا مرحله‌ی «آدرس‌های منتخب» دارند و آدرس
+            // انتخاب‌شده را در `addressId` می‌فرستند. صفحه‌ی مبدا همان را با فهرست
+            // تازه‌ی آدرس‌ها اعتبارسنجی کرده؛ اینجا فقط اگر فهرست بارگذاری شده و
+            // آدرس در آن نیست (در این فاصله حذف شده) رد می‌کنیم.
+            // در نبود `addressId` (ورودی‌های قدیمی) همان fallback قبلی می‌ماند.
+            // هر دو حالت خطا کاربر را به صفحه‌ی مراحل برمی‌گرداند که انتخاب‌هایش
+            // همان‌جا (و در پیش‌نویس) باقی است - چیزی پاک نمی‌شود.
+            const hasSavedList = Array.isArray(savedAddresses) && savedAddresses.length > 0;
+            let resolvedAddressId = null;
+            if (addressIdParam != null) {
+              const stillExists =
+                !hasSavedList ||
+                savedAddresses.some((item) => String(item?.id) === String(addressIdParam));
+              if (!stillExists) {
+                showToastOrAlert('آدرس انتخاب‌شده دیگر در دسترس نیست. در مرحله‌ی «آدرس‌های منتخب» آدرس دیگری انتخاب کنید.');
+                setIsSubmitting(false);
+                if (navigation.canGoBack?.()) navigation.goBack();
+                return;
+              }
+              resolvedAddressId = addressIdParam;
+            } else {
+              resolvedAddressId = pickSavedAddress(savedAddresses, selectedAddressId)?.id ?? null;
+            }
             if (!resolvedAddressId) {
-              showToastOrAlert('برای ثبت سفارش، ابتدا یک آدرس در پروفایل خود ثبت کنید.');
+              showToastOrAlert('برای ثبت سفارش، در مرحله‌ی «آدرس‌های منتخب» یک آدرس انتخاب یا اضافه کنید. انتخاب‌های شما حفظ شده‌اند.');
               setIsSubmitting(false);
+              if (navigation.canGoBack?.()) navigation.goBack();
               return;
             }
 
@@ -334,6 +363,16 @@ export default function OrderSummaryScreen({ navigation, route }) {
             }
 
             const orderNumber = String(realOrderId ?? '');
+
+            // سفارش روی سرور ثبت شد؛ پیش‌نویسِ آن دیگر لازم نیست. شکست در پاک کردن
+            // پیش‌نویس نباید ادامه‌ی ثبت را خراب کند.
+            if (draftId) {
+              try {
+                await deleteDraft(draftOwnerKey(user, userType), draftId);
+              } catch (error) {
+                console.warn('[OrderSummary] draft cleanup failed', error?.message);
+              }
+            }
 
             // پیامک تاییدیه «بهترین-تلاش» است و نباید ثبت سفارشِ واقعی (که بالا
             // انجام شد) را شکست بدهد.

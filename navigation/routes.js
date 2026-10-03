@@ -321,6 +321,12 @@ export const routes = [
     path: 'organization-profile',
   },
   {
+    // «امنیت حساب» - کاربر عادی و سازمانی/شرکتی (نیازمند ورود).
+    name: 'AccountSecurity',
+    getComponent: () => require('@screens/account/AccountSecurityScreen').default,
+    path: 'account-security',
+  },
+  {
     name: 'OrganizationContract',
     getComponent: () => require('@screens/organization/OrganizationContract').default,
     path: 'org-contract',
@@ -585,6 +591,11 @@ export const AUTH_ROUTE = 'SignInLanding';
  * is where a signed-out one lands, so both belong here — otherwise back from
  * either pops to an empty stack. (`Landing` replaces itself with one of the
  * two, so neither ever has a screen beneath it.)
+ *
+ * A customer's home, `SystematicCategoryScreen` (navigation/homeRoute.js), is
+ * deliberately *not* listed: for an organisation user it sits above `List`, so
+ * back must pop to `List`. `useExitConfirmation` treats it as a root only when it
+ * is the bottom of the stack.
  */
 export const ROOT_ROUTES = ['Landing', 'Welcome', 'List', 'SignInLanding'];
 

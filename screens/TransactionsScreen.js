@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { createStyles } from '@styles/NewStyles';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { formatPrice, formatDateTime, showToastOrAlert } from '@helpers/Common';
+import { describePayment } from '@services/paymentMethods';
 import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7, themeColor8 } from '@theme/Color';
 import { getTransactions, selectTransactions, TRANSACTION_STATUS, TRANSACTION_TYPE } from '@services/WalletApi';
 import FooterSpacer from '@components/FooterSpacer';
@@ -237,6 +238,14 @@ export default function TransactionsScreen() {
                   <Text style={[NewStyles.text4]}>{t("Type")}:</Text>
                   <Text style={[NewStyles.text4]}>{getTypeText(item.type)}</Text>
                 </View>
+
+                {/* روش/کانال پرداخت - وقتی سرور `payment_method` را بفرستد */}
+                {describePayment(item) && (
+                  <View style={styles.transactionRow}>
+                    <Text style={[NewStyles.text4]}>{t("Payment method")}:</Text>
+                    <Text style={[NewStyles.text4]}>{describePayment(item).label}</Text>
+                  </View>
+                )}
 
                 {item.referenceId && (
                   <View style={styles.transactionRow}>

@@ -16,7 +16,7 @@ import {
   isOrganizationAccount,
 } from './receiptModel';
 import { resolveCustomer, resolveUserCode } from './receiptCustomer';
-import { toReceiptDate, toReceiptTime, todayReceiptDate } from './receiptDates';
+import { toReceiptDate, toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
 
@@ -27,6 +27,7 @@ const NON_SERVICE_STEPS = new Set([
   'procurement', // → جدول اقلام
   'technician', // → جزئی از سفارش، نه ردیف خدمت
   'time_range', // → مشخصات تحویل
+  'address', // → مشخصات کاربر (selectedAddressId)
   'order_actions', // → دکمه‌ها، نه داده
 ]);
 
@@ -221,6 +222,7 @@ export const receiptFromSystematic = ({
   return buildReceipt({
     state,
     issuedAt: todayReceiptDate(),
+    issuedTime: nowReceiptTime(),
     order: {
       number: orderNumber,
       userCode: resolveUserCode(user),

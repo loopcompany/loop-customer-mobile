@@ -17,8 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
 import FooterSpacer from '@components/FooterSpacer';
+import { useHomeRoute } from '@navigation/homeRoute';
 
 export default function GameResultScreen({ route, navigation }) {
+  // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
+  const homeRoute = useHomeRoute();
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
@@ -81,7 +84,7 @@ export default function GameResultScreen({ route, navigation }) {
   };
 
   const handleBackToMenu = () => {
-    navigation.navigate('List');
+    navigation.navigate(homeRoute);
   };
 
   return (

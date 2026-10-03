@@ -10,7 +10,7 @@ import { themeColor0, themeColor1, themeColor5 } from '@theme/Color';
 import { orderAPI } from '@services/Api';
 import { formatDate, showToastOrAlert } from '@helpers/Common';
 
-export default function OrderDropdown({ value, onChange, placeholder }) {
+export default function OrderDropdown({ value, onChange, placeholder, onOrdersLoaded }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),
@@ -40,6 +40,9 @@ export default function OrderDropdown({ value, onChange, placeholder }) {
                 }));
                 
                 setOrders(formattedOrders);
+                // همان لیست را به صفحه هم می‌دهیم تا جستجوی شماره‌ی تایپ‌شده
+                // درخواستِ دوم به `/orders/summary` نزند.
+                onOrdersLoaded?.(formattedOrders);
             }
         } catch (error) {
             console.error('Error fetching orders:', error);

@@ -249,6 +249,9 @@ function OrderReceipt({ receipt }) {
             <Ionicons name="calendar-outline" size={13} color={C.iconGold} />
           </View>
           <Text style={s.dateValue}>{receipt.issuedAt || NOT_SET}</Text>
+          {receipt.issuedTime ? (
+            <Text style={s.timeValue}>ساعت {receipt.issuedTime}</Text>
+          ) : null}
           <Image
             source={assets.divider}
             style={[s.divider, { width: divider.width, height: divider.height }]}
@@ -492,6 +495,13 @@ const createStyles = (lang) => {
       fontSize: F.dateValue,
       color: C.textNavy,
       marginTop: 8,
+      textAlign: 'center',
+    },
+    timeValue: {
+      fontFamily: light,
+      fontSize: F.dateLabel,
+      color: C.textNavy,
+      marginTop: 2,
       textAlign: 'center',
     },
 

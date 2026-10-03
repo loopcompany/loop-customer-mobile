@@ -21,7 +21,10 @@ import HintBadge from '@components/HintBadge';
 import { createStyles } from '@styles/NewStyles';
 import { useMenu } from '@contexts/MenuContext';
 import { createPaymentRedirectUrl, openPaymentGateway } from '@utils/paymentGateway';
+import { useHomeRoute } from '@navigation/homeRoute';
 function Invoice({ route, navigation }) {
+    // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
+    const homeRoute = useHomeRoute();
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
@@ -263,7 +266,7 @@ function Invoice({ route, navigation }) {
                     <Text style={NewStyles.title7}>{t('With Loop, we are with you forever.')}</Text>
                     <View style={{ paddingHorizontal: '5%', alignItems: 'center' }}>
                         <TouchableOpacity style={{ padding: 10 }} onPress={() => {
-                            navigation.navigate("List")
+                            navigation.navigate(homeRoute)
                         }}>
                             <Text style={NewStyles.title}> {t("Reorder")} </Text>
                         </TouchableOpacity>

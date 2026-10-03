@@ -9,8 +9,11 @@ import CustomStatusBar from '@components/CustomStatusBar';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
 import FooterSpacer from '@components/FooterSpacer';
+import { useHomeRoute } from '@navigation/homeRoute';
 
 const DiscountCodeScreen = ({ navigation }) => {
+  // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
+  const homeRoute = useHomeRoute();
   const { i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const [discountCode, setDiscountCode] = useState('');
@@ -270,7 +273,7 @@ const DiscountCodeScreen = ({ navigation }) => {
         {/* دکمه ثبت / ادامه */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
           <TouchableOpacity 
-            onPress={() => navigation.navigate('List')}
+            onPress={() => navigation.navigate(homeRoute)}
             style={{ 
               backgroundColor: '#1976d2', 
               borderRadius: 12, 
