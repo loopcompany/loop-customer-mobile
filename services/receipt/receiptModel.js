@@ -90,6 +90,9 @@ export const DELIVERY_STATUS = {
   BY_COURIER_LOOP: 'توسط پیک / لوپ',
   BY_USER: 'توسط کاربر',
   BY_LOOP: 'توسط لوپ',
+  // روش‌های ارسال سند «توضیحات اپ کاربر» بند ۱۵ (order.delivery.method).
+  BY_LOOP_TECHNICIAN: 'توسط تکنسین لوپ',
+  BY_COURIER: 'توسط پیک حمل و نقل',
   /** سفارش ثبت شده ولی هنوز تحویلی رخ نداده - «نامشخص» اینجا غلط‌انداز است. */
   PENDING: 'در انتظار تحویل',
   /** سفارش لغو شده؛ تحویلی در کار نیست. */
@@ -237,6 +240,8 @@ export const buildReceipt = ({
     delivery: {
       receiverName: delivery.receiverName ?? null,
       date: delivery.date ?? null,
+      // ساعت تحویل - هنگام ثبت «دریافت محصول / سفارش» توسط کاربر (بند ۱۵).
+      time: delivery.time ?? null,
       status: delivery.status ?? DELIVERY_STATUS.UNKNOWN,
     },
     payment: {

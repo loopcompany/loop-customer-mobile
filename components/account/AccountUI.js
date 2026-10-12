@@ -383,3 +383,46 @@ export const NavRow = ({ icon, title, subtitle, onPress, badge, danger }) => {
     </TouchableOpacity>
   );
 };
+
+/**
+ * گزینه‌ی انتخابی - رادیو (پیش‌فرض) یا چک‌باکس (`multi`)، برای فرم‌های کوتاه مثل
+ * «تحویل‌گیرنده»، «روش ارسال» یا فیلدهای درخواست ویرایش.
+ */
+export const ChoiceRow = ({ label, subtitle, selected, onPress, disabled, multi = false }) => {
+  const dir = useDir();
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.75}
+      accessibilityRole={multi ? 'checkbox' : 'radio'}
+      accessibilityState={{ selected: Boolean(selected), disabled: Boolean(disabled) }}
+      style={{
+        flexDirection: dir.row,
+        alignItems: 'center',
+        gap: spacing.sm,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        borderWidth: 1,
+        borderRadius: radius.sm,
+        borderColor: selected ? colors.primary.bgColor(1) : colors.border.bgColor(1),
+        backgroundColor: selected ? colors.primary.bgColor(0.06) : colors.background.bgColor(1),
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      <Ionicons
+        name={
+          multi
+            ? selected ? 'checkbox' : 'square-outline'
+            : selected ? 'radio-button-on' : 'radio-button-off'
+        }
+        size={20}
+        color={selected ? colors.primary.color : colors.textMuted.color}
+      />
+      <View style={{ flex: 1 }}>
+        <BodyText bold={selected}>{label}</BodyText>
+        {subtitle ? <BodyText muted>{subtitle}</BodyText> : null}
+      </View>
+    </TouchableOpacity>
+  );
+};

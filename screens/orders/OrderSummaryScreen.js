@@ -58,6 +58,7 @@ import usePromoCode from '@hooks/usePromoCode';
 import useReferralCode from '@hooks/useReferralCode';
 import useCategoryRates from '@hooks/useCategoryRates';
 import { deleteDraft, draftOwnerKey } from '@services/orderDrafts';
+import { pickOrderExtras } from '@org/procurementPayload';
 
 // این دو کلید تنها fallbackهایی هستند که describeApiError صدا می‌زند؛ این
 // صفحه از i18next استفاده نمی‌کند (L()/LO() فارسی محلی‌اش را دارد) پس یک
@@ -89,6 +90,9 @@ export default function OrderSummaryScreen({ navigation, route }) {
     receipt: receiptParam = null,
     addressId: addressIdParam = null,
     draftId = null,
+    // فیلدهای ساختاریافته‌ی مسیرهای سازمانی (اقلام تامین کالا، نحوه ارائه، جنسیت
+    // تکنسین) - فقط کلیدهای مجاز در بدنه‌ی ثبت می‌نشینند (pickOrderExtras).
+    orderExtras = null,
   } = params;
 
   // بعد از refreshِ صفحه روی وب این param رشته‌ی «[object Object]» است، نه رسید.
@@ -327,6 +331,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
                 // آرایه‌ی خالی می‌رفت و سفارشِ سازمانی هیچ ردیفی نداشت.
                 steps: rates.steps,
                 file_paths: [],
+                ...pickOrderExtras(orderExtras),
               };
               // فقط کدهای تأییدشده، دقیقاً همان رشته‌ای که سرور به رسمیت شناخته.
               // کد تخفیف فقط در `promo_code` — قرارداد FRONTEND_PROMO_CODES.md.

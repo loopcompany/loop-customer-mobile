@@ -44,6 +44,14 @@ export const API_ENDPOINTS = {
     GATEWAY_PAYMENT: '/orders/gateway-payment', // POST { order_id, linking_url }
     CANCEL: '/orders/{id}/cancel',
     TRACK: '/orders/{id}/track',
+    // تامین کالای سازمانی/شرکتی: استعلام قیمت، پیش‌پرداخت و باقی‌مانده (پیشنهادی —
+    // docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md بخش ۹).
+    PROCUREMENT_ACCEPT: '/orders/{id}/procurement/accept',
+    PROCUREMENT_REJECT: '/orders/{id}/procurement/reject',
+    PROCUREMENT_REQUOTE: '/orders/{id}/procurement/requote',
+    PROCUREMENT_PAY: '/orders/{id}/procurement/pay', // POST { stage, method, linking_url }
+    // مشخصات تحویل (تحویل‌گیرنده و روش ارسال) - بخش ۱۰ همان سند.
+    DELIVERY: '/orders/{id}/delivery', // PUT
   },
 
   // Service steps & rates — contract: FRONTEND_SERVICE_RATES.md
@@ -139,6 +147,8 @@ export const API_ENDPOINTS = {
     LOGOUT_ALL: '/organization/logout-all',
     WARRANTY: '/info/warranties',
     // پیشنهادی - هنوز در بک‌اند پیاده نشده (docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md)
+    // «درخواست ویرایش» اطلاعات قفل‌شده با نامه‌ی مهر و امضادار (بخش ۱۱ سند بک‌اند).
+    EDIT_REQUESTS: '/organization/edit-requests', // POST (multipart: letter, description, fields[])
     DOCUMENTS: '/organization/documents', // GET فهرست / POST بارگذاری (multipart)
     DOCUMENT: '/organization/documents/{id}', // DELETE
     USERS: '/organization/users', // GET فهرست / POST افزودن کاربر مجاز
@@ -155,6 +165,11 @@ export const API_ENDPOINTS = {
     TWO_FACTOR_ENABLE: '/account/security/two-factor/enable',
     TWO_FACTOR_DISABLE: '/account/security/two-factor/disable',
     TWO_FACTOR_RECOVERY_CODES: '/account/security/two-factor/recovery-codes',
+    // مرحله‌ی دوم ورود (وقتی پاسخ ورود `requires_two_factor: true` دارد).
+    LOGIN_TWO_FACTOR_VERIFY: '/auth/two-factor/verify', // POST { two_factor_token, code }
+    LOGIN_TWO_FACTOR_RESEND: '/auth/two-factor/resend', // POST { two_factor_token }
+    ORG_LOGIN_TWO_FACTOR_VERIFY: '/organization/two-factor/verify',
+    ORG_LOGIN_TWO_FACTOR_RESEND: '/organization/two-factor/resend',
     DEVICES: '/account/devices',
     DEVICE: '/account/devices/{id}',
     DEVICES_REGISTER: '/account/devices/register',
@@ -171,6 +186,13 @@ export const API_ENDPOINTS = {
     DELETION_REQUEST: '/account/deletion-request',
     DELETION_SEND_CODE: '/account/deletion-request/send-code',
     DELETION_CANCEL: '/account/deletion-request/cancel',
+  },
+
+  // کیف پول مأمور خرید (پورسانت کد معرف) - پیشنهادی، بخش ۱۳ سند بک‌اند.
+  REFERRAL_AGENT: {
+    SUMMARY: '/referral-agent/summary', // GET
+    COMMISSIONS: '/referral-agent/commissions', // GET ?page=
+    WITHDRAWALS: '/referral-agent/withdrawals', // GET فهرست / POST درخواست برداشت یا تهاتر
   },
 
   // نسخه‌ی اپ (پیشنهادی) - برای دکمه‌ی «بروزرسانی اپلیکیشن».

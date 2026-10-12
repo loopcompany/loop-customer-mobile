@@ -19,6 +19,7 @@ import {
 import { resolveCustomer, resolveUserCode } from './receiptCustomer';
 import { toReceiptDate, toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
 import { describePayment } from '@services/paymentMethods';
+import { DELIVERY_METHOD, RECEIVER_TYPE, readDelivery } from '@services/OrderFulfillmentApi';
 
 // کدهای وضعیت، از buttonConfig در components/OrderItem.js:
 //   0 در انتظار بررسی · 1 در حال انجام · 2 انجام شده
@@ -53,6 +54,50 @@ const readPaymentStatus = (value) => {
     return { paid, label: paid ? 'پرداخت شده' : 'پرداخت نشده' };
   }
   return { paid: null, label: raw };
+};
+
+// روش ارسالِ ثبت‌شده روی سفارش → متن «وضعیت تحویل» رسید.
+const METHOD_STATUS = {
+  [DELIVERY_METHOD.LOOP_TECHNICIAN]: DELIVERY_STATUS.BY_LOOP_TECHNICIAN,
+  [DELIVERY_METHOD.USER]: DELIVERY_STATUS.BY_USER,
+  [DELIVERY_METHOD.COURIER]: DELIVERY_STATUS.BY_COURIER,
+};
+
+/**
+ * «مشخصات تحویل» رسید (بند ۱۵): تحویل‌گیرنده‌ای که کاربر مشخص کرده (خودش یا
+ * نماینده)، تاریخ و ساعتِ ثبت دریافت، و روش ارسال (تکنسین لوپ / کاربر / پیک).
+ * تا وقتی سرور `delivery` را نفرستد همان رفتار قبلی می‌ماند.
+ */
+export const deliveryOf = (data, { state, addressName, user } = {}) => {
+  const delivery = readDelivery(data);
+  const selfName =
+    [user?.name ?? user?.fname, user?.last_name ?? user?.lname].filter(Boolean).join(' ') || null;
+  const receiverName =
+    delivery.receiverName ||
+    (delivery.receiverType === RECEIVER_TYPE.SELF ? selfName : null) ||
+    addressName ||
+    null;
+
+  const deliveredAt = delivery.deliveredAt;
+  const methodStatus = delivery.method ? METHOD_STATUS[delivery.method] : null;
+
+  let status;
+  if (state === RECEIPT_STATE.FAILED) status = DELIVERY_STATUS.CANCELLED;
+  else if (deliveredAt) status = methodStatus || DELIVERY_STATUS.BY_LOOP;
+  else if (delivery.present) {
+    // روش ارسال انتخاب شده ولی هنوز تحویل نشده.
+    status = methodStatus ? `${DELIVERY_STATUS.PENDING} (${methodStatus})` : DELIVERY_STATUS.PENDING;
+  } else {
+    // سفارش‌های بدون `delivery` (سرور قدیمی / خدمت در محل): رفتار قبلی.
+    status = data?.finished_at ? DELIVERY_STATUS.BY_LOOP : DELIVERY_STATUS.PENDING;
+  }
+
+  return {
+    receiverName,
+    date: toReceiptDate(deliveredAt || data?.finished_at || data?.arrived_at || data?.date),
+    time: deliveredAt ? toReceiptTime(deliveredAt) : null,
+    status,
+  };
 };
 
 /** عددِ قیمت یا null - رشته‌ی خالی و undefined نباید صفر شوند. */
@@ -170,17 +215,7 @@ export const receiptFromOrderApi = (
     product: null,
     items: [],
     services,
-    delivery: {
-      receiverName: addressName || null,
-      date: toReceiptDate(data?.finished_at || data?.arrived_at || data?.date),
-      // تا وقتی سفارش تمام نشده تحویلی رخ نداده - «در انتظار تحویل»، نه
-      // «نامشخص»؛ و سفارشِ لغوشده اصلاً تحویلی ندارد.
-      status: data?.finished_at
-        ? DELIVERY_STATUS.BY_LOOP
-        : state === RECEIPT_STATE.FAILED
-          ? DELIVERY_STATUS.CANCELLED
-          : DELIVERY_STATUS.PENDING,
-    },
+    delivery: deliveryOf(data, { state, addressName, user }),
     payment: {
       // نبودِ کد را کامپوننت «ندارد» چاپ می‌کند.
       discountCode,

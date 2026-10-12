@@ -6,23 +6,23 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import ProfilePhotoEditor from '@components/avatar/ProfilePhotoEditor';
+import { appendImageFile } from '@components/avatar/photoFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from '@styles/NewStyles';
-import { themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '@theme/Color';
+import { colors, themeColor1, themeColor11, themeColor4, themeColor6, themeColor7 } from '@theme/Color';
 import ScreenHeaders from '@components/ScreenHeaders';
 import CustomStatusBar from '@components/CustomStatusBar';
 import DatePickerModal from '@components/DatePickerModal';
-import { langIsRTL, showAlert } from '@helpers/Common';
+import { isLocalUri, langIsRTL, showAlert } from '@helpers/Common';
 
 import useLogout from '@hooks/useLogout';
 import { imageUri, uri } from '@services/URL';
@@ -35,8 +35,24 @@ import {
   AccountActionsCard,
   AuthorizedUsersSection,
   OrganizationDocumentsSection,
+  OrganizationEditRequestCard,
   VerificationStatusCard,
 } from '@components/account/OrganizationAccountSections';
+import {
+  isProfileFieldEditable,
+  pickEditableProfileValues,
+  readEditRequestState,
+} from '@services/OrganizationAccountApi';
+
+// برچسب فیلد؛ فیلدهای قفل‌شده آیکون قفل می‌گیرند تا کاربر بداند تغییرشان
+// «درخواست ویرایش» لازم دارد.
+// در فارسی برچسب راست‌چین است و قفل سمت چپش؛ در انگلیسی برعکس.
+const FieldLabel = ({ text, locked, style, rtl }) => (
+  <View style={{ flexDirection: rtl ? 'row' : 'row-reverse', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+    {locked ? <Ionicons name="lock-closed" size={13} color={colors.textMuted.color} /> : null}
+    <Text style={style}>{text}</Text>
+  </View>
+);
 // Backend تاریخ شمسی می‌خواد، نیازی به تبدیل نیست
 // import { jalaliToGregorian } from '@helpers/Common';
 
@@ -90,6 +106,16 @@ const OrganizationProfile = () => {
   const [errors, setErrors] = useState({});
   const [datePickerModal, setDatePickerModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [requestFormOpen, setRequestFormOpen] = useState(false);
+  // لوگو / عکس حذف شده و هنوز «ذخیره» نزده است.
+  const [removePhoto, setRemovePhoto] = useState(false);
+
+  // بند ۱۰: فیلدهای آزاد همیشه با «ویرایش» باز می‌شوند؛ فیلدهای قفل فقط وقتی
+  // پنل «درخواست ویرایش» را تأیید کرده باشد (و پس از ذخیره دوباره قفل می‌شوند).
+  const editState = useMemo(() => readEditRequestState(savedMainData), [savedMainData]);
+  const can = (field) =>
+    isProfileFieldEditable(field, { editing: isEditing, unlockedFields: editState.unlockedFields });
+  const isLocked = (field) => !isProfileFieldEditable(field, { editing: true, unlockedFields: editState.unlockedFields });
 
   useEffect(() => {
     loadOrganizationProfile();
@@ -172,33 +198,47 @@ const OrganizationProfile = () => {
     }
   };
 
-  // انتخاب تصویر پروفایل
-  const pickImage = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (permissionResult.granted === false) {
-        showAlert(t('Error'), t('Gallery access is required.'));
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedImage = result.assets[0];
-
-        setProfileImage(selectedImage);
-      } else {
-      }
-    } catch (error) {
-      showAlert(t('Error'), t('Error selecting image'));
+  // فرم را از یک منبع (پروفایل ذخیره‌شده یا تغییرات در انتظار بررسی) پر می‌کند.
+  const fillForm = (source) => {
+    if (!source) return;
+    setOrganizationName(source.organization_name || '');
+    setBusinessName(source.business_name || '');
+    setOrganizationNationalId(source.melicode || source.organization_national_id || source.national_id || '');
+    setRegistrationNumber(source.registration_number || '');
+    setEconomicCode(source.economic_code || '');
+    setAgentName(source.agent_name || '');
+    setAgentPhone(source.agent_phone || '');
+    setHistory(source.history || '');
+    setFamilyName(source.manager_full_name || '');
+    if (source.manager_national_code) setNationalCode(source.manager_national_code);
+    if (source.manager_mobile) setMobileNumber(source.manager_mobile);
+    setOrganizationPhoneNumber(source.organization_phone || '');
+    setBirthDate(source.manager_birthdate || '');
+    setOrganizationEmail(source.organization_email || '');
+    setCity(source.city || '');
+    setRegion(source.region_id || '');
+    setOrganizationAddress(source.organization_address || '');
+    setOrganizationPostalCode(source.postal_code || '');
+    if (source.profile_image) {
+      const isFullUrl = source.profile_image.startsWith('http');
+      const imageUrl = isFullUrl ? source.profile_image : `${imageUri}/${source.profile_image}`;
+      setProfileImage({ uri: imageUrl, uploaded: true });
     }
+  };
+
+  const startEdit = () => {
+    // تغییراتی که هنوز در انتظار بررسی پنل‌اند (روال قبلی) ادامه داده می‌شوند.
+    if (editRequest && Number(editRequest.status) === 0) fillForm(editRequest);
+    setRequestFormOpen(false);
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setRemovePhoto(false);
+    if (!savedMainData?.profile_image) setProfileImage(null);
+    fillForm(savedMainData);
+    setErrors({});
+    setIsEditing(false);
   };
 
   // به‌روزرسانی پروفایل
@@ -214,7 +254,8 @@ const OrganizationProfile = () => {
       }
 
       // بررسی آیا عکس جدید داریم
-      const hasNewImage = profileImage && profileImage.uri && !profileImage.uri.startsWith('http');
+      // عکس تازه همیشه URI محلی است (برش‌خورده، دوربین یا آواتار آماده).
+      const hasNewImage = Boolean(profileImage?.uri) && isLocalUri(profileImage.uri);
 
       let requestData;
       let requestHeaders = {
@@ -222,43 +263,10 @@ const OrganizationProfile = () => {
         'Accept': 'application/json',
       };
 
-      if (hasNewImage) {
-        const formData = new FormData();
-
-        const uriParts = profileImage.uri.split('.');
-        const fileType = uriParts[uriParts.length - 1];
-
-        formData.append('profile_image', {
-          uri: profileImage.uri,
-          name: `profile.${fileType}`,
-          type: `image/${fileType}`,
-        });
-
-        formData.append('organization_name', organizationName);
-        formData.append('business_name', businessName);
-        formData.append('melicode', organizationNationalId);
-        formData.append('registration_number', registrationNumber);
-        formData.append('economic_code', economicCode);
-        formData.append('agent_name', agentName);
-        formData.append('agent_phone', agentPhone);
-        formData.append('history', history);
-        formData.append('organization_email', organizationEmail);
-        formData.append('organization_phone', organizationPhoneNumber);
-        formData.append('organization_address', organizationAddress);
-        formData.append('manager_full_name', familyName);
-        formData.append('city', city);
-        formData.append('region', region);
-        formData.append('postal_code', organizationPostalCode);
-
-        if (birthDate) {
-          // Backend تاریخ شمسی می‌خواد (مثلاً 1370/01/01)
-          formData.append('manager_birthdate', birthDate);
-        }
-
-        requestData = formData;
-        requestHeaders['Content-Type'] = 'multipart/form-data';
-      } else {
-        const jsonData = {
+      // فقط فیلدهای مجاز فرستاده می‌شوند: آزادها همیشه، قفل‌ها فقط پس از تأیید
+      // «درخواست ویرایش» توسط پنل.
+      const values = pickEditableProfileValues(
+        {
           organization_name: organizationName,
           business_name: businessName,
           melicode: organizationNationalId,
@@ -271,18 +279,29 @@ const OrganizationProfile = () => {
           organization_phone: organizationPhoneNumber,
           organization_address: organizationAddress,
           manager_full_name: familyName,
+          manager_national_code: nationalCode,
+          manager_mobile: mobileNumber,
           city: city,
           region: region,
           postal_code: organizationPostalCode,
-        };
-
-        if (birthDate) {
           // Backend تاریخ شمسی می‌خواد (مثلاً 1370/01/01)
-          jsonData.manager_birthdate = birthDate;
+          ...(birthDate ? { manager_birthdate: birthDate } : {}),
+        },
+        editState.unlockedFields
+      );
+      // حذف لوگو / عکس سازمان (بند ۱۲) - قرارداد: `remove_profile_image: 1`.
+      if (removePhoto && !hasNewImage) values.remove_profile_image = 1;
 
-        }
+      if (hasNewImage) {
+        const formData = new FormData();
 
-        requestData = jsonData;
+        await appendImageFile(formData, 'profile_image', profileImage.uri);
+        Object.entries(values).forEach(([key, value]) => formData.append(key, value ?? ''));
+
+        requestData = formData;
+        requestHeaders['Content-Type'] = 'multipart/form-data';
+      } else {
+        requestData = values;
         requestHeaders['Content-Type'] = 'application/json';
       }
 
@@ -316,6 +335,7 @@ const OrganizationProfile = () => {
         // کش می‌کند؛ بدون این، رسید تا ری‌لود بعدی مقدار قدیمی را نشان می‌داد.
         clearAccountProfileCache();
         showAlert(t('Success'), t('Profile updated successfully.'));
+        setRemovePhoto(false);
         setIsEditing(false);
         // بارگذاری مجدد اطلاعات
         await loadOrganizationProfile();
@@ -464,194 +484,159 @@ const OrganizationProfile = () => {
               </View>
             }
           </View>
-          <TouchableOpacity
-            onPress={() => {
+          {/* «ویرایش» فیلدهای آزاد را باز می‌کند (و پس از تأیید پنل، فیلدهای قفل را
+              هم)؛ «درخواست ویرایش» فرم نامه‌ی مهر و امضادار را باز می‌کند. */}
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: spacing.sm }}>
+            <TouchableOpacity onPress={isEditing ? cancelEdit : startEdit} style={styles.editButton}>
+              <Ionicons
+                name={isEditing ? 'close-circle-outline' : 'create-outline'}
+                size={22}
+                color={themeColor1.bgColor(1)}
+              />
+              <Text style={styles.editButtonText}>{isEditing ? t('Cancel') : t('Edit')}</Text>
+            </TouchableOpacity>
+            {!isEditing && editState.canRequest && (
+              <TouchableOpacity onPress={() => setRequestFormOpen((open) => !open)} style={styles.editButton}>
+                <Ionicons name="document-lock-outline" size={22} color={themeColor1.bgColor(1)} />
+                <Text style={styles.editButtonText}>{t('Edit request')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
-              if (editRequest && !isEditing) {
-                setOrganizationName(editRequest.organization_name || '');
-                setBusinessName(editRequest.business_name || '');
-                setOrganizationNationalId(editRequest.melicode || editRequest.organization_national_id || editRequest.national_id || '');
-                setRegistrationNumber(editRequest.registration_number || '');
-                setEconomicCode(editRequest.economic_code || '');
-                setAgentName(editRequest.agent_name || '');
-                setAgentPhone(editRequest.agent_phone || '');
-                setHistory(editRequest.history || '');
-                setFamilyName(editRequest.manager_full_name || '');
-                setOrganizationPhoneNumber(editRequest.organization_phone || '');
-                setBirthDate(editRequest.manager_birthdate || '');
-                setOrganizationEmail(editRequest.organization_email || '');
-                setCity(editRequest.city || '');
-                setRegion(editRequest.region_id || '');
-                setOrganizationAddress(editRequest.organization_address || '');
-                setOrganizationPostalCode(editRequest.postal_code || '');
-                // بررسی: آیا URL کامل است؟
-                if (editRequest?.profile_image) {
-
-                  const isFullUrl = editRequest.profile_image.startsWith('http');
-
-                  const imageUrl = isFullUrl ? editRequest.profile_image : `${imageUri}/${editRequest.profile_image}`;
-                  setProfileImage({ uri: imageUrl, uploaded: true });
-                }
-                setIsEditing(true);
-              } else if (isEditing) {
-                setOrganizationName(savedMainData.organization_name || '');
-                setBusinessName(savedMainData.business_name || '');
-                setOrganizationNationalId(savedMainData.melicode || savedMainData.organization_national_id || savedMainData.national_id || '');
-                setRegistrationNumber(savedMainData.registration_number || '');
-                setEconomicCode(savedMainData.economic_code || '');
-                setAgentName(savedMainData.agent_name || '');
-                setAgentPhone(savedMainData.agent_phone || '');
-                setHistory(savedMainData.history || '');
-                setFamilyName(savedMainData.manager_full_name || '');
-                setOrganizationPhoneNumber(savedMainData.organization_phone || '');
-                setBirthDate(savedMainData.manager_birthdate || '');
-                setOrganizationEmail(savedMainData.organization_email || '');
-                setCity(savedMainData.city || '');
-                setRegion(savedMainData.region_id || '');
-                setOrganizationAddress(savedMainData.organization_address || '');
-                setOrganizationPostalCode(savedMainData.postal_code || '');
-                // بررسی: آیا URL کامل است؟
-                if (savedMainData?.profile_image) {
-
-                  const isFullUrl = savedMainData.profile_image.startsWith('http');
-
-                  const imageUrl = isFullUrl ? savedMainData.profile_image : `${imageUri}/${savedMainData.profile_image}`;
-                  setProfileImage({ uri: imageUrl, uploaded: true });
-                }
-                setIsEditing(false);
-              } else if (!editRequest) {
-
-                setIsEditing(!isEditing);
-              }
+        <View style={styles.topSection}>
+          <OrganizationEditRequestCard
+            editState={editState}
+            formOpen={requestFormOpen}
+            onCloseForm={() => setRequestFormOpen(false)}
+            onSubmitted={() => {
+              setRequestFormOpen(false);
+              loadOrganizationProfile();
             }}
-            style={styles.editButton}
-          >
-            <Ionicons
-              name={isEditing ? "checkmark-circle" : "create-outline"}
-              size={24}
-              color={themeColor1.bgColor(1)}
-            />
-            <Text style={styles.editButtonText}>
-              {isEditing ? t('Cancel') : t("Edit request")}
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
 
         <View style={styles.formContainer}>
 
-          {/* تصویر پروفایل */}
-          <TouchableOpacity
-            onPress={isEditing ? pickImage : null}
-            disabled={!isEditing}
-            style={styles.imageContainer}
-          >
-            {profileImage ? (
-              <Image
-                source={{ uri: profileImage.uri }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <View style={styles.placeholderImage}>
-                <Text style={{ fontSize: 40 }}>🏢</Text>
-              </View>
-            )}
+          {/* لوگو / عکس سازمان: گرد، با دوربین / گالری / آواتار و نمای شرکت‌ها /
+              نمایش تمام‌صفحه / حذف (بند ۱۲). تغییر فقط در حالت «ویرایش». */}
+          <View style={styles.imageContainer}>
+            <ProfilePhotoEditor
+              uri={profileImage?.uri || null}
+              variant="organization"
+              editable={can('profile_image')}
+              onChange={({ uri: photoUri }) => {
+                setProfileImage({ uri: photoUri });
+                setRemovePhoto(false);
+              }}
+              onRemove={() => {
+                setProfileImage(null);
+                setRemovePhoto(true);
+              }}
+            />
             {isEditing && (
               <Text style={styles.imageText}>
-                {profileImage ? t('Change image') : t('Select image')}
+                {t('Use the camera button to change the logo / photo')}
               </Text>
             )}
-          </TouchableOpacity>
+          </View>
 
           {/* نام سازمان */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Organization name *')}</Text>
+            <FieldLabel text={t('Organization name *')} locked={isLocked('organization_name')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={organizationName}
               onChangeText={setOrganizationName}
-              editable={isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              editable={can('organization_name')}
+              style={[styles.input, !can('organization_name') && styles.inputDisabled]}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Business name')}</Text>
+            <FieldLabel text={t('Business name')} locked={isLocked('business_name')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={businessName}
               onChangeText={setBusinessName}
-              editable={isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              editable={can('business_name')}
+              style={[styles.input, !can('business_name') && styles.inputDisabled]}
             />
           </View>
 
           {/* شناسه ملی، شماره ثبت و شماره اقتصادی سازمان / شرکت */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Organization national ID')}</Text>
+            <FieldLabel text={t('Organization national ID')} locked={isLocked('melicode')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={organizationNationalId}
               onChangeText={setOrganizationNationalId}
-              editable={isEditing}
+              editable={can('melicode')}
               keyboardType="number-pad"
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('melicode') && styles.inputDisabled]}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Company registration number')}</Text>
+            <FieldLabel text={t('Company registration number')} locked={isLocked('registration_number')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={registrationNumber}
               onChangeText={setRegistrationNumber}
-              editable={isEditing}
+              editable={can('registration_number')}
               keyboardType="number-pad"
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('registration_number') && styles.inputDisabled]}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Economic code (optional)')}</Text>
+            <FieldLabel text={t('Economic code (optional)')} locked={isLocked('economic_code')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={economicCode}
               onChangeText={setEconomicCode}
-              editable={isEditing}
+              editable={can('economic_code')}
               keyboardType="number-pad"
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('economic_code') && styles.inputDisabled]}
             />
           </View>
 
           {/* نام مدیر */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Manager full name *')}</Text>
+            <FieldLabel text={t('Manager full name *')} locked={isLocked('manager_full_name')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={familyName}
               onChangeText={setFamilyName}
-              editable={isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              editable={can('manager_full_name')}
+              style={[styles.input, !can('manager_full_name') && styles.inputDisabled]}
             />
           </View>
 
           {/* کد ملی - غیرقابل ویرایش */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Manager national ID')}</Text>
+            <FieldLabel text={t('Manager national ID')} locked={isLocked('manager_national_code')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={nationalCode}
-              editable={false}
-              style={[styles.input, styles.inputDisabled]}
+              onChangeText={setNationalCode}
+              editable={can('manager_national_code')}
+              keyboardType="number-pad"
+              maxLength={10}
+              style={[styles.input, !can('manager_national_code') && styles.inputDisabled]}
             />
           </View>
 
           {/* شماره موبایل - غیرقابل ویرایش */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Manager mobile number')}</Text>
+            <FieldLabel text={t('Manager mobile number')} locked={isLocked('manager_mobile')} style={styles.label} rtl={isRTL} />
             <TextInput
               value={mobileNumber}
-              editable={false}
-              style={[styles.input, styles.inputDisabled]}
+              onChangeText={setMobileNumber}
+              editable={can('manager_mobile')}
+              keyboardType="phone-pad"
+              maxLength={11}
+              style={[styles.input, !can('manager_mobile') && styles.inputDisabled]}
             />
           </View>
 
           {/* تاریخ تولد */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>{t('Manager date of birth')}</Text>
+            <FieldLabel text={t('Manager date of birth')} locked={isLocked('manager_birthdate')} style={styles.label} rtl={isRTL} />
             <TouchableOpacity
-              onPress={isEditing ? () => setDatePickerModal(true) : null}
-              disabled={!isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              onPress={can('manager_birthdate') ? () => setDatePickerModal(true) : null}
+              disabled={!can('manager_birthdate')}
+              style={[styles.input, !can('manager_birthdate') && styles.inputDisabled]}
             >
               <Text style={[styles.dateText, !birthDate && styles.placeholderText]}>
                 {birthDate || t('Select Date')}
@@ -664,8 +649,8 @@ const OrganizationProfile = () => {
             <TextInput
               value={agentName}
               onChangeText={setAgentName}
-              editable={isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              editable={can('agent_name')}
+              style={[styles.input, !can('agent_name') && styles.inputDisabled]}
             />
           </View>
           <View style={styles.fieldContainer}>
@@ -673,10 +658,10 @@ const OrganizationProfile = () => {
             <TextInput
               value={agentPhone}
               onChangeText={setAgentPhone}
-              editable={isEditing}
+              editable={can('agent_phone')}
               keyboardType={'phone-pad'}
               maxLength={11}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('agent_phone') && styles.inputDisabled]}
             />
           </View>
           <View style={styles.fieldContainer}>
@@ -684,8 +669,8 @@ const OrganizationProfile = () => {
             <TextInput
               value={history}
               onChangeText={setHistory}
-              editable={isEditing}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              editable={can('history')}
+              style={[styles.input, !can('history') && styles.inputDisabled]}
             />
           </View>
 
@@ -695,10 +680,10 @@ const OrganizationProfile = () => {
             <TextInput
               value={organizationEmail}
               onChangeText={setOrganizationEmail}
-              editable={isEditing}
+              editable={can('organization_email')}
               keyboardType="email-address"
               autoCapitalize="none"
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('organization_email') && styles.inputDisabled]}
             />
           </View>
 
@@ -709,9 +694,9 @@ const OrganizationProfile = () => {
               <TextInput
                 value={organizationPhoneNumber}
                 onChangeText={setOrganizationPhoneNumber}
-                editable={isEditing}
+                editable={can('organization_phone')}
                 keyboardType="phone-pad"
-                style={[styles.input, { flex: 1 }, !isEditing && styles.inputDisabled]}
+                style={[styles.input, { flex: 1 }, !can('organization_phone') && styles.inputDisabled]}
               />
               <TextInput style={[NewStyles.text10, styles.prefixInput,]} value="021" editable={false} />
             </View>
@@ -725,9 +710,9 @@ const OrganizationProfile = () => {
               <TextInput
                 value={region}
                 onChangeText={setRegion}
-                editable={isEditing}
+                editable={can('region')}
                 keyboardType='number-pad'
-                style={[styles.input, !isEditing && styles.inputDisabled]}
+                style={[styles.input, !can('region') && styles.inputDisabled]}
               />
             </View>
           </View>
@@ -738,10 +723,10 @@ const OrganizationProfile = () => {
             <TextInput
               value={organizationAddress}
               onChangeText={setOrganizationAddress}
-              editable={isEditing}
+              editable={can('organization_address')}
               multiline
               numberOfLines={3}
-              style={[styles.input, styles.textArea, !isEditing && styles.inputDisabled]}
+              style={[styles.input, styles.textArea, !can('organization_address') && styles.inputDisabled]}
             />
           </View>
 
@@ -751,10 +736,10 @@ const OrganizationProfile = () => {
             <TextInput
               value={organizationPostalCode}
               onChangeText={setOrganizationPostalCode}
-              editable={isEditing}
+              editable={can('postal_code')}
               keyboardType="numeric"
               maxLength={10}
-              style={[styles.input, !isEditing && styles.inputDisabled]}
+              style={[styles.input, !can('postal_code') && styles.inputDisabled]}
             />
           </View>
 
@@ -950,21 +935,6 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 8,
-  },
-  placeholderImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
   },
   imageText: {
     fontSize: 14,

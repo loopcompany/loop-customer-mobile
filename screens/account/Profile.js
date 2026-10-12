@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, I18nManager, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +17,8 @@ import { isLocalUri, showToastOrAlert, langIsRTL } from '@helpers/Common';
 import DatePickerModal from '@components/DatePickerModal';
 import { Ionicons } from '@expo/vector-icons';
 import OrganizationProfile from './OrganizationProfile';
-import * as ImagePicker from 'expo-image-picker';
+import ProfilePhotoEditor from '@components/avatar/ProfilePhotoEditor';
+import { appendImageFile } from '@components/avatar/photoFile';
 import { imageUri } from '@services/URL';
 import { createStyles } from '@styles/NewStyles';
 import LocationPicker from '@components/LocationPicker';
@@ -39,6 +40,8 @@ export default function Profile() {
     const [checkingUserType, setCheckingUserType] = useState(true);
     const [userType, setUserType] = useState(null);
     const [pickedImageUri, setPickedImageUri] = useState(null);
+    // کاربر عکس را حذف کرده و هنوز «ذخیره» نزده است.
+    const [removePhoto, setRemovePhoto] = useState(false);
     // Get user type from Redux
     const userTypeFromRedux = useSelector(state => state.auth.userType);
     const user = useSelector(state => state.user?.data)
@@ -95,7 +98,7 @@ export default function Profile() {
         }
 
         // اگر URI محلی است (file://, blob:, content://)
-        if (path.startsWith('file://') || path.startsWith('blob:') || path.startsWith('content://')) {
+        if (path.startsWith('file://') || path.startsWith('blob:') || path.startsWith('content://') || path.startsWith('data:')) {
             return path;
         }
 
@@ -161,38 +164,6 @@ export default function Profile() {
         } catch (error) {
             console.log('Error toggling auto-login:', error);
             showToastOrAlert(t('Error changing settings'));
-        }
-    };
-
-    // Pick profile image
-    const pickProfileImage = async () => {
-        try {
-            // Request permission
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                showToastOrAlert(t('Gallery access is required to select a photo'));
-                return;
-            }
-
-            // Launch image picker
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: 'images',
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 0.8,
-            });
-
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-                const selectedImage = result.assets[0];
-                console.log('📷 Selected image URI:', selectedImage.uri);
-                console.log('📱 Platform:', Platform.OS);
-                setProfileImage(selectedImage.uri);
-                setPickedImageUri(selectedImage.uri);
-                showToastOrAlert(t('Image selected. To save, click Save Profile Information button'));
-            }
-        } catch (error) {
-            console.log('Error picking image:', error);
-            showToastOrAlert(t('Error selecting image'));
         }
     };
 
@@ -279,38 +250,14 @@ export default function Profile() {
                     // Laravel نیاز به _method برای PUT با FormData دارد
                     formData.append('_method', 'PUT');
 
-                    // اضافه کردن عکس با نام profile_image
-                    if (Platform.OS === 'web') {
-                        // برای وب: تبدیل blob به File
-                        try {
-                            const response = await fetch(profileImage);
-                            const blob = await response.blob();
-                            const fileName = `profile_${Date.now()}.${blob.type.split('/')[1]}`;
-                            const file = new File([blob], fileName, { type: blob.type });
-                            formData.append("profile_photo_path", file);
-                            console.log('📷 Web: Image converted to File object');
-                        } catch (err) {
-                            console.error('❌ Error converting image:', err);
-                            showToastOrAlert(t('Error processing image'));
-                            return;
-                        }
-                    } else {
-                        // برای موبایل: از URI استفاده می‌کنیم
-                        let finalUri = profileImage;
-                        if (Platform.OS === "android" && !finalUri.startsWith("file://")) {
-                            finalUri = "file://" + finalUri;
-                        }
-
-                        const fileName = finalUri.split("/").pop();
-                        const ext = fileName.split('.').pop();
-                        const type = `image/${ext}`;
-
-                        formData.append("profile_photo_path", {
-                            uri: finalUri,
-                            name: fileName,
-                            type,
-                        });
-                        console.log('📱 Native: Image added to FormData');
+                    // عکس (برش‌خورده، آواتار آماده یا گرفته‌شده با دوربین) - وب و موبایل
+                    // در photoFile.js جدا مدیریت می‌شوند.
+                    try {
+                        await appendImageFile(formData, 'profile_photo_path', pickedImageUri);
+                    } catch (err) {
+                        console.error('❌ Error converting image:', err);
+                        showToastOrAlert(t('Error processing image'));
+                        return;
                     }
 
                     // اضافه کردن همه فیلدهای پروفایل (سرور نیاز دارد حداقل یک فیلد داشته باشیم)
@@ -354,6 +301,8 @@ export default function Profile() {
                             const user = response.user;
 
 
+                            setPickedImageUri(null);
+                            setRemovePhoto(false);
                             // بروزرسانی عکس پروفایل
                             if (user.profile_photo_path) {
                                 setProfileImage(user.profile_photo_path);
@@ -410,6 +359,11 @@ export default function Profile() {
                     console.log("birthDate:", birthDate, birthDateChanged);
                     console.log('====================================');
 
+                    // حذف عکس پروفایل (بند ۱۲) - قرارداد: `remove_profile_photo: 1`.
+                    if (removePhoto) {
+                        updateData.remove_profile_photo = 1;
+                    }
+
                     if (Object.keys(updateData).length === 0) {
                         showToastOrAlert(t('No information to update'));
                         return;
@@ -426,6 +380,10 @@ export default function Profile() {
                         clearAccountProfileCache();
 
                         setBirthDateChanged(false);
+                        if (removePhoto) {
+                            setRemovePhoto(false);
+                            setProfileImage(null);
+                        }
 
                         if (response.user) {
                             const user = response.user;
@@ -599,28 +557,26 @@ export default function Profile() {
                 <ScrollView contentContainerStyle={styles.container}>
 
 
-                    {/* Profile Image Section */}
+                    {/* عکس پروفایل: گرد، با دوربین / گالری / آواتار / نمایش تمام‌صفحه / حذف (بند ۱۲) */}
                     <View style={styles.profileImageContainer}>
-                        <TouchableOpacity
-                            style={styles.profileImageWrapper}
-                            onPress={pickProfileImage}
-                        >
-                            {profileImage ? (
-                                <Image
-                                    source={{ uri: getImageUrl(profileImage) }}
-                                    style={styles.profileImagePreview}
-                                    onError={(e) => console.log('❌ Image load error:', e.nativeEvent.error, 'URI was:', getImageUrl(profileImage))}
-                                    onLoad={() => console.log('✅ Image loaded successfully:', getImageUrl(profileImage))}
-                                />
-                            ) : (
-                                <View style={styles.profileImagePlaceholder}>
-                                    <Ionicons name="person" size={50} color={themeColor10.bgColor(0.4)} />
-                                </View>
-                            )}
-
-                        </TouchableOpacity>
+                        <ProfilePhotoEditor
+                            uri={getImageUrl(profileImage)}
+                            variant="person"
+                            onChange={({ uri }) => {
+                                setProfileImage(uri);
+                                setPickedImageUri(uri);
+                                setRemovePhoto(false);
+                                showToastOrAlert(t('Image selected. To save, click Save Profile Information button'));
+                            }}
+                            onRemove={() => {
+                                setProfileImage(null);
+                                setPickedImageUri(null);
+                                setRemovePhoto(true);
+                                showToastOrAlert(t('Photo removed. To save, click Save Profile Information button'));
+                            }}
+                        />
                         <Text style={[NewStyles.text10, { textAlign: 'center', marginTop: 10, fontSize: 12, color: themeColor10.bgColor(0.6) }]}>
-                            {t('Click to change profile picture')}
+                            {t('Tap the photo to view it full screen; use the camera button to change it')}
                         </Text>
                     </View>
 
@@ -1044,39 +1000,5 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     profileImageContainer: {
         alignItems: 'center',
         marginVertical: 20,
-    },
-    profileImageWrapper: {
-        position: 'relative',
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        overflow: 'hidden',
-        borderWidth: 3,
-        borderColor: themeColor4.bgColor(1),
-        backgroundColor: '#fff',
-    },
-    profileImagePreview: {
-        width: '100%',
-        height: '100%',
-    },
-    profileImagePlaceholder: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: themeColor10.bgColor(0.1),
-    },
-    editIconContainer: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: themeColor4.bgColor(1),
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#000000ff',
     },
 });

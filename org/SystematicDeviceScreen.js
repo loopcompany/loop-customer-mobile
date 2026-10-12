@@ -35,6 +35,7 @@ import {
   TIME_SLOT_OPTIONS,
 } from './deviceCatalog';
 import { getCategory, getFlow, getVisibleFlow } from './systematicFlows';
+import { toProcurementItemsPayload } from './procurementPayload';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -309,6 +310,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         answers,
         // آدرس انتخاب‌شده در مرحله‌ی «آدرس‌های منتخب» - همان که با سفارش ثبت می‌شود.
         addressId: selectedAddressId,
+        // اقلام تامین کالا به‌صورت ساختاریافته، تا پنل برایشان قیمت اعلام کند.
+        orderExtras: {
+          procurement_items: toProcurementItemsPayload(answers.procurement),
+          technician_gender: answers.technician?.gender ?? null,
+        },
         // پس از ثبت موفق روی سرور، OrderSummaryScreen همین پیش‌نویس را پاک می‌کند.
         draftId,
         // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش

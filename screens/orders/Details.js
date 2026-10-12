@@ -23,6 +23,8 @@ import OrderReviewRatingSection from './OrderReviewRatingSection';
 import OrderLoopDispatchSection from './OrderLoopDispatchSection';
 import OrderLoopSendSection from './OrderLoopSendSection';
 import OrderReturnTimeSection from './OrderReturnTimeSection';
+import ProcurementQuoteSection from '@components/order/ProcurementQuoteSection';
+import DeliveryDetailsSection from '@components/order/DeliveryDetailsSection';
 import AccordionHeader from '@components/AccordionHeader';
 import { fetchUser } from '@slices/userSlice';
 import { fetchOrders } from '@slices/orderSlice';
@@ -226,6 +228,8 @@ function Details({ route, navigation }) {
     const [submittingReceive, setSubmittingReceive] = useState(false);
     const [submittingInPlace, setSubmittingInPlace] = useState(false);
     const [showReviewRating, setShowReviewRating] = useState(false);
+    const [showProcurement, setShowProcurement] = useState(false);
+    const [showDelivery, setShowDelivery] = useState(false);
     const [isTechnicianVerified, setIsTechnicianVerified] = useState(0);
     const [verifying, setVerifying] = useState(false);
     const [data, setData] = useState([]);
@@ -500,6 +504,7 @@ function Details({ route, navigation }) {
     const minPrice = useSelector(state => state.minPrice?.data)
     if (data.length <= 0) { return <Loader /> }
     const paymentInfo = describePayment(data);
+    const hasDelivery = Boolean(data?.delivery || data?.send_to_loop || data?.procurement);
 
 
     return (
@@ -711,6 +716,25 @@ function Details({ route, navigation }) {
                         />
                     )}
 
+                    {/* تامین کالا / استعلام قیمت - فقط سفارش‌هایی که سرور برایشان procurement می‌فرستد */}
+                    {data?.procurement && (
+                        <>
+                            <AccordionHeader
+                                title={t("Equipment supply / Price inquiry")}
+                                isActive={true}
+                                isOpen={showProcurement}
+                                onPress={() => setShowProcurement(!showProcurement)}
+                            />
+                            {showProcurement && (
+                                <ProcurementQuoteSection
+                                    order={data}
+                                    orderId={orderId}
+                                    onUpdate={() => setRefreshing(true)}
+                                />
+                            )}
+                        </>
+                    )}
+
                     {/* زمان عودت - فقط اگر user_cancellation_date پر باشه */}
                     {data?.user_cancellation_date && (
                         <>
@@ -841,6 +865,25 @@ function Details({ route, navigation }) {
                                 </View>
                             )}
                         </View>
+                    )}
+                    {/* مشخصات تحویل - سفارش‌هایی که کالا/محصول از لوپ به کاربر برمی‌گردد */}
+                    {hasDelivery && (
+                        <>
+                            <AccordionHeader
+                                title={t("Delivery details")}
+                                isActive={true}
+                                isOpen={showDelivery}
+                                onPress={() => setShowDelivery(!showDelivery)}
+                            />
+                            {showDelivery && (
+                                <DeliveryDetailsSection
+                                    key={JSON.stringify(data?.delivery ?? null)}
+                                    order={data}
+                                    orderId={orderId}
+                                    onUpdate={() => setRefreshing(true)}
+                                />
+                            )}
+                        </>
                     )}
                     <AccordionHeader
                         title={t("Product dispatch status to the user's location")}

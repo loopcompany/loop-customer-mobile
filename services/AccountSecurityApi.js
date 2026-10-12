@@ -47,6 +47,39 @@ export const regenerateRecoveryCodes = ({ code }) =>
   request(() => axios.post(url(A.TWO_FACTOR_RECOVERY_CODES), { code }, QUIET));
 
 // ---------------------------------------------------------------------------
+// مرحله‌ی دوم ورود
+// ---------------------------------------------------------------------------
+// وقتی 2FA فعال است، `/auth/login` و `/organization/login` به‌جای توکن
+// `{ requires_two_factor: true, two_factor_token, method }` برمی‌گردانند. پاسخ verify
+// دقیقاً همان شکل پاسخ موفق همان ورود را دارد (توکن و کاربر و برای سازمان،
+// organization) تا صفحه‌ی ورود همان مسیر تکمیل ورود را طی کند.
+
+/** پاسخ ورود مرحله‌ی دوم می‌خواهد؟ (بدنه‌ی پاسخ `/auth/login` یا `/organization/login`) */
+export const readTwoFactorChallenge = (body) =>
+  body?.requires_two_factor && body?.two_factor_token
+    ? { token: body.two_factor_token, method: body.method === 'app' ? 'app' : 'sms' }
+    : null;
+
+/** @param {'individual'|'organization'} accountType */
+export const verifyLoginTwoFactor = (accountType, { twoFactorToken, code }) =>
+  request(() =>
+    axios.post(
+      url(accountType === 'organization' ? A.ORG_LOGIN_TWO_FACTOR_VERIFY : A.LOGIN_TWO_FACTOR_VERIFY),
+      { two_factor_token: twoFactorToken, code },
+      QUIET
+    )
+  );
+
+export const resendLoginTwoFactor = (accountType, twoFactorToken) =>
+  request(() =>
+    axios.post(
+      url(accountType === 'organization' ? A.ORG_LOGIN_TWO_FACTOR_RESEND : A.LOGIN_TWO_FACTOR_RESEND),
+      { two_factor_token: twoFactorToken },
+      QUIET
+    )
+  );
+
+// ---------------------------------------------------------------------------
 // دستگاه‌ها
 // ---------------------------------------------------------------------------
 /** مشخصات همین دستگاه - هم برای ثبت و هم برای تشخیص «دستگاه فعلی». */

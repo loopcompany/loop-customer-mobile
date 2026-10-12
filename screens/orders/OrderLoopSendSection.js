@@ -265,7 +265,7 @@ const OrderLoopSendSection = ({ data, orderId, onUpdate }) => {
                     <View style={{ gap: 5 }}>
                         {user?.apple_check != 1 && <View style={[NewStyles.row, { gap: 5 }]}>
                             <Ionicons name={"documents-outline"} size={20} color={themeColor0.bgColor(1)} />
-                            <Text style={NewStyles.title}>{t('Down payment amount')}</Text>
+                            <Text style={NewStyles.title}>{t('Down payment amount')} ({Number(data?.prepayment)}٪)</Text>
                         </View>}
                         <View style={[styles.itemWrapper, NewStyles.row, NewStyles.border10, { gap: 10 }]}>
                             <Ionicons name="ellipse" size={10} color={themeColor0.bgColor(0.5)} />

@@ -227,6 +227,15 @@ const EN = {
   'به زودی': 'Coming soon',
   'عکس': 'Photo',
   'لطفاً این مرحله را تکمیل کنید': 'Please complete this step',
+  // org/comprehensiveValidation.js
+  'حداقل یک قلم «تامین تجهیزات / کالا» یا یک خدمت نرم‌افزاری / سخت‌افزاری انتخاب کنید.':
+    'Choose at least one equipment supply item or one software / hardware service.',
+  'نحوه ارائه خدمات را انتخاب کنید.': 'Choose how the service is delivered.',
+  'برای تامین کالا «کوتاه مدت / یکبار» را انتخاب کنید.': 'For equipment supply, choose “Short-term / One-time”.',
+  'تاریخ مراجعه را در «بازه زمانی / رزرو» انتخاب کنید.': 'Choose a visit date under “Time Range / Booking”.',
+  'بازه ساعتی را در «بازه زمانی / رزرو» انتخاب کنید.': 'Choose a time slot under “Time Range / Booking”.',
+  'یکی از «آدرس‌های منتخب» را انتخاب کنید.': 'Choose one of your saved addresses.',
+  'در «انتخاب تکنسین» یکی از گزینه‌ها را انتخاب کنید.': 'Choose an option under “Technician Selection”.',
   'مراحل این دسته هنوز تعریف نشده است.': 'The steps for this category are not defined yet.',
 
   // --- time slots ------------------------------------------------------

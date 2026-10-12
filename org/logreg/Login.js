@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import TwoFactorChallenge from '@components/auth/TwoFactorChallenge';
+import { readTwoFactorChallenge, resendLoginTwoFactor, verifyLoginTwoFactor } from '@services/AccountSecurityApi';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -38,6 +40,8 @@ const Login = ({ navigation }) => {
   const [rememberPassword, setRememberPassword] = useState(false);
   const isRTL = langIsRTL(i18n.language);
   const [loading, setLoading] = useState(false);
+  // چالش مرحله‌ی دوم ورود ({ token, method }) یا null.
+  const [twoFactor, setTwoFactor] = useState(null);
   const [errors, setErrors] = useState({});
   const [securityCode, setSecurityCode] = useState('');
 
@@ -77,6 +81,98 @@ const Login = ({ navigation }) => {
     };
   }, []);
 
+  // تکمیل ورود سازمانی - هم بعد از ورود عادی و هم بعد از مرحله‌ی دوم (تأیید
+  // دومرحله‌ای). payload همان `data` پاسخ موفق: { token, user, organization }.
+  const finishLogin = async (payload) => {
+    // Save token and user data — the token must always be persisted so the
+    // axios interceptors (which read AsyncStorage 'userToken', not Redux) can
+    // authenticate subsequent requests. `rememberPassword` only controls
+    // whether the org code is pre-filled on the next launch.
+    await AsyncStorage.setItem('userToken', payload.token);
+    await AsyncStorage.setItem('userData', JSON.stringify(payload.user));
+
+    await AsyncStorage.setItem('organizationData', JSON.stringify(payload.organization));
+
+    await AsyncStorage.setItem('accountType', 'organization');
+
+    await AsyncStorage.setItem('organizationCode', organizationCode);
+
+    // Dispatch to Redux
+    dispatch(setToken(payload.token));
+
+    dispatch(setUserType('organization'));
+
+    // Drop whatever account was in `state.user` before, then load this one —
+    // the menu and footer dock read the code/name from it.
+    dispatch(emptyUser());
+    dispatch(clearWallet());
+    dispatch(fetchUser(payload.token));
+
+    dispatch(setOrganizationData(payload.organization));
+    console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', payload.organization);
+
+    dispatch(fetchAddresses(payload.token));
+    console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
+
+    // Persist (or clear) what the "Remember password" box controls. Besides
+    // pre-filling the form, ticking it opts the account into the same
+    // auto-login flags the customer login uses — without them the next cold
+    // start dropped straight back to the login page, which is what made the
+    // checkbox look like it did nothing.
+    if (rememberPassword) {
+      await AsyncStorage.multiSet([
+        [SAVED_ORG_CODE_KEY, organizationCode],
+        [SAVED_ORG_PASSWORD_KEY, password],
+        ['rememberLogin', 'true'],
+        ['autoLoginEnabled', 'true'],
+      ]);
+      console.log('💾 [Login] savedOrganizationCode ذخیره شد');
+    } else {
+      await AsyncStorage.multiRemove([
+        SAVED_ORG_CODE_KEY,
+        SAVED_ORG_PASSWORD_KEY,
+        'rememberLogin',
+        'autoLoginEnabled',
+      ]);
+    }
+
+    console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');
+
+    // Clear navigation state from AsyncStorage to ensure fresh start
+    try {
+      await AsyncStorage.removeItem('NAVIGATION_STATE_V1');
+      console.log('🗑️ [Login] Navigation state cleared from AsyncStorage');
+    } catch (error) {
+      console.error('Error clearing navigation state:', error);
+    }
+
+    // Show success message and navigate
+    showAlert(
+      t('success'),
+      t('Login successful'),
+      [
+        {
+          text: t('Confirm'),
+          onPress: () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'List' }],
+            });
+          },
+        },
+      ]
+    );
+  };
+
+  // مرحله‌ی دوم ورود سازمانی.
+  const submitTwoFactor = async (code) => {
+    const result = await verifyLoginTwoFactor('organization', { twoFactorToken: twoFactor?.token, code });
+    if (!result.ok || !result.data?.token) return { ...result, ok: false };
+    setTwoFactor(null);
+    await finishLogin(result.data);
+    return result;
+  };
+
   const handleLogin = async () => {
     // Clear previous errors
     setErrors({});
@@ -114,86 +210,15 @@ const Login = ({ navigation }) => {
         password: password,
       });
 
+      // تأیید دومرحله‌ای فعال است: سرور به‌جای توکن، چالش مرحله‌ی دوم می‌فرستد.
+      const challenge = readTwoFactorChallenge(response.data);
+      if (challenge) {
+        setTwoFactor(challenge);
+        return;
+      }
+
       if (response.data.status === 'success') {
-
-        // Save token and user data — the token must always be persisted so the
-        // axios interceptors (which read AsyncStorage 'userToken', not Redux) can
-        // authenticate subsequent requests. `rememberPassword` only controls
-        // whether the org code is pre-filled on the next launch.
-        await AsyncStorage.setItem('userToken', response.data.data.token);
-        await AsyncStorage.setItem('userData', JSON.stringify(response.data.data.user));
-
-        await AsyncStorage.setItem('organizationData', JSON.stringify(response.data.data.organization));
-
-        await AsyncStorage.setItem('accountType', 'organization');
-
-        await AsyncStorage.setItem('organizationCode', organizationCode);
-
-        // Dispatch to Redux
-        dispatch(setToken(response.data.data.token));
-
-        dispatch(setUserType('organization'));
-
-        // Drop whatever account was in `state.user` before, then load this one —
-        // the menu and footer dock read the code/name from it.
-        dispatch(emptyUser());
-        dispatch(clearWallet());
-        dispatch(fetchUser(response.data.data.token));
-
-        dispatch(setOrganizationData(response.data.data.organization));
-        console.log('📦 [Login] اطلاعات سازمان به Redux ارسال شد:', response.data.data.organization);
-
-        dispatch(fetchAddresses(response.data.data.token));
-        console.log('📦 [Login] بارگذاری آدرس‌ها آغاز شد');
-
-        // Persist (or clear) what the "Remember password" box controls. Besides
-        // pre-filling the form, ticking it opts the account into the same
-        // auto-login flags the customer login uses — without them the next cold
-        // start dropped straight back to the login page, which is what made the
-        // checkbox look like it did nothing.
-        if (rememberPassword) {
-          await AsyncStorage.multiSet([
-            [SAVED_ORG_CODE_KEY, organizationCode],
-            [SAVED_ORG_PASSWORD_KEY, password],
-            ['rememberLogin', 'true'],
-            ['autoLoginEnabled', 'true'],
-          ]);
-          console.log('💾 [Login] savedOrganizationCode ذخیره شد');
-        } else {
-          await AsyncStorage.multiRemove([
-            SAVED_ORG_CODE_KEY,
-            SAVED_ORG_PASSWORD_KEY,
-            'rememberLogin',
-            'autoLoginEnabled',
-          ]);
-        }
-
-        console.log('✅ [Login] تمام اطلاعات با موفقیت ذخیره شد');
-
-        // Clear navigation state from AsyncStorage to ensure fresh start
-        try {
-          await AsyncStorage.removeItem('NAVIGATION_STATE_V1');
-          console.log('🗑️ [Login] Navigation state cleared from AsyncStorage');
-        } catch (error) {
-          console.error('Error clearing navigation state:', error);
-        }
-
-        // Show success message and navigate
-        showAlert(
-          t('success'),
-          t('Login successful'),
-          [
-            {
-              text: t('Confirm'),
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'List' }],
-                });
-              },
-            },
-          ]
-        );
+        await finishLogin(response.data.data);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -518,6 +543,15 @@ const Login = ({ navigation }) => {
           <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
+      {twoFactor ? (
+        <TwoFactorChallenge
+          visible
+          method={twoFactor.method}
+          onSubmit={submitTwoFactor}
+          onResend={() => resendLoginTwoFactor('organization', twoFactor.token)}
+          onCancel={() => setTwoFactor(null)}
+        />
+      ) : null}
     </View>
   );
 };

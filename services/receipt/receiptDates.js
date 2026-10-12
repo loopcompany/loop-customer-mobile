@@ -1,12 +1,13 @@
 // قالب‌بندی تاریخ/ساعت مخصوص رسید.
 //
 // در طرحِ رسید تاریخ همیشه شمسیِ صفرپرشده با فاصله دور اسلش است («1404 / 08 / 08»)
-// و ساعت با فاصله دور دونقطه («16 : 45»). هیچ‌کدام از فرمترهای helpers/Common.js
+// و ساعت با فاصله دور دونقطه («16 : 45»). هر دو با ltr() علامت می‌خورند، چون
+// «ساعت 16 : 45» داخل متن فارسی بدون آن «45 : 16» دیده می‌شد. هیچ‌کدام از فرمترهای helpers/Common.js
 // دقیقاً این شکل را نمی‌دهند (formatJalaaliDate صفر نمی‌گذارد و ساعت را می‌چسباند)،
 // ولی تبدیل تقویم از همان‌جا می‌آید - این فایل تبدیل تازه‌ای ننوشته است.
 
 import { toJalaali } from 'jalaali-js';
-import { parsePickerDate } from '@helpers/Common';
+import { ltr, parsePickerDate } from '@helpers/Common';
 
 const padZero = (value) => String(value).padStart(2, '0');
 
@@ -41,7 +42,7 @@ export const toReceiptDate = (value) => {
   const date = toDate(value);
   if (!date) return null;
   const { jy, jm, jd } = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return `${jy} / ${padZero(jm)} / ${padZero(jd)}`;
+  return ltr(`${jy} / ${padZero(jm)} / ${padZero(jd)}`);
 };
 
 /**
@@ -53,7 +54,7 @@ export const toReceiptDate = (value) => {
 export const toReceiptTime = (value) => {
   const date = toDate(value);
   if (!date) return null;
-  return `${padZero(date.getHours())} : ${padZero(date.getMinutes())}`;
+  return ltr(`${padZero(date.getHours())} : ${padZero(date.getMinutes())}`);
 };
 
 /** تاریخ امروز به قالب رسید - «تاریخ صدور / نمایش». */

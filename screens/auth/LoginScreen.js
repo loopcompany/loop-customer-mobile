@@ -19,6 +19,8 @@ import { ImageBackground } from "expo-image";
 import { createStyles } from '@styles/NewStyles';
 import FooterSpacer from '@components/FooterSpacer';
 import { resetToHome } from '@navigation/homeRoute';
+import TwoFactorChallenge from '@components/auth/TwoFactorChallenge';
+import { readTwoFactorChallenge, resendLoginTwoFactor, verifyLoginTwoFactor } from '@services/AccountSecurityApi';
 const initialState = {
   phone: '',
   password: '',
@@ -72,6 +74,8 @@ const formReducer = (state, action) => {
 
 export default function LoginScreen({ navigation }) {
   const [state, dispatch] = useReducer(formReducer, initialState);
+  // چالش مرحله‌ی دوم ورود ({ token, method }) یا null.
+  const [twoFactor, setTwoFactor] = useState(null);
   const reduxDispatch = useDispatch();
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -126,6 +130,54 @@ export default function LoginScreen({ navigation }) {
     return true;
   };
 
+  // تکمیل ورود - هم بعد از ورود عادی و هم بعد از مرحله‌ی دوم (تأیید دومرحله‌ای).
+  const finishLogin = async (token, userData) => {
+    await TokenManager.saveAuthData(token, userData);
+    console.log('✅ Token and user data saved to AsyncStorage');
+
+    // Save additional data and enable auto-login only if user wants to remember login
+    if (state.rememberMe) {
+      await AsyncStorage.setItem('savedPhone', state.phone);
+      await AsyncStorage.setItem('rememberLogin', 'true');
+      await AsyncStorage.setItem('autoLoginEnabled', 'true');
+      console.log('✅ Auto-login enabled');
+    } else {
+      // Remove any previous auto-login settings
+      await AsyncStorage.removeItem('savedPhone');
+      await AsyncStorage.removeItem('rememberLogin');
+      await AsyncStorage.removeItem('autoLoginEnabled');
+      console.log('✅ Auto-login disabled');
+    }
+
+    // Update Redux store
+    reduxDispatch(setToken(token));
+    reduxDispatch(setUserType('individual'));
+
+    // Save account type to AsyncStorage for next app launch
+    await AsyncStorage.setItem('accountType', 'individual');
+    await AsyncStorage.setItem('userType', 'individual');
+    console.log('💾 [LoginScreen] accountType و userType ذخیره شد: individual');
+
+    reduxDispatch(fetchUser(token));
+    reduxDispatch(fetchAddresses(token));
+
+    showToastOrAlert(t('Login successful'));
+
+    // مشتری از «سفارش سیستماتیک» وارد شده؛ صفحه‌ی اصلی او «انتخاب سیستماتیک»
+    // است، نه List. reset تا برگشت به صفحه‌ی ورود ممکن نباشد.
+    resetToHome(navigation, 'individual');
+  };
+
+  // مرحله‌ی دوم ورود: کد پیامکی / اپ احراز هویت / کد بازیابی.
+  const submitTwoFactor = async (code) => {
+    const result = await verifyLoginTwoFactor('individual', { twoFactorToken: twoFactor?.token, code });
+    if (!result.ok || !result.data?.token) return { ...result, ok: false };
+    setTwoFactor(null);
+    dispatch({ type: 'RESET_ATTEMPTS' });
+    await finishLogin(result.data.token, result.data.user);
+    return result;
+  };
+
   // Handle login submission
   const handleLogin = async () => {
     if (!canAttemptLogin()) return;
@@ -147,48 +199,18 @@ export default function LoginScreen({ navigation }) {
 
       const response = await authAPI.login(credentials);
 
+      // تأیید دومرحله‌ای فعال است: سرور به‌جای توکن، چالش مرحله‌ی دوم می‌فرستد.
+      const challenge = readTwoFactorChallenge(response);
+      if (challenge) {
+        setTwoFactor(challenge);
+        return;
+      }
+
       if (response.success) {
         // Reset login attempts on success
         dispatch({ type: 'RESET_ATTEMPTS' });
 
-        // Save user token and data
-        const userData = response.data.user;
-        const token = response.data.token;
-
-        await TokenManager.saveAuthData(token, userData);
-        console.log('✅ Token and user data saved to AsyncStorage');
-
-        // Save additional data and enable auto-login only if user wants to remember login
-        if (state.rememberMe) {
-          await AsyncStorage.setItem('savedPhone', state.phone);
-          await AsyncStorage.setItem('rememberLogin', 'true');
-          await AsyncStorage.setItem('autoLoginEnabled', 'true');
-          console.log('✅ Auto-login enabled');
-        } else {
-          // Remove any previous auto-login settings
-          await AsyncStorage.removeItem('savedPhone');
-          await AsyncStorage.removeItem('rememberLogin');
-          await AsyncStorage.removeItem('autoLoginEnabled');
-          console.log('✅ Auto-login disabled');
-        }
-
-        // Update Redux store
-        reduxDispatch(setToken(token));
-        reduxDispatch(setUserType('individual'));
-
-        // Save account type to AsyncStorage for next app launch
-        await AsyncStorage.setItem('accountType', 'individual');
-        await AsyncStorage.setItem('userType', 'individual');
-        console.log('💾 [LoginScreen] accountType و userType ذخیره شد: individual');
-
-        reduxDispatch(fetchUser(token));
-        reduxDispatch(fetchAddresses(token));
-
-        showToastOrAlert(t('Login successful'));
-
-        // مشتری از «سفارش سیستماتیک» وارد شده؛ صفحه‌ی اصلی او «انتخاب سیستماتیک»
-        // است، نه List. reset تا برگشت به صفحه‌ی ورود ممکن نباشد.
-        resetToHome(navigation, 'individual');
+        await finishLogin(response.data.token, response.data.user);
 
       } else {
         dispatch({ type: 'INCREMENT_ATTEMPTS' });
@@ -508,6 +530,15 @@ export default function LoginScreen({ navigation }) {
           <FooterSpacer />
         </ScrollView>
       </KeyboardAvoidingView>
+      {twoFactor ? (
+        <TwoFactorChallenge
+          visible
+          method={twoFactor.method}
+          onSubmit={submitTwoFactor}
+          onResend={() => resendLoginTwoFactor('individual', twoFactor.token)}
+          onCancel={() => setTwoFactor(null)}
+        />
+      ) : null}
     </ImageBackground>
   );
 }

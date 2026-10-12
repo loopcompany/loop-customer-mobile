@@ -41,6 +41,8 @@ import {
   TRANSACTION_TYPE,
 } from '@services/WalletApi';
 import { fetchWalletBalance, seedBalance, selectWalletBalance } from '@slices/walletSlice';
+import { getAgentSummary, readAgentSummary } from '@services/AgentWalletApi';
+import { NavRow, SectionCard } from '@components/account/AccountUI';
 
 /** چند تراکنش آخر روی این صفحه؛ بقیه در صفحه‌ی تراکنش‌ها. */
 const RECENT_COUNT = 5;
@@ -70,6 +72,8 @@ export default function Wallet({ navigation }) {
   const [loadingRecent, setLoadingRecent] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [hidden, setHidden] = useState(false);
+  // null = کاربر مأمور خرید نیست / سرور هنوز این بخش را ندارد (بی‌صدا پنهان می‌ماند).
+  const [agentSummary, setAgentSummary] = useState(null);
 
   // مقادیری که فقط *خوانده* می‌شوند، از طریق ref به تابع بارگذاری می‌رسند و
   // در وابستگی‌ها نمی‌آیند.
@@ -89,10 +93,13 @@ export default function Wallet({ navigation }) {
     // مقدار پروفایل فقط تا رسیدن پاسخ سرور نمایش داده می‌شود.
     dispatch(seedBalance(latest.current.wallet));
 
-    const [, transactionsResult] = await Promise.all([
+    const [, transactionsResult, agentResult] = await Promise.all([
       dispatch(fetchWalletBalance(token)),
       getTransactions(token, { per_page: RECENT_COUNT }),
+      getAgentSummary(token),
     ]);
+
+    setAgentSummary(agentResult.ok ? readAgentSummary(agentResult.data) : null);
 
     if (transactionsResult.ok) {
       // `per_page` is accepted but not always honoured, so slice locally too.
@@ -244,6 +251,18 @@ export default function Wallet({ navigation }) {
             </Pressable>
           </View>
         </LinearGradient>
+
+        {/* کیف پول مأمور خرید - فقط وقتی سرور کاربر را مأمور خرید معرفی کند (بند ۹) */}
+        {agentSummary ? (
+          <SectionCard style={{ paddingVertical: spacing.xs }}>
+            <NavRow
+              icon="briefcase-outline"
+              title={t('Purchase agent wallet')}
+              subtitle={`${t('Available for withdrawal')}: ${formatPrice(agentSummary.availableBalance)} ${t('Tomans')}`}
+              onPress={() => navigation.navigate('AgentWallet')}
+            />
+          </SectionCard>
+        ) : null}
 
         {/* شارژ سریع */}
         <View style={styles.card}>

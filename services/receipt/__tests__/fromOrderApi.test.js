@@ -126,7 +126,7 @@ describe('receiptFromOrderApi', () => {
 
   it('تاریخ ثبت به شمسیِ صفرپرشده تبدیل می‌شود', () => {
     const receipt = receiptFromOrderApi(order, { user: { account_type: 'individual' } });
-    expect(receipt.order.registeredDate).toMatch(/^\d{4} \/ \d{2} \/ \d{2}$/);
-    expect(receipt.order.registeredTime).toMatch(/^\d{2} : \d{2}$/);
+    expect(receipt.order.registeredDate).toMatch(/^\u200E\d{4} \/ \d{2} \/ \d{2}$/);
+    expect(receipt.order.registeredTime).toMatch(/^\u200E\d{2} : \d{2}$/);
   });
 });

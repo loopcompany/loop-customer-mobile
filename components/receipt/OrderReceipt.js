@@ -424,6 +424,9 @@ function OrderReceipt({ receipt }) {
         <Section title="مشخصات تحویل" icon="car-outline" s={s} style={s.pairCard}>
           <Row icon="person-outline" label="تحویل گیرنده" value={delivery.receiverName} s={s} />
           <Row icon="calendar-outline" label="تاریخ تحویل" value={delivery.date} s={s} />
+          {delivery.time ? (
+            <Row icon="time-outline" label="ساعت تحویل" value={delivery.time} s={s} />
+          ) : null}
           <Row
             icon="checkmark-circle-outline"
             label="وضعیت تحویل"

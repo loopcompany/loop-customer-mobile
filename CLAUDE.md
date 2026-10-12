@@ -228,6 +228,36 @@ everything still missing on the server: `docs/BACKEND_REQUIREMENTS_USER_ORG_APP.
 - **Payment method/channel** labels live in `services/paymentMethods.js`; they show only
   once the server sends `payment_method`.
 
+Second round of the same brief (items 9–15, 2026-10-12). The backend doc (sections 9–14) is also
+exported as `docs/BACKEND_REQUIREMENTS_USER_ORG_APP.pdf` for the backend developer. Rebuild it with
+`python3 scripts/build-doc-pdf.py docs/BACKEND_REQUIREMENTS_USER_ORG_APP.md` after you edit the markdown.
+
+- **Procurement quote and delivery** (`services/OrderFulfillmentApi.js`,
+  `components/order/`): the sections in `Details.js` render only when the order has `procurement` /
+  `delivery` / `send_to_loop`. All amounts and statuses come from the server through the pure
+  `readProcurement` / `readDelivery`; the default prepayment is 60%. The org flows send
+  `procurement_items` / `delivery_mode` / `technician_gender` through `params.orderExtras`, and
+  `pickOrderExtras` whitelists those keys so a route param can't overwrite `address_id` or `total_price`.
+- **«انتخاب جامع» required steps** live in `org/comprehensiveValidation.js`. A procurement-only
+  order is valid; don't make the service sections mandatory again.
+- **Org profile free vs locked fields** (`FREE_PROFILE_FIELDS` / `LOCKED_PROFILE_FIELDS` in
+  `services/OrganizationAccountApi.js`): «ویرایش» opens only the free fields. Locked fields open
+  only after an approved «درخواست ویرایش» (stamped letter); the default is locked (fail secure).
+  `pickEditableProfileValues` keeps locked fields out of the request.
+- **Profile photo** (`components/avatar/`): circular cropper, camera/gallery/preset avatars,
+  delete, and a fullscreen viewer. These use plain `PanResponder`, because
+  reanimated/gesture-handler are installed but not set up (no worklets). Cropping uses
+  `expo-image-manipulator`, a native module added in this round, so the app needs a new
+  dev-client/production build. The preset images are in `assets/avatars/` (replace a file to change one).
+- **Purchase-agent wallet** (`services/AgentWalletApi.js`, `AgentWallet` route): the entry
+  in `Wallet.js` appears only when `/referral-agent/summary` says `is_agent`.
+- **2FA at login**: both login screens show `components/auth/TwoFactorChallenge.js` when the
+  login response has `requires_two_factor`. Each screen's `finishLogin()` completes the login in
+  both paths.
+- **Numbers inside Persian text** (dates, `17 : 53`): wrap them with `ltr()` from
+  `helpers/Common.js`. Without it the bidi algorithm swaps hour and minute (item 13). The receipt
+  date/time formatters and `formatDateTime` already do this.
+
 ## Push notifications (Firebase Cloud Messaging)
 
 `services/notifications/` owns the FCM client flow (backend contract:

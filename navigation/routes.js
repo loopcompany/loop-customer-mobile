@@ -176,6 +176,12 @@ export const routes = [
     path: 'increase',
   },
   {
+    // «کیف پول مأمور خرید» - پورسانت کد معرف، برداشت و تهاتر (بند ۹).
+    name: 'AgentWallet',
+    getComponent: () => require('@screens/account/AgentWalletScreen').default,
+    path: 'agent-wallet',
+  },
+  {
     name: 'PaymentScreen',
     getComponent: () => require('@screens/account/PaymentScreen').default,
     path: 'payment',

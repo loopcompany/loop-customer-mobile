@@ -48,13 +48,14 @@ import { L } from './orgI18n';
 const TILE_WIDTH = 100;
 const GRID_GAP = spacing.sm;
 
-// ستون سمت چپ دقیقاً سه کاشی دارد و «ضایعات» کاشی سوم همان ستون است؛ بقیه‌ی
-// کاشی‌ها در ستون دوم می‌نشینند.
-const LEFT_COLUMN_SIZE = 3;
+// «ضایعات» همیشه کاشی سوم ستون چپ است: [حساب کاربری، اولین دسته، ضایعات، ...].
+// جای آن در فهرست دسته‌ها (بدون کاشی حساب کاربری) اندیس ۱ است.
+const TRASH_INDEX_IN_CATEGORIES = 1;
 
-// ستون چپ = [حساب کاربری، اولین دسته، ضایعات]. پس جای «ضایعات» در فهرست دسته‌ها
-// (بدون کاشی حساب کاربری) یکی مانده به انتهای ستون چپ است.
-const TRASH_INDEX_IN_CATEGORIES = LEFT_COLUMN_SIZE - 2;
+// دو ستون هم‌قد: ستون چپ نیمه‌ی بالایی (گرد به بالا). قبلاً ستون چپ ثابت سه
+// کاشی داشت و ستون راست با ۸ کاشی دو کاشی بلندتر می‌شد؛ کارفرما خواست یکی از
+// کاشی‌ها زیر «ضایعات» بیاید تا چیدمان درست شود (بند ۱۴).
+const leftColumnSize = (tileCount) => Math.ceil(tileCount / 2);
 
 // آیکون کاشی‌ها از سرور (`image_path` دسته) می‌آید. آیکون محلی همان دسته
 // (systematicFlows.js) فقط جایگزین است: وقتی سرور تصویری نداده یا بارگذاری آن
@@ -306,8 +307,9 @@ const SystematicCategoryScreen = ({ navigation }) => {
   };
 
   const tiles = buildTiles();
-  const leftColumn = tiles.slice(0, LEFT_COLUMN_SIZE);
-  const rightColumn = tiles.slice(LEFT_COLUMN_SIZE);
+  const leftSize = leftColumnSize(tiles.length);
+  const leftColumn = tiles.slice(0, leftSize);
+  const rightColumn = tiles.slice(leftSize);
 
   const renderTile = (tile) => (
     <Folder
@@ -369,8 +371,7 @@ const createLocalStyles = (NewStyles) =>
     gridScroll: {
       flex: 1,
     },
-    // دو ستون واقعی (نه ردیف wrap): ستون چپ سه کاشی و ستون راست بقیه. چون هر
-    // ستون مستقل پر می‌شود، تعداد کاشی‌های ستون چپ ثابت می‌ماند.
+    // دو ستون واقعی (نه ردیف wrap) که هر کدام نیمی از کاشی‌ها را دارند.
     grid: {
       flexDirection: 'row',
       alignSelf: 'flex-start',

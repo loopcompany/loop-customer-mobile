@@ -41,6 +41,8 @@ import { showAlert, showToastOrAlert, validateMelicode, validatePhone } from '@h
 import { useMenu } from '@contexts/MenuContext';
 import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
+import { getMissingComprehensiveStep } from './comprehensiveValidation';
+import { toProcurementItemsPayload } from './procurementPayload';
 import { RECEIPT_STATE, receiptFromComprehensive } from '@services/receipt';
 import useReceiptSources from '@hooks/useReceiptSources';
 
@@ -440,17 +442,27 @@ const ComprehensiveSelectionScreen = ({ navigation, route }) => {
       return;
     }
     if (action === 'submit_order') {
-      if (addressId == null) {
-        showToastOrAlert(`${L('آدرس‌های منتخب')} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
-        setExpanded('address');
-        requestScrollTo('address');
-        return;
-      }
-      const operatorError = getOperatorInfoError();
-      if (operatorError) {
-        showToastOrAlert(operatorError);
-        setExpanded('operator_info');
-        requestScrollTo('operator_info');
+      // فقط مراحل اجباری سند (بند ۱۱) چک می‌شوند؛ کاربری که فقط تامین کالا
+      // می‌خواهد مجبور به پر کردن بخش‌های خدماتی نیست.
+      const missing = getMissingComprehensiveStep({
+        deviceCounts,
+        osCounts,
+        softwareDeviceCounts,
+        softwareItems,
+        hardwareItems,
+        procurementItems,
+        deliveryMode,
+        onceDate,
+        startDate,
+        timeSlot,
+        addressId,
+        operatorError: getOperatorInfoError(),
+        technicianGender,
+      });
+      if (missing) {
+        showToastOrAlert(L(missing.message));
+        setExpanded(missing.section);
+        requestScrollTo(missing.section);
         return;
       }
       navigation.navigate('OrderSummaryScreen', {
@@ -469,6 +481,11 @@ const ComprehensiveSelectionScreen = ({ navigation, route }) => {
         contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
         addressId,
         draftId,
+        orderExtras: {
+          procurement_items: toProcurementItemsPayload(procurementItems),
+          delivery_mode: deliveryMode,
+          technician_gender: technicianGender,
+        },
         // پس از ثبت نهایی، OrderSummaryScreen همین رسید را با شماره‌ی سفارش
         // تکمیل و نمایش می‌دهد.
         receipt: preReceipt(),

@@ -382,7 +382,7 @@ export const formatJalaaliDate = (isoDate) => {
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
 
-  return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
+  return ltr(`${jy}/${jm}/${jd} - ${hours}:${minutes}`);
 };
 
 export const formatDate = (isoDate, fa = i18n.language === 'fa') => {
@@ -433,6 +433,21 @@ export const getOrderStatusColor = (status) => {
   return colorMap[status] || '#9E9E9E';
 };
 
+// علامت LRM (U+200E). در متنی که با کلمه‌ی فارسی شروع می‌شود («ساعت 17 : 53»)
+// عددها جهت ندارند و اعدادِ جداشده با فاصله/دونقطه/خط تیره راست‌به‌چپ چیده
+// می‌شوند — «17 : 53» به‌صورت «53 : 17» دیده می‌شد. یک LRM پیش از عدد اول
+// همه‌ی عددهای بعدی را تا اولین حرف فارسی چپ‌به‌راست نگه می‌دارد.
+const LRM = '‎';
+
+/**
+ * رشته‌ی عددی (تاریخ، ساعت، «تاریخ - ساعت») را طوری علامت می‌زند که داخل متن
+ * فارسی ترتیبش به‌هم نخورد. روی خروجی خالی/null کاری نمی‌کند.
+ *
+ * @param {string|null|undefined} text
+ * @returns {string|null|undefined}
+ */
+export const ltr = (text) => (text ? `${LRM}${text}` : text);
+
 const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
 export const langIsRTL = (lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
 
@@ -449,7 +464,7 @@ export const formatDateTime = (isoDate, fa = i18n.language === 'fa') => {
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
 
-  return `${jy}/${jm}/${jd} - ${hours}:${minutes}`;
+  return ltr(`${jy}/${jm}/${jd} - ${hours}:${minutes}`);
 };
 export const calculateDaysDifference = (targetDate) => {
   const now = dayjs();
