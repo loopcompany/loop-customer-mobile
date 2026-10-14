@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
@@ -205,6 +206,13 @@ export default function ProductIssueScreen({ navigation }) {
       <ScreenHeaders title={t('Service / Product Fault')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={[NewStyles.wrapper, { paddingBottom: 100 }]}>
+          {/* توضیح بالای فرم - «گزارش ایرادات سفارش / محصول» */}
+          <View style={styles.introCard}>
+            <Ionicons name="construct-outline" size={22} color={colors.primary.color} />
+            <Text style={[NewStyles.text10, styles.introText]}>
+              {t('Please describe the issue or discrepancy you noticed in the order or product so it can be reviewed and followed up.')}
+            </Text>
+          </View>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')} </Text>
 
           <View style={styles.lookupRow}>
@@ -309,6 +317,20 @@ export default function ProductIssueScreen({ navigation }) {
 }
 
 const createLocalStyles = (NewStyles) => StyleSheet.create({
+  // جهت ردیف از NewStyles.row می‌آید (فارسی: آیکون سمت راست).
+  introCard: {
+    ...NewStyles.row,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    backgroundColor: colors.primary.bgColor(0.08),
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  introText: {
+    flex: 1,
+    lineHeight: 24,
+  },
   placeholder: {
     color: colors.textMuted.color,
   },

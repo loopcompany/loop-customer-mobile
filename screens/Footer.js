@@ -90,7 +90,7 @@ export default function Footer() {
     },
     { id: 11, title: "فکروبکر", screen: "IdeaBoxScreen" },
     { id: 12, title: "طرح‌های تشویقی", screen: "Club" },
-    { id: 13, title: "عیوب سرویس / محصول", screen: "ProductIssueScreen" },
+    { id: 13, title: "گزارش ایرادات سفارش / محصول", screen: "ProductIssueScreen" },
     { id: 14, title: "نرخنامه", screen: "RateListScreen" },
     { id: 15, title: " ثبت/پیگیری تخلف", screen: "ViolationReportScreen" },
     { id: 16, title: "نظرات و پیشنهادات", screen: "FeedbackSurveyScreen" },

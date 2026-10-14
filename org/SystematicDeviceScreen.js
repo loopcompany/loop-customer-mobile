@@ -36,6 +36,7 @@ import {
 } from './deviceCatalog';
 import { getCategory, getFlow, getVisibleFlow } from './systematicFlows';
 import { toProcurementItemsPayload } from './procurementPayload';
+import { counterLines, procurementLines, selectedTitles } from './summaryLines';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -157,12 +158,8 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         case 'options': {
           const hasSelection = step.multi ? Boolean(value.selected?.length) : Boolean(value.selected);
           if (hasSelection) {
-            lines.push({
-              label: L(step.title),
-              value: step.multi
-                ? value.selected.length
-                : titleOf(LO(step.options), value.selected),
-            });
+            // متن خود گزینه‌ها، نه تعدادشان (بند ۴ سند دسکتاپ ۲).
+            lines.push({ label: L(step.title), value: selectedTitles(LO(step.options), value.selected) });
           }
           if (step.extra && value[step.extra.id]) {
             lines.push({ label: L(step.extra.title), value: titleOf(LO(step.extra.options), value[step.extra.id]) });
@@ -176,7 +173,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           break;
         }
         case 'checklist':
-          lines.push({ label: L(step.title), value: value.selected.length });
+          lines.push({ label: L(step.title), value: selectedTitles(LO(step.options), value.selected) });
           break;
         case 'note':
           lines.push({ label: L(step.title), value: value.note });
@@ -190,15 +187,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           }
           break;
         case 'procurement':
-          Object.entries(value).forEach(([itemId, entry]) => {
-            if (entry.new > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('آکبند')}`, value: entry.new });
-            if (entry.used > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('کارکرده')}`, value: entry.used });
-          });
+          // تعداد آکبند/کارکرده و توضیح کاربر (مثلاً «ماوس» برای لوازم جانبی).
+          lines.push(...procurementLines(value, LO(PROCUREMENT_ITEMS), L));
           break;
         case 'hardwareCounters':
-          Object.entries(value).forEach(([itemId, entry]) => {
-            if (entry.count > 0) lines.push({ label: titleOf(LO(HARDWARE_ITEMS), itemId), value: entry.count });
-          });
+          lines.push(...counterLines(value, LO(HARDWARE_ITEMS), L));
           break;
         case 'technician':
           lines.push({ label: L(step.title), value: titleOf(LO(TECHNICIAN_GENDER_OPTIONS), value.gender) });

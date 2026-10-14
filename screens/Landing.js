@@ -6,7 +6,12 @@ import { setToken, setUserType } from '@slices/authSlice';
 import { fetchUser } from '@slices/userSlice';
 import TokenManager from '@services/TokenManager';
 import CustomStatusBar from '@components/CustomStatusBar';
-import { themeColor0, themeColor10 } from '@theme/Color';
+import { colors, themeColor0, themeColor10 } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
+import { Ionicons } from '@expo/vector-icons';
+import { playWithSoundOrMuted, unmuteOnFirstGesture } from '@utils/autoplayWithSound';
 import { fetchAddresses } from '@slices/addressSlice';
 import { ImageBackground } from 'expo-image';
 import { fetchRadii } from '@slices/radiusSlice';
@@ -48,14 +53,18 @@ export default function Landing({ navigation }) {
   const settledRef = React.useRef(false);
   const fallbackTimerRef = React.useRef(null);
   const playbackArmedRef = React.useRef(false);
+  // لوگوموشن با صدا پخش می‌شود. روی اندروید/iOS مستقیم؛ روی وب پخش را
+  // utils/autoplayWithSound.js شروع می‌کند (پایین‌تر)، چون مرورگر ممکن است پخش
+  // صدادار را تا اولین لمس کاربر مسدود کند.
   const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
-    console.log("player ready");
-    if (Platform.OS === 'web') {
-
-      player.muted = true;
-    }
-    player.play();
+    player.muted = false;
+    player.volume = 1;
+    if (Platform.OS !== 'web') player.play();
   });
+  // ریشه‌ی صفحه؛ روی وب همان div است و تگ <video> داخلش پیدا می‌شود.
+  const rootRef = React.useRef(null);
+  // روی وب: مرورگر صدا را مسدود کرد و ویدیو بی‌صدا پخش می‌شود تا کاربر لمس کند.
+  const [soundBlocked, setSoundBlocked] = useState(false);
   // Check authentication on component mount
   useEffect(() => {
 
@@ -240,16 +249,34 @@ export default function Landing({ navigation }) {
   }, [isPlaying, player]);
 
 
+  // وب: اول با صدا، اگر مرورگر اجازه نداد بی‌صدا + روشن شدن صدا با اولین لمس.
   useEffect(() => {
-    if (Platform.OS === 'web' && !isPlaying && player) {
-      player.play();
-
-
-    }
-  }, [player, isPlaying])
+    if (Platform.OS !== 'web') return undefined;
+    let cancelled = false;
+    let retryTimer = null;
+    let removeUnlock = () => {};
+    const start = async () => {
+      const video = rootRef.current?.querySelector?.('video');
+      if (!video) {
+        // VideoView هنوز تگ را نساخته است.
+        retryTimer = setTimeout(start, 50);
+        return;
+      }
+      const result = await playWithSoundOrMuted(video);
+      if (cancelled || result !== 'muted') return;
+      setSoundBlocked(true);
+      removeUnlock = unmuteOnFirstGesture(window, video, () => setSoundBlocked(false));
+    };
+    start();
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+      removeUnlock();
+    };
+  }, [player]);
 
   return (
-    <View style={styles.root}>
+    <View ref={rootRef} style={styles.root}>
       <CustomStatusBar />
       <LinearGradient colors={SPLASH_GRADIENT} style={StyleSheet.absoluteFill} />
 
@@ -271,6 +298,12 @@ export default function Landing({ navigation }) {
         player={player}
         contentFit="cover"
       />
+      {soundBlocked ? (
+        <View pointerEvents="none" style={styles.soundHint}>
+          <Ionicons name="volume-high" size={18} color={colors.white.color} />
+          <Text style={styles.soundHintText}>{i18n.t('Tap the screen to turn on the sound')}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -294,6 +327,24 @@ const styles = StyleSheet.create({
   // کوچکِ موبایل این از صفحه بیرون می‌زد و `#root` (که `overflow: auto` دارد)
   // اسکرول افقی و عمودی نشان می‌داد. با `100%` این اتفاق نمی‌افتد و روی نیتیو
   // هم دقیقاً همان absoluteFill است.
+  // راهنمای «برای صدا لمس کنید» (فقط وب، وقتی مرورگر صدا را مسدود کرده).
+  soundHint: {
+    position: 'absolute',
+    bottom: spacing.huge,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
+    backgroundColor: colors.black.bgColor(0.55),
+  },
+  soundHintText: {
+    color: colors.white.color,
+    fontFamily: getFontFamily('bold', 'fa'),
+    fontSize: fontSize.sm,
+  },
   video: {
     position: 'absolute',
     top: 0,

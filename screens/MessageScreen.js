@@ -16,14 +16,28 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
-import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '@theme/Color';
+import { colors, themeColor0, themeColor1, themeColor3, themeColor4, themeColor7, themeColor10, themeColor8, themeColor2 } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize } from '@theme/Typography';
 import CustomStatusBar from '@components/CustomStatusBar';
 import { getTicketsList, sendTicketMessage } from '@services/Api';
-import { formatDate, formatDateTime, showAlert } from '@helpers/Common';
+import { formatDate, formatDateTime, showAlert, showToastOrAlert } from '@helpers/Common';
 import Button from '@components/Button';
 import { useSelector } from 'react-redux';
 import { createStyles } from '@styles/NewStyles';
 import FooterSpacer from '@components/FooterSpacer';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import EmojiPicker from '@components/chat/EmojiPicker';
+import AttachmentChips from '@components/chat/AttachmentChips';
+import PhotoViewer from '@components/avatar/PhotoViewer';
+import {
+  ALLOWED_DOCUMENT_TYPES,
+  insertAtSelection,
+  isImageAttachment,
+  validateAttachment,
+} from '@components/chat/composerUtils';
 export default function MessageScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -38,13 +52,25 @@ export default function MessageScreen({ navigation }) {
   const [sending, setSending] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  // نوار نوشتن پیام: ایموجی (در محل نشانگر) و پیوست فایل/تصویر.
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [panel, setPanel] = useState(null); // null | 'emoji' | 'attach'
+  const [attachments, setAttachments] = useState([]);
+  const [attachmentsSupported, setAttachmentsSupported] = useState(false);
+  const [viewerUri, setViewerUri] = useState(null);
   const contact = useSelector(state => state.contacts?.data?.data?.contact);
+  // شماره‌ی قابل نمایش روی دکمه (فقط وقتی لینک از نوع tel: است).
+  const supportLink = String(contact?.link || `tel:${DEFAULT_SUPPORT_PHONE}`);
+  const supportPhone = supportLink.startsWith('tel:')
+    ? supportLink.replace('tel:', '').replace('+98', '0')
+    : null;
 
   // دریافت لیست پیام‌ها
   const fetchMessages = async () => {
     try {
       const response = await getTicketsList();
 
+      setAttachmentsSupported(Boolean(response.attachmentsSupported));
       if (response.success && response.data) {
         // ترتیب معکوس برای نمایش جدیدترین پیام‌ها در پایین
         setMessages(response.data);
@@ -77,7 +103,7 @@ export default function MessageScreen({ navigation }) {
 
   // ارسال پیام جدید
   const handleSendMessage = async () => {
-    if (!messageText.trim()) {
+    if (!messageText.trim() && attachments.length === 0) {
       showAlert(t('Warning'), t('Please enter the message text'));
       return;
     }
@@ -89,11 +115,13 @@ export default function MessageScreen({ navigation }) {
 
     try {
       setSending(true);
-      const response = await sendTicketMessage(messageText);
+      const response = await sendTicketMessage(messageText, attachments);
 
       if (response.success) {
         showAlert(t('Successful'), t('Your message was sent successfully'));
         setMessageText('');
+        setAttachments([]);
+        setPanel(null);
         // به‌روزرسانی لیست پیام‌ها
         await fetchMessages();
       }
@@ -102,6 +130,82 @@ export default function MessageScreen({ navigation }) {
     } finally {
       setSending(false);
     }
+  };
+
+  const insertEmoji = (emoji) => {
+    const next = insertAtSelection(messageText, selection, emoji);
+    if (next.text.length > 5000) return;
+    setMessageText(next.text);
+    setSelection({ start: next.caret, end: next.caret });
+  };
+
+  const addAttachment = (asset) => {
+    const error = validateAttachment(asset, attachments.length);
+    if (error) {
+      showToastOrAlert(t(error));
+      return;
+    }
+    setAttachments((prev) => [
+      ...prev,
+      {
+        key: `${Date.now()}-${prev.length}`,
+        uri: asset.uri,
+        name: asset.name || asset.fileName || asset.uri.split('/').pop(),
+        size: asset.size ?? asset.fileSize,
+        mimeType: asset.mimeType || (asset.type === 'image' ? 'image/jpeg' : undefined),
+        file: asset.file,
+      },
+    ]);
+  };
+
+  const pickAttachment = async (source) => {
+    setPanel(null);
+    try {
+      if (source === 'document') {
+        const result = await DocumentPicker.getDocumentAsync({
+          type: ALLOWED_DOCUMENT_TYPES,
+          copyToCacheDirectory: true,
+          multiple: false,
+        });
+        if (!result.canceled && result.assets?.length) addAttachment(result.assets[0]);
+        return;
+      }
+      const permission =
+        source === 'camera'
+          ? await ImagePicker.requestCameraPermissionsAsync()
+          : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        showToastOrAlert(
+          source === 'camera'
+            ? t('Camera access is required to take a photo')
+            : t('Gallery access is required to select a photo')
+        );
+        return;
+      }
+      const options = { mediaTypes: ['images'], quality: 0.8 };
+      const result =
+        source === 'camera'
+          ? await ImagePicker.launchCameraAsync(options)
+          : await ImagePicker.launchImageLibraryAsync(options);
+      if (!result.canceled && result.assets?.length) addAttachment(result.assets[0]);
+    } catch (error) {
+      console.warn('[MessageScreen] attachment pick failed', error?.message);
+      showToastOrAlert(t('Error selecting image'));
+    }
+  };
+
+  const toggleAttachPanel = () => {
+    // تا سرور پیوست را نپذیرد، فایل‌ها دور ریخته می‌شدند - پس دکمه فعال نمی‌شود.
+    if (!attachmentsSupported) {
+      showToastOrAlert(t('Sending files will be available soon.'));
+      return;
+    }
+    setPanel((current) => (current === 'attach' ? null : 'attach'));
+  };
+
+  const openAttachment = (item) => {
+    if (isImageAttachment(item)) setViewerUri(item.uri);
+    else if (item.uri) Linking.openURL(item.uri);
   };
 
   // تابع فورمت تاریخ
@@ -131,15 +235,19 @@ export default function MessageScreen({ navigation }) {
           }
         >
 
-          {/* دکمه پیام های دریافتی از اپ */}
-          <View style={{width:'100%', alignItems:'center'}}>
+          {/* «ارتباط با پشتیبانی» - تیتر و متن طبق سند کارفرما، با دکمه‌ی تماس */}
+          <View style={styles.supportCard}>
+            <View style={styles.supportIcon}>
+              <Ionicons name="headset-outline" size={30} color={colors.white.color} />
+            </View>
+            <Text style={styles.supportTitle}>{t('Support contact title')}</Text>
+            <Text style={styles.supportText}>{t('For guidance, contact the Loop support team.')}</Text>
             <Button
-              title={t('Call')}
+              title={supportPhone ? `${t('Call')} ${supportPhone}` : t('Call')}
               onPress={() => {
-                Linking.openURL(`${contact?.link}`);
+                Linking.openURL(supportLink);
               }}
             />
-
           </View>
           {/* باکس متن پیام */}
           <View style={styles.messageBox}>
@@ -152,12 +260,56 @@ export default function MessageScreen({ navigation }) {
               placeholderTextColor="#999"
               value={messageText}
               onChangeText={setMessageText}
+              // محل نشانگر فقط خوانده می‌شود (کنترل‌کردنش روی اندروید نشانگر را جابه‌جا می‌کند).
+              onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
               textAlignVertical="top"
               editable={!sending}
             />
-            <Text style={styles.charCount}>
-              {messageText.length} / 5000
-            </Text>
+            {/* ایموجی و سنجاق (پیوست) */}
+            <View style={styles.composerBar}>
+              <View style={styles.composerTools}>
+                <TouchableOpacity
+                  onPress={() => setPanel((current) => (current === 'emoji' ? null : 'emoji'))}
+                  accessibilityLabel={t('Emoji')}
+                  style={[styles.toolButton, panel === 'emoji' && styles.toolButtonActive]}
+                >
+                  <Ionicons name="happy-outline" size={22} color={themeColor10.bgColor(0.8)} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={toggleAttachPanel}
+                  accessibilityLabel={t('Attach file')}
+                  style={[
+                    styles.toolButton,
+                    panel === 'attach' && styles.toolButtonActive,
+                    !attachmentsSupported && styles.toolButtonDisabled,
+                  ]}
+                >
+                  <Ionicons name="attach-outline" size={22} color={themeColor10.bgColor(0.8)} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.charCount}>
+                {messageText.length} / 5000
+              </Text>
+            </View>
+            {panel === 'emoji' ? <EmojiPicker onPick={insertEmoji} /> : null}
+            {panel === 'attach' ? (
+              <View style={styles.attachMenu}>
+                {[
+                  { source: 'gallery', icon: 'images-outline', label: t('Choose from gallery') },
+                  { source: 'camera', icon: 'camera-outline', label: t('Take a photo') },
+                  { source: 'document', icon: 'document-attach-outline', label: t('PDF or image file') },
+                ].map((option) => (
+                  <TouchableOpacity key={option.source} onPress={() => pickAttachment(option.source)} style={styles.attachOption}>
+                    <Ionicons name={option.icon} size={22} color={colors.primary.color} />
+                    <Text style={styles.attachOptionText}>{option.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
+            <AttachmentChips
+              items={attachments}
+              onRemove={(key) => setAttachments((prev) => prev.filter((item) => item.key !== key))}
+            />
           </View>
 
           {/* دکمه ارسال پیام به لوپ */}
@@ -256,7 +408,19 @@ export default function MessageScreen({ navigation }) {
                         )}
                       </View>
                     </View>
-                    <Text style={styles.messageContent}>{msg.message}</Text>
+                    {msg.message ? <Text style={styles.messageContent}>{msg.message}</Text> : null}
+                    {Array.isArray(msg.attachments) && msg.attachments.length > 0 ? (
+                      <AttachmentChips
+                        items={msg.attachments.map((file, index) => ({
+                          key: String(file.id ?? index),
+                          uri: file.url,
+                          name: file.name,
+                          size: file.size,
+                          mimeType: file.mime_type,
+                        }))}
+                        onOpen={openAttachment}
+                      />
+                    ) : null}
                     {!msg.is_read && !msg.is_mine && (
                       <View style={styles.unreadBadge}>
                         <Text style={styles.unreadText}>{t('New')}</Text>
@@ -271,11 +435,86 @@ export default function MessageScreen({ navigation }) {
         </ScrollView>
       )}
 
+      {viewerUri ? <PhotoViewer visible uri={viewerUri} onClose={() => setViewerUri(null)} /> : null}
     </LinearGradient>
   );
 }
 
+// همان شماره‌ی پشتیبانی که منوی اصلی (MenuContext.callSupport) می‌گیرد.
+const DEFAULT_SUPPORT_PHONE = '02191693909';
+
 const createLocalStyles = (NewStyles) => StyleSheet.create({
+  composerBar: {
+    ...NewStyles.rowWrapper,
+    marginTop: spacing.xs,
+  },
+  composerTools: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  toolButton: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.bgColor(1),
+  },
+  toolButtonActive: {
+    backgroundColor: colors.primary.bgColor(0.15),
+  },
+  toolButtonDisabled: {
+    opacity: 0.45,
+  },
+  attachMenu: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border.bgColor(1),
+    backgroundColor: colors.surface.bgColor(1),
+    paddingHorizontal: spacing.md,
+  },
+  attachOption: {
+    ...NewStyles.row,
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider.bgColor(1),
+  },
+  attachOptionText: {
+    ...NewStyles.text10,
+    fontSize: fontSize.sm,
+  },
+  supportCard: {
+    width: '100%',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    backgroundColor: colors.white.bgColor(0.12),
+    borderWidth: 1,
+    borderColor: colors.white.bgColor(0.25),
+  },
+  supportIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary.bgColor(0.6),
+    borderWidth: 2,
+    borderColor: colors.white.bgColor(0.6),
+  },
+  supportTitle: {
+    ...NewStyles.title4,
+    fontSize: fontSize.lg,
+    textAlign: 'center',
+  },
+  supportText: {
+    ...NewStyles.text4,
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
   background: {
     flex: 1,
   },

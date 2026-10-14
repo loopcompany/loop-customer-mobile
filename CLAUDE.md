@@ -254,6 +254,15 @@ exported as `docs/BACKEND_REQUIREMENTS_USER_ORG_APP.pdf` for the backend develop
 - **2FA at login**: both login screens show `components/auth/TwoFactorChallenge.js` when the
   login response has `requires_two_factor`. Each screen's `finishLogin()` completes the login in
   both paths.
+- **Desktop brief 2 (mobile part)**: «عیوب سرویس / محصول» is now «گزارش ایرادات سفارش / محصول». Only
+  the locale *values* changed (keys kept), so `MenuContext` and desktop pick it up without edits.
+  Order summaries list option texts and user notes through `org/summaryLines.js`, never counts.
+  Support messages have an emoji picker and attachments (`components/chat/`); the paperclip works only
+  when `GET /tickets` returns `attachments_supported: true` (backend doc section 15), so no file is ever
+  silently dropped.
+- **Splash logo motion plays with sound.** On web, browsers block sound until the first user gesture, so
+  `utils/autoplayWithSound.js` tries with sound, falls back to muted plus a «برای پخش صدا روی صفحه بزنید»
+  hint, and unmutes on the first tap or key without restarting. Don't go back to `player.muted = true`.
 - **Numbers inside Persian text** (dates, `17 : 53`): wrap them with `ltr()` from
   `helpers/Common.js`. Without it the bidi algorithm swaps hour and minute (item 13). The receipt
   date/time formatters and `formatDateTime` already do this.

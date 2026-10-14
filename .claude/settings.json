@@ -6,7 +6,8 @@
       "Bash(rtk ls *)",
       "Bash(rtk git *)",
       "Bash(rtk curl *)",
-      "Bash(rtk lint *)"
+      "Bash(rtk lint *)",
+      "mcp__claude-in-chrome__tabs_context_mcp"
     ]
   }
 }

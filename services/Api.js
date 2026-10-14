@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
 import { handleError, showToastOrAlert } from '@helpers/Common';
 import i18next from 'i18next';
+import { appendUploadFile } from './uploadFile';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -511,18 +512,42 @@ export const getTicketsList = async () => {
       messages: response.data?.data?.length || 0
     });
 
-    return handleResponse(response);
+    // پیوست فایل در پیام‌ها فقط وقتی فعال می‌شود که سرور صریحاً بگوید پشتیبانی
+    // می‌کند؛ وگرنه فایل‌ها بی‌صدا دور ریخته می‌شدند و کاربر خبر نداشت.
+    return {
+      ...handleResponse(response),
+      attachmentsSupported: response.data?.attachments_supported === true,
+    };
   } catch (error) {
     console.error('❌ خطا در دریافت پیام‌ها:', error.response?.data || error.message);
     return handleError(error);
   }
 };
-export const sendTicketMessage = async (message) => {
+/**
+ * ارسال پیام پشتیبانی، با پیوست‌های اختیاری (تصویر / PDF).
+ *
+ * @param {string} message
+ * @param {Array<{ uri: string, name: string, mimeType?: string, file?: File }>} [attachments]
+ */
+export const sendTicketMessage = async (message, attachments = []) => {
   try {
     console.log('📤 ارسال پیام جدید...');
     console.log('📝 طول پیام:', message?.length || 0);
 
-    const response = await apiClient.post('/tickets', { message });
+    let response;
+    if (attachments.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message || '');
+      for (const attachment of attachments) {
+        await appendUploadFile(formData, 'attachments[]', attachment);
+      }
+      response = await apiClient.post('/tickets', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000,
+      });
+    } else {
+      response = await apiClient.post('/tickets', { message });
+    }
 
     console.log('✅ پیام با موفقیت ارسال شد:', response.data);
 

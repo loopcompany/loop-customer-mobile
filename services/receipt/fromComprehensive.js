@@ -15,6 +15,7 @@ import {
   TIME_SLOT_OPTIONS,
 } from '@org/deviceCatalog';
 import { L, LO } from '@org/orgI18n';
+import { titleWithNote } from '@org/summaryLines';
 import {
   RECEIPT_STATE,
   DELIVERY_STATUS,
@@ -86,9 +87,10 @@ export const receiptFromComprehensive = ({
   const items = [];
   LO(PROCUREMENT_ITEMS).forEach((item) => {
     const entry = procurementItems?.[item.id];
-    if (entry?.new > 0) items.push({ title: item.title, condition: L('آکبند'), qty: entry.new });
-    if (entry?.used > 0)
-      items.push({ title: item.title, condition: L('کارکرده'), qty: entry.used });
+    // توضیح کاربر کنار نام کالا: «لوازم جانبی (ماوس)».
+    const title = titleWithNote(item.title, entry?.desc);
+    if (entry?.new > 0) items.push({ title, condition: L('آکبند'), qty: entry.new });
+    if (entry?.used > 0) items.push({ title, condition: L('کارکرده'), qty: entry.used });
   });
 
   // --- زمان مراجعه ------------------------------------------------------

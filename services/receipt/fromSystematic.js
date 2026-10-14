@@ -5,6 +5,7 @@
 // SystematicDeviceScreen نگه می‌دارد. شکل هر پاسخ به `type` مرحله بستگی دارد -
 // همان قرارداد سطح‌به‌سطحی که summaryLines در آن صفحه هم از آن می‌خواند.
 
+import { titleWithNote } from '@org/summaryLines';
 import { PROCUREMENT_ITEMS, HARDWARE_ITEMS, OS_ITEMS, TIME_SLOT_OPTIONS } from '@org/deviceCatalog';
 import { getVisibleFlow, getCategory } from '@org/systematicFlows';
 import { L, LO } from '@org/orgI18n';
@@ -114,11 +115,13 @@ const buildItems = (procurementAnswer) => {
     const title = titleOf(LO(PROCUREMENT_ITEMS), itemId);
     // آکبند و کارکرده دو ردیف جدا هستند - قیمتشان یکی نیست و کاربر هم
     // جداگانه شمرده‌شان.
+    // توضیح کاربر کنار نام کالا: «لوازم جانبی (ماوس)».
+    const label = titleWithNote(title, entry?.desc);
     if (entry?.new > 0) {
-      rows.push({ title, condition: L('آکبند'), qty: entry.new });
+      rows.push({ title: label, condition: L('آکبند'), qty: entry.new });
     }
     if (entry?.used > 0) {
-      rows.push({ title, condition: L('کارکرده'), qty: entry.used });
+      rows.push({ title: label, condition: L('کارکرده'), qty: entry.used });
     }
   });
   return rows;

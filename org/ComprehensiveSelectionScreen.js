@@ -43,6 +43,7 @@ import useAccordionScroll from '@hooks/useAccordionScroll';
 import { L, LO } from './orgI18n';
 import { getMissingComprehensiveStep } from './comprehensiveValidation';
 import { toProcurementItemsPayload } from './procurementPayload';
+import { counterLines, procurementLines } from './summaryLines';
 import { RECEIPT_STATE, receiptFromComprehensive } from '@services/receipt';
 import useReceiptSources from '@hooks/useReceiptSources';
 
@@ -381,28 +382,21 @@ const ComprehensiveSelectionScreen = ({ navigation, route }) => {
         lines.push({ label: L(device.title), value: softwareDeviceCounts[device.id] });
       }
     });
-    SOFTWARE_ITEMS.forEach((item) => {
-      const entry = softwareItems[item.id];
-      if (entry?.count > 0) lines.push({ label: L(item.title), value: entry.count });
-    });
+    // تعداد هر نرم‌افزار و توضیح کاربر برای آن.
+    lines.push(...counterLines(softwareItems, LO(SOFTWARE_ITEMS), L));
     return lines;
   }, [deviceCounts, osCounts, softwareDeviceCounts, softwareItems]);
 
-  const hardwareSummaryLines = useMemo(() => {
-    return HARDWARE_ITEMS
-      .filter((item) => hardwareItems[item.id]?.count > 0)
-      .map((item) => ({ label: L(item.title), value: hardwareItems[item.id].count }));
-  }, [hardwareItems]);
+  // توضیح هر قلم هم در خلاصه می‌آید (بند ۴ سند دسکتاپ ۲) - قبلاً فقط تعداد بود.
+  const hardwareSummaryLines = useMemo(
+    () => counterLines(hardwareItems, LO(HARDWARE_ITEMS), L),
+    [hardwareItems]
+  );
 
-  const procurementSummaryLines = useMemo(() => {
-    const lines = [];
-    PROCUREMENT_ITEMS.forEach((item) => {
-      const entry = procurementItems[item.id];
-      if (entry?.new > 0) lines.push({ label: `${L(item.title)} / ${L('آکبند')}`, value: entry.new });
-      if (entry?.used > 0) lines.push({ label: `${L(item.title)} / ${L('کارکرده')}`, value: entry.used });
-    });
-    return lines;
-  }, [procurementItems]);
+  const procurementSummaryLines = useMemo(
+    () => procurementLines(procurementItems, LO(PROCUREMENT_ITEMS), L),
+    [procurementItems]
+  );
 
   const handleOrderAction = (action) => {
     // «انتخاب جامع» روی سرور ثبت نمی‌شود؛ رسید از همین state ساخته می‌شود.
