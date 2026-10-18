@@ -35,7 +35,7 @@ export const API_ENDPOINTS = {
     LIST: '/orders',
     CREATE: '/orders/submit', // POST /api/orders/submit — verified against the live API.
     // NOTE: '/orders/' 301-redirects to '/orders', which only accepts GET/HEAD,
-    // so a POST there always fails with 405. docs/ORDER_SUBMIT_API_QUICK_GUIDE.md is wrong.
+    // so a POST there always fails with 405.
     // NOTE: no longer used at checkout. The order screen's discount field now
     // validates against PROMO.CHECK and submits `promo_code`; this club/gem
     // endpoint is kept because the backend still serves it.

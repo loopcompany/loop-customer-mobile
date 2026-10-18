@@ -37,9 +37,10 @@ theme/        Color.js, Spacing.js, Radius.js, Typography.js, Shadows.js —
               the design-token single source of truth (see below)
 helpers/      Common.js — the everything-utility file (dates, validation, alerts, formatting)
 utils/        Smaller focused utilities (apiErrorHandler, performanceOptimization)
-docs/         Feature/bugfix write-ups — check here before re-solving a problem
+docs/         API contracts, backend requirements, feature write-ups
   guides/       web setup / build / deploy
   architecture/ access control, review system, transactions
+  client-briefs/ the client's source documents (receipt designs «رسیدها/», «تغییرات اپ کاربر.pdf»)
 ```
 
 ### Import paths — always use an `@alias`
@@ -76,16 +77,15 @@ the deprecated side.
 `theme/Color.js` exports `themeColor0`..`themeColor16`, each `{ color, bgColor(opacity) }`,
 plus a semantic `colors` object (`colors.primary`, `colors.error`, `colors.textSecondary`,
 `colors.border`, ...) — see **Design tokens** below. The old top-level `Colors` object is
-fully removed (`docs/COLORS_TO_THEMECOLOR_MIGRATION.md` migration is complete, not
-in-progress — zero `Colors.x` usages remain). Don't reintroduce a `Colors.*` reference or a
+fully removed (the migration is complete — zero `Colors.x` usages remain). Don't reintroduce a `Colors.*` reference or a
 new raw hex literal.
 
 ### Alerts — use `showAlert()` / `showToastOrAlert()`, never raw `Alert.alert()`
 Both live in `helpers/Common.js`. `Alert.alert()` from `react-native` does not work on web,
-and `docs/ALERT_USAGE_LIST.md` tracks the (incomplete) migration off it. Any new alert/confirm
-dialog must go through `showAlert(title, message, buttons)`; toasts/simple messages through
-`showToastOrAlert(message)`. If you touch a screen still calling `Alert.alert` directly,
-migrate that call while you're in there.
+and the migration off it is complete — the only remaining `Alert.alert` calls are inside the
+`showAlert` wrapper itself and `hooks/useLogout.js`. Any new alert/confirm dialog must go
+through `showAlert(title, message, buttons)`; toasts/simple messages through
+`showToastOrAlert(message)`.
 
 ### Styles — extend `NewStyles.js`, not `Styles.js`
 `styles/Styles.js` is legacy. New style objects go in `styles/NewStyles.js` and reference
@@ -196,11 +196,11 @@ Four things not to undo:
   through `apiResponse.request`, because a 200 with a top-level `valid:false` is a
   rejection and `request` only keeps `data`.
 
-**Known landmine:** the order-submission endpoint is documented inconsistently across
-`docs/ORDER_SUBMIT_API_COMPLETE_DOCS.md`, `docs/ORDER_SUBMIT_UPDATES.md`, and
-`docs/API_ENDPOINT_FIX.md` — variously `/api/orders/`, `/api/orders/submit`, `/orders/`.
-**Before touching order submission, read the actual call site in
-`screens/category/Preview.js`, not the docs** — the docs disagree with each other.
+**Known landmine:** the order-submission endpoint used to be documented inconsistently
+(`/api/orders/`, `/api/orders/submit`, `/orders/`). The contradicting write-ups were removed;
+`docs/ORDER_SUBMIT_API_COMPLETE_DOCS.md` matches the live `POST /orders/submit`
+(`services/ApiEndpoints.js`). **Before touching order submission, still read the actual call
+site in `screens/category/Preview.js`** — the code is the source of truth, not the doc.
 
 ## User / org app brief (2026-10) — drafts, address step, account security
 
