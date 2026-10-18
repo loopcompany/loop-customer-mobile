@@ -63,13 +63,29 @@ const METHOD_STATUS = {
   [DELIVERY_METHOD.COURIER]: DELIVERY_STATUS.BY_COURIER,
 };
 
+/** «مشخصات تحویل» پیش از تأیید پنل: همه‌ی ردیف‌ها «نامشخص». */
+const UNCONFIRMED_DELIVERY = {
+  receiverName: null,
+  date: null,
+  time: null,
+  status: DELIVERY_STATUS.UNKNOWN,
+};
+
 /**
  * «مشخصات تحویل» رسید (بند ۱۵): تحویل‌گیرنده‌ای که کاربر مشخص کرده (خودش یا
  * نماینده)، تاریخ و ساعتِ ثبت دریافت، و روش ارسال (تکنسین لوپ / کاربر / پیک).
- * تا وقتی سرور `delivery` را نفرستد همان رفتار قبلی می‌ماند.
+ *
+ * «تغییرات اپ کاربر»: این مشخصات از سوی پنل ادمین تأیید و فرستاده می‌شود و تا
+ * آن لحظه رسید «نامشخص» می‌زند - یعنی فقط وقتی `delivery.confirmed_at` آمده
+ * باشد پر می‌شود. سفارشِ لغوشده هرگز تحویلی ندارد و «لغو شده» می‌ماند.
  */
 export const deliveryOf = (data, { state, addressName, user } = {}) => {
+  if (state === RECEIPT_STATE.FAILED) {
+    return { ...UNCONFIRMED_DELIVERY, status: DELIVERY_STATUS.CANCELLED };
+  }
+
   const delivery = readDelivery(data);
+  if (!delivery.confirmed) return UNCONFIRMED_DELIVERY;
   const selfName =
     [user?.name ?? user?.fname, user?.last_name ?? user?.lname].filter(Boolean).join(' ') || null;
   const receiverName =
@@ -82,15 +98,9 @@ export const deliveryOf = (data, { state, addressName, user } = {}) => {
   const methodStatus = delivery.method ? METHOD_STATUS[delivery.method] : null;
 
   let status;
-  if (state === RECEIPT_STATE.FAILED) status = DELIVERY_STATUS.CANCELLED;
-  else if (deliveredAt) status = methodStatus || DELIVERY_STATUS.BY_LOOP;
-  else if (delivery.present) {
-    // روش ارسال انتخاب شده ولی هنوز تحویل نشده.
-    status = methodStatus ? `${DELIVERY_STATUS.PENDING} (${methodStatus})` : DELIVERY_STATUS.PENDING;
-  } else {
-    // سفارش‌های بدون `delivery` (سرور قدیمی / خدمت در محل): رفتار قبلی.
-    status = data?.finished_at ? DELIVERY_STATUS.BY_LOOP : DELIVERY_STATUS.PENDING;
-  }
+  if (deliveredAt) status = methodStatus || DELIVERY_STATUS.BY_LOOP;
+  // تأیید شده ولی هنوز تحویل نشده؛ روش ارسال اگر انتخاب شده داخل پرانتز.
+  else status = methodStatus ? `${DELIVERY_STATUS.PENDING} (${methodStatus})` : DELIVERY_STATUS.PENDING;
 
   return {
     receiverName,

@@ -1985,5 +1985,10 @@
   "PDF or image file": "PDF or image file",
   "You can attach up to 5 files.": "You can attach up to 5 files.",
   "Each file must be smaller than 10 MB.": "Each file must be smaller than 10 MB.",
-  "Only images and PDF files can be attached.": "Only images and PDF files can be attached."
+  "Only images and PDF files can be attached.": "Only images and PDF files can be attached.",
+  "Order failed": "Failed",
+  "Canceled by the user": "Canceled by the user",
+  "Canceled by the technician": "Canceled by the technician",
+  "Canceled by the panel": "Canceled by the panel",
+  "Canceled by the system (order time expired)": "Canceled by the system (order time expired)"
 }

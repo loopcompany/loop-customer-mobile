@@ -1985,5 +1985,10 @@
   "PDF or image file": "فایل PDF یا تصویر",
   "You can attach up to 5 files.": "حداکثر ۵ فایل می‌توانید پیوست کنید.",
   "Each file must be smaller than 10 MB.": "حجم هر فایل باید کمتر از ۱۰ مگابایت باشد.",
-  "Only images and PDF files can be attached.": "فقط تصویر و فایل PDF قابل پیوست است."
+  "Only images and PDF files can be attached.": "فقط تصویر و فایل PDF قابل پیوست است.",
+  "Order failed": "ناموفق",
+  "Canceled by the user": "لغو از سوی کاربر",
+  "Canceled by the technician": "لغو از سوی تکنسین",
+  "Canceled by the panel": "لغو از سوی پنل",
+  "Canceled by the system (order time expired)": "لغو از سوی سیستم (پایان مهلت سفارش)"
 }

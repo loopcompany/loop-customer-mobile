@@ -168,6 +168,7 @@ describe('receipt delivery block (deliveryOf)', () => {
           receiver_name: 'علی رضایی',
           method: 'loop_technician',
           delivered_at: new Date(2026, 9, 12, 17, 53).toISOString(),
+          confirmed_at: '2026-10-12T18:00:00Z',
         },
       },
       { state: RECEIPT_STATE.DONE }
@@ -179,7 +180,7 @@ describe('receipt delivery block (deliveryOf)', () => {
 
   it('uses the account holder for «self» and marks a chosen-but-pending method', () => {
     const result = deliveryOf(
-      { delivery: { receiver_type: 'self', method: 'courier' } },
+      { delivery: { receiver_type: 'self', method: 'courier', confirmed_at: '2026-10-12T18:00:00Z' } },
       { state: RECEIPT_STATE.PENDING, user: { name: 'مریم', last_name: 'احمدی' } }
     );
     expect(result.receiverName).toBe('مریم احمدی');
@@ -187,10 +188,45 @@ describe('receipt delivery block (deliveryOf)', () => {
     expect(result.status).toBe(`${DELIVERY_STATUS.PENDING} (${DELIVERY_STATUS.BY_COURIER})`);
   });
 
-  it('keeps the old behaviour when the server sends no delivery block', () => {
+  it('stays «نامشخص» until the admin panel confirms the delivery details', () => {
+    const unconfirmed = deliveryOf(
+      {
+        finished_at: '2026-10-01T10:00:00Z',
+        delivery: {
+          receiver_type: 'representative',
+          receiver_name: 'علی رضایی',
+          method: 'courier',
+          delivered_at: '2026-10-01T10:00:00Z',
+        },
+      },
+      { state: RECEIPT_STATE.DONE, addressName: 'خانه' }
+    );
+    expect(unconfirmed).toEqual({
+      receiverName: null,
+      date: null,
+      time: null,
+      status: DELIVERY_STATUS.UNKNOWN,
+    });
     expect(
       deliveryOf({ finished_at: '2026-10-01T10:00:00Z' }, { state: RECEIPT_STATE.DONE }).status
-    ).toBe(DELIVERY_STATUS.BY_LOOP);
+    ).toBe(DELIVERY_STATUS.UNKNOWN);
+  });
+
+  it('a cancelled order is «لغو شده», confirmed or not', () => {
     expect(deliveryOf({}, { state: RECEIPT_STATE.FAILED }).status).toBe(DELIVERY_STATUS.CANCELLED);
+    expect(
+      deliveryOf(
+        { delivery: { confirmed_at: '2026-10-01T10:00:00Z', receiver_name: 'x' } },
+        { state: RECEIPT_STATE.FAILED }
+      ).receiverName
+    ).toBeNull();
+  });
+
+  it('reads confirmed_at in readDelivery', () => {
+    expect(readDelivery({ delivery: {} }).confirmed).toBe(false);
+    expect(readDelivery({ delivery: { confirmed_at: 'not a date' } }).confirmed).toBe(false);
+    const confirmed = readDelivery({ delivery: { confirmed_at: '2026-10-01 10:00:00' } });
+    expect(confirmed.confirmed).toBe(true);
+    expect(confirmed.confirmedAt).toBeInstanceOf(Date);
   });
 });

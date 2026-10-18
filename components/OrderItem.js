@@ -8,7 +8,17 @@ import { createStyles } from '@styles/NewStyles';
 import NewStyles from '@styles/NewStyles';
 import { imageUri, uri } from '@services/URL';
 import { fetchOrders } from '@slices/ordersSlice';
-import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor5, themeColor6, themeColor7 } from '@theme/Color';
+import { colors, themeColor0, themeColor1, themeColor10, themeColor3, themeColor5, themeColor6, themeColor7 } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
+import {
+    ORDER_STATUS_KIND,
+    ORDER_STATUS_LABEL_KEYS,
+    CANCELLED_BY_LABEL_KEYS,
+    orderStatusKind,
+    cancelledByOf,
+} from '@services/orderStatus';
 import { calculateDaysDifference, formatDate, formatPrice, showToastOrAlert } from '@helpers/Common';
 import PairButton from '@components/PairButton';
 import ConfirmationModal from './ConfirmationModal';
@@ -16,6 +26,15 @@ import { fetchSteps } from '@slices/stepSlice';
 import { setCategory } from '@slices/categorySlice';
 import RateModal from './RateModal';
 import { langIsRTL } from '@helpers/Common';
+
+// رنگ کادر و لیبلِ هر وضعیت - «تغییرات اپ کاربر» بند ۱.
+const STATUS_TONE = {
+    [ORDER_STATUS_KIND.PENDING]: colors.warning,
+    [ORDER_STATUS_KIND.IN_PROGRESS]: colors.primary,
+    [ORDER_STATUS_KIND.DONE]: colors.success,
+    [ORDER_STATUS_KIND.CANCELLED]: colors.error,
+};
+
 export default function OrderItem({ item, navigation, user }) {
 
     const { t, i18n } = useTranslation();
@@ -23,7 +42,7 @@ export default function OrderItem({ item, navigation, user }) {
         () => createStyles(i18n.language),
         [i18n.language]
     );
-    const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
+    const styles = useMemo(() => createLocalStyles(NewStyles, i18n.language), [NewStyles, i18n.language]);
     const isRtl = langIsRTL(i18n.language)
     const dispatch = useDispatch();
     const token = useSelector((state) => state?.auth?.token);
@@ -91,6 +110,10 @@ export default function OrderItem({ item, navigation, user }) {
         return Number(basePrice) + Number(item?.extra_price);
     }, [item]);
 
+    const statusKind = orderStatusKind(item);
+    const statusTone = STATUS_TONE[statusKind];
+    const cancelledBy = cancelledByOf(item);
+
     const renderRow = (text1, text2, textStyle1, textStyle2) => (
         <View style={NewStyles.rowWrapper}>
             <Text style={[NewStyles.text10, textStyle1]}>{text1}</Text>
@@ -131,20 +154,28 @@ export default function OrderItem({ item, navigation, user }) {
                 // برچسب قبلی «پیش رسید» بود، ولی طبق «توضیحات رسیدها.pdf»
                 // پیش‌رسید مربوط به سفارشِ در انتظار است؛ سفارش لغو‌شده رسیدِ
                 // «ناموفق» دارد.
+                // «لغو از سوی ...» پیش‌تر به شکل یک دکمه‌ی قرمزِ بی‌عمل اینجا بود؛
+                // حالا لیبلِ بالای کارت است و این‌جا فقط دکمه‌ی رسید می‌ماند.
                 text1: ((item?.status == 4 && item?.technician_cancel_reason != 'اعلام حضور / لغو از سوی تکنسین') || (item?.status == 3 && item?.arrived_at)) ? t('Receipt') : '',
-                text2: item?.status == 3 ? t('Canceled by You') : item?.status == 4 ? t('Canceled by Technician') : item?.status == 5 ? t('Canceled by Loop') : item?.status == 6 ? t('Canceled due to Order Time Expiry') : t('Canceled'),
                 onPress1: () => navigation.navigate('OrderReceipt', { orderId: item?.id }),
-
-                onPress2: () => { },
                 loading1: loading,
-                loading2: loading,
             };
         }
         return null;
     }, [item]);
 
     return (
-        <Pressable style={[styles.itemWrapper, NewStyles.shadow, NewStyles.border10]} onPress={() => { navigation.navigate('Details', { orderId: item?.id }); }}>
+        <Pressable style={[styles.itemWrapper, NewStyles.shadow, NewStyles.border10, { borderColor: statusTone.bgColor(1) }]} onPress={() => { navigation.navigate('Details', { orderId: item?.id }); }}>
+            <View style={[NewStyles.row, styles.statusRow]}>
+                <View style={[styles.statusPill, { backgroundColor: statusTone.bgColor(1) }]}>
+                    <Text style={styles.statusPillText}>{t(ORDER_STATUS_LABEL_KEYS[statusKind])}</Text>
+                </View>
+                {!!cancelledBy && (
+                    <Text style={[styles.cancelledByText, { color: statusTone.bgColor(1) }]}>
+                        {t(CANCELLED_BY_LABEL_KEYS[cancelledBy])}
+                    </Text>
+                )}
+            </View>
             {!!item?.technician_id &&
                 <View style={[{ width: '100%', padding: '5%', backgroundColor: themeColor3.bgColor(0.2) }, NewStyles.border10, NewStyles.center]} >
                     <View>
@@ -204,7 +235,7 @@ export default function OrderItem({ item, navigation, user }) {
                 <Text style={NewStyles.text3}>{t('View Details')}</Text>
                 <Ionicons name={isRtl ? 'chevron-back' : 'chevron-forward'} size={16} color={themeColor3.bgColor(1)} />
             </View>
-            {buttonConfig && <PairButton {...buttonConfig} />}
+            {!!buttonConfig?.text1 && <PairButton {...buttonConfig} />}
             <RateModal rateModal={rateModal} setRateModal={setRateModal} orderId={item?.id} data={item?.user_rate} />
             <ConfirmationModal title={t('Cancel Order')} message={t('Are you sure you want to cancel your order?')} action={() => cancel()} confirmationModal={cancelModal} setConfirmationModal={setCancelModal} />
             <ConfirmationModal title={t('Start Order')} message={t('Do you confirm that the technician has started your order?')} action={() => start()} confirmationModal={startModal} setConfirmationModal={setStartModal} />
@@ -214,13 +245,34 @@ export default function OrderItem({ item, navigation, user }) {
     )
 }
 
-const createLocalStyles = (NewStyles) => StyleSheet.create({
+const createLocalStyles = (NewStyles, lang) => StyleSheet.create({
     itemWrapper: {
         marginHorizontal: '5%',
         backgroundColor: themeColor5.bgColor(1),
         paddingHorizontal: '5%',
         paddingVertical: 15,
-        gap: 10
+        gap: 10,
+        // رنگ کادر از وضعیت سفارش می‌آید (STATUS_TONE).
+        borderWidth: 2,
+    },
+    statusRow: {
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: spacing.sm,
+    },
+    statusPill: {
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
+        borderRadius: radius.pill,
+    },
+    statusPillText: {
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', lang),
+        color: colors.textInverse.color,
+    },
+    cancelledByText: {
+        fontSize: fontSize.xs,
+        fontFamily: getFontFamily('bold', lang),
     },
     profileImage: {
         height: 60,

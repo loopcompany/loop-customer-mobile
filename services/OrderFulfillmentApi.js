@@ -206,6 +206,9 @@ export const readDelivery = (order) => {
     ? raw.receiver_type
     : null;
   const deliveredAt = toTime(raw.delivered_at);
+  // پنل ادمین مشخصات تحویل را تأیید و برای کاربر می‌فرستد؛ تا آن لحظه رسید
+  // «نامشخص» نشان می‌دهد («تغییرات اپ کاربر»، مشخصات تحویل).
+  const confirmedAt = toTime(raw.confirmed_at);
   const status = deliveredAt ? 'delivered' : DELIVERY_STATUS_LABELS[raw.status] ? raw.status : null;
   return {
     present: Boolean(order?.delivery),
@@ -218,6 +221,8 @@ export const readDelivery = (order) => {
     status,
     statusLabel: status ? DELIVERY_STATUS_LABELS[status] : null,
     deliveredAt,
+    confirmedAt,
+    confirmed: Boolean(confirmedAt),
     // بعد از ارسال، تغییر تحویل‌گیرنده یا روش ارسال معنایی ندارد.
     editable: !deliveredAt && status !== 'shipped',
   };

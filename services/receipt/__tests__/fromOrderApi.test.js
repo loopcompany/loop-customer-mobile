@@ -113,15 +113,32 @@ describe('receiptFromOrderApi', () => {
     expect(receipt.payment.discountCode).toBe('LOOP10');
   });
 
-  it('وضعیت تحویلِ سفارشِ در جریان «در انتظار تحویل» است، نه «نامشخص»', () => {
+  it('مشخصات تحویل تا تأیید پنل ادمین «نامشخص» است', () => {
     const pending = receiptFromOrderApi({ ...order, status: 1, finished_at: null }, {});
-    expect(pending.delivery.status).toBe('در انتظار تحویل');
+    expect(pending.delivery.status).toBe('نامشخص');
+
+    const doneUnconfirmed = receiptFromOrderApi({ ...order, finished_at: '2025-10-28T10:00:00' }, {});
+    expect(doneUnconfirmed.delivery.status).toBe('نامشخص');
+    expect(doneUnconfirmed.delivery.date).toBeNull();
 
     const cancelled = receiptFromOrderApi({ ...order, status: 3, finished_at: null }, {});
     expect(cancelled.delivery.status).toBe('لغو شده');
 
-    const done = receiptFromOrderApi({ ...order, finished_at: '2025-10-28T10:00:00' }, {});
-    expect(done.delivery.status).toBe('توسط لوپ');
+    const confirmedPending = receiptFromOrderApi(
+      { ...order, status: 1, finished_at: null, delivery: { confirmed_at: '2025-10-27T10:00:00' } },
+      {}
+    );
+    expect(confirmedPending.delivery.status).toBe('در انتظار تحویل');
+
+    const confirmedDone = receiptFromOrderApi(
+      {
+        ...order,
+        finished_at: '2025-10-28T10:00:00',
+        delivery: { delivered_at: '2025-10-28T10:00:00', confirmed_at: '2025-10-28T11:00:00' },
+      },
+      {}
+    );
+    expect(confirmedDone.delivery.status).toBe('توسط لوپ');
   });
 
   it('تاریخ ثبت به شمسیِ صفرپرشده تبدیل می‌شود', () => {

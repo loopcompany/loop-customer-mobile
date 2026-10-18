@@ -11,6 +11,7 @@ import OrderItem from '@components/OrderItem';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
 import FooterSpacer from '@components/FooterSpacer';
+import { onlyCancelledOrders } from '@services/orderStatus';
 function CanceledOrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -48,7 +49,7 @@ function CanceledOrdersScreen({ navigation }) {
       <FlatList
         ListFooterComponent={<FooterSpacer />}
         contentContainerStyle={{ paddingVertical: 20, gap: 15 }}
-        data={orders?.filter(order => (order.status == 3 || order.status == 4 || order.status == 5 || order.status == 6))}
+        data={onlyCancelledOrders(orders)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

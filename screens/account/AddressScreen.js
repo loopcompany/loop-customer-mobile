@@ -22,6 +22,7 @@ import Button from "@components/Button";
 import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from "@components/ShowMapDetailComponent";
 import FooterSpacer from '@components/FooterSpacer';
+import { spacing } from '@theme/Spacing';
 export default function AddressScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
@@ -111,7 +112,7 @@ export default function AddressScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        <View style={[NewStyles.rowWrapper, Platform.OS != 'web' && { alignItems: 'flex-start' }]}>
+        <View style={[NewStyles.rowWrapper, styles.cardBody, Platform.OS != 'web' && { alignItems: 'flex-start' }]}>
           <View style={styles.cardContent}>
             {item.fname && item.lname && (
               <View style={styles.infoRow}>
@@ -158,7 +159,7 @@ export default function AddressScreen({ route, navigation }) {
               </View>
             )}
           </View>
-          <View style={[{ height: 100, width: 100, overflow: 'hidden' }, NewStyles.border100]}>
+          <View style={[styles.mapThumb, NewStyles.border100]}>
             <ShowMapDetailComponent
               latitude={item?.latitude}
               longitude={item?.longitude}
@@ -252,8 +253,25 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
   iconBtn: {
     padding: 5,
   },
+  // «تغییرات اپ کاربر» بند ۳: نقشه از کادر بیرون می‌زد. ستونِ متن flex نداشت و
+  // آدرسِ بلند آن را به اندازه‌ی کل کارت پهن می‌کرد و نقشه را بیرون هل می‌داد.
+  cardBody: {
+    gap: spacing.md,
+  },
   cardContent: {
-    gap: 8,
+    flex: 1,
+    minWidth: 0,
+    gap: spacing.sm,
+  },
+  mapThumb: {
+    width: 100,
+    height: 100,
+    flexShrink: 0,
+    overflow: 'hidden',
+    // روی وب لایه‌های Leaflet با z-index خودشان از overflow/borderRadius بیرون
+    // می‌زنند؛ zIndex یک stacking context می‌سازد تا گوشه‌ی گرد آن‌ها را هم ببُرد.
+    position: 'relative',
+    zIndex: 0,
   },
   infoRow: {
     ...NewStyles.row

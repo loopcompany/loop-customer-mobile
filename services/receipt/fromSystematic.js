@@ -6,7 +6,7 @@
 // همان قرارداد سطح‌به‌سطحی که summaryLines در آن صفحه هم از آن می‌خواند.
 
 import { titleWithNote } from '@org/summaryLines';
-import { PROCUREMENT_ITEMS, HARDWARE_ITEMS, OS_ITEMS, TIME_SLOT_OPTIONS } from '@org/deviceCatalog';
+import { PROCUREMENT_ITEMS, HARDWARE_ITEMS, OS_ITEMS } from '@org/deviceCatalog';
 import { getVisibleFlow, getCategory } from '@org/systematicFlows';
 import { L, LO } from '@org/orgI18n';
 import {
@@ -17,7 +17,7 @@ import {
   isOrganizationAccount,
 } from './receiptModel';
 import { resolveCustomer, resolveUserCode } from './receiptCustomer';
-import { toReceiptDate, toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
+import { toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
 
@@ -216,10 +216,6 @@ export const receiptFromSystematic = ({
   // --- اقلام ------------------------------------------------------------
   const items = buildItems(answers.procurement);
 
-  // --- زمان مراجعه ------------------------------------------------------
-  const schedule = answers.time_range;
-  const slotTitle = schedule?.slot ? titleOf(LO(TIME_SLOT_OPTIONS), schedule.slot) : null;
-
   const isOrg = isOrganizationAccount(user?.account_type);
 
   return buildReceipt({
@@ -245,14 +241,9 @@ export const receiptFromSystematic = ({
     product,
     items,
     services,
-    delivery: {
-      // تاریخ مراجعه‌ی انتخابی کاربر، نه تاریخ تحویل واقعی - تا وقتی سفارش
-      // روی سرور ثبت نشده تحویلی هم رخ نداده است.
-      date: schedule?.date ? toReceiptDate(schedule.date) : null,
-      // سفارش هنوز ثبت نشده، پس تحویلی هم رخ نداده: «در انتظار تحویل»، نه
-      // «نامشخص». بازه‌ی ساعتِ انتخابی کاربر داخل پرانتز می‌آید.
-      status: slotTitle ? `${DELIVERY_STATUS.PENDING} (${slotTitle})` : DELIVERY_STATUS.PENDING,
-    },
+    // «تغییرات اپ کاربر»: مشخصات تحویل را پنل ادمین تأیید و می‌فرستد. این رسید
+    // پیش از ثبتِ سفارش ساخته می‌شود، پس همه‌ی ردیف‌هایش «نامشخص» است.
+    delivery: { status: DELIVERY_STATUS.UNKNOWN },
     payment: {
       // مسیر سازمانی قیمت ندارد: «پس از بررسی کارشناس اعلام می‌شود».
       status: state === RECEIPT_STATE.PENDING ? L('در انتظار تایید و پرداخت') : null,

@@ -19,6 +19,7 @@ import { langIsRTL } from '@helpers/Common';
 import FooterSpacer from '@components/FooterSpacer';
 import OrderDraftsSection from '@components/OrderDraftsSection';
 import { useHomeRoute } from '@navigation/homeRoute';
+import { withoutCancelledOrders } from '@services/orderStatus';
 
 function OrdersScreen({ navigation }) {
   // «خانه» برای مشتری «انتخاب سیستماتیک» و برای سازمان List است (navigation/homeRoute.js).
@@ -26,7 +27,9 @@ function OrdersScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const dispatch = useDispatch();
-  const orders = useSelector(state => state.orders?.data);
+  // لغوشده‌ها فقط در «سفارش‌های لغوشده» می‌آیند («تغییرات اپ کاربر» بند ۲).
+  const allOrders = useSelector(state => state.orders?.data);
+  const orders = useMemo(() => withoutCancelledOrders(allOrders), [allOrders]);
   const orderLoader = useSelector(state => state.orders?.loading);
   const user = useSelector(state => state.user?.data);
   const [showStatusOptions, setShowStatusOptions] = useState(false);
@@ -248,7 +251,8 @@ function OrdersScreen({ navigation }) {
                   />
                 </TouchableOpacity>
                 {showStatusOptions && <View style={styles.statusButtons}>
-                  {[null, 0, 1, 2, 3].map((statusValue) => (
+                  {/* «لغو شده» اینجا گزینه نیست - آن سفارش‌ها در این لیست نمی‌آیند. */}
+                  {[null, 0, 1, 2].map((statusValue) => (
                     <TouchableOpacity
                       key={statusValue}
                       style={[

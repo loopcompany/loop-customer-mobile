@@ -12,7 +12,6 @@ import {
   HARDWARE_ITEMS,
   PROCUREMENT_ITEMS,
   OS_ITEMS,
-  TIME_SLOT_OPTIONS,
 } from '@org/deviceCatalog';
 import { L, LO } from '@org/orgI18n';
 import { titleWithNote } from '@org/summaryLines';
@@ -24,7 +23,7 @@ import {
   isOrganizationAccount,
 } from './receiptModel';
 import { resolveCustomer, resolveUserCode } from './receiptCustomer';
-import { toReceiptDate, toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
+import { toReceiptTime, todayReceiptDate, nowReceiptTime } from './receiptDates';
 
 const titleOf = (options, id) => options.find((opt) => opt.id === id)?.title || id;
 
@@ -63,9 +62,6 @@ export const receiptFromComprehensive = ({
   hardwareItems = {},
   procurementItems = {},
   operatorInfo = {},
-  startDate = '',
-  onceDate = '',
-  timeSlot = null,
   user = null,
   orgProfile = null,
   profile = null,
@@ -92,11 +88,6 @@ export const receiptFromComprehensive = ({
     if (entry?.new > 0) items.push({ title, condition: L('آکبند'), qty: entry.new });
     if (entry?.used > 0) items.push({ title, condition: L('کارکرده'), qty: entry.used });
   });
-
-  // --- زمان مراجعه ------------------------------------------------------
-  // «کوتاه مدت / یکبار» تاریخِ onceDate دارد، بقیه‌ی حالت‌ها startDate.
-  const visitDate = onceDate || startDate || null;
-  const slotTitle = timeSlot ? titleOf(LO(TIME_SLOT_OPTIONS), timeSlot) : null;
 
   const isOrg = isOrganizationAccount(user?.account_type);
 
@@ -136,12 +127,9 @@ export const receiptFromComprehensive = ({
     product: null,
     items,
     services,
-    delivery: {
-      date: visitDate ? toReceiptDate(visitDate) : null,
-      // سفارش هنوز ثبت نشده، پس تحویلی هم رخ نداده: «در انتظار تحویل»، نه
-      // «نامشخص». بازه‌ی ساعتِ انتخابی کاربر داخل پرانتز می‌آید.
-      status: slotTitle ? `${DELIVERY_STATUS.PENDING} (${slotTitle})` : DELIVERY_STATUS.PENDING,
-    },
+    // «تغییرات اپ کاربر»: مشخصات تحویل را پنل ادمین تأیید و می‌فرستد. این رسید
+    // پیش از ثبتِ سفارش ساخته می‌شود، پس همه‌ی ردیف‌هایش «نامشخص» است.
+    delivery: { status: DELIVERY_STATUS.UNKNOWN },
     payment: {
       // مسیر سازمانی قیمت ندارد: «پس از بررسی کارشناس اعلام می‌شود».
       status: state === RECEIPT_STATE.PENDING ? L('در انتظار تایید و پرداخت') : null,
