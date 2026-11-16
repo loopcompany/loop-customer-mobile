@@ -8,14 +8,16 @@ import i18next from 'i18next';
  * این reference باید از App.js یا RootNavigation.js set شود
  */
 let navigationRef = null;
+let onSessionExpired = null;
 
 /**
  * تنظیم navigation reference برای استفاده در error handling
  * 
  * @param {Object} navRef - Navigation reference
  */
-export const setNavigationRef = (navRef) => {
+export const setNavigationRef = (navRef, expireSession) => {
   navigationRef = navRef;
+  onSessionExpired = expireSession ?? null;
   console.log('🧭 Navigation reference set for API error handling');
 };
 
@@ -23,6 +25,18 @@ export const setNavigationRef = (navRef) => {
  * گرفتن navigation reference
  */
 export const getNavigationRef = () => navigationRef;
+
+export async function handleExpiredSession(error) {
+  const authorization = error.config?.headers?.Authorization;
+  if (error.response?.status !== 401 || typeof authorization !== 'string'
+      || !authorization.startsWith('Bearer ') || !onSessionExpired) return;
+
+  try {
+    await onSessionExpired(authorization.slice(7), navigationRef?.current);
+  } catch (sessionError) {
+    console.warn('Unable to clear expired customer session:', sessionError?.message);
+  }
+}
 
 /**
  * Axios instance اصلی برای تمام درخواست‌ها
@@ -84,7 +98,7 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     // لاگ خطا
     console.error('❌ API Response Error:', {
       url: error.config?.url,
@@ -97,6 +111,11 @@ apiClient.interceptors.response.use(
     // بعضی از درخواست‌ها background و best-effort هستند و خودشان خطا را
     // مدیریت می‌کنند؛ نباید interceptor برایشان alert سراسری نشان بدهد.
     if (isSilentAPI(error.config?.url)) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && onSessionExpired) {
+      await handleExpiredSession(error);
       return Promise.reject(error);
     }
 

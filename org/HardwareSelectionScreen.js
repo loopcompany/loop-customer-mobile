@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import Footer from '@screens/Footer';
 import ScreenHeaders from '@components/ScreenHeaders';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
+import SchedulePicker from '@components/SchedulePicker';
+import SavedAddressPicker from '@components/SavedAddressPicker';
+import { OrderActionButtons, SelectableOptions } from '@components/OrgSelectionKit';
+import { TECHNICIAN_GENDER_OPTIONS, TIME_SLOT_OPTIONS } from './deviceCatalog';
+import { L, LO } from './orgI18n';
 import { useTranslation } from 'react-i18next';
 import { langIsRTL } from '@helpers/Common';
 
@@ -15,9 +20,13 @@ const HardwareSelectionScreen = ({ navigation }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [generalNeed, setGeneralNeed] = useState('');
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [slot, setSlot] = useState(null);
+  const [addressId, setAddressId] = useState(null);
+  const [technicianGender, setTechnicianGender] = useState(null);
   const [quantities, setQuantities] = useState({
     'کارکرده': 0,
-    'اکبند': 2
+    'اکبند': 0
   });
 
   const categories = [
@@ -35,6 +44,36 @@ const HardwareSelectionScreen = ({ navigation }) => {
       ...prev,
       [item]: Math.max(0, prev[item] + increment)
     }));
+  };
+
+  const canProceed = Object.values(quantities).some((count) => count > 0) &&
+    Boolean(date && slot && addressId && technicianGender);
+
+  const openSummary = (previewOnly = false) => {
+    if (!canProceed) return;
+    navigation.navigate('OrderSummaryScreen', {
+      source: 'hardware',
+      categoryId: 3,
+      addressId,
+      technicianGender,
+      schedule: { date, slot },
+      previewOnly,
+      procurementSelection: {
+        title: selectedCategory,
+        new_count: quantities['اکبند'],
+        used_count: quantities['کارکرده'],
+        description: description.trim() || undefined,
+      },
+      orderTitle: 'تأمین کالا - ' + selectedCategory,
+      summaryLines: [
+        { label: 'دسته‌بندی', value: selectedCategory },
+        ...Object.entries(quantities)
+          .filter(([, count]) => count > 0)
+          .map(([condition, count]) => ({ label: condition, value: count })),
+        ...(generalNeed.trim() ? [{ label: 'نیاز کلی', value: generalNeed }] : []),
+        ...(description.trim() ? [{ label: 'توضیحات', value: description }] : []),
+      ],
+    });
   };
 
   return (
@@ -336,114 +375,20 @@ const HardwareSelectionScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Action buttons */}
         <View style={{ width: '95%', alignSelf: 'center', gap: 8 }}>
-          {/* مدور پیش رسید */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#4caf50',
-              borderRadius: 12,
-              paddingVertical: 14,
-              alignItems: 'center',
-              elevation: 2,
-              shadowColor: '#4caf50',
-              shadowOpacity: 0.3,
-              shadowRadius: 4
-            }}
-            onPress={() => { }}
-          >
-            <Text style={{
-              color: '#fff',
-              fontSize: 16,
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>صدور پیش رسید</Text>
-          </TouchableOpacity>
-
-          {/* نمایش پیش رسید */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#1976d2',
-              borderRadius: 12,
-              paddingVertical: 14,
-              alignItems: 'center',
-              elevation: 2,
-              shadowColor: '#1976d2',
-              shadowOpacity: 0.3,
-              shadowRadius: 4
-            }}
-            onPress={() => { }}
-          >
-            <Text style={{
-              color: '#fff',
-              fontSize: 16,
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>نمایش پیش رسید</Text>
-          </TouchableOpacity>
-
-          {/* ثبت سفارش */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#4caf50',
-              borderRadius: 12,
-              paddingVertical: 14,
-              alignItems: 'center',
-              elevation: 2,
-              shadowColor: '#4caf50',
-              shadowOpacity: 0.3,
-              shadowRadius: 4
-            }}
-            onPress={() =>
-              navigation.navigate('OrderSummaryScreen', {
-                source: 'hardware',
-                orderTitle: `سفارش خدمات سخت‌افزاری - ${selectedCategory}`,
-                summaryLines: [
-                  { label: 'دسته‌بندی', value: selectedCategory },
-                  ...Object.entries(quantities)
-                    .filter(([, count]) => count > 0)
-                    .map(([condition, count]) => ({ label: condition, value: count })),
-                  ...(generalNeed.trim() ? [{ label: 'نیاز کلی', value: generalNeed }] : []),
-                  ...(description.trim() ? [{ label: 'توضیحات', value: description }] : []),
-                ],
-              })
-            }
-          >
-            <Text style={{
-              color: '#fff',
-              fontSize: 16,
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>ثبت سفارش</Text>
-          </TouchableOpacity>
-
-          {/* لغو سفارش */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#ff9800',
-              borderRadius: 12,
-              paddingVertical: 14,
-              alignItems: 'center',
-              elevation: 2,
-              shadowColor: '#ff9800',
-              shadowOpacity: 0.3,
-              shadowRadius: 4
-            }}
-            onPress={() => {
-              if (Platform.OS == 'web') {
-                window.history.back()
-              } else {
-                navigation.goBack()
-              }
-            }}
-          >
-            <Text style={{
-              color: '#fff',
-              fontSize: 16,
-              fontFamily: 'VazirBold',
-              textAlign: 'center'
-            }}>لغو سفارش</Text>
-          </TouchableOpacity>
+          <Text style={NewStyles.title10}>{L('انتخاب تکنسین')}</Text>
+          <SelectableOptions options={LO(TECHNICIAN_GENDER_OPTIONS)} value={technicianGender} onChange={setTechnicianGender} />
+          <Text style={NewStyles.title10}>{L('بازه زمانی / رزرو')}</Text>
+          <SchedulePicker date={date} onChangeDate={setDate} slot={slot} onChangeSlot={setSlot} slots={LO(TIME_SLOT_OPTIONS)} />
+          <Text style={NewStyles.title10}>{L('آدرس‌های منتخب')}</Text>
+          <SavedAddressPicker value={addressId} onChange={setAddressId} navigation={navigation} />
+          <OrderActionButtons
+            disabled={!canProceed}
+            onIssueReceipt={() => openSummary()}
+            onShowReceipt={() => openSummary(true)}
+            onSubmit={() => openSummary()}
+            onCancel={() => navigation.goBack()}
+          />
         </View>
 
       </ScrollView>

@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import { themeColor0, themeColor1, themeColor11, themeColor4, themeColor6, theme
 import { getTransactions } from '@services/WalletApi';
 
 export default function TransactionsScreen() {
+  useRealtimeRefresh(["wallet"], () => fetchTransactions());
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),

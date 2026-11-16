@@ -92,6 +92,8 @@ const isRTL = langIsRTL(i18n.language);
       <ScreenHeaders title={t("Violation Report/Tracking")} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={styles.container}>
+          <Text style={NewStyles.text10}>{t('Choose the request subject and related section')}</Text>
+          <Text style={NewStyles.text10}>{t('To speed up review and follow-up')}</Text>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Violation Type')} <Text style={NewStyles.title6}>*</Text></Text>
 
           <TextInput
@@ -110,6 +112,7 @@ const isRTL = langIsRTL(i18n.language);
             value={form.technician}
             onChangeText={(text) => handleChange('technician', text)}
           />
+          <Text style={NewStyles.text10}>{t('Enter the date, amount and full subject details')}</Text>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Registration Date')}<Text style={NewStyles.title6}>*</Text></Text>
 
           <Pressable style={styles.input} onPress={() => setDatePickerModal(true)}>
@@ -129,7 +132,7 @@ const isRTL = langIsRTL(i18n.language);
 
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder={t('Description')}
+            placeholder={t('Brief and precise subject description')}
             placeholderTextColor={themeColor10.bgColor(0.6)}
             multiline
             value={form.desc}

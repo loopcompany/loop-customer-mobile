@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,17 +13,16 @@ import { RefreshControl } from 'react-native';
 import Loader from '@components/Loader';
 import AccordionItem from '@components/AccordionItem';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import Button from '@components/Button';
-import { imageUri } from '@services/URL';
+import { termsPdfUrl } from '@services/URL';
 
 export default function OrganizationTermsScreen() {
+  useRealtimeRefresh(["catalog"], () => loadTerms());
   const { t } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
-  const pdf = useSelector(state => state.pdf?.data)
   useEffect(() => {
     loadTerms();
   }, [isRefreshing]);
@@ -79,7 +79,7 @@ export default function OrganizationTermsScreen() {
             <Button
               title={t("PDF of organizational terms and conditions")}
               onPress={()=>{
-                Linking.openURL(`${imageUri}/${pdf?.organ_term}`)
+                Linking.openURL(termsPdfUrl)
               }}
             />
           )

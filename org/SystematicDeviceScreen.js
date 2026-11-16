@@ -13,6 +13,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
 import SchedulePicker from '@components/SchedulePicker';
+import SavedAddressPicker from '@components/SavedAddressPicker';
 import {
   AccordionHeader,
   SectionBody,
@@ -32,8 +33,10 @@ import {
   PROCUREMENT_ITEMS,
   TECHNICIAN_GENDER_OPTIONS,
   TIME_SLOT_OPTIONS,
+  hasDescriptionWithoutQuantity,
 } from './deviceCatalog';
-import { getCategory, getFlow } from './systematicFlows';
+import { getCategory, getFlow, SERVICE_STEP_IDS } from './systematicFlows';
+import { describeQuantity, selectionDescription } from './orderDescriptions';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
 import { spacing } from '@theme/Spacing';
@@ -61,7 +64,7 @@ const isStepFilled = (step, value) => {
     case 'options':
       return step.multi ? Boolean(value?.selected?.length) : Boolean(value?.selected);
     case 'checklist':
-      return Boolean(value?.selected?.length);
+      return Boolean(value?.selected?.length || (SERVICE_STEP_IDS.includes(step.id) && value?.note?.trim()));
     case 'note':
       return Boolean((value?.note || '').trim());
     case 'photo':
@@ -74,6 +77,8 @@ const isStepFilled = (step, value) => {
       return Boolean(value?.date && value?.slot);
     case 'technician':
       return Boolean(value?.gender);
+    case 'address':
+      return value?.addressId != null;
     default:
       return false;
   }
@@ -85,7 +90,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const { footerSpace } = useMenu();
   const categoryId = route?.params?.categoryId;
   const category = getCategory(categoryId);
-  const steps = getFlow(categoryId);
+  const steps = useMemo(() => getFlow(categoryId), [categoryId]);
 
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
@@ -93,7 +98,13 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const setAnswer = (stepId, patch) =>
     setAnswers((prev) => ({ ...prev, [stepId]: { ...prev[stepId], ...patch } }));
 
-  const toggleSection = (id) => setExpanded((prev) => (prev === id ? null : id));
+  const toggleSection = (id) => {
+    if (id !== expanded && missingQuantityStep?.id === expanded) {
+      showToastOrAlert(L('برای موارد دارای توضیحات، تعداد را وارد کنید.'));
+      return;
+    }
+    setExpanded((prev) => (prev === id ? null : id));
+  };
 
   const filledCount = useMemo(
     () => steps.filter((step) => isStepFilled(step, answers[step.id])).length,
@@ -105,13 +116,16 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     const lines = [];
     steps.forEach((step) => {
       const value = answers[step.id];
-      if (!isStepFilled(step, value)) return;
+      if (!isStepFilled(step, value) && !(value?.note || '').trim()) return;
       switch (step.type) {
         case 'brands':
           lines.push({ label: L(step.title), value: value.brand ? titleOf(LO(step.brands), value.brand) : value.other });
+          if (value.brand && value.other?.trim()) lines.push({ label: L('توضیحات'), value: value.other.trim() });
           break;
         case 'fields':
-          lines.push({ label: L(step.title), value: value[step.fields[0].id] });
+          step.fields.forEach((field) => {
+            if (String(value[field.id] || '').trim()) lines.push({ label: `${L(step.title)} — ${L(field.label || field.placeholder || field.id)}`, value: value[field.id] });
+          });
           break;
         case 'osGrid':
           lines.push({ label: L(step.title), value: titleOf(LO(OS_ITEMS), value) });
@@ -120,12 +134,19 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           lines.push({
             label: L(step.title),
             value: step.multi
-              ? value.selected.length
+              ? (value.selected || []).map((id) => titleOf(LO(step.options), id)).join("، ")
               : titleOf(LO(step.options), value.selected),
           });
+          if (step.extra && value[step.extra.id]) lines.push({ label: L(step.extra.title), value: titleOf(LO(step.extra.options), value[step.extra.id]) });
+          if (value.note?.trim()) lines.push({ label: `${L(step.title)} — ${L('توضیحات')}`, value: value.note.trim() });
           break;
         case 'checklist':
-          lines.push({ label: L(step.title), value: value.selected.length });
+          (value.selected || []).forEach((id) => {
+            lines.push({ label: L(step.title), value: titleOf(LO(step.options), id) });
+          });
+          if (value.note?.trim()) {
+            lines.push({ label: `${L(step.title)} - ${L('توضیحات')}`, value: value.note.trim() });
+          }
           break;
         case 'note':
           lines.push({ label: L(step.title), value: value.note });
@@ -142,11 +163,12 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           Object.entries(value).forEach(([itemId, entry]) => {
             if (entry.new > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('آکبند')}`, value: entry.new });
             if (entry.used > 0) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} / ${L('کارکرده')}`, value: entry.used });
+            if (selectionDescription(entry)) lines.push({ label: `${titleOf(LO(PROCUREMENT_ITEMS), itemId)} — ${L('توضیحات')}`, value: selectionDescription(entry) });
           });
           break;
         case 'hardwareCounters':
           Object.entries(value).forEach(([itemId, entry]) => {
-            if (entry.count > 0) lines.push({ label: titleOf(LO(HARDWARE_ITEMS), itemId), value: entry.count });
+            if (entry.count > 0) lines.push({ label: titleOf(LO(HARDWARE_ITEMS), itemId), value: describeQuantity(entry.count, entry, L('توضیحات')) });
           });
           break;
         case 'technician':
@@ -168,10 +190,19 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     return lines;
   }, [steps, answers]);
 
+  const serviceSteps = steps.filter((step) => SERVICE_STEP_IDS.includes(step.id));
   const firstMissingStep = () =>
-    steps.find((step) => step.required && !isStepFilled(step, answers[step.id]));
+    steps.find((step) => step.required && !isStepFilled(step, answers[step.id])) ||
+    (serviceSteps.some((step) => isStepFilled(step, answers[step.id])) ? null : serviceSteps[0]);
+
+  const missingQuantityStep = steps.find((step) =>
+    ['procurement', 'hardwareCounters'].includes(step.type) && hasDescriptionWithoutQuantity(answers[step.id]));
 
   const handleOrderAction = (action) => {
+    if (action !== 'cancel_order' && missingQuantityStep) {
+      showToastOrAlert(L('برای موارد دارای توضیحات، تعداد را وارد کنید.'));
+      return;
+    }
     if (action === 'cancel_order') {
       showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
         { text: L('انصراف'), style: 'cancel' },
@@ -181,7 +212,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     }
 
     const missing = firstMissingStep();
-    if (action === 'submit_order' || action === 'issue_receipt') {
+    if (action !== 'cancel_order') {
       if (missing) {
         showToastOrAlert(`${L(missing.title)} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
         setExpanded(missing.id);
@@ -189,12 +220,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       }
     }
 
-    if (action === 'submit_order') {
+    if (['submit_order', 'issue_receipt', 'show_receipt'].includes(action)) {
       // مرحله‌ی «بازه زمانی / رزرو» تاریخ و ساعت مراجعه را نگه می‌دارد.
       const scheduleStep = steps.find((step) => step.type === 'schedule');
       navigation.navigate('OrderSummaryScreen', {
         source: 'systematic',
-        categoryId,
+        previewOnly: action === 'show_receipt',
+        categoryId: route?.params?.backendCategoryId ?? null,
+        addressId: answers.address?.addressId,
+        technicianGender: answers.technician?.gender,
         categoryTitle: category?.title,
         orderTitle: category?.title ? `${L('انتخاب سیستماتیک')} - ${L(category.title)}` : undefined,
         summaryLines,
@@ -202,13 +236,6 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         answers,
       });
       return;
-    }
-    if (action === 'issue_receipt') {
-      showToastOrAlert(L('پیش‌رسید صادر شد'));
-      return;
-    }
-    if (action === 'show_receipt') {
-      showToastOrAlert(L('نمایش پیش‌رسید'));
     }
   };
 
@@ -418,10 +445,14 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
           </>
         );
 
+      case 'address':
+        return <SavedAddressPicker value={value?.addressId} onChange={(addressId) => setAnswer(step.id, { addressId })} navigation={navigation} />;
+
       case 'orderActions':
         return (
           <>
             <OrderActionButtons
+              disabled={Boolean(missingQuantityStep || firstMissingStep())}
               onIssueReceipt={() => handleOrderAction('issue_receipt')}
               onShowReceipt={() => handleOrderAction('show_receipt')}
               onSubmit={() => handleOrderAction('submit_order')}

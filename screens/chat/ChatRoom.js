@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import { View, TextInput, Pressable, ImageBackground, Platform, KeyboardAvoidingView, Text, ActivityIndicator } from 'react-native'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -13,6 +14,7 @@ import MessagesList from './MessagesList';
 import ScreenHeaders from '@components/ScreenHeaders';
 
 export default function ChatRoom({ route }) {
+  useRealtimeRefresh(["chat", "orders"], () => { if (token && technicianId) return fetchData(); });
 
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

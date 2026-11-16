@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 import React, { useState, useCallback,useMemo } from 'react';
 import {
   View,
@@ -24,6 +25,7 @@ import Button from '@components/Button';
 import { useSelector } from 'react-redux';
 import { createStyles } from '@styles/NewStyles';
 export default function MessageScreen({ navigation }) {
+  useRealtimeRefresh(["support"], () => fetchMessages());
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),

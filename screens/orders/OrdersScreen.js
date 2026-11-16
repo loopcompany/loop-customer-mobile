@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, FlatList, Modal, BackHandler } from 'react-native';
+import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView,  RefreshControl, ActivityIndicator, FlatList, Modal, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
@@ -19,6 +21,7 @@ import Button from '@components/Button';
 import { langIsRTL } from '@helpers/Common';
 
 function OrdersScreen({ navigation }) {
+  useRealtimeRefresh(["orders"], () => dispatch(fetchOrders(filterParams)));
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const dispatch = useDispatch();
@@ -44,29 +47,21 @@ function OrdersScreen({ navigation }) {
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
-  useEffect(() => {
-    const params = {};
-    if (fromDate) params.from_date = fromDate;
-    if (toDate) params.to_date = toDate;
-    if (status !== null) params.status = status;
-
-    dispatch(fetchOrders(params));
-  }, [dispatch, fromDate, toDate, status]);
+  const filterParams = useMemo(() => ({
+    ...(fromDate ? { from_date: fromDate } : {}),
+    ...(toDate ? { to_date: toDate } : {}),
+    ...(status !== null ? { status } : {}),
+  }), [fromDate, toDate, status]);
 
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(fetchOrders());
-    }, [dispatch])
+      dispatch(fetchOrders(filterParams));
+    }, [dispatch, filterParams])
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const params = {};
-    if (fromDate) params.from_date = fromDate;
-    if (toDate) params.to_date = toDate;
-    if (status !== null) params.status = status;
-
-    await dispatch(fetchOrders(params));
+    await dispatch(fetchOrders(filterParams));
     setRefreshing(false);
   };
 

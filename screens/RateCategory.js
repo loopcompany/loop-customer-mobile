@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 // RateListScreen.js
 import React, { useState, useEffect, useMemo } from 'react';
 import {
@@ -27,6 +28,7 @@ import { useSelector } from 'react-redux';
 
 
 export default function RateCategory() {
+  useRealtimeRefresh(["catalog"], () => fetchLetterRates());
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),

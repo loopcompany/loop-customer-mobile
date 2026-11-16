@@ -1,3 +1,4 @@
+import ReferralWalletPanel from '@components/ReferralWalletPanel';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useState, useEffect, useRef,useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
@@ -126,6 +127,7 @@ const styles = useMemo(()=> createLocalStyles(NewStyles), [NewStyles]);
         <SafeAreaView edges={{top:'off', bottom:'additive'}} style={[NewStyles.container]}>
             <ScreenHeaders title={t('Wallet recharge')} />
             <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
+                <ReferralWalletPanel />
                 <Text style={NewStyles.text}>{t('Enter your desired amount in Tomans.')} <Text style={[NewStyles.title6]}>*</Text></Text>
                 <Text style={NewStyles.text10}>{t('Your current wallet balance:')} <Text style={NewStyles.title}>{formatPrice(user?.wallet ?? 0)}</Text> {t('Tomans')}</Text>
                 <View style={[{ backgroundColor: themeColor3.bgColor(0.2), }, NewStyles.row, NewStyles.border10]}>

@@ -6,8 +6,10 @@ import { useEffect, useRef } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AuthInitializer from '@components/AuthInitializer';
+import RealtimeProvider from '@components/RealtimeProvider';
 import PushNotificationProvider from '@components/PushNotificationProvider';
 import { MenuProvider } from '@contexts/MenuContext';
 import { setNavigationRef } from '@services/axiosConfig';
@@ -18,6 +20,39 @@ import linking from './navigation/linking';
 import RootNavigator from './navigation/RootNavigator';
 import useExitConfirmation from './navigation/useExitConfirmation';
 import store from './store';
+import { removeToken } from '@slices/authSlice';
+import { emptyUser } from '@slices/userSlice';
+import { clearOrganizationData } from '@slices/organizationSlice';
+import { clearOrders } from '@slices/ordersSlice';
+
+async function expireCustomerSession(rejectedToken, navigation) {
+  const { token, userType } = store.getState().auth;
+  if (!token || token !== rejectedToken) return;
+
+  // Clear Redux first so concurrent 401 responses for this token are ignored.
+  store.dispatch(removeToken());
+  store.dispatch(emptyUser());
+  store.dispatch(clearOrganizationData());
+  store.dispatch(clearOrders());
+
+  let accountType = userType;
+  try {
+    const [[, storedType], [, storedToken]] = await AsyncStorage.multiGet(['accountType', 'userToken']);
+    if (store.getState().auth.token || (storedToken && storedToken !== rejectedToken)) return;
+    accountType ||= storedType;
+    await AsyncStorage.multiRemove([
+      'userToken', 'user_data', 'sessionToken', 'sessionUserData',
+      'accountType', 'userType', 'organizationData', 'organizationCode',
+    ]);
+  } catch (error) {
+    console.warn('Unable to clear expired customer session:', error?.message);
+  }
+
+  if (!store.getState().auth.token) {
+    const login = accountType === 'organization' ? 'Login' : 'LoginScreen';
+    navigation?.resetRoot?.({ index: 0, routes: [{ name: login }] });
+  }
+}
 
 /**
  * Persian font faces. These four keys are the *only* registered families —
@@ -49,7 +84,8 @@ const App = () => {
 
   // The axios error interceptor needs a way to redirect to the login screen.
   useEffect(() => {
-    setNavigationRef(navigationRef);
+    setNavigationRef(navigationRef, expireCustomerSession);
+    return () => setNavigationRef(null);
   }, []);
 
   useEffect(() => {
@@ -71,11 +107,13 @@ const App = () => {
             fallback={<NavigationFallback />}
           >
             <AuthInitializer>
+              <RealtimeProvider>
               <PushNotificationProvider>
                 <MenuProvider>
                   <RootNavigator />
                 </MenuProvider>
               </PushNotificationProvider>
+              </RealtimeProvider>
             </AuthInitializer>
           </NavigationContainer>
         </SafeAreaProvider>

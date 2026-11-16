@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 // صفحه‌ی «انتخاب سیستماتیک».
 //
 // این صفحه دقیقاً همان شبکه‌ی کاشی‌های صفحه‌ی اصلی قبلی است
@@ -48,6 +49,7 @@ const TILE_WIDTH = 100;
 const GRID_GAP = spacing.sm;
 
 const SystematicCategoryScreen = ({ navigation }) => {
+  useRealtimeRefresh(["catalog"], () => loadCategories());
   const { t, i18n } = useTranslation();
   // فضای رزرو شده زیر شبکه‌ی کاشی‌ها تا ردیف آخر زیر داک شناور پایین پنهان نشود
   const { footerSpace } = useMenu();
@@ -143,6 +145,7 @@ const SystematicCategoryScreen = ({ navigation }) => {
     if (systematicId && getFlow(systematicId).length) {
       navigation.navigate('SystematicDeviceScreen', {
         categoryId: systematicId,
+        backendCategoryId: Number.isInteger(Number(source?.id)) ? Number(source.id) : null,
         categoryTitle: entry.title,
       });
       return;

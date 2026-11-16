@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Linking } from 'react-native'
+import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { StyleSheet, Text, View,  ActivityIndicator, Linking } from 'react-native'
 import React, { useState, useMemo, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'

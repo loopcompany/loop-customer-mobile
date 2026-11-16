@@ -110,10 +110,17 @@ Desktop.ini
 .cache/
 
 # EAS
-.easignore
 
 # Sentry / source maps
 *.map
 
 # Graphify (local knowledge-graph output, not part of the app)
 graphify-out/
+
+android/
+
+ios/
+
+# Local release secrets
+credentials.json
+*.dpapi

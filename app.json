@@ -3,14 +3,13 @@
     "name": "loop",
     "slug": "loop",
     "scheme": "expo.loop.with-webbrowser-redirect",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.clpiran.loop",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "entitlements": {
         "aps-environment": "production"
       },
@@ -37,7 +36,8 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.POST_NOTIFICATIONS"
-      ]
+      ],
+      "versionCode": 20261115
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -86,9 +86,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "eb67af04-814c-4099-9bc0-243754cc4c4d"
+        "projectId": "915fb158-d12c-43b0-88e8-d08ed5eef1ad"
       }
     },
-    "owner": "mehrdadtorki"
+    "owner": "clpiran.com"
   }
 }

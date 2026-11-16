@@ -61,7 +61,6 @@ export default function ProductIssueScreen({ navigation }) {
 
   const handleOrderSelect = (item) => {
     setSelectedOrder(item);
-    console.log(JSON.stringify(item, null, 2));
 
     // Auto-fill fields with order information
     setForm(prev => ({
@@ -88,7 +87,7 @@ export default function ProductIssueScreen({ navigation }) {
     }
 
     if (!form.desc || form.desc.trim().length < 10) {
-      showToastOrAlert(t('Please enter description (minimum 10 characters)'));
+      showToastOrAlert(t('Issue subject details hint'));
       return;
     }
 
@@ -173,6 +172,7 @@ export default function ProductIssueScreen({ navigation }) {
       <ScreenHeaders title={t('Service / Product Fault')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
         <ScrollView contentContainerStyle={[NewStyles.wrapper, { paddingBottom: 100 }]}>
+          <Text style={NewStyles.text10}>{t('Find the relevant order')}</Text>
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Number')} </Text>
 
           <OrderDropdown
@@ -180,9 +180,10 @@ export default function ProductIssueScreen({ navigation }) {
             onChange={handleOrderSelect}
             placeholder={t('Select Order Number')}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Product / Service Name')} </Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order subject')} </Text>
 
-          <TextInput placeholder={t('Product / Service Name')} editable={false} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
+          <Text style={NewStyles.text10}>{t('Order details are filled automatically')}</Text>
+          <TextInput placeholder={t('Order subject')} editable={false} value={form.name} onChangeText={(text) => handleChange('name', text)} style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10]} placeholderTextColor="#999" />
           <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Order Registration Date')} </Text>
 
           <TouchableOpacity disabled={true} style={[NewStyles.textInput, NewStyles.border10]} onPress={() => setOrderDatePickerVisible(true)}>
@@ -219,10 +220,11 @@ export default function ProductIssueScreen({ navigation }) {
             keyboardType="numeric"
             editable={false}
           />
-          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Description')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={[NewStyles.text, { fontFamily: 'VazirBold' }]}>{t('Describe the review request')}<Text style={NewStyles.title6}>*</Text></Text>
+          <Text style={NewStyles.text10}>{t('A specialist will contact you to follow up')}</Text>
 
           <TextInput
-            placeholder={t('Description')}
+            placeholder={t('Issue subject details')}
             value={form.desc}
             onChangeText={(text) => handleChange('desc', text)}
             style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { height: 120, textAlignVertical: 'top' }]}

@@ -55,12 +55,15 @@ const ordersSlice = createSlice({
         loading: false,
         error: null,
         lastFetch: null,
+        activeRequestId: null,
     },
     reducers: {
         clearOrders: (state) => {
             state.data = [];
             state.error = null;
             state.lastFetch = null;
+            state.activeRequestId = null;
+            state.loading = false;
         },
         updateOrderStatus: (state, action) => {
             const { orderId, status } = action.payload;
@@ -72,17 +75,22 @@ const ordersSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchOrders.pending, (state) => {
+            .addCase(fetchOrders.pending, (state, action) => {
+                state.activeRequestId = action.meta.requestId;
                 state.loading = true;
                 state.error = null;
             })
             .addCase(fetchOrders.fulfilled, (state, action) => {
+                if (state.activeRequestId !== action.meta.requestId) return;
+                state.activeRequestId = null;
                 state.loading = false;
                 state.data = action.payload;
                 state.lastFetch = new Date().toISOString();
                 state.error = null;
             })
             .addCase(fetchOrders.rejected, (state, action) => {
+                if (state.activeRequestId !== action.meta.requestId) return;
+                state.activeRequestId = null;
                 state.loading = false;
                 state.error = action.payload || 'خطا در دریافت سفارشات';
             });

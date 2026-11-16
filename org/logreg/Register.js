@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
@@ -12,7 +12,7 @@ import { themeColor0, themeColor1, themeColor3 } from '@theme/Color';
 import CustomStatusBar from '@components/CustomStatusBar';
 import DatePickerModal from '@components/DatePickerModal';
 import LocationPicker from '@components/LocationPicker';
-import { uri } from '@services/URL';
+import { uri, termsPdfUrl } from '@services/URL';
 import { jalaliToGregorian, showAlert } from '@helpers/Common';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@components/Button';
@@ -1086,6 +1086,7 @@ const Register = ({ navigation }) => {
               </TouchableOpacity>
               <Text style={[NewStyles.text10, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>
             </View>
+            <Button title={t("Terms of use PDF")} onPress={() => Linking.openURL(termsPdfUrl)} />
             {errors.acceptTerms && (
               <Text style={[NewStyles.text6, { fontSize: 12, marginTop: 4, }]}>
                 {errors.acceptTerms}

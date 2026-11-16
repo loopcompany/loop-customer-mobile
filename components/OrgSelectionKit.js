@@ -911,19 +911,21 @@ export const IconOptionGrid = ({ options, value, onChange, columns = 3, imageSiz
 );
 
 // دکمه‌های «نمایش / استعلام / ثبت سفارش» - همان چهار دکمه‌ی پایانی هر دو مسیر.
-export const OrderActionButtons = ({ onIssueReceipt, onShowReceipt, onSubmit, onCancel }) => (
+export const OrderActionButtons = ({ onIssueReceipt, onShowReceipt, onSubmit, onCancel, disabled = false }) => (
   <View>
-    <ActionButton title={L('صدور پیش‌رسید')} color={colors.success} onPress={onIssueReceipt} />
-    <ActionButton title={L('نمایش پیش‌رسید')} color={colors.primary} onPress={onShowReceipt} />
-    <ActionButton title={L('ثبت سفارش')} color={colors.success} onPress={onSubmit} />
+    <ActionButton title={L('استعلام سفارش')} color={colors.success} onPress={onIssueReceipt} disabled={disabled} />
+    <ActionButton title={L('نمایش پیش‌رسید')} color={colors.primary} onPress={onShowReceipt} disabled={disabled} />
+    <ActionButton title={L('ثبت سفارش')} color={colors.success} onPress={onSubmit} disabled={disabled} />
     <ActionButton title={L('لغو سفارش')} color={colors.warning} onPress={onCancel} last />
   </View>
 );
 
-export const ActionButton = ({ title, color, onPress, last }) => (
+export const ActionButton = ({ title, color, onPress, last, disabled = false }) => (
   <TouchableOpacity
     onPress={onPress}
+    disabled={disabled}
     style={{
+      opacity: disabled ? 0.45 : 1,
       backgroundColor: color.bgColor(1),
       borderRadius: radius.sm,
       paddingVertical: spacing.md,

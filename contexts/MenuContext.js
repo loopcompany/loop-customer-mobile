@@ -34,6 +34,8 @@ import { shadow } from '@theme/Shadows';
 import { deviceHeight } from '@styles/NewStyles';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import useLogout from '@hooks/useLogout';
+import PendingOrderQuoteNotice from '@components/PendingOrderQuoteNotice';
+import PendingOrganizationAgreementNotice from '@components/PendingOrganizationAgreementNotice';
 import { fetchContacts } from '@slices/contactSlice';
 import { fetchUser } from '@slices/userSlice';
 import { createStyles } from '@styles/NewStyles';
@@ -470,7 +472,7 @@ export const MenuProvider = ({ children }) => {
             { id: 4, title: t("Transactions"), screen: "TransactionsScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/TransactionsScreen.png` },
             { id: 5, title: t("Canceled Orders"), screen: "CanceledOrdersScreen", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/CanceledOrdersScreen.png` },
             { id: 6, title: t("Messages"), screen: "MessageScreen", image: `${imageUri}/userfolder/MessageScreen.png` },
-            { id: 8, title: t("Contract"), screen: "OrganizationContract", organizationOnly: true, image: `${imageUri}/userfolder/OrganizationContract.png` },
+            { id: 8, title: 'سوابق توافق‌نامه‌ها', screen: "OrganizationContract", organizationOnly: true, image: `${imageUri}/userfolder/OrganizationContract.png` },
             { id: 9, title: t("Selected Addresses"), screen: "AddressScreen", image: `${imageUri}/userfolder/AddressScreen.png` },
             { id: 10, title: t("Training Course Registration"), screen: "TrainingRegistrationScreen", image: `${imageUri}/userfolder/TrainingRegistrationScreen.png` },
             { id: 23, title: t("Promotional codes"), screen: "UserDiscounts", apple_check: userData?.apple_check, image: `${imageUri}/userfolder/Club.png` },
@@ -603,6 +605,8 @@ export const MenuProvider = ({ children }) => {
         <MenuContext.Provider value={contextValue}>
             <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={{ flex: 1 }}>
                 {children}
+                <PendingOrderQuoteNotice navigation={navigation} />
+                <PendingOrganizationAgreementNotice navigation={navigation} />
 
                 {shouldShowMenu && (
                     <View
@@ -692,10 +696,16 @@ export const MenuProvider = ({ children }) => {
                             ListHeaderComponent={() => {
                                 return (
                                     <View style={[{ backgroundColor: themeColor4.bgColor(1), padding: 15 }, NewStyles.center]}>
+                                        <Image source={require('@assets/icons/sections/account-menu.png')} style={styles.accountIcon} resizeMode="contain" />
                                         {!!accountDisplayName && (
                                             <Text style={[NewStyles.title, styles.accountName]}>{accountDisplayName}</Text>
                                         )}
                                         <Text style={styles.accountTypeBadge}>{accountTypeLabel}</Text>
+                                        {!!userData?.code && (
+                                            <Text selectable style={NewStyles.title}>
+                                                {t('Customer account code')}{' '}{userData.code}
+                                            </Text>
+                                        )}
                                         <View style={[{ paddingVertical: 10, width: '90%', backgroundColor: themeColor8.bgColor(0.2), }, NewStyles.center, NewStyles.border10]}>
                                             <Text style={NewStyles.title}>{t("Your Points:")} {userData?.user_gems ?? '0'}</Text>
                                         </View>
@@ -832,6 +842,10 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         fontSize: fontSize.xs,
         fontFamily: getFontFamily('bold', language),
     },
+    accountIcon: {
+        width: 52,
+        height: 52,
+    },
     accountName: {
         marginBottom: spacing.xs,
         textAlign: 'center',
@@ -848,8 +862,8 @@ const createLocalStyles = (NewStyles, language) => StyleSheet.create({
         textAlign: 'center',
     },
     footerLogo: {
-        width: 34,
-        height: 34,
+        width: 44,
+        height: 44,
         resizeMode: "contain",
     },
     list: {

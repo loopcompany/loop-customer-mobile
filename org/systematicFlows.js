@@ -260,6 +260,7 @@ const closingSteps = (procurementIds, afterProcurement = []) => [
     hint: 'جنسیت تکنسینی که برای انجام خدمت مراجعه می‌کند را انتخاب کنید.',
     icon: sectionIcon.technician,
     type: 'technician',
+    required: true,
   },
   {
     id: 'time_range',
@@ -267,6 +268,13 @@ const closingSteps = (procurementIds, afterProcurement = []) => [
     hint: 'تاریخ مراجعه و بازه ساعتی مورد نظر خود را انتخاب کنید.',
     icon: sectionIcon.timeRange,
     type: 'schedule',
+    required: true,
+  },
+  {
+    id: 'address',
+    title: 'آدرس‌های منتخب',
+    hint: 'آدرس محل مراجعه را انتخاب کنید.',
+    type: 'address',
     required: true,
   },
   {
@@ -388,7 +396,7 @@ export const SYSTEMATIC_FLOWS = {
       id: 'brand',
       title: 'برند مانیتور',
       hint: 'برند مانیتور خود را انتخاب کنید. اگر برند شما در فهرست نیست، آن را در کادر «برند دیگر» بنویسید.',
-      icon: deviceIcon.monitor,
+      icon: require('@assets/icons/sections/monitor-brand.png'),
       type: 'brands',
       brands: MONITOR_BRANDS,
       required: true,
@@ -397,7 +405,7 @@ export const SYSTEMATIC_FLOWS = {
       id: 'panel_type',
       title: 'مدل مانیتور',
       hint: 'نوع پنل مانیتور را انتخاب و در صورت نیاز مدل دقیق را بنویسید.',
-      icon: deviceIcon.monitor,
+      icon: require('@assets/icons/sections/monitor-model.png'),
       type: 'options',
       options: [
         { id: 'lcd', title: 'LCD' },
@@ -808,6 +816,14 @@ export const SYSTEMATIC_FLOWS = {
       note: true,
       required: true,
     },
+    {
+      id: 'device_status',
+      title: 'وضعیت هارد دیسک',
+      hint: 'وضعیت فعلی هارد دیسک را انتخاب کنید.',
+      icon: sectionIcon.equipmentStatus,
+      type: 'options',
+      options: DEVICE_STATUS_OPTIONS,
+    },
     ...closingSteps(['storage_drive', 'accessories']),
   ],
 
@@ -869,7 +885,26 @@ export const SYSTEMATIC_FLOWS = {
   ],
 };
 
-export const getFlow = (categoryId) => SYSTEMATIC_FLOWS[categoryId] || [];
+const REQUIRED_DEVICE_STEPS = {
+  laptop: ['brand', 'model', 'device_status', 'hard_disk_data'],
+  monitor: ['brand', 'panel_type', 'size', 'physical_issue', 'device_status'],
+  case: ['model', 'device_status', 'hard_disk_data'],
+  all_in_one: ['brand', 'model', 'device_status', 'hard_disk_data'],
+  hard_disk: ['brand', 'disk_type', 'device_status', 'hard_disk_data'],
+  printer_copy: ['brand', 'model', 'device_type', 'device_status'],
+};
+
+export const SERVICE_STEP_IDS = ['os', 'software_install', 'software_default', 'hardware_default'];
+
+export const getFlow = (categoryId) => {
+  const flow = SYSTEMATIC_FLOWS[categoryId] || [];
+  const required = REQUIRED_DEVICE_STEPS[categoryId];
+  if (!required) return flow;
+  return flow.map((step) => ({
+    ...step,
+    required: required.includes(step.id) || ['technician', 'time_range', 'address'].includes(step.id),
+  }));
+};
 
 export const getCategory = (categoryId) =>
   SYSTEMATIC_CATEGORIES.find((c) => c.id === categoryId) || null;

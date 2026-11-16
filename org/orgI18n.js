@@ -94,8 +94,8 @@ const EN = {
   'نمایش / استعلام / ثبت سفارش': 'Preview / inquiry / submit order',
   'توافق نامه': 'Agreement',
   'رزرو / مراجعه تکنسین': 'Booking / technician visit',
-  'تخفیف پنل / کد تخفیف': 'Panel discount / discount code',
-  'کد تخفیف': 'Discount code',
+  'تخفیف پنل / کد تشویقی': 'Panel discount / discount code',
+  'کد تشویقی': 'Discount code',
 
   // --- section hints (Comprehensive) ---------------------------------
   'مشخص کنید خدمات به چه شکل و در چه بازه‌ای ارائه شود: کوتاه‌مدت/یکبار، ماهانه، سالیانه یا پروژه‌ای.':
@@ -183,6 +183,19 @@ const EN = {
   'کارکرده': 'Used',
   'نو / آکبند': 'New',
   'کارکرده و سالم': 'Used & healthy',
+  'برای موارد دارای توضیحات، تعداد را وارد کنید.': 'Enter a quantity for each item with a description.',
+  'ابتدا یک آدرس ثبت کنید.': 'Add an address first.',
+  'مدیریت آدرس‌ها': 'Manage addresses',
+  'آدرس محل مراجعه را انتخاب کنید.': 'Choose the service address.',
+  'برآورد هزینه سفارش شما آماده است.': 'Your order estimate is ready.',
+  'استعلام سفارش': 'Request an estimate',
+  'پیش‌رسید برآورد سفارش': 'Order estimate',
+  'دلیل درخواست بازنگری را وارد کنید.': 'Enter the reason for requesting a revision.',
+  'دلیل درخواست بازنگری': 'Reason for requesting a revision',
+  'ثبت تصمیم انجام نشد.': 'Could not save your decision.',
+  'درخواست بازنگری هزینه‌ها': 'Request a price review',
+  'وضعیت هارد دیسک': 'Drive condition',
+  'وضعیت فعلی هارد دیسک را انتخاب کنید.': 'Choose the current condition of the drive.',
   'خلاصه سفارش': 'Order summary',
   'تعداد مورد نیاز': 'Quantity needed',
   '{n} از {total} مرحله تکمیل شده': '{n} of {total} steps completed',
@@ -429,7 +442,7 @@ const EN = {
   'شرح کلی نیاز': 'Overall need description',
 
   // --- guide / help titles -------------------------------------------
-  'راهنمای احتساب درصد تخفیف پنل / کد تخفیف ۱': 'Guide: panel discount / discount code calculation',
+  'راهنمای احتساب درصد تخفیف پنل / کد تشویقی ۱': 'Guide: panel discount / discount code calculation',
   'راهنمای اطلاعات اپراتور ۱': 'Guide: operator information',
   'راهنمای زمان نگهداری کوتاه مدت': 'Guide: short-term retention time',
   'زمان نگهداری و سرویس (کوتاه مدت)': 'Retention & service time (short-term)',

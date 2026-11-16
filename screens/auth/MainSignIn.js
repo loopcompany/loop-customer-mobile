@@ -17,6 +17,7 @@ import Button from "@components/Button";
 import NewStyles from "@styles/NewStyles";
 import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "@theme/Color";
 import { authAPI } from "@services/Api";
+import { termsPdfUrl } from "@services/URL";
 import { showToastOrAlert, langIsRTL } from "@helpers/Common";
 import CustomStatusBar from "@components/CustomStatusBar";
 import InviteCodeInput from "@components/InviteCodeInput";
@@ -382,6 +383,7 @@ export default function MainSignIn({ navigation }) {
                                 </TouchableOpacity>
                                 <Text style={[NewStyles.text4, { flex: 1, padding: 5 }]}> {t("By continuing, I accept Loop's Terms of Use and Privacy Policy.")} </Text>
                             </View>
+                            <Button title={t("Terms of use PDF")} onPress={() => Linking.openURL(termsPdfUrl)} />
                             {state.errors.acceptTerms && (
                                 <Text style={styles.fieldErrorText}>
                                     {state.errors.acceptTerms}

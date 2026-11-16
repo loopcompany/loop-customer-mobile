@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 // RateListScreen.js
 import React, { useState, useEffect } from 'react';
 import {
@@ -22,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 
 
 export default function RateListScreen({ route }) {
+  useRealtimeRefresh(["catalog"], () => fetchLetterRates());
 
   const { t } = useTranslation();
   const params = route?.params;

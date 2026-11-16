@@ -268,6 +268,7 @@ export const useOrganizationAccess = () => {
     
     // صفحات همیشه مجاز برای کاربران سازمانی
     const alwaysAllowedScreens = [
+      'ComprehensiveSelectionScreen',
       // صفحات مربوط به مدیریت حساب سازمانی
       'OrganizationProfile',
       'OrganizationContract', 

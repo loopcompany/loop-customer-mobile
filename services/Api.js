@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS, buildApiUrl } from './ApiEndpoints';
+import { handleExpiredSession } from './axiosConfig';
 import { handleError, showToastOrAlert } from '@helpers/Common';
 import i18next from 'i18next';
 
@@ -36,8 +37,12 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     // Log error but don't show toast automatically for verification endpoints
+    const path = error.config?.url ?? '';
+    if (error.response?.status === 401 && !/\/(?:auth\/|organization\/(?:login|register|verify-phone|resend-code|validate-token|logout))/.test(path)) {
+      await handleExpiredSession(error);
+    }
     if (error.config?.url?.includes('/auth/verify-phone') ||
       error.config?.url?.includes('/auth/verify-reset-code')) {
       console.log('Verification error (no toast):', error.response?.data);

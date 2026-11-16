@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 import React, { useState, useEffect,useMemo } from "react";
 import {
   View,
@@ -19,6 +20,7 @@ import moment from "moment-jalaali";
 import { createStyles } from '@styles/NewStyles';
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function NotesScreen({ route, navigation }) {
+  useRealtimeRefresh(["account"], () => fetchNotes());
 const { t, i18n } = useTranslation();
 const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(

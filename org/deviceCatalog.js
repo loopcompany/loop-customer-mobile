@@ -78,6 +78,11 @@ export const SOFTWARE_ITEMS = [
 // بازه‌های دو ساعته مطابق طرح «بازه زمانی / رزرو» (صفحات لپ تاپ و مانیتور طرح).
 // start/end ساعت شروع و پایان هر بازه است تا SchedulePicker بتواند بازه‌های
 // گذشته‌ی «امروز» را غیرفعال کند و کاربر زمانِ سپری‌شده را رزرو نکند.
+export const hasDescriptionWithoutQuantity = (items = {}) =>
+  Object.values(items).some((item) =>
+    item.desc?.trim() && !(item.count > 0 || item.new > 0 || item.used > 0)
+  );
+
 export const TIME_SLOT_OPTIONS = [
   { id: 'slot_10_12', title: '۱۰ الی ۱۲', start: 10, end: 12 },
   { id: 'slot_12_14', title: '۱۲ الی ۱۴', start: 12, end: 14 },

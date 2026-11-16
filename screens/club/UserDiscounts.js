@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import { FlatList, View } from 'react-native';
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
@@ -12,6 +13,7 @@ import ScreenHeaders from '@components/ScreenHeaders';
 import BlankScreen from '@components/BlankScreen';
 import { createStyles } from '@styles/NewStyles';
 export default function UserDiscounts({ navigation }) {
+  useRealtimeRefresh(["wallet", "catalog"], () => fetchData());
 
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(

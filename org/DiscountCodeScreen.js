@@ -30,7 +30,7 @@ const DiscountCodeScreen = ({ navigation }) => {
       
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, paddingTop: 10 }}>
         
-        {/* تخفیف پنل / کد تخفیف Header */}
+        {/* تخفیف پنل / کد تشویقی Header */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
           <View style={{ 
             backgroundColor: '#1976d2', 
@@ -50,10 +50,10 @@ const DiscountCodeScreen = ({ navigation }) => {
               fontWeight: 'bold', 
               fontFamily: 'VazirBold',
               textAlign: 'center' 
-            }}>تخفیف پنل / کد تخفیف</Text>
+            }}>تخفیف پنل / کد تشویقی</Text>
             <HintBadge
-              hint="راهنمای احتساب درصد تخفیف پنل / کد تخفیف ۱"
-              title="تخفیف پنل / کد تخفیف"
+              hint="راهنمای احتساب درصد تخفیف پنل / کد تشویقی ۱"
+              title="تخفیف پنل / کد تشویقی"
               style={{ position: 'absolute', top: 10, left: 10 }}
             />
             <View style={{
@@ -94,7 +94,7 @@ const DiscountCodeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* کد تخفیف */}
+        {/* کد تشویقی */}
         <View style={{ width: '90%', alignSelf: 'center', marginBottom: 15 }}>
           <TextInput
             style={{ 
@@ -111,7 +111,7 @@ const DiscountCodeScreen = ({ navigation }) => {
             }}
             value={discountCode}
             onChangeText={setDiscountCode}
-            placeholder="کد تخفیف"
+            placeholder="کد تشویقی"
             placeholderTextColor="#999"
           />
         </View>

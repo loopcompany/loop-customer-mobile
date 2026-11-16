@@ -30,7 +30,7 @@ const MENU_ITEMS = [
   { id: 2, title: 'تامین قطعات / کالا', screen: 'HardwareSelectionScreen' },
   { id: 3, title: 'رزرو / مراجعه تکنسین', screen: 'TechnicianVisitScreen' },
   { id: 4, title: 'انتخاب تکنسین', screen: 'ChooseTechnicianScreen' },
-  { id: 5, title: 'تخفیف پنل / کد تخفیف', screen: 'DiscountCodeScreen' },
+  { id: 5, title: 'تخفیف پنل / کد تشویقی', screen: 'DiscountCodeScreen' },
   // صفحه‌ی «اطلاعات اپراتور» هنوز به‌صورت مستقل وجود ندارد و فقط به شکل یک بخش
   // داخل ComprehensiveSelectionScreen پیاده شده، بنابراین این دکمه فعلاً پیام
   // «به‌زودی» می‌دهد (مثل رفتار قبلی کاشی «ضایعات» در صفحه‌ی اصلی).

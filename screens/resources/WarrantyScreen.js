@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,7 @@ import AccordionItem from '@components/AccordionItem';
 import { createStyles } from '@styles/NewStyles';
 import { ImageBackground } from 'expo-image';
 export default function WarrantyScreen() {
+  useRealtimeRefresh(["catalog"], () => loadWarranties());
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),

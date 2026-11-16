@@ -423,7 +423,7 @@ const OrganizationProfile = () => {
       >
         {/* Header با دکمه ویرایش */}
         <View style={styles.headerContainer}>
-          <View style={{alignItems: langIsRTL(i18n.language) ? 'flex-end' : 'flex-start'}}>
+          <View style={[styles.headerInfo, {alignItems: langIsRTL(i18n.language) ? 'flex-end' : 'flex-start'}]}>
             <Text style={styles.headerTitle}>{t('Organization information')}</Text>
             {
               editRequest &&
@@ -839,13 +839,24 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 3,
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  headerInfo: {
+    flexGrow: 1,
+    flexBasis: 160,
+    minWidth: 0,
+    maxWidth: '100%',
   },
   headerTitle: {
+    flexShrink: 1,
     color: '#fff',
     fontSize: 16,
     fontFamily: 'VazirBold',
   },
   editButton: {
+    maxWidth: '100%',
+    flexShrink: 1,
     ...NewStyles.row,
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -854,6 +865,7 @@ const createLocalStyles = (NewStyles, isRTL) => StyleSheet.create({
     borderRadius: 6,
   },
   editButtonText: {
+    flexShrink: 1,
     color: '#fff',
     fontSize: 14,
     fontFamily: 'VazirLight',

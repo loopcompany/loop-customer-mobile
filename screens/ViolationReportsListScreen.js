@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
 // ViolationReportsListScreen.js
 import React, { useState, useEffect,useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, } from 'react-native';
@@ -11,6 +12,7 @@ import violationReportAPI from '@services/ViolationReportApi';
 import { formatJalaaliDate, formatPrice, showToastOrAlert } from '@helpers/Common';
 import { createStyles } from '@styles/NewStyles';
 export default function ViolationReportsListScreen({ navigation }) {
+  useRealtimeRefresh(["support"], () => fetchReports(1, true));
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
     () => createStyles(i18n.language),

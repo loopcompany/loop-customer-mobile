@@ -1,3 +1,4 @@
+import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
 // screens/OrderTrackingScreen.js
 
 import React from 'react';
@@ -5,7 +6,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+
   ScrollView,
   ImageBackground,
 } from 'react-native';

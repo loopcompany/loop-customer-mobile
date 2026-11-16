@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 // AddressScreen.js
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -22,6 +23,7 @@ import Button from "@components/Button";
 import { createStyles } from '@styles/NewStyles';
 import ShowMapDetailComponent from "@components/ShowMapDetailComponent";
 export default function AddressScreen({ route, navigation }) {
+  useRealtimeRefresh(["account"], () => fetchAddresses());
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(

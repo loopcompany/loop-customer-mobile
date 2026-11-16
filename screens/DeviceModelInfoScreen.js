@@ -186,15 +186,15 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
             </View>
           </FormSection>
 
-          {/* ✅ کد تخفیف */}
+          {/* ✅ کد تشویقی */}
           <FormSection
-            label="کد تخفیف"
+            label="کد تشویقی"
             visible={visibleSection === 'discount'}
             onPress={() => toggleSection('discount')}
-            yellowText="در صورت وجود، کد تخفیف وارد کنید"
+            yellowText="در صورت وجود، کد تشویقی وارد کنید"
           >
             <TextInput
-              placeholder="کد تخفیف را وارد کنید"
+              placeholder="کد تشویقی را وارد کنید"
               placeholderTextColor={themeColor10.bgColor(0.7)}
               style={[NewStyles.textInput, NewStyles.border10, NewStyles.text10, { fontSize: 13 }]}
             />

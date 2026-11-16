@@ -1,4 +1,7 @@
-import { View, Text, Image, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, KeyboardAvoidingView, TextInput, FlatList } from 'react-native'
+import { OrderReadOnlyContext } from '../../contexts/OrderReadOnlyContext';
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { View, Text, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl,  KeyboardAvoidingView, } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -6,12 +9,16 @@ import * as Linking from "expo-linking";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
-import { imageUri, uri } from '@services/URL';
+import { uri } from '@services/URL';
 import NewStyles from '@styles/NewStyles'
 import { formatDate, formatDateTime, formatPrice, langIsRTL, showToastOrAlert } from '@helpers/Common';
 import { themeColor0, themeColor1, themeColor10, themeColor3, themeColor4, themeColor5, themeColor6, themeColor7, themeColor8, themeColor14 } from '@theme/Color';
 import Loader from '@components/Loader';
 import { useFocusEffect } from '@react-navigation/native';
+import OrderQuoteCard from '@components/OrderQuoteCard';
+import CustomerVisitDecisionCard from '@components/CustomerVisitDecisionCard';
+import OrderProcurementDetails from '@components/OrderProcurementDetails';
+import CustomerOrderAttachments from '@components/CustomerOrderAttachments';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import TechnicianDetailsComponent from '@components/TechnicianDetailsComponent';
@@ -146,27 +153,15 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
             </View>}
 
 
-            {data?.image_path &&
-                <Image style={[{ height: 250, margin: '5%', maxWidth: 400, resizeMode: 'contain', width: '90%', alignSelf: 'center' }, NewStyles.border10]} source={{ uri: `${imageUri}/${data?.image_path}` }} />
-            }
-            {data?.order_galleries?.length > 0 && <View>
-                <FlatList
-                    data={data?.order_galleries}
-                    inverted={langIsRTL(i18n?.language)}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: '5%', gap: 10, paddingVertical: 10 }}
-                    renderItem={({ item }) => {
-                        return (
-                            <TouchableOpacity style={{}} onPress={() => {
-                                Linking.openURL(`${imageUri}/${item?.image_path}`)
-                            }}>
-                                <Image source={{ uri: `${imageUri}/${item?.image_path}` }} style={[{ height: 120, width: 120, }, NewStyles.border10]} />
-                            </TouchableOpacity>
-                        )
-                    }}
-                />
-            </View>}
+            {data?.procurement_items?.length > 0 && (
+                <View style={{ paddingHorizontal: '5%', paddingVertical: 10 }}>
+                    <OrderProcurementDetails items={data.procurement_items} titleStyle={NewStyles.title} textStyle={NewStyles.text10} />
+                </View>
+            )}
+
+            <View style={{ paddingHorizontal: '5%' }}>
+                <CustomerOrderAttachments order={data} titleStyle={NewStyles.title} textStyle={NewStyles.text10} />
+            </View>
             <View style={{ width: '100%', height: 250, paddingHorizontal: '5%' }}>
                 <ShowMapDetailComponent
                     latitude={data?.user_address?.latitude}
@@ -180,6 +175,7 @@ const OrderDetail = ({ data, renderRow, totalDiscountedPrice, totalPrice, t, sty
 
 
 function Details({ route, navigation }) {
+  useRealtimeRefresh(["orders", "chat", "chat-counts"], async () => { if (orderId && token) { await fetchData(true); await checkReportStatus(); } });
 
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(
@@ -263,12 +259,12 @@ function Details({ route, navigation }) {
         }
     };
 
-    const fetchData = async () => {
+    const fetchData = async (background = false) => {
         try {
             const response = await axios.post(`${uri}/orders/detail`, { orderId }, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}`, 'Accept-Language': lang } })
             if (response.status == 200) {
                 setData(response?.data)
-                setIsTechnicianVerified(response?.data?.is_technician_verified);
+                if (!background) setIsTechnicianVerified(response?.data?.is_technician_verified);
             }
         } catch (error) {
             const message = error?.response ? (error?.response?.status ? error?.response?.data?.message : t("An unexpected error occurred!")) : t("Network error!");
@@ -528,8 +524,15 @@ function Details({ route, navigation }) {
             <ScreenHeaders title={t("Current order")} />
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding'>
 
-                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, { paddingBottom: 100 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() => setRefreshing(true)} />}>
+                <ScrollView contentContainerStyle={[{ paddingVertical: 10 }, { paddingBottom: 100 }]} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl colors={[themeColor0.bgColor(1)]} progressBackgroundColor={themeColor5.bgColor(1)} refreshing={refreshing} onRefresh={() =>
 
+ setRefreshing(true)} />}>
+<OrderReadOnlyContext.Provider value={Number(data?.status)===2}>
+                    {Number(data?.status)===2 && <Text style={[NewStyles.title10,{padding:16}]}>پرونده مختومه است؛ اطلاعات فقط قابل مشاهده‌اند. نظر و امتیاز اختیاری است.</Text>}
+
+
+                    <OrderQuoteCard orderId={orderId} order={data} quote={data?.workflow?.current_quote} readOnly={Number(data?.status) >= 2} onChanged={() => setRefreshing(true)} />
+                    <CustomerVisitDecisionCard orderId={orderId} workflow={data?.workflow} onChanged={() => setRefreshing(true)} />
                     <AccordionHeader
                         title={t("Order details")}
                         isActive={true}
@@ -940,6 +943,7 @@ function Details({ route, navigation }) {
                         </View>
                     )}
 
+                    </OrderReadOnlyContext.Provider>
                     {/* مرحله ثبت نظر - فعال بعد از تکمیل سفارش (status=2 و finished_at) */}
                     <AccordionHeader
                         title={t("Submit review")}
@@ -959,6 +963,7 @@ function Details({ route, navigation }) {
                             technicianId={data?.technician?.id}
                             orderStatus={data?.status}
                             finishedAt={data?.finished_at}
+                            reviewDismissedAt={data?.review_dismissed_at}
                         />
                     )}
                 </ScrollView>

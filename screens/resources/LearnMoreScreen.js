@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import Loader from '@components/Loader';
 import AccordionItem from '@components/AccordionItem';
 
 export default function LearnMoreScreen() {
+  useRealtimeRefresh(["catalog"], () => loadFaqs());
   const { t } = useTranslation();
   const [faqs, setFaqs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

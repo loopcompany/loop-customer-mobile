@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, } from 'react-native';
+import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { View, Text, StyleSheet, ScrollView,  FlatList, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '@styles/NewStyles';
 import ScreenHeaders from '@components/ScreenHeaders';
@@ -11,6 +13,7 @@ import OrderItem from '@components/OrderItem';
 import { createStyles } from '@styles/NewStyles';
 import { langIsRTL } from '@helpers/Common';
 function CanceledOrdersScreen({ navigation }) {
+  useRealtimeRefresh(["orders"], () => dispatch(fetchOrders()));
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(

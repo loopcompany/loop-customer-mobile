@@ -72,7 +72,7 @@ export default function TechnicianBookingScreen({navigation}) {
           ))}
         </View>
 
-        {/* کد تخفیف */}
+        {/* کد تشویقی */}
         <TextInput
           style={styles.input}
           placeholder={t("Discount Code (Optional)")}

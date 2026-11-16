@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, Modal, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
 import { useEffect, useState, useMemo } from 'react';
 import { Image } from 'expo-image';
@@ -22,6 +23,7 @@ import { showToastOrAlert } from '@helpers/Common';
 import ScreenHeaders from '@components/ScreenHeaders';
 import { langIsRTL } from '@helpers/Common';
 export default function Club({ navigation }) {
+  useRealtimeRefresh(["wallet", "catalog"], () => fetchData());
 
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(

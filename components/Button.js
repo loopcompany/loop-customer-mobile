@@ -1,3 +1,4 @@
+import { useOrderReadOnly } from '@contexts/OrderReadOnlyContext';
 import {
   View,
   Text,
@@ -10,9 +11,10 @@ import { themeColor0, themeColor10, themeColor4 } from "@theme/Color";
 import NewStyles from "@styles/NewStyles";
 
 export default function Button({ onPress, title, style, loading , textStyle}) {
+  const orderReadOnly=useOrderReadOnly();
   return (
     <TouchableOpacity
-      disabled={loading}
+      disabled={orderReadOnly || (loading)}
       style={[styles.button, NewStyles.shadow, NewStyles.border10,NewStyles.center, style]}
       onPress={onPress}
     >

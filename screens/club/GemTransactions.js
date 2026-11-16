@@ -1,3 +1,4 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -13,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenHeaders from '@components/ScreenHeaders';
 import i18n from 'i18next';
 export default function GemTransactions() {
+  useRealtimeRefresh(["wallet"], () => fetchData());
 
     const dispatch = useDispatch();
     const { t } = useTranslation();

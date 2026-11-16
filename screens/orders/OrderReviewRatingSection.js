@@ -1,10 +1,11 @@
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
 // OrderReviewRatingSection.js - ثبت نظر و امتیاز
 import React, { useState, useEffect,useMemo } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  TextInput,
+
+
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
@@ -18,9 +19,10 @@ import { themeColor0, themeColor1, themeColor3, themeColor4, themeColor7 } from 
 import Button from '@components/Button';
 import { uri } from '@services/URL';
 import { showToastOrAlert, langIsRTL } from '@helpers/Common';
+import apiClient from '@services/Api';
 import { submitReview, checkReviewForOrder } from '@services/ReviewApi';
 
-export default function OrderReviewRatingSection({ orderId, technicianId, orderStatus, finishedAt }) {
+export default function OrderReviewRatingSection({ orderId, technicianId, orderStatus, finishedAt, reviewDismissedAt }) {
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
@@ -28,6 +30,8 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
     [i18n.language]
   );
     const styles = useMemo(()=> createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL]);
+  const [dismissed,setDismissed]=useState(Boolean(reviewDismissedAt));
+  const [dismissing,setDismissing]=useState(false);
   const [scores, setScores] = useState({
     application: '',
     technician: '',
@@ -120,6 +124,14 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
     }
   };
 
+  const dismiss = async () => {
+    if (dismissing || submitLoading) return;
+    setDismissing(true);
+    try { await apiClient.post('/reviews/dismiss',{order_id:orderId}); setDismissed(true); }
+    catch (error) { showToastOrAlert(error.response?.data?.message || 'ثبت صرف‌نظر انجام نشد.'); }
+    finally { setDismissing(false); }
+  };
+
   const convertNumberToRating = (number) => {
     if (number >= 4) return t('Good');
     if (number >= 2) return t('Average');
@@ -139,6 +151,13 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
       </View>
     );
   }
+
+  if (dismissed && !hasReview) return (
+    <View style={styles.container}>
+      <Text style={NewStyles.text10}>نظر و امتیاز اختیاری است؛ از ثبت نظر برای این پرونده صرف‌نظر کرده‌اید.</Text>
+      <TouchableOpacity onPress={()=>setDismissed(false)}><Text style={NewStyles.title10}>ثبت نظر در صورت تمایل</Text></TouchableOpacity>
+    </View>
+  );
 
   // اگر قبلاً نظر ثبت شده
   if (hasReview && reviewData) {
@@ -189,6 +208,10 @@ export default function OrderReviewRatingSection({ orderId, technicianId, orderS
   // فرم ثبت نظر
   return (
     <View style={styles.container}>
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel="صرف‌نظر از نظر و امتیاز این پرونده" disabled={dismissing || submitLoading} onPress={dismiss} style={{alignSelf:'flex-start',padding:12}}>
+        <Text style={NewStyles.title10}>×  نمی‌خواهم نظر بدهم</Text>
+      </TouchableOpacity>
+
       <View style={styles.section}>
         <Text style={[NewStyles.text10, { textAlign: 'center', marginBottom: 15 }]}>
           {t('Dear user, please submit your review about this order.')}

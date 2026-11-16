@@ -8,6 +8,8 @@ import ScreenTitle from '@components/ScreenTitle';
 import CustomStatusBar from '@components/CustomStatusBar';
 import DatePickerModal from '@components/DatePickerModal';
 import SchedulePicker from '@components/SchedulePicker';
+import SavedAddressPicker from '@components/SavedAddressPicker';
+import OrganizationAgreementPanel from '@components/OrganizationAgreementPanel';
 import {
   AccordionHeader,
   SectionBody,
@@ -29,6 +31,7 @@ import {
   SOFTWARE_ITEMS,
   TECHNICIAN_GENDER_OPTIONS,
   TIME_SLOT_OPTIONS,
+  hasDescriptionWithoutQuantity,
 } from './deviceCatalog';
 import NewStyles from '@styles/NewStyles';
 import { themeColor0, themeColor7, themeColor10, themeColor11, themeColor4, colors } from '@theme/Color';
@@ -37,6 +40,7 @@ import { fontSize } from '@theme/Typography';
 import { showAlert, showToastOrAlert, validateMelicode } from '@helpers/Common';
 import { useMenu } from '@contexts/MenuContext';
 import { L, LO } from './orgI18n';
+import { describeQuantity, selectionDescription } from './orderDescriptions';
 
 const DELIVERY_MODE_OPTIONS = [
   { id: 'once_short', title: 'کوتاه مدت / یکبار' },
@@ -188,11 +192,23 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
 
   const [technicianGender, setTechnicianGender] = useState(null);
+  const [addressId, setAddressId] = useState(null);
 
   const [letterFile, setLetterFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const toggleSection = (id) => setExpanded((prev) => (prev === id ? null : id));
+  const toggleSection = (id) => {
+    const itemsBySection = {
+      software_services: softwareItems,
+      hardware_services: hardwareItems,
+      procurement: procurementItems,
+    };
+    if (id !== expanded && hasDescriptionWithoutQuantity(itemsBySection[expanded])) {
+      showToastOrAlert(L('برای موارد دارای توضیحات، تعداد را وارد کنید.'));
+      return;
+    }
+    setExpanded((prev) => (prev === id ? null : id));
+  };
 
   const changeDeviceCount = (id, delta) =>
     setDeviceCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
@@ -220,7 +236,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   // «بازه زمانی/رزرو» شرطیه: اگر «کوتاه‌مدت/یکبار» جزو حالت‌های انتخاب‌شده باشد
   // (نحوه ارائه خدمات چندانتخابی است)، فقط تاریخ+ساعت نمایش داده می‌شود.
-  const isOnceShort = deliveryMode.includes('once_short');
+  const isOnceShort = deliveryMode.length === 1 && deliveryMode.includes('once_short');
 
   const handleUploadLetter = async () => {
     try {
@@ -262,7 +278,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
     });
     SOFTWARE_ITEMS.forEach((item) => {
       const entry = softwareItems[item.id];
-      if (entry?.count > 0) lines.push({ label: L(item.title), value: entry.count });
+      if (entry?.count > 0) lines.push({ label: L(item.title), value: describeQuantity(entry.count, entry, L('توضیحات')) });
     });
     return lines;
   }, [osCounts, softwareDeviceCounts, softwareItems]);
@@ -270,7 +286,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
   const hardwareSummaryLines = useMemo(() => {
     return HARDWARE_ITEMS
       .filter((item) => hardwareItems[item.id]?.count > 0)
-      .map((item) => ({ label: L(item.title), value: hardwareItems[item.id].count }));
+      .map((item) => ({ label: L(item.title), value: describeQuantity(hardwareItems[item.id].count, hardwareItems[item.id], L('توضیحات')) }));
   }, [hardwareItems]);
 
   const procurementSummaryLines = useMemo(() => {
@@ -279,11 +295,23 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       const entry = procurementItems[item.id];
       if (entry?.new > 0) lines.push({ label: `${L(item.title)} / ${L('آکبند')}`, value: entry.new });
       if (entry?.used > 0) lines.push({ label: `${L(item.title)} / ${L('کارکرده')}`, value: entry.used });
+      if (selectionDescription(entry)) lines.push({ label: `${L(item.title)} — ${L('توضیحات')}`, value: selectionDescription(entry) });
     });
     return lines;
   }, [procurementItems]);
 
+  const hasMissingQuantity = hasDescriptionWithoutQuantity(softwareItems) ||
+    hasDescriptionWithoutQuantity(hardwareItems) || hasDescriptionWithoutQuantity(procurementItems);
+
+  const hasService = softwareSummaryLines.length > 0 || hardwareSummaryLines.length > 0;
+  const supplyOnly = !hasService && procurementSummaryLines.length > 0;
+  const canProceed = !hasMissingQuantity && deliveryMode.length > 0 &&
+    (hasService || supplyOnly) && (supplyOnly || equipmentStatus.length > 0) &&
+    Boolean(serviceLevel && (isOnceShort ? onceDate : startDate) && timeSlot && addressId && technicianGender) &&
+    (isOnceShort || Boolean(letterFile && (supplyOnly || criticalInfra) && validateOperatorInfo()));
+
   const handleOrderAction = (action) => {
+    if (action !== 'cancel_order' && !canProceed) return;
     if (action === 'cancel_order') {
       showAlert(L('لغو سفارش'), L('آیا از لغو سفارش مطمئن هستید؟'), [
         { text: L('انصراف'), style: 'cancel' },
@@ -291,17 +319,20 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       ]);
       return;
     }
-    if (action === 'submit_order') {
-      if (!validateOperatorInfo()) {
-        showToastOrAlert(L('لطفاً اطلاعات اپراتور را کامل کنید.'));
-        setExpanded('operator_info');
-        return;
-      }
+    if (['submit_order', 'issue_receipt', 'show_receipt'].includes(action)) {
       navigation.navigate('OrderSummaryScreen', {
+        previewOnly: action === 'show_receipt',
         source: 'comprehensive',
+        categoryId: 3,
+        addressId,
+        technicianGender,
+        deliveryMode,
+        procurementItems,
+        letterFile,
         orderTitle: L('انتخاب جامع - خدمات سازمانی'),
         // هر سه بخش انتخاب‌شده در یک فهرست خلاصه‌ی واحد.
         summaryLines: [
+          { label: L('نحوه ارائه خدمات'), value: deliveryMode.map((mode) => L(DELIVERY_MODE_OPTIONS.find((option) => option.id === mode)?.title || mode)).join('، ') },
           ...softwareSummaryLines,
           ...hardwareSummaryLines,
           ...procurementSummaryLines,
@@ -309,14 +340,6 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         schedule: { date: isOnceShort ? onceDate : startDate, slot: timeSlot },
         contact: { fullName: operatorInfo.fullName, mobile: operatorInfo.mobile },
       });
-      return;
-    }
-    if (action === 'issue_receipt') {
-      showToastOrAlert(L('پیش‌رسید صادر شد'));
-      return;
-    }
-    if (action === 'show_receipt') {
-      showToastOrAlert(L('نمایش پیش‌رسید'));
       return;
     }
   };
@@ -343,7 +366,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         />
         {expanded === 'delivery_mode' && (
           <SectionBody>
-            <SelectableOptions options={LO(DELIVERY_MODE_OPTIONS)} value={deliveryMode} onChange={setDeliveryMode} multi columns={2} />
+            <SelectableOptions options={LO(DELIVERY_MODE_OPTIONS)} value={deliveryMode.at(-1) ?? null} onChange={(mode) => setDeliveryMode(mode ? [mode] : [])} columns={2} />
           </SectionBody>
         )}
 
@@ -466,6 +489,8 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           hint={SEC[3].hint}
           icon={SEC[3].icon}
           expanded={expanded === 'procurement'}
+          step={4}
+          done={procurementSummaryLines.length > 0 && !hasDescriptionWithoutQuantity(procurementItems)}
           onPress={() => toggleSection('procurement')}
         />
         {expanded === 'procurement' && (
@@ -666,6 +691,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
         />
         {expanded === 'letter_upload' && (
           <SectionBody>
+            <OrganizationAgreementPanel deliveryModes={deliveryMode} navigation={navigation} />
             <TouchableOpacity
               onPress={handleUploadLetter}
               disabled={uploading}
@@ -688,6 +714,17 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           </SectionBody>
         )}
 
+        <AccordionHeader
+          title={L('آدرس‌های منتخب')}
+          expanded={expanded === 'address'}
+          onPress={() => toggleSection('address')}
+        />
+        {expanded === 'address' && (
+          <SectionBody>
+            <SavedAddressPicker value={addressId} onChange={setAddressId} navigation={navigation} />
+          </SectionBody>
+        )}
+
         {/* ۱۲. نمایش / استعلام / ثبت سفارش */}
         <AccordionHeader
           title={SEC[11].title}
@@ -700,19 +737,22 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           <SectionBody>
             <TouchableOpacity
               onPress={() => handleOrderAction('issue_receipt')}
-              style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+              disabled={!canProceed}
+              style={{ opacity: canProceed ? 1 : 0.45, backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
-              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('صدور پیش‌رسید')}</Text>
+              <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('استعلام سفارش')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleOrderAction('show_receipt')}
-              style={{ backgroundColor: themeColor0.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+              disabled={!canProceed}
+              style={{ opacity: canProceed ? 1 : 0.45, backgroundColor: themeColor0.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
               <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('نمایش پیش‌رسید')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleOrderAction('submit_order')}
-              style={{ backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
+              disabled={!canProceed}
+              style={{ opacity: canProceed ? 1 : 0.45, backgroundColor: themeColor7.bgColor(1), borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginBottom: 8 }}
             >
               <Text style={{ color: themeColor4.bgColor(1), fontFamily: 'VazirBold' }}>{L('ثبت سفارش')}</Text>
             </TouchableOpacity>

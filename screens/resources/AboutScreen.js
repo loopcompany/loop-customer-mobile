@@ -1,5 +1,6 @@
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -11,10 +12,13 @@ import { showToastOrAlert } from '@helpers/Common';
 import BlankScreen from '@components/BlankScreen';
 import { RefreshControl } from 'react-native';
 import Loader from '@components/Loader';
+import Button from '@components/Button';
+import { termsPdfUrl } from '@services/URL';
 import AccordionItem from '@components/AccordionItem';
 import { createStyles } from '@styles/NewStyles';
 
 export default function AboutScreen() {
+  useRealtimeRefresh(["catalog"], () => loadTerms());
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -72,6 +76,7 @@ export default function AboutScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.termsContainer}
         renderItem={renderTermItem}
+        ListFooterComponent={<Button title={t("Terms of use PDF")} onPress={() => Linking.openURL(termsPdfUrl)} />}
         ListEmptyComponent={() => {
           return (
             <BlankScreen />

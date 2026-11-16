@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Image } from 'react-native'
+import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { View, Text, StyleSheet, ScrollView, RefreshControl,  Image } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';
 import * as Linking from "expo-linking";
@@ -16,9 +18,11 @@ import Loader from '@components/Loader';
 import { useTranslation } from 'react-i18next';
 import ScreenHeaders from '@components/ScreenHeaders';
 import HintBadge from '@components/HintBadge';
+import OrderRequestDetails from '@components/OrderRequestDetails';
 import { createStyles } from '@styles/NewStyles';
 import { useMenu } from '@contexts/MenuContext';
 function Invoice({ route, navigation }) {
+  useRealtimeRefresh(["orders", "wallet"], async () => { if (orderId && token) { await fetchData(); await fetchExtraServices(); } });
 
     const dispatch = useDispatch()
     const { t, i18n } = useTranslation();
@@ -223,6 +227,7 @@ function Invoice({ route, navigation }) {
                             renderRow(t('Travel and tuition fees'), formatPrice('200000') + ' ' + t('Toman'))
                         }
                         {renderRow(`${t('Your wallet balance')}:`, formatPrice(user?.wallet ?? 0) + ' ' + t('Toman'))}
+                        <OrderRequestDetails order={data} titleStyle={NewStyles.title} textStyle={NewStyles.text10} />
 
                         {/* Extra Services Display */}
                         {extraServices.length > 0 && (

@@ -1,5 +1,5 @@
 import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, ActivityIndicator, I18nManager, Image, SectionList, FlatList, Platform } from 'react-native';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,7 @@ function Preview({ navigation }) {
     );
     const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
     const [loading, setLoading] = useState(false);
+    const submitting = useRef(false);
     const [pending, setPending] = useState(false);
     const userType = useSelector(state => state.auth?.userType)
     const token = useSelector((state) => state?.auth?.token);
@@ -161,6 +162,8 @@ function Preview({ navigation }) {
     };
 
     const submitOrder = async () => {
+        if (submitting.current) return;
+        submitting.current = true;
         setLoading(true);
         try {
 
@@ -223,18 +226,19 @@ function Preview({ navigation }) {
 
             // 📥 لاگ کردن پاسخ کامل از API 
 
-            if (response.status == 200 || response.status == 201) {
+            if (response.data?.success && response.data.data?.order_id) {
                 showToastOrAlert(response?.data?.message);
                 dispatch(fetchOrders(token));
                 dispatch(emptySteps());
                 dispatch(emptyCategory());
                 dispatch(emptyAddress());
-                navigation.replace('OrdersScreen');
+                navigation.reset({ index: 0, routes: [{ name: 'OrdersScreen' }] });
             }
         } catch (error) {
             const message = describeApiError(error, t);
             showToastOrAlert(message);
         } finally {
+            submitting.current = false;
             setLoading(false);
         }
     };
