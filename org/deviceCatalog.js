@@ -95,5 +95,5 @@ export const TIME_SLOT_OPTIONS = [
 // تکنسین هنوز فعال نیست).
 export const TECHNICIAN_GENDER_OPTIONS = [
   { id: 'male', title: 'آقا' },
-  { id: 'female', title: 'خانم' },
+  { id: 'female', title: 'خانم (به‌زودی)', disabled: true },
 ];

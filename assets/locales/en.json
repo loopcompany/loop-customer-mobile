@@ -517,7 +517,7 @@
   "Organization password recovery": "Organization password recovery",
   "Enter organization code and admin mobile number": "Enter organization code and admin mobile number",
   "Admin mobile number": "Admin mobile number",
-  "\ud83d\udca1 The recovery code will be sent to the mobile number registered in the organization admin account.": "\ud83d\udca1 The recovery code will be sent to the mobile number registered in the organization admin account.",
+  "💡 The recovery code will be sent to the mobile number registered in the organization admin account.": "💡 The recovery code will be sent to the mobile number registered in the organization admin account.",
   "Recovery code has been sent to your mobile number.": "Recovery code has been sent to your mobile number.",
   "Next": "Next",
   "User with entered email not found": "User with entered email not found",
@@ -1578,5 +1578,6 @@
   "Terms of use PDF": "Terms of use PDF",
   "Order attachments": "Order attachments",
   "Open order attachment": "Open attachment {{number}}",
-  "Unable to open order attachment": "Could not open the order attachment."
+  "Unable to open order attachment": "Could not open the order attachment.",
+  "Coming soon": "Coming soon"
 }

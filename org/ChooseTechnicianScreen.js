@@ -330,7 +330,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
               }}>آقا</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{
+            <TouchableOpacity disabled accessibilityState={{ disabled: true }} style={{ opacity: 0.45,
               backgroundColor: '#f5f5f5',
               borderRadius: 8,
               paddingVertical: 12,
@@ -346,7 +346,7 @@ export default function ChooseTechnicianScreen({ navigation }) {
                 fontFamily: 'VazirBold',
                 color: '#333',
                 textAlign: 'center'
-              }}>خانم</Text>
+              }}>خانم (به‌زودی)</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -174,13 +174,16 @@ export default function DeviceModelInfoScreen({ navigation, route }) {
               {genders.map((g) => (
                 <TouchableOpacity
                   key={g}
+                  disabled={g === 'خانم'}
+                  accessibilityState={{ disabled: g === 'خانم' }}
                   onPress={() => setTechGender(g)}
                   style={[
                     styles.genderButton,
+                g === 'خانم' && { opacity: 0.45 },
                     techGender === g && styles.genderSelected,
                   ]}
                 >
-                  <Text style={[NewStyles.text10,{textAlign:'center'}]}>{g}</Text>
+                  <Text style={[NewStyles.text10,{textAlign:'center'}]}>{g}{g === 'خانم' ? ' (به‌زودی)' : ''}</Text>
                 </TouchableOpacity>
               ))}
             </View>

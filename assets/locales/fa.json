@@ -517,7 +517,7 @@
   "Organization password recovery": "بازیابی رمزعبور سازمان",
   "Enter organization code and admin mobile number": "کد سازمان و شماره موبایل مدیر را وارد کنید",
   "Admin mobile number": "شماره موبایل مدیر",
-  "\ud83d\udca1 The recovery code will be sent to the mobile number registered in the organization admin account.": "💡 کد بازیابی به شماره موبایل ثبت‌شده در حساب مدیر سازمان ارسال می‌شود.",
+  "💡 The recovery code will be sent to the mobile number registered in the organization admin account.": "💡 کد بازیابی به شماره موبایل ثبت‌شده در حساب مدیر سازمان ارسال می‌شود.",
   "Recovery code has been sent to your mobile number.": "کد بازیابی به شماره موبایل شما ارسال شد.",
   "Next": "بعدی",
   "User with entered email not found": "کاربری با ایمیل وارد شده یافت نشد",
@@ -1080,7 +1080,7 @@
   "You are the best!": "تو بهترین هستی!",
   "You are strong!": "تو قوی هستی!",
   "Amazing!": "شگفت‌انگیز!",
-  "Correct!": "درست!", 
+  "Correct!": "درست!",
   "Computer": "کامپیوتر",
   "Mouse": "ماوس",
   "Keyboard": "کیبورد",
@@ -1579,5 +1579,6 @@
   "Terms of use PDF": "فایل شرایط و ضوابط استفاده از خدمات",
   "Order attachments": "تصاویر و پیوست‌های سفارش",
   "Open order attachment": "باز کردن پیوست {{number}}",
-  "Unable to open order attachment": "باز کردن پیوست سفارش ممکن نشد."
+  "Unable to open order attachment": "باز کردن پیوست سفارش ممکن نشد.",
+  "Coming soon": "به‌زودی"
 }

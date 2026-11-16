@@ -166,6 +166,7 @@ export const SelectableOptions = ({ options, value, onChange, multi = false, col
   const isSelected = (id) => (multi ? Array.isArray(value) && value.includes(id) : value === id);
 
   const handlePress = (id) => {
+    if (options.find((option) => option.id === id)?.disabled) return;
     if (multi) {
       const current = Array.isArray(value) ? value : [];
       onChange(current.includes(id) ? current.filter((v) => v !== id) : [...current, id]);

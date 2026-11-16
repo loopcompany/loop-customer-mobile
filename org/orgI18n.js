@@ -155,6 +155,7 @@ const EN = {
   // --- technician gender -------------------------------------------------
   'آقا': 'Male',
   'خانم': 'Female',
+  'خانم (به‌زودی)': 'Female (Coming soon)',
 
   // --- operator info form --------------------------------------------
   'عنوان شغلی اپراتور': 'Operator job title',

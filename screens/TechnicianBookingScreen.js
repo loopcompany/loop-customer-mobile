@@ -61,13 +61,16 @@ export default function TechnicianBookingScreen({navigation}) {
           {genders.map((g) => (
             <TouchableOpacity
               key={g}
+              disabled={g === 'Female'}
+              accessibilityState={{ disabled: g === 'Female' }}
               onPress={() => setGender(g)}
               style={[
                 styles.genderButton,
+                g === 'Female' && { opacity: 0.45 },
                 gender === g && styles.genderSelected,
               ]}
             >
-              <Text style={styles.genderText}>{t(g)}</Text>
+              <Text style={styles.genderText}>{t(g)}{g === 'Female' ? ` (${t('Coming soon')})` : ''}</Text>
             </TouchableOpacity>
           ))}
         </View>

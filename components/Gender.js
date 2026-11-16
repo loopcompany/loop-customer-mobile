@@ -1,5 +1,5 @@
 import { View, Text, Pressable, Image } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,13 @@ export default function Gender({ step, data }) {
     const femaleCount = useSelector(state => state.step?.femaleCount);
     const maleCount = useSelector(state => state.step?.maleCount);
     const unspecifiedCount = useSelector(state => state.step?.unspecifiedCount);
+
+    useEffect(() => {
+        if (femaleCount > 0) {
+            dispatch(setFemaleCount(0));
+            dispatch(setMaleCount(1));
+        }
+    }, [femaleCount, dispatch]);
 
     return (
         <View style={NewStyles.seperator1}>
@@ -66,19 +73,16 @@ export default function Gender({ step, data }) {
             </Pressable>
             }
             {data?.is_required == 1 && <Pressable
-                onPress={() => {
-                    dispatch(setFemaleCount(1));
-                    dispatch(setMaleCount(0));
-                    dispatch(setUnspecifiedCount(0));
-                    dispatch(setGeneralData({ fieldId: data?.id, value: 1, step }));
-                }}
+                disabled
+                accessibilityState={{ disabled: true }}
                 style={[NewStyles.border5, {
                     paddingHorizontal: 16,
+                    opacity: 0.45,
                     paddingVertical: 12,
                     backgroundColor: femaleCount === 1 ? themeColor0.bgColor(0.1) : themeColor4.bgColor(1)
                 }]}
             >
-                <Text style={[NewStyles.text3, { color: femaleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Female Technician')}</Text>
+                <Text style={[NewStyles.text3, { color: femaleCount === 1 ? themeColor0.bgColor(1) : themeColor0.bgColor(1) }]}>{t('Female Technician')} ({t('Coming soon')})</Text>
             </Pressable>}
         </View>
     )
