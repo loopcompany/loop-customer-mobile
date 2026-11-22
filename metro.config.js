@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 /**
  * Metro configuration.
  *
@@ -17,6 +20,10 @@
 const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
+
+// Each app owns its cache; simultaneous --clear builds must not erase a sibling's files.
+config.cacheStores = config.cacheStores.map((store) => new store.constructor({root:path.resolve(__dirname,'.cache/metro')}));
+config.cacheVersion = (config.cacheVersion || '') + '-localization-' + crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, 'scripts/localize-ui-literals.cjs'))).digest('hex');
 
 config.transformer.getTransformOptions = async () => ({
   transform: {

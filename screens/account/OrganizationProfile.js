@@ -1,3 +1,5 @@
+import useProfileRelogin from '@hooks/useProfileRelogin';
+import AddressBuildingFields from '@components/AddressBuildingFields';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
@@ -34,6 +36,7 @@ import { useSelector } from 'react-redux';
 const OrganizationProfile = () => {
   const navigation = useNavigation();
   const { logoutWithConfirmation, isLoggingOut } = useLogout();
+  const profileRelogin=useProfileRelogin('organization');
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const NewStyles = useMemo(
@@ -61,6 +64,7 @@ const OrganizationProfile = () => {
   const [city, setCity] = useState('');
   const [region, setRegion] = useState('');
   const [organizationAddress, setOrganizationAddress] = useState('');
+  const [building, setBuilding] = useState({work_number:'',work_unit:'',work_floor:''});
   const [organizationPostalCode, setOrganizationPostalCode] = useState('');
   const token = useSelector(state => state.auth?.token)
   // Password change states
@@ -103,6 +107,7 @@ const OrganizationProfile = () => {
 
 
       if (response.data.status === 'success') {
+        if(await profileRelogin(response.data)) return;
         const data = response.data.data;
         setEditRequest(data?.edited_organization)
         setSavedMainData(data)
@@ -135,6 +140,7 @@ const OrganizationProfile = () => {
         setCity(data.city || '');
         setRegion(data.region_id || '');
         setOrganizationAddress(data.organization_address || '');
+        setBuilding({work_number:data.work_number??'',work_unit:data.work_unit??'',work_floor:data.work_floor??''});
         setOrganizationPostalCode(data.postal_code || '');
 
         if (data.profile_image) {
@@ -226,6 +232,7 @@ const OrganizationProfile = () => {
         formData.append('organization_email', organizationEmail);
         formData.append('organization_phone', organizationPhoneNumber);
         formData.append('organization_address', organizationAddress);
+        Object.entries(building).forEach(([key,value])=>formData.append(key,String(value)));
         formData.append('manager_full_name', familyName);
         formData.append('city', city);
         formData.append('region', region);
@@ -248,6 +255,7 @@ const OrganizationProfile = () => {
           organization_email: organizationEmail,
           organization_phone: organizationPhoneNumber,
           organization_address: organizationAddress,
+          ...building,
           manager_full_name: familyName,
           city: city,
           region: region,
@@ -278,6 +286,7 @@ const OrganizationProfile = () => {
 
 
       if (response.data.status === 'success') {
+        if(await profileRelogin(response.data)) return;
         const responseData = response.data.data;
 
 
@@ -675,6 +684,7 @@ const OrganizationProfile = () => {
               numberOfLines={3}
               style={[styles.input, styles.textArea, !isEditing && styles.inputDisabled]}
             />
+            <AddressBuildingFields kind="work" value={building} onChange={(key,value)=>setBuilding((prev)=>({...prev,[key]:value}))} />
           </View>
 
           {/* کد پستی */}

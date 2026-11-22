@@ -1,3 +1,5 @@
+import ProcurementConsultationActions from '@components/ProcurementConsultationActions';
+import { procurementNeedsBudget } from '@utils/procurementBudget';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import Footer from '@screens/Footer';
@@ -20,6 +22,9 @@ const HardwareSelectionScreen = ({ navigation }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [generalNeed, setGeneralNeed] = useState('');
   const [description, setDescription] = useState('');
+  const [budgetRial,setBudgetRial]=useState('');
+  const supplyIds={'لپ تاپ':'laptop','کیس':'case_standard','کیس معمولی':'case_standard','کیس حرفه‌ای':'case_professional','مینی کیس':'mini_case'};
+  const supplyId=supplyIds[selectedCategory];
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState(null);
   const [addressId, setAddressId] = useState(null);
@@ -31,7 +36,9 @@ const HardwareSelectionScreen = ({ navigation }) => {
 
   const categories = [
     'لپ تاپ',
-    'کیس',
+    'کیس معمولی',
+    'کیس حرفه‌ای',
+    'مینی کیس',
     'مانیتور',
     'آل این وان',
     'هارد دیسک',
@@ -46,7 +53,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
     }));
   };
 
-  const canProceed = Object.values(quantities).some((count) => count > 0) &&
+  const canProceed = !procurementNeedsBudget(supplyId,{new:quantities['اکبند'],used:quantities['کارکرده'],desc:description,budgetRial}) && Object.values(quantities).some((count) => count > 0) &&
     Boolean(date && slot && addressId && technicianGender);
 
   const openSummary = (previewOnly = false) => {
@@ -59,6 +66,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
       schedule: { date, slot },
       previewOnly,
       procurementSelection: {
+        item_id:supplyId, budget_rial:budgetRial || undefined,
         title: selectedCategory,
         new_count: quantities['اکبند'],
         used_count: quantities['کارکرده'],
@@ -67,6 +75,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
       orderTitle: 'تأمین کالا - ' + selectedCategory,
       summaryLines: [
         { label: 'دسته‌بندی', value: selectedCategory },
+        ...(budgetRial ? [{label:'محدوده هزینه (ریال)',value:budgetRial}] : []),
         ...Object.entries(quantities)
           .filter(([, count]) => count > 0)
           .map(([condition, count]) => ({ label: condition, value: count })),
@@ -375,6 +384,7 @@ const HardwareSelectionScreen = ({ navigation }) => {
           </View>
         </View>
 
+        <View style={{width:'95%',alignSelf:'center',marginBottom:12}}><ProcurementConsultationActions itemId={supplyId} title={selectedCategory} newCount={quantities['اکبند']} usedCount={quantities['کارکرده']} desc={description} budgetRial={budgetRial} onBudgetChange={setBudgetRial} /></View>
         <View style={{ width: '95%', alignSelf: 'center', gap: 8 }}>
           <Text style={NewStyles.title10}>{L('انتخاب تکنسین')}</Text>
           <SelectableOptions options={LO(TECHNICIAN_GENDER_OPTIONS)} value={technicianGender} onChange={setTechnicianGender} />

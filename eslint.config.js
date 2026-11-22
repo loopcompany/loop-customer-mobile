@@ -19,6 +19,7 @@ module.exports = defineConfig([
     ignores: [
       'node_modules/**',
       'dist/**',
+      'dist-review/**',
       'web-build/**',
       '.expo/**',
       'graphify-out/**',
@@ -108,7 +109,7 @@ module.exports = defineConfig([
 
   {
     // Config and build files run in Node and legitimately log.
-    files: ['*.config.js', 'scripts/**/*.js'],
+    files: ['*.config.js', 'scripts/**/*.{js,cjs}', 'test/**/*.cjs'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',

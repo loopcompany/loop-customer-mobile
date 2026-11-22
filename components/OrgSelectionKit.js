@@ -1,3 +1,4 @@
+import ProcurementConsultationActions from '@components/ProcurementConsultationActions';
 // کیت رابط کاربری مشترک مسیرهای سازمانی («انتخاب جامع» و «انتخاب سیستماتیک»).
 // این کامپوننت‌ها ابتدا داخل org/ComprehensiveSelectionScreen.js نوشته شده بودند و
 // چون «انتخاب سیستماتیک» باید دقیقاً همان استایل را داشته باشد، به اینجا منتقل شدند
@@ -718,7 +719,7 @@ export const LabeledCounterRow = ({ label, count, onIncrement, onDecrement }) =>
 
 // کارت تامین تجهیزات/کالا: ردیف اول = تصویر (ابتدای ردیف) + عنوان + دو شمارشگر
 // آکبند/کارکرده (انتهای ردیف)، ردیف دوم = توضیحات.
-export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNewInc, onNewDec, onUsedInc, onUsedDec, onDescChange }) => (
+export const ProcurementCard = ({ image, title, itemId, budgetRial, onBudgetChange, newCount, usedCount, desc, onNewInc, onNewDec, onUsedInc, onUsedDec, onDescChange }) => (
   <View
     style={{
       backgroundColor: colors.surface.bgColor(1),
@@ -751,6 +752,7 @@ export const ProcurementCard = ({ image, title, newCount, usedCount, desc, onNew
       </View>
     </View>
     <DescriptionInput value={desc} onChangeText={onDescChange} />
+    <ProcurementConsultationActions itemId={itemId} title={title} newCount={newCount} usedCount={usedCount} desc={desc} budgetRial={budgetRial} onBudgetChange={onBudgetChange} />
   </View>
 );
 

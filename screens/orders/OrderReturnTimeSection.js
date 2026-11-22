@@ -1,4 +1,4 @@
-import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
 import { Text, View,  } from 'react-native'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'

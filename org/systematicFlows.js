@@ -42,16 +42,16 @@ export const SYSTEMATIC_CATEGORIES = [
     id: 'user_account',
     title: 'حساب کاربری',
     subtitle: 'User Account',
-    image: sectionIcon.operatorInfo,
+    image: require('@assets/icons/sections/account-menu.png'),
     // این کاشی مرحله‌ای ندارد و مستقیم صفحه‌ی حساب کاربری موجود را باز می‌کند.
     screen: 'Profile',
   },
-  { id: 'laptop', title: 'لپ تاپ', subtitle: 'Laptop', image: deviceIcon.laptop },
-  { id: 'printer_copy', title: 'پرینتر / کپی', subtitle: 'Printer / Copy', image: deviceIcon.printer },
   { id: 'monitor', title: 'مانیتور', subtitle: 'Monitor', image: deviceIcon.monitor },
+  { id: 'trash', title: 'ضایعات', subtitle: 'به زودی', image: deviceIcon.trash },
+  { id: 'laptop', title: 'لپ تاپ', subtitle: 'Laptop', image: deviceIcon.laptop },
   { id: 'case', title: 'کیس', subtitle: 'Case', image: deviceIcon.case },
-  { id: 'trash', title: 'ضایعات', subtitle: 'Trash', iconName: 'trash-outline' },
   { id: 'all_in_one', title: 'آل این وان', subtitle: 'All in One', image: deviceIcon.allInOne },
+  { id: 'printer_copy', title: 'پرینتر / کپی', subtitle: 'Printer / Copy', image: deviceIcon.printer },
   { id: 'hard_disk', title: 'هارد دیسک', subtitle: 'Hard Disk', image: deviceIcon.hardDisk },
 ];
 
@@ -304,7 +304,7 @@ export const SYSTEMATIC_FLOWS = {
     {
       id: 'model',
       title: 'مدل لپ تاپ',
-      hint: 'در صورتی که مدل لپ تاپ را می‌دانید بنویسید. مثلاً X550',
+      hint: 'مدل لپ تاپ معمولاً از روش‌های زیر قابل پیدا کردن است:\nداخل ویندوز: Win + R را بزنید، msinfo32 را وارد کنید و مقابل System Model مدل را ببینید.\nبرچسب مشخصات زیر یا کنار دستگاه، جعبه یا فاکتور خرید را بررسی کنید.\nاگر دستگاه روشن نمی‌شود از برچسب یا جعبه کمک بگیرید. مثال: X555',
       icon: deviceIcon.laptop,
       type: 'fields',
       fields: [
@@ -330,7 +330,7 @@ export const SYSTEMATIC_FLOWS = {
     },
     {
       id: 'hardware_default',
-      title: 'سخت افزار (پیش فرض)',
+      title: 'عیوب سخت افزار',
       hint: 'مشکلات متداول نرم‌افزاری و سیستمی لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
@@ -507,7 +507,7 @@ export const SYSTEMATIC_FLOWS = {
     },
     {
       id: 'hardware_default',
-      title: 'سخت افزار (پیش فرض)',
+      title: 'عیوب سخت افزار',
       hint: 'ایرادهای سخت‌افزاری متداول کیس؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
@@ -615,7 +615,7 @@ export const SYSTEMATIC_FLOWS = {
     },
     {
       id: 'hardware_default',
-      title: 'سخت افزار (پیش فرض)',
+      title: 'عیوب سخت افزار',
       hint: 'ایرادهای سخت‌افزاری متداول دستگاه؛ هر مورد که مصداق دارد را انتخاب کنید.',
       icon: sectionIcon.hardware,
       type: 'checklist',
@@ -900,7 +900,15 @@ export const getFlow = (categoryId) => {
   const flow = SYSTEMATIC_FLOWS[categoryId] || [];
   const required = REQUIRED_DEVICE_STEPS[categoryId];
   if (!required) return flow;
-  return flow.map((step) => ({
+  const normalized = flow.slice();
+  if (['case', 'all_in_one', 'hard_disk', 'printer_copy'].includes(categoryId) && !normalized.some((step) => step.id === 'software_default')) {
+    const template = SYSTEMATIC_FLOWS.laptop.find((step) => step.id === 'software_default');
+    normalized.splice(normalized.findIndex((step) => step.id === 'hardware_default'), 0, { ...template, title: 'عیوب نرم افزار' });
+  }
+  // Reject ambiguous step identities before navigation or receipt generation.
+  const ids = normalized.map((step) => step.id);
+  if (new Set(ids).size !== ids.length) throw new Error('Duplicate systematic step: ' + categoryId);
+  return normalized.map((step) => ({
     ...step,
     required: required.includes(step.id) || ['technician', 'time_range', 'address'].includes(step.id),
   }));

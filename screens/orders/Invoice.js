@@ -1,5 +1,5 @@
-import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
-import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
+import useRealtimeRefresh from '@hooks/useRealtimeRefresh';
 import { View, Text, StyleSheet, ScrollView, RefreshControl,  Image } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';

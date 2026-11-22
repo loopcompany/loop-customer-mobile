@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useIsFocused } from '@react-navigation/native';
-import { subscribeRealtime } from '../services/realtime/events';
+import { subscribeRealtime } from '@services/realtime/events';
 
 export function useRealtimeEvent(topics, refresh, enabled = true) {
   const callback = useRef(refresh);

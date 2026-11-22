@@ -1,3 +1,5 @@
+import useProfileRelogin from '@hooks/useProfileRelogin';
+import AddressBuildingFields from '@components/AddressBuildingFields';
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image, I18nManager, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -32,6 +34,7 @@ export default function Profile() {
     const styles = useMemo(() => createLocalStyles(NewStyles, isRTL), [NewStyles, isRTL])
     const navigation = useNavigation();
     const { logoutWithConfirmation, logoutFromAllDevicesWithConfirmation, isLoggingOut } = useLogout();
+  const profileRelogin=useProfileRelogin('individual');
     const [datePickerModal, setDatePickerModal] = useState(false);
     const [checkingUserType, setCheckingUserType] = useState(true);
     const [userType, setUserType] = useState(null);
@@ -52,6 +55,12 @@ export default function Profile() {
         postal_code: '',
         city: '',
         region_id: '',
+        home_number: '',
+        home_unit: '',
+        home_floor: '',
+        work_number: '',
+        work_unit: '',
+        work_floor: '',
         home_address: '',
         work_address: '',
         card_number: '',
@@ -210,6 +219,12 @@ export default function Profile() {
                     postal_code: user.postal_code || '',
                     city: user.city || '',
                     region_id: user.region_id || '',
+                    home_number: user.home_number ?? '',
+                    home_unit: user.home_unit ?? '',
+                    home_floor: user.home_floor ?? '',
+                    work_number: user.work_number ?? '',
+                    work_unit: user.work_unit ?? '',
+                    work_floor: user.work_floor ?? '',
                     home_address: user.home_address || '',
                     work_address: user.work_address || '',
                     card_number: user.card_number || '',
@@ -319,7 +334,7 @@ export default function Profile() {
                                 formData.append('region', profileData[key]?.code);
                             }
                         } else if (key !== 'phone') {
-                            const value = (profileData[key] || '').toString().trim();
+                            const value = (profileData[key] ?? '').toString().trim();
                             formData.append(key, value);
                             if (value) addedFields++;
                             console.log(`📝 Field ${key}: ${value || '(empty)'}`);
@@ -339,6 +354,7 @@ export default function Profile() {
                     const response = await userAPI.updateProfile(formData);
 
                     if (response.success) {
+                        if(await profileRelogin(response)) return;
                         showToastOrAlert(response.message);
 
 
@@ -390,8 +406,8 @@ export default function Profile() {
                                 updateData['region_id'] = profileData[key]?.id
                                 updateData['region'] = profileData[key]?.code
                             }
-                        } else if (key !== 'phone' && profileData[key] && profileData[key].trim() !== '') {
-                            updateData[key] = profileData[key].trim();
+                        } else if (key !== 'phone' && profileData[key] && String(profileData[key]).trim() !== '') {
+                            updateData[key] = String(profileData[key]).trim();
                         }
                     });
 
@@ -412,6 +428,7 @@ export default function Profile() {
                     const response = await userAPI.updateProfile(updateData);
 
                     if (response.success) {
+                        if(await profileRelogin(response)) return;
                         showToastOrAlert(response.message);
 
                         setBirthDateChanged(false);
@@ -463,7 +480,8 @@ export default function Profile() {
                     if (errors && typeof errors === 'object') {
                         const firstErrorKey = Object.keys(errors)[0];
                         const firstError = errors[firstErrorKey][0];
-                        showToastOrAlert(firstError);
+                        setErrorTxt(errors);
+                        showToastOrAlert(Object.values(errors).flat().join('\n'));
                     } else {
                         showToastOrAlert(error.response.data.message || t('Error validating information'));
                     }
@@ -513,6 +531,7 @@ export default function Profile() {
             });
 
             if (response.success) {
+                        if(await profileRelogin(response)) return;
                 showToastOrAlert(response.message);
                 // Clear password fields
                 setPasswordData({ currentPassword: '', newPassword: '' });
@@ -663,6 +682,7 @@ export default function Profile() {
                             placeholderTextColor={themeColor10.bgColor(0.6)}
                             keyboardType="email-address"
                             value={profileData.email}
+                            editable={false}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, email: text }))}
                         />
                         {errorTxt?.email &&
@@ -752,6 +772,7 @@ export default function Profile() {
                             value={profileData.home_address}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, home_address: text }))}
                         />
+<AddressBuildingFields kind="home" value={profileData} onChange={(field,value)=>setProfileData((prev)=>({...prev,[field]:value}))} />
 
                         {/* محل کار */}
                         <Text style={NewStyles.text10}>{t('Work Address')}</Text>
@@ -763,6 +784,7 @@ export default function Profile() {
                             value={profileData.work_address}
                             onChangeText={(text) => setProfileData(prev => ({ ...prev, work_address: text }))}
                         />
+<AddressBuildingFields kind="work" value={profileData} onChange={(field,value)=>setProfileData((prev)=>({...prev,[field]:value}))} />
 
                         {/* معرفی به دوستان */}
                         <Text style={NewStyles.text10}>{t('User Card Number')}</Text>

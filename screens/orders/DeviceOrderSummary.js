@@ -1,4 +1,4 @@
-import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
 import React, { useState } from 'react';
 import { View, Text,   Image, ImageBackground, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';

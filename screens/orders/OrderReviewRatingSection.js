@@ -1,4 +1,4 @@
-import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
 // OrderReviewRatingSection.js - ثبت نظر و امتیاز
 import React, { useState, useEffect,useMemo } from 'react';
 import {

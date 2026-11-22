@@ -1,4 +1,4 @@
-import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
 // screens/OrderTrackingScreen.js
 
 import React from 'react';

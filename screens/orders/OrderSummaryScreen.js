@@ -1,4 +1,4 @@
-import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
+import { OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
 // screens/orders/OrderSummaryScreen.js
 //
 // پیش‌نمایش نهایی ثبت سفارش.
@@ -167,6 +167,7 @@ export default function OrderSummaryScreen({ navigation, route }) {
           new_count: procurement[item.id].new || 0,
           used_count: procurement[item.id].used || 0,
           description: procurement[item.id].desc || undefined,
+          budget_rial: procurement[item.id].budgetRial || undefined,
         })),
       }, { headers });
       if (!data?.success || !data.data?.order_id) throw new Error('ORDER_NOT_CREATED');

@@ -17,15 +17,11 @@ import { useDispatch } from "react-redux";
 export default function Welcome({ navigation }) {
   const { t } = useTranslation()
   const dispatch = useDispatch();
-  const navigateToMainApp = () => {
-    setTimeout(() => {
-      navigation.replace('OrderMenuScreen');
-    }, 4000);
-  };
   useEffect(() => {
-    navigateToMainApp()
+    const timer=setTimeout(()=>navigation.replace('OrderMenuScreen'),4000);
     dispatch(fetchContacts());
-  }, [])
+    return()=>clearTimeout(timer);
+  },[dispatch,navigation]);
   return (
     <ImageBackground cachePolicy={'memory-disk'} source={Platform.OS === 'web' ? require('@assets/loopbackground.webp') : require("@assets/moon.jpg")} style={[NewStyles.container, { backgroundColor: '#020305' }]} contentPosition={'center'} contentFit={"cover"}>
       <TouchableWithoutFeedback

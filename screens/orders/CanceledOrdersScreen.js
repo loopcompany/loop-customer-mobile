@@ -1,5 +1,5 @@
-import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
-import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
+import useRealtimeRefresh from '@hooks/useRealtimeRefresh';
 import { View, Text, StyleSheet, ScrollView,  FlatList, RefreshControl, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewStyles from '@styles/NewStyles';

@@ -1,3 +1,5 @@
+import { emptyUser } from '@slices/userSlice';
+import { clearOrders } from '@slices/ordersSlice';
 import { useState } from 'react';
 import { Platform } from 'react-native';
 import { useDispatch } from 'react-redux';
@@ -30,6 +32,8 @@ export const useLogout = () => {
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
+        dispatch(emptyUser());
+        dispatch(clearOrders());
 
         return result;
       } else {
@@ -154,6 +158,8 @@ export const useLogout = () => {
         dispatch(setToken(null));
         dispatch(setUserType(null));
         dispatch(clearOrganizationData());
+        dispatch(emptyUser());
+        dispatch(clearOrders());
 
         return result;
       } else {

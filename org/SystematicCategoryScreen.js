@@ -106,21 +106,12 @@ const SystematicCategoryScreen = ({ navigation }) => {
   // اگر API در دسترس نبود، همان هشت دسته با آیکون‌های محلی نشان داده می‌شوند تا
   // صفحه هیچ‌وقت خالی نماند.
   const items = useMemo(() => {
-    if (folders.length) {
-      return folders.map((item) => ({
-        key: String(item?.id),
-        title: item?.title,
-        image: item?.image_path,
-        apiItem: item,
-      }));
-    }
-    return SYSTEMATIC_CATEGORIES.map((item) => ({
-      key: item.id,
-      title: item.title,
-      imageSource: item.image,
-      iconName: item.iconName,
-      apiItem: item,
-    }));
+    const order=['user_account','monitor','trash','laptop','case','all_in_one','printer_copy','hard_disk'];
+    return order.map((id)=> {
+      const local=SYSTEMATIC_CATEGORIES.find((entry)=>entry.id===id);
+      const remote=folders.find((entry)=>resolveSystematicCategoryId(entry)===id);
+      return {key:id,title:local.title,imageSource:local.image,iconName:local.iconName,apiItem:remote || local};
+    });
   }, [folders]);
 
   const openCategory = async (entry) => {
@@ -128,8 +119,9 @@ const SystematicCategoryScreen = ({ navigation }) => {
     const systematicId = resolveSystematicCategoryId(source);
 
     // کاشی «حساب کاربری» مرحله‌ای ندارد و مستقیم صفحه‌ی پروفایل را باز می‌کند.
+    if (systematicId === 'trash') { showToastOrAlert(L('به زودی')); return; }
     if (systematicId === 'user_account') {
-      navigation.navigate('Profile');
+      navigation.navigate(user?.account_type && !['individual','indiviual'].includes(user.account_type)?'OrganizationProfile':'Profile');
       return;
     }
 
@@ -207,8 +199,8 @@ const SystematicCategoryScreen = ({ navigation }) => {
           {/* کاشی حساب کاربری - مثل قبل بالای شبکه و با همان آیکون سروری */}
           <Folder
             title={L('حساب کاربری')}
-            imageSource={{ uri: `${imageUri}/userfolder/Profile.png` }}
-            onPress={() => navigation.navigate('Profile')}
+            imageSource={require('@assets/icons/sections/account-menu.png')}
+            onPress={() => navigation.navigate(user?.account_type && !['individual','indiviual'].includes(user.account_type)?'OrganizationProfile':'Profile')}
           />
 
           {items
@@ -222,7 +214,8 @@ const SystematicCategoryScreen = ({ navigation }) => {
             .map((entry) => (
               <Folder
                 key={entry.key}
-                title={L(entry.title)}
+                title={entry.key==='trash'?`${L(entry.title)} — ${L('به زودی')}`:L(entry.title)}
+                loading={entry.key==='trash'}
                 image={entry.image}
                 imageSource={entry.imageSource}
                 icon={

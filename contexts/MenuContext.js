@@ -1,3 +1,4 @@
+import { LanguageSelector, useLocalization } from '@components/LocalizationProvider';
 import React, {
     createContext,
     useContext,
@@ -217,56 +218,7 @@ function DockAction({ icon, image, imageStyle, label, onPress, lang, accessibili
 // سوییچ زبان — یک کلید کشویی دو‌بخشی به‌جای یک آیکون کره‌ی زمین بی‌روح.
 // هر دو زبان همیشه با خط بومی خودشان دیده می‌شوند («EN» / «فا») و بخش فعال با
 // یک قرص سفید براق زیرش هایلایت می‌شود که هنگام تعویض زبان نرم سُر می‌خورد.
-const LanguageSwitch = React.memo(({ language, onToggle }) => {
-    const isFa = language === 'fa';
-    const slide = useRef(new Animated.Value(isFa ? 1 : 0)).current;
-
-    useEffect(() => {
-        Animated.spring(slide, {
-            toValue: isFa ? 1 : 0,
-            useNativeDriver: true,
-            friction: 7,
-            tension: 90,
-        }).start();
-    }, [isFa, slide]);
-
-    const translateX = slide.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, LANG_SEG_WIDTH],
-    });
-
-    return (
-        <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onToggle}
-            style={dockStyles.action}
-            accessibilityRole="switch"
-            accessibilityState={{ checked: isFa }}
-            accessibilityLabel="Language / زبان"
-        >
-            <View style={langStyles.track}>
-                <Animated.View
-                    style={[langStyles.thumb, { transform: [{ translateX }] }]}
-                    pointerEvents="none"
-                />
-                <View style={langStyles.seg}>
-                    <Text style={[langStyles.segText, !isFa && langStyles.segTextActive]}>EN</Text>
-                </View>
-                <View style={langStyles.seg}>
-                    <Text
-                        style={[
-                            langStyles.segText,
-                            { fontFamily: getFontFamily('bold', 'fa') },
-                            isFa && langStyles.segTextActive,
-                        ]}
-                    >
-                        فا
-                    </Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
-});
+const LanguageSwitch = React.memo(() => <LanguageSelector />);
 
 const dockStyles = StyleSheet.create({
     // ویندوز ۷: آیکون‌های نوار وظیفه بدون حاشیه و بدون پلاک پس‌زمینه‌اند
@@ -337,6 +289,7 @@ const langStyles = StyleSheet.create({
 
 // Menu Provider Component
 export const MenuProvider = ({ children }) => {
+    const { openLanguagePicker } = useLocalization();
     const { t, i18n } = useTranslation();
     const userData = useSelector((state) => state.user?.data);
     const NewStyles = useMemo(
@@ -449,7 +402,6 @@ export const MenuProvider = ({ children }) => {
 
     useEffect(() => {
         dispatch(fetchContacts());
-        loadLanguage()
     }, [])
     useEffect(() => {
         if (!user && token) {
@@ -465,7 +417,7 @@ export const MenuProvider = ({ children }) => {
             // { id: 23, title: t("Submit order"), screen: "FolderScreen" },
             // { id: 12, title: t("Lucky Wheel"), screen: "Club", apple_check: userData?.apple_check, image:`${imageUri}/userfolder/gift.png` },
             // { id: 11, title: t("Think and Play"), screen: "GameMenu" },
-            // { id: 7, title: t("User Account"), screen: "Profile", image:`${imageUri}/userfolder/Profile.png` },
+            { id: 7, title: t("User Account"), screen: userType === 'organization' ? 'OrganizationProfile' : 'Profile', image: require('@assets/icons/sections/account-menu.png') },
             
             
             { id: 3, title: t("Orders"), screen: "OrdersScreen", image: `${imageUri}/userfolder/Orders.png` },
@@ -582,28 +534,9 @@ export const MenuProvider = ({ children }) => {
         filteredMenuItems,
         contentBottomInset,
     ]);
-    const changeLanguage = async (lng) => {
-        await i18n.changeLanguage(lng);
-        await AsyncStorage.setItem('language', lng);
-        dispatch(setLanguage(lng))
-    };
-    const loadLanguage = async () => {
-
-        try {
-            const language = await AsyncStorage.getItem('language');
-            if (language) {
-                dispatch(setLanguage(language));
-                i18n.changeLanguage(language);
-            } else {
-                i18n.changeLanguage('fa');
-            }
-        } catch (error) {
-            console.error('Error loading language', error);
-        }
-    };
     return (
         <MenuContext.Provider value={contextValue}>
-            <SafeAreaView edges={{ top: 'off', bottom: 'additive' }} style={{ flex: 1 }}>
+            <SafeAreaView edges={{ top: 'off', bottom: currentRouteName === 'Landing' ? 'off' : 'additive' }} style={{ flex: 1 }}>
                 {children}
                 <PendingOrderQuoteNotice navigation={navigation} />
                 <PendingOrganizationAgreementNotice navigation={navigation} />
@@ -645,12 +578,7 @@ export const MenuProvider = ({ children }) => {
                                     />
                                 </View>
 
-                                <LanguageSwitch
-                                    language={i18n.language}
-                                    onToggle={() =>
-                                        changeLanguage(i18n.language === 'en' ? 'fa' : 'en')
-                                    }
-                                />
+                                <LanguageSwitch />
 
                                 <DockAction
                                     image={require('@assets/images/support-nobg.png')}
@@ -691,7 +619,7 @@ export const MenuProvider = ({ children }) => {
                     animationType="fade"
                 >
 
-                    <View style={{ flex: 1, alignSelf: 'flex-start' }}>
+                    <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', paddingTop: insets.top, paddingBottom: insets.bottom }}><TouchableWithoutFeedback onPress={closeMenu}><View style={{ flex: 1 }} /></TouchableWithoutFeedback><View style={{ height: '65%', width: '78%', maxWidth: 380, alignSelf: 'flex-start', overflow: 'hidden', borderTopRightRadius: 16 }}>
                         <FlatList
                             ListHeaderComponent={() => {
                                 return (
@@ -716,6 +644,7 @@ export const MenuProvider = ({ children }) => {
                             data={filteredMenuItems}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={renderMenuItem}
+                            style={{ flex: 1 }}
                             contentContainerStyle={styles.list}
                             showsVerticalScrollIndicator={false}
                         />
@@ -741,7 +670,7 @@ export const MenuProvider = ({ children }) => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </View></View>
 
                 </Modal>
             </SafeAreaView>

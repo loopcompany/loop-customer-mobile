@@ -1,3 +1,4 @@
+import LocalizationProvider from '@components/LocalizationProvider';
 import { NavigationContainer } from '@react-navigation/native';
 import { isRunningInExpoGo } from 'expo';
 import { useFonts } from 'expo-font';
@@ -99,6 +100,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <I18nextProvider i18n={i18n}>
+        <LocalizationProvider app="customer">
         <SafeAreaProvider>
           <NavigationContainer
             ref={navigationRef}
@@ -117,6 +119,7 @@ const App = () => {
             </AuthInitializer>
           </NavigationContainer>
         </SafeAreaProvider>
+      </LocalizationProvider>
       </I18nextProvider>
     </Provider>
   );

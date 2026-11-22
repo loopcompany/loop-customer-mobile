@@ -1,3 +1,4 @@
+import { SYSTEMATIC_CATEGORIES, resolveSystematicCategoryId } from '@org/systematicFlows';
 import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
@@ -53,7 +54,8 @@ function FolderScreen({ navigation }) {
       const categories = Array.isArray(res.data)
         ? res.data
         : res.data || res.data?.data || [];
-      setFolders(categories);
+      const order=['monitor','trash','laptop','case','all_in_one','printer_copy','hard_disk'];
+      setFolders(order.map((id)=>{const remote=categories.find((entry)=>resolveSystematicCategoryId(entry)===id);const local=SYSTEMATIC_CATEGORIES.find((entry)=>entry.id===id);return {...remote,title:local.title,localImage:local.image,systematicId:id};}));
     } catch (err) {
       console.error("Failed to load categories:", err);
       // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
@@ -102,29 +104,32 @@ function FolderScreen({ navigation }) {
 
           </ScrollView>
         </View>
-        <View style={{ flex: 1, alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, paddingHorizontal: 10, }}>
+        <ScrollView style={{flex:1}} contentContainerStyle={{width:230,maxWidth:'100%',alignSelf:'flex-start',flexDirection:'row',flexWrap:'wrap',gap:10,paddingHorizontal:10,paddingBottom:100}}>
 
           <TouchableOpacity style={[styles.button, NewStyles.center, { justifyContent: 'flex-start' }]} onPress={() => {
             navigation.navigate("Profile")
           }} >
             <Image
-              source={{ uri: `${imageUri}/userfolder/Profile.png` }}
+              source={require('@assets/icons/sections/account-menu.png')}
               style={[styles.folderIcon]}
             />
-            <Text style={NewStyles.title4}>{("User Account")}</Text>
+            <Text style={NewStyles.title4}>{t("User Account")}</Text>
           </TouchableOpacity>
           {
             folders.map((item) => {
               return (
-                <View key={item?.id}>
+                <View key={item.systematicId || item.id}>
                   <Folder
-                    title={item?.title}
-                    image={item?.image_path}
+                    title={item?.systematicId==='trash'?`${t(item.title)} — ${t('به زودی')}`:item?.title}
+                    loading={item?.systematicId==='trash'}
+                    imageSource={item?.localImage}
+                    image={item?.localImage ? undefined : item?.image_path}
                     onPress={async () => {
-                      if (item?.id == 'trash') {
+                      if (item?.systematicId === 'trash') {
                         showToastOrAlert(t("(Coming soon)"))
                         return
                       }
+                      if (!item?.id) {showToastOrAlert(t('این دسته‌بندی فعلاً در دسترس نیست.')); return;}
                       if (!user?.code) {
                         showToastOrAlert(t("To place an order, first complete your information in the account section."))
                         return
@@ -156,7 +161,7 @@ function FolderScreen({ navigation }) {
               )
             })
           }
-        </View>
+        </ScrollView>
       </ImageBackground>
     </SafeAreaView>
   );

@@ -124,3 +124,5 @@ ios/
 # Local release secrets
 credentials.json
 *.dpapi
+
+/dist-review/

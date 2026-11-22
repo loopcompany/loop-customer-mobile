@@ -1,3 +1,4 @@
+import { procurementNeedsBudget } from '@utils/procurementBudget';
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ImageBackground } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -295,6 +296,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
       const entry = procurementItems[item.id];
       if (entry?.new > 0) lines.push({ label: `${L(item.title)} / ${L('آکبند')}`, value: entry.new });
       if (entry?.used > 0) lines.push({ label: `${L(item.title)} / ${L('کارکرده')}`, value: entry.used });
+      if (entry?.budgetRial) lines.push({ label: `${L(item.title)} — ${L('محدوده هزینه (ریال)')}`, value: entry.budgetRial });
       if (selectionDescription(entry)) lines.push({ label: `${L(item.title)} — ${L('توضیحات')}`, value: selectionDescription(entry) });
     });
     return lines;
@@ -305,7 +307,8 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
 
   const hasService = softwareSummaryLines.length > 0 || hardwareSummaryLines.length > 0;
   const supplyOnly = !hasService && procurementSummaryLines.length > 0;
-  const canProceed = !hasMissingQuantity && deliveryMode.length > 0 &&
+  const hasMissingBudget = Object.entries(procurementItems).some(([id, entry]) => procurementNeedsBudget(id, entry));
+  const canProceed = !hasMissingBudget && !hasMissingQuantity && deliveryMode.length > 0 &&
     (hasService || supplyOnly) && (supplyOnly || equipmentStatus.length > 0) &&
     Boolean(serviceLevel && (isOnceShort ? onceDate : startDate) && timeSlot && addressId && technicianGender) &&
     (isOnceShort || Boolean(letterFile && (supplyOnly || criticalInfra) && validateOperatorInfo()));
@@ -489,7 +492,6 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
           hint={SEC[3].hint}
           icon={SEC[3].icon}
           expanded={expanded === 'procurement'}
-          step={4}
           done={procurementSummaryLines.length > 0 && !hasDescriptionWithoutQuantity(procurementItems)}
           onPress={() => toggleSection('procurement')}
         />
@@ -499,6 +501,7 @@ const ComprehensiveSelectionScreen = ({ navigation }) => {
               const entry = procurementItems[item.id] || { new: 0, used: 0, desc: '' };
               return (
                 <ProcurementCard
+                  itemId={item.id} budgetRial={entry.budgetRial} onBudgetChange={(budgetRial) => setProcurementItems((prev) => ({ ...prev, [item.id]: { ...prev[item.id], budgetRial } }))}
                   key={item.id}
                   image={item.image}
                   title={L(item.title)}

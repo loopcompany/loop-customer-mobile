@@ -5,7 +5,7 @@ import axios from 'axios';
 import { uri } from '@services/URL';
 import { showAlert } from '@helpers/Common';
 import { L } from '@org/orgI18n';
-import { subscribeRealtime } from '../services/realtime/events';
+import { subscribeRealtime } from '@services/realtime/events';
 
 export default function PendingOrderQuoteNotice({ navigation }) {
   const token = useSelector((state) => state.auth.token);

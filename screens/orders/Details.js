@@ -1,6 +1,6 @@
 import { OrderReadOnlyContext } from '../../contexts/OrderReadOnlyContext';
-import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
-import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { OrderTextInput as TextInput, OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
+import useRealtimeRefresh from '@hooks/useRealtimeRefresh';
 import { View, Text, Pressable, SectionList, StyleSheet, ScrollView, RefreshControl,  KeyboardAvoidingView, } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';

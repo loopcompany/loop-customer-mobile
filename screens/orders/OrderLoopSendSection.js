@@ -1,4 +1,4 @@
-import { OrderTextInput as TextInput } from '../../components/OrderReadOnlyControls';
+import { OrderTextInput as TextInput } from '@components/OrderReadOnlyControls';
 import { StyleSheet, Text, View, } from 'react-native'
 import React, { useState, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import api from '../services/Api';
-import useRealtimeRefresh from '../hooks/useRealtimeRefresh';
+import api from '@services/Api';
+import useRealtimeRefresh from '@hooks/useRealtimeRefresh';
 
 const digits = (value) => String(value).replace(/[۰-۹٠-٩]/g, (c) => String(c.charCodeAt(0) - (c <= '۹' && c >= '۰' ? 1776 : 1632)));
 const money = (value) => Number(value || 0).toLocaleString('fa-IR') + ' تومان';

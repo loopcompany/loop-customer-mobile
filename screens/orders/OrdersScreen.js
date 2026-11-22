@@ -1,5 +1,5 @@
-import { OrderTouchable as TouchableOpacity } from '../../components/OrderReadOnlyControls';
-import useRealtimeRefresh from '../../hooks/useRealtimeRefresh';
+import { OrderTouchable as TouchableOpacity } from '@components/OrderReadOnlyControls';
+import useRealtimeRefresh from '@hooks/useRealtimeRefresh';
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView,  RefreshControl, ActivityIndicator, FlatList, Modal, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +21,6 @@ import Button from '@components/Button';
 import { langIsRTL } from '@helpers/Common';
 
 function OrdersScreen({ navigation }) {
-  useRealtimeRefresh(["orders"], () => dispatch(fetchOrders(filterParams)));
   const { t, i18n } = useTranslation();
   const isRTL = langIsRTL(i18n.language);
   const dispatch = useDispatch();
@@ -52,6 +51,8 @@ function OrdersScreen({ navigation }) {
     ...(toDate ? { to_date: toDate } : {}),
     ...(status !== null ? { status } : {}),
   }), [fromDate, toDate, status]);
+
+  useRealtimeRefresh(["orders"], () => dispatch(fetchOrders(filterParams)));
 
   useFocusEffect(
     React.useCallback(() => {

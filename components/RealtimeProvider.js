@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { uri } from '../services/URL';
+import { uri } from '@services/URL';
 import { fetchUser } from '../slices/userSlice';
 import { fetchContacts } from '../slices/contactSlice';
 import { fetchPdfDocs } from '../slices/pdfDocumentSlice';
 import { fetchMinPrice } from '../slices/minPriceSlice';
-import { createRealtimeClient } from '../services/realtime/client';
-import { emitRealtimeChange } from '../services/realtime/events';
+import { createRealtimeClient } from '@services/realtime/client';
+import { emitRealtimeChange } from '@services/realtime/events';
 
 export default function RealtimeProvider({ children }) {
   const token = useSelector((state) => state.auth?.token);

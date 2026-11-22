@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '@slices/authSlice';
 import { fetchUser } from '@slices/userSlice';
 import TokenManager from '@services/TokenManager';
 import CustomStatusBar from '@components/CustomStatusBar';
-import { themeColor0, themeColor10 } from '@theme/Color';
+import { colors, themeColor0, themeColor10 } from '@theme/Color';
+import { spacing } from '@theme/Spacing';
+import { radius } from '@theme/Radius';
+import { fontSize, getFontFamily } from '@theme/Typography';
+import { Ionicons } from '@expo/vector-icons';
+import { playWithSoundOrMuted, unmuteOnFirstGesture } from '@utils/autoplayWithSound';
 import { fetchAddresses } from '@slices/addressSlice';
 import { ImageBackground } from 'expo-image';
-import NewStyles, { deviceHeight, deviceWidth } from '@styles/NewStyles';
 import { fetchRadii } from '@slices/radiusSlice';
 import i18n from 'i18next';
 import { setLanguage } from '@slices/languageSlice';
@@ -23,29 +26,47 @@ import { useEvent } from 'expo';
 import { getSmsHash } from '@screens/auth/OtpRetriever';
 import { setHashApp } from '@slices/hashAppSlice';
 
-// اگر ویدیوی اسپلش پخش نشود (کدک، شبکه، یا نرسیدن رویداد playToEnd روی دستگاه)
-// کاربر برای همیشه روی صفحه‌ی سیاه می‌ماند. این سقف زمانی تضمین می‌کند که در هر
-// شرایطی وارد اپ می‌شود.
-const SPLASH_TIMEOUT_MS = 6000;
+// اگر ویدیوی اسپلش اصلاً شروع به پخش نکند (کدک، شبکه، autoplay) کاربر برای
+// همیشه روی صفحه‌ی سیاه می‌ماند. این سقف فقط تا «شروع پخش» است.
+//
+// قبلاً همین ۶ ثانیه از لحظه‌ی mount شمرده می‌شد، در حالی که لوگوموشن ۸ ثانیه
+// است؛ پس روی همه‌ی دستگاه‌ها ویدیو وسط پخش قطع می‌شد. حالا بعد از شروع پخش،
+// سقف دوباره از روی مدت واقعی ویدیو تنظیم می‌شود (پایین‌تر، اثرِ isPlaying).
+const SPLASH_START_TIMEOUT_MS = 6000;
+
+// مدت لوگوموشن، وقتی player هنوز duration را گزارش نکرده است.
+const SPLASH_VIDEO_FALLBACK_S = 8;
+
+// حاشیه‌ی بعد از پایان ویدیو برای رسیدن رویداد playToEnd؛ فقط اگر آن رویداد
+// نرسد، این تایمر ادامه می‌دهد.
+const SPLASH_END_GRACE_MS = 1500;
 
 // سقفِ مطلق: حتی اگر بررسیِ توکن هم گیر کند (شبکه‌ی کند، تایم‌اوتِ ۱۰ ثانیه‌ای
 // axios)، کاربر بعد از این مدت به هر حال وارد صفحه‌ی خانه می‌شود.
-const SPLASH_MAX_MS = 15000;
+const SPLASH_MAX_MS = 20000;
 
 export default function Landing({ navigation }) {
   const dispatch = useDispatch();
+  const mountedRef=React.useRef(true);
+  useEffect(()=>{mountedRef.current=true;return()=>{mountedRef.current=false;};},[]);
   const [checking, setChecking] = useState(true);
   // نگهبان‌های تک‌بار-بودن: هم playToEnd و هم تایم‌اوت می‌توانند مسیر را ادامه دهند.
   const startedRef = React.useRef(false);
   const settledRef = React.useRef(false);
+  const fallbackTimerRef = React.useRef(null);
+  const playbackArmedRef = React.useRef(false);
+  // لوگوموشن با صدا پخش می‌شود. روی اندروید/iOS مستقیم؛ روی وب پخش را
+  // utils/autoplayWithSound.js شروع می‌کند (پایین‌تر)، چون مرورگر ممکن است پخش
+  // صدادار را تا اولین لمس کاربر مسدود کند.
   const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
-    console.log("player ready");
-    if (Platform.OS === 'web') {
-
-      player.muted = true;
-    }
-    player.play();
+    player.muted = false;
+    player.volume = 1;
+    if (Platform.OS !== 'web') player.play();
   });
+  // ریشه‌ی صفحه؛ روی وب همان div است و تگ <video> داخلش پیدا می‌شود.
+  const rootRef = React.useRef(null);
+  // روی وب: مرورگر صدا را مسدود کرد و ویدیو بی‌صدا پخش می‌شود تا کاربر لمس کند.
+  const [soundBlocked, setSoundBlocked] = useState(false);
   // Check authentication on component mount
   useEffect(() => {
 
@@ -74,55 +95,40 @@ export default function Landing({ navigation }) {
       // Use TokenManager to check authentication
       const authStatus = await TokenManager.isAuthenticated();
 
-      if (authStatus.authenticated) {
-        dispatch(setToken(authStatus.token));
-        dispatch(fetchAddresses(authStatus.token));
-        await dispatch(fetchUser(authStatus.token));
-        if (authStatus.user) {
-          if (authStatus.user?.account_type !== 'individual') {
-            dispatch(setUserType('organization'))
-          } else {
-            dispatch(setUserType('individual'))
-          }
-          navigateToMainApp();
-        } else {
-          const userResult = await dispatch(fetchUser(authStatus.token));
-          if (userResult?.payload?.account_type !== 'individual') {
-            dispatch(setUserType('organization'))
-          } else {
-            dispatch(setUserType('individual'))
-          }
-
-          if (fetchUser.fulfilled.match(userResult)) {
-            navigateToMainApp();
-          } else {
-            navigateToWelcome();
-          }
-        }
-      } else {
-        navigateToWelcome();
-      }
+      if (!mountedRef.current) return;
+      if (!authStatus.authenticated) {navigateToWelcome(); return;}
+      dispatch(setToken(authStatus.token));
+      dispatch(fetchAddresses(authStatus.token));
+      const result=await dispatch(fetchUser(authStatus.token));
+      if (!mountedRef.current) return;
+      // Temporary network failures preserve an existing session. An actual 401
+      // removes the token through the shared interceptor/TokenManager.
+      if ((await TokenManager.getToken()) !== authStatus.token) {navigateToWelcome(); return;}
+      const profile=fetchUser.fulfilled.match(result) ? result.payload : authStatus.user;
+      const storedType=await AsyncStorage.getItem('userType');
+      const accountType=profile?.account_type;
+      dispatch(setUserType(accountType ? (['individual','indiviual'].includes(accountType)?'individual':'organization') : (storedType || 'individual')));
+      navigateToMainApp();
 
     } catch (error) {
       navigateToWelcome();
     }
   };
 
-  // `List` is the app's home page (web: /list). Every cold start lands there,
-  // signed in or not, so closing and reopening the app always returns to the
-  // same place. Screens reachable from List that need a session send the user
-  // to Login themselves.
-  const goHome = () => {
-    if (settledRef.current) return;
+  // مقصد بعد از اسپلش. هر دو مسیر از این می‌گذرند تا فقط یک بار جابه‌جایی رخ دهد.
+  //
+  // Both auth branches funnel through here so the "settle once" guard covers
+  // them equally — `playToEnd` and either timeout can all reach this point.
+  const settle = (routeName) => {
+    if (settledRef.current || !mountedRef.current) return;
     settledRef.current = true;
     setChecking(false);
-    navigation.replace('List');
+    navigation.replace(routeName);
   };
 
-  // Kept as separate names so the auth branches below stay readable; both
-  // destinations are now the same home page.
-  const navigateToWelcome = goHome;
-  const navigateToMainApp = goHome;
+  // Signed-in sessions open the dashboard; guests retain both sign-in paths.
+  const navigateToMainApp = () => settle('List');
+  const navigateToWelcome = () => settle('Welcome');
 
 
   useEffect(() => {
@@ -138,25 +144,48 @@ export default function Landing({ navigation }) {
 
   // Fallback: never let a video that refuses to play (or never emits
   // `playToEnd`) strand the user on the splash screen.
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const armFallback = (ms) => {
+    clearTimeout(fallbackTimerRef.current);
+    fallbackTimerRef.current = setTimeout(() => {
       if (!settledRef.current) {
         console.warn('[Landing] splash video did not finish in time — continuing');
         checkAuthenticationStatus();
       }
-    }, SPLASH_TIMEOUT_MS);
+    }, ms);
+  };
 
-    // goHome() با settledRef محافظت شده، پس اگر بررسیِ توکن زودتر تمام شود این
+  useEffect(() => {
+    armFallback(SPLASH_START_TIMEOUT_MS);
+
+    // اگر بررسیِ توکن هم طول بکشد، مقصد را از روی *وجودِ* توکن انتخاب می‌کنیم،
+    // نه از روی نتیجه‌ی تأییدِ آن؛ کاربری که توکن دارد نباید به‌خاطر کندیِ شبکه
+    // دوباره به صفحه‌ی ورود فرستاده شود.
+    //
+    // If the auth check itself overruns, pick the destination from whether a
+    // token *exists*, not from whether it was verified. A user who has a stored
+    // token is signed in as far as this screen is concerned: bouncing them to
+    // the login page because the network was slow is exactly the regression
+    // this splash screen must not cause. Entering the app is safe here because
+    // nothing downstream trusts this decision — `RequireAuth` still gates every
+    // guarded route, and the 401 interceptor still raises the session-expiry
+    // sheet the moment a real request proves the token is dead.
+    //
+    // settle() با settledRef محافظت شده، پس اگر بررسیِ توکن زودتر تمام شود این
     // فراخوانی بی‌اثر است.
-    const hardTimer = setTimeout(() => {
-      if (!settledRef.current) {
-        console.warn('[Landing] auth check exceeded budget — entering app anyway');
-        goHome();
-      }
+    const hardTimer = setTimeout(async () => {
+      if (settledRef.current) return;
+
+      const storedToken = await TokenManager.getToken();
+      console.warn(
+        `[Landing] auth check exceeded budget — continuing as ${storedToken ? 'signed in' : 'guest'}`
+      );
+
+      if (storedToken) navigateToMainApp();
+      else navigateToWelcome();
     }, SPLASH_MAX_MS);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(fallbackTimerRef.current);
       clearTimeout(hardTimer);
     };
   }, []);
@@ -173,27 +202,120 @@ export default function Landing({ navigation }) {
   }, []);
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
 
-
+  // به محض شروع پخش، سقف «شروع نشد» را با «باقی‌مانده‌ی ویدیو + حاشیه» عوض
+  // می‌کنیم تا لوگوموشن کامل پخش شود و فقط اگر playToEnd نرسید، ادامه دهیم.
   useEffect(() => {
-    if (Platform.OS === 'web' && !isPlaying && player) {
-      player.play();
+    if (!isPlaying || playbackArmedRef.current || settledRef.current) return;
+    playbackArmedRef.current = true;
+    const duration = player.duration > 0 ? player.duration : SPLASH_VIDEO_FALLBACK_S;
+    const remaining = Math.max(0, duration - (player.currentTime || 0));
+    armFallback(remaining * 1000 + SPLASH_END_GRACE_MS);
+  }, [isPlaying, player]);
 
 
-    }
-  }, [player, isPlaying])
+  // وب: اول با صدا، اگر مرورگر اجازه نداد بی‌صدا + روشن شدن صدا با اولین لمس.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return undefined;
+    let cancelled = false;
+    let retryTimer = null;
+    let removeUnlock = () => {};
+    const start = async () => {
+      const video = rootRef.current?.querySelector?.('video');
+      if (!video) {
+        // VideoView هنوز تگ را نساخته است.
+        retryTimer = setTimeout(start, 50);
+        return;
+      }
+      const result = await playWithSoundOrMuted(video);
+      if (cancelled || result !== 'muted') return;
+      setSoundBlocked(true);
+      removeUnlock = unmuteOnFirstGesture(window, video, () => setSoundBlocked(false));
+    };
+    start();
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+      removeUnlock();
+    };
+  }, [player]);
 
   return (
-    <SafeAreaView style={NewStyles.container}>
+    <View ref={rootRef} style={styles.root}>
       <CustomStatusBar />
-      <LinearGradient colors={['#1c2833', '#0b0d11', '#0b0d11']} style={{ flex: 1 }}>
+      <LinearGradient colors={SPLASH_GRADIENT} style={StyleSheet.absoluteFill} />
 
-        <VideoView style={{ flex: 1 }} nativeControls={false} player={player} contentFit='contain' allowsFullscreen allowsPictureInPicture />
-      </LinearGradient>
-    </SafeAreaView >
+      {/* کادر ویدیو دقیقاً هم‌اندازه‌ی صفحه است و `cover` خودش تصویر را وسط
+          نگه می‌دارد — پس روی هر نسبت‌تصویری تمام‌صفحه و بدون نوار سیاه است.
+          اندازه از `useWindowDimensions` حساب نمی‌شود: آن عدد روی اندروید
+          (edge-to-edge، نوار وضعیت/ناوبری، حالت چندپنجره‌ای) با اندازه‌ی واقعی
+          این کادر یکی نیست و همان اختلاف بود که ویدیو را روی بعضی گوشی‌ها از
+          بالا و پایین می‌برید.
+
+          The box is the screen, and `cover` does the centring itself, so the
+          video fills any aspect ratio with nothing letterboxed. Deriving a size
+          from `useWindowDimensions` is what cropped it on some devices: on
+          Android that number does not always match this view's real height
+          (edge-to-edge insets, split screen), so the computed box overflowed. */}
+      <VideoView
+        style={styles.video}
+        nativeControls={false}
+        player={player}
+        contentFit="cover"
+      />
+      {soundBlocked ? (
+        <View pointerEvents="none" style={styles.soundHint}>
+          <Ionicons name="volume-high" size={18} color={colors.white.color} />
+          <Text style={styles.soundHintText}>{i18n.t('Tap the screen to turn on the sound')}</Text>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
+// رنگ‌های اختصاصی اسپلش (در پالت theme/Color.js معادل ندارند).
+const SPLASH_GRADIENT = ['#1c2833', '#0b0d11', '#0b0d11'];
+
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: SPLASH_GRADIENT[1],
+    // اسپلش هیچ‌وقت نباید اسکرول شود؛ این هر سرریزِ احتمالی را می‌برد.
+    overflow: 'hidden',
+  },
+  // عرض/ارتفاعِ صریح، نه فقط `StyleSheet.absoluteFill`.
+  //
+  // روی وب این استایل مستقیم روی خودِ تگ `<video>` می‌نشیند، و `<video>` یک
+  // replaced element است: طبق CSS، وقتی `width`/`height` برابر `auto` باشند
+  // (چیزی که absoluteFill تنها با top/left/right/bottom باقی می‌گذارد) مرورگر
+  // ابعادِ ذاتیِ فایل را به کار می‌برد — یعنی ۷۲۰×۱۲۸۰ پیکسل. روی پنجره‌ی
+  // کوچکِ موبایل این از صفحه بیرون می‌زد و `#root` (که `overflow: auto` دارد)
+  // اسکرول افقی و عمودی نشان می‌داد. با `100%` این اتفاق نمی‌افتد و روی نیتیو
+  // هم دقیقاً همان absoluteFill است.
+  // راهنمای «برای صدا لمس کنید» (فقط وب، وقتی مرورگر صدا را مسدود کرده).
+  soundHint: {
+    position: 'absolute',
+    bottom: spacing.huge,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
+    backgroundColor: colors.black.bgColor(0.55),
+  },
+  soundHintText: {
+    color: colors.white.color,
+    fontFamily: getFontFamily('bold', 'fa'),
+    fontSize: fontSize.sm,
+  },
+  video: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  },
   background: {
     flex: 1,
     resizeMode: 'cover',

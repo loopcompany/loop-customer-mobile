@@ -1,3 +1,4 @@
+import { languageDirection } from '@services/localizationRegistry';
 import { Dimensions, Platform, ToastAndroid, Alert } from "react-native";
 import Constants from "expo-constants";
 import dayjs from "dayjs";
@@ -440,7 +441,7 @@ export const getOrderStatusColor = (status) => {
 };
 
 const RTL_LANGS = new Set(['fa', 'ar', 'he', 'ur', 'ps', 'ckb']);
-export const langIsRTL = (lang) => (lang || '').toLowerCase().split('-')[0] && RTL_LANGS.has((lang || '').toLowerCase().split('-')[0]);
+export const langIsRTL = (lang) => languageDirection(lang) === 'rtl';
 
 export const formatDateTime = (isoDate, fa = i18n.language === 'fa') => {
   if (!isoDate) return '';

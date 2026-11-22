@@ -1,3 +1,4 @@
+import { languageDirection } from '@services/localizationRegistry';
 export const fontSize = {
   xs: 12,
   sm: 14,
@@ -8,11 +9,7 @@ export const fontSize = {
   display: 32,
 };
 
-const RTL_LANGS = new Set(["fa", "ar", "he", "ur", "ps", "ckb"]);
-
-const langIsRTL = (lang) =>
-  Boolean((lang || "").toLowerCase().split("-")[0]) &&
-  RTL_LANGS.has((lang || "").toLowerCase().split("-")[0]);
+const langIsRTL = (lang) => languageDirection(lang) === 'rtl';
 
 // weight: 'bold' | 'light'. Mirrors the RTL font-family switch already used
 // in styles/NewStyles.js (Vazir* for LTR, Vazir*FD for RTL).
