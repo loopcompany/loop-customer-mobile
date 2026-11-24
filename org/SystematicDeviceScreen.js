@@ -6,7 +6,7 @@ import { procurementNeedsBudget } from '@utils/procurementBudget';
 // کاربری «انتخاب جامع» (components/OrgSelectionKit.js) رندر می‌کند تا دو مسیر
 // دقیقاً یک ظاهر داشته باشند.
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, Text, TextInput, ScrollView, ImageBackground, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +27,7 @@ import {
   PhotoNoteInput,
   SummaryBox,
   OrderActionButtons,
+  ActionButton,
 } from '@components/OrgSelectionKit';
 import {
   HARDWARE_ITEMS,
@@ -37,6 +38,7 @@ import {
   hasDescriptionWithoutQuantity,
 } from './deviceCatalog';
 import { getCategory, getFlow, SERVICE_STEP_IDS } from './systematicFlows';
+import { listMissingSteps, isServiceGroupMissing, leaveBlockReason, leaveBlockMessage } from './systematicRequired';
 import { describeQuantity, selectionDescription } from './orderDescriptions';
 import NewStyles from '@styles/NewStyles';
 import { themeColor10, colors } from '@theme/Color';
@@ -96,6 +98,20 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const [answers, setAnswers] = useState({});
   const [expanded, setExpanded] = useState(steps[0]?.id || null);
 
+  // برای «رفتن به مرحله‌ی ناقص»: بالا بودن هر مرحله نسبت به محتوای اسکرول‌ویو را
+  // نگه می‌داریم تا بتوانیم خودِ مرحله را وسط دید کاربر بیاوریم.
+  const scrollViewRef = useRef(null);
+  const stepTops = useRef({});
+  const focusStep = (id) => {
+    setExpanded(id);
+    // سربرگ مرحله بالای بدنه‌ی آکاردئون است، پس بازشدن بدنه جای سربرگ را جابه‌جا
+    // نمی‌کند؛ فقط یک فریم صبر می‌کنیم تا چیدمان تازه اعمال شود.
+    requestAnimationFrame(() => {
+      const top = stepTops.current[id];
+      if (top != null) scrollViewRef.current?.scrollTo({ y: Math.max(0, top - 8), animated: true });
+    });
+  };
+
   const setAnswer = (stepId, patch) =>
     setAnswers((prev) => ({ ...prev, [stepId]: { ...prev[stepId], ...patch } }));
 
@@ -103,6 +119,15 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     if (id !== expanded && missingQuantityStep?.id === expanded) {
       showToastOrAlert(L('برای موارد دارای توضیحات، تعداد را وارد کنید.'));
       return;
+    }
+    // قاعده‌ی سند کارفرما (۲۵ آبان ۱۴۰۵، بند ۳۵): از یک مرحله‌ی الزامیِ ناقص نمی‌شود
+    // جلو رفت؛ پیام می‌آید و کاربر روی همان مرحله می‌ماند. برگشتن به عقب آزاد است.
+    if (id !== expanded) {
+      const block = leaveBlockReason(steps, answers, isStepFilled, expanded, id);
+      if (block) {
+        showToastOrAlert(leaveBlockMessage(block, L));
+        return;
+      }
     }
     setExpanded((prev) => (prev === id ? null : id));
   };
@@ -192,10 +217,20 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     return lines;
   }, [steps, answers]);
 
-  const serviceSteps = steps.filter((step) => SERVICE_STEP_IDS.includes(step.id));
-  const firstMissingStep = () =>
-    steps.find((step) => step.required && !isStepFilled(step, answers[step.id])) ||
-    (serviceSteps.some((step) => isStepFilled(step, answers[step.id])) ? null : serviceSteps[0]);
+  // مراحل ناقص، به ترتیب خودِ مراحل؛ گروه خدمات (سیستم عامل / نصب نرم افزار / عیوب
+  // نرم افزار / عیوب سخت افزار) طبق سند کارفرما (۲۵ آبان ۱۴۰۵، بند ۳۵) «یکی از این‌ها
+  // الزامی است» و در جای اولین عضو گروه می‌ایستد. منطق در org/systematicRequired.js
+  // است و تست دارد.
+  //
+  // تا ۱۴۰۵/۰۹/۰۲ ترتیب گزارش همین‌طور نبود: اول تک‌تک مراحل الزامیِ بعدی (تکنسین،
+  // زمان، آدرس) اعلام می‌شدند و گروه خدمات آخر می‌ماند.
+  const missingSteps = useMemo(
+    () => listMissingSteps(steps, answers, isStepFilled),
+    [steps, answers]
+  );
+  const firstMissingStep = () => missingSteps[0] || null;
+  // تا وقتی هیچ‌کدام از مراحل خدمات انتخاب نشده، همه‌شان نشان «یکی از این مراحل الزامی است» می‌گیرند.
+  const serviceGroupMissing = isServiceGroupMissing(steps, answers, isStepFilled);
 
   const missingBudgetStep = steps.find((step) => step.type === 'procurement' && Object.entries(answers[step.id] || {}).some(([id, entry]) => procurementNeedsBudget(id, entry)));
   const missingQuantityStep = steps.find((step) =>
@@ -204,10 +239,11 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
   const handleOrderAction = (action) => {
     if (action !== 'cancel_order' && missingBudgetStep) {
       showToastOrAlert(L('برای کالای انتخاب‌شده محدوده هزینه و برای کالای کارکرده توضیحات را تکمیل کنید.'));
-      setExpanded(missingBudgetStep.id); return;
+      focusStep(missingBudgetStep.id); return;
     }
     if (action !== 'cancel_order' && missingQuantityStep) {
       showToastOrAlert(L('برای موارد دارای توضیحات، تعداد را وارد کنید.'));
+      focusStep(missingQuantityStep.id);
       return;
     }
     if (action === 'cancel_order') {
@@ -222,7 +258,7 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
     if (action !== 'cancel_order') {
       if (missing) {
         showToastOrAlert(`${L(missing.title)} — ${L('لطفاً این مرحله را تکمیل کنید')}`);
-        setExpanded(missing.id);
+        focusStep(missing.id);
         return;
       }
     }
@@ -459,8 +495,27 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
       case 'orderActions':
         return (
           <>
+            {/* تا ۱۴۰۵/۰۹/۰۲ با هر مرحله‌ی ناقص، هر سه دکمه بی‌توضیح کم‌رنگ و غیرفعال
+                می‌شدند؛ کاربر که بدون تکمیل مراحل به آخر رسیده بود «دکمه‌ای نداشت» و
+                گیج می‌ماند. حالا دکمه‌ها همیشه فعال‌اند: با مرحله‌ی ناقص، پیام می‌دهند و
+                خودِ مرحله را باز می‌کنند و به آن اسکرول می‌کنند. مراحل مانده هم بالای
+                دکمه‌ها فهرست می‌شوند. */}
+            {missingSteps.length > 0 ? (
+              <View style={styles.missingBox}>
+                <Text style={styles.missingTitle}>
+                  {`${L('مراحل الزامی باقی‌مانده')} (${missingSteps.length}): ${missingSteps
+                    .map((step) => L(step.title))
+                    .join('، ')}`}
+                </Text>
+                <ActionButton
+                  title={L('رفتن به مرحله‌ی ناقص')}
+                  color={colors.error}
+                  onPress={() => focusStep(missingSteps[0].id)}
+                  last
+                />
+              </View>
+            ) : null}
             <OrderActionButtons
-              disabled={Boolean(missingBudgetStep || missingQuantityStep || firstMissingStep())}
               onIssueReceipt={() => handleOrderAction('issue_receipt')}
               onShowReceipt={() => handleOrderAction('show_receipt')}
               onSubmit={() => handleOrderAction('submit_order')}
@@ -494,9 +549,17 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 40 + footerSpace }}
+      >
         {steps.map((step, index) => (
-          <View key={step.id}>
+          <View
+            key={step.id}
+            onLayout={(event) => {
+              stepTops.current[step.id] = event.nativeEvent.layout.y;
+            }}
+          >
             <AccordionHeader
               title={L(step.title)}
               hint={L(step.hint)}
@@ -504,6 +567,14 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
               step={index + 1}
               done={isStepFilled(step, answers[step.id])}
               expanded={expanded === step.id}
+              // مرحله‌ی الزامیِ ناقص، نشان «الزامی» می‌گیرد؛ مراحل خدمات تا وقتی
+              // هیچ‌کدام انتخاب نشده، نشان «یکی از این مراحل الزامی است».
+              required={step.required || (serviceGroupMissing && SERVICE_STEP_IDS.includes(step.id))}
+              requiredLabel={
+                serviceGroupMissing && SERVICE_STEP_IDS.includes(step.id)
+                  ? L('یکی از این مراحل الزامی است')
+                  : undefined
+              }
               onPress={() => toggleSection(step.id)}
             />
             {expanded === step.id && <SectionBody>{renderStepBody(step)}</SectionBody>}
@@ -515,6 +586,23 @@ const SystematicDeviceScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
+  // بنر «مراحل الزامی باقی‌مانده» بالای دکمه‌های ثبت سفارش
+  missingBox: {
+    backgroundColor: colors.error.bgColor(0.1),
+    borderColor: colors.error.bgColor(0.4),
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  missingTitle: {
+    fontFamily: 'VazirBold',
+    fontSize: fontSize.sm,
+    color: colors.textInverse.color,
+    textAlign: 'center',
+    lineHeight: fontSize.sm * 1.8,
+    marginBottom: spacing.md,
+  },
   subLabel: {
     fontFamily: 'VazirBold',
     fontSize: fontSize.xs,

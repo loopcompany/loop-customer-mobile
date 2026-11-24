@@ -62,7 +62,10 @@ const SystematicCategoryScreen = ({ navigation }) => {
 
   const [folders, setFolders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [loader, setLoader] = useState(true);
+  // کاشی‌ها تصویر محلی دارند و باید بی‌درنگ نمایش داده شوند. تا ۱۴۰۵/۰۹/۰۲ صفحه تا
+  // رسیدن پاسخ /categories یک Loader نشان می‌داد و کاربر آن را «دیر لود شدن
+  // آیکون‌ها» می‌دید. پاسخ سرور فقط برای شناسه‌ی دسته‌ها در پس‌زمینه می‌آید.
+  const [loader, setLoader] = useState(false);
 
   const loadCategories = async () => {
     // ‎/categories یک endpoint احراز هویت‌شده است. توکن را AuthInitializer به صورت
@@ -196,10 +199,10 @@ const SystematicCategoryScreen = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          {/* کاشی حساب کاربری - مثل قبل بالای شبکه و با همان آیکون سروری */}
+          {/* کاشی حساب کاربری - بالای شبکه، با همان آیکون اصلی کارفرما */}
           <Folder
             title={L('حساب کاربری')}
-            imageSource={require('@assets/icons/sections/account-menu.png')}
+            imageSource={require('@assets/icons/systematic/account.webp')}
             onPress={() => navigation.navigate(user?.account_type && !['individual','indiviual'].includes(user.account_type)?'OrganizationProfile':'Profile')}
           />
 
@@ -214,8 +217,9 @@ const SystematicCategoryScreen = ({ navigation }) => {
             .map((entry) => (
               <Folder
                 key={entry.key}
-                title={entry.key==='trash'?`${L(entry.title)} — ${L('به زودی')}`:L(entry.title)}
-                loading={entry.key==='trash'}
+                // «Trash» در هر دو زبان همین‌طور نوشته می‌شود. کاشی غیرفعال نیست:
+                // با ضربه، openCategory پیام «به زودی» را نشان می‌دهد.
+                title={entry.key === 'trash' ? 'Trash' : L(entry.title)}
                 image={entry.image}
                 imageSource={entry.imageSource}
                 icon={

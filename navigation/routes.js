@@ -38,6 +38,8 @@ export const routes = [
   { name: 'Landing', getComponent: () => require('@screens/Landing').default, path: '' },
   { name: 'Welcome', getComponent: () => require('@screens/Welcome').default, path: 'welcome' },
 
+  { name: 'TechnicianIdentity', getComponent: () => require('@screens/account/TechnicianIdentityScreen').default, path: 'technician-identity' },
+
   /* ---- Customer authentication ---- */
   {
     name: 'SignInLanding',
@@ -477,8 +479,10 @@ export const INITIAL_ROUTE = 'Landing';
 /**
  * Routes on which the Android back button should offer to exit the app.
  * `List` is the home page every cold start lands on, so it belongs here —
- * otherwise back from home pops to an empty stack.
+ * otherwise back from home pops to an empty stack. `SignInLanding` is the last
+ * screen left in the stack for a guest (Welcome replaces itself with it), so
+ * back there has nowhere to go either.
  */
-export const ROOT_ROUTES = ['Landing', 'Welcome', 'FolderScreen', 'List'];
+export const ROOT_ROUTES = ['Landing', 'Welcome', 'SignInLanding', 'FolderScreen', 'List'];
 
 export default routes;

@@ -1,6 +1,6 @@
 {
   "name": "loop-customer-mobile",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Loop (لوپ) — Expo/React Native customer app for the Loop home-service platform.",
   "private": true,
   "main": "index.js",
@@ -46,6 +46,7 @@
     "expo-asset": "~57.0.16",
     "expo-blur": "~57.0.2",
     "expo-build-properties": "~57.0.17",
+    "expo-camera": "~57.0.6",
     "expo-clipboard": "~57.0.1",
     "expo-constants": "~57.0.17",
     "expo-dev-client": "~57.0.18",

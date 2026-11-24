@@ -25,7 +25,11 @@ const rtl = () => langIsRTL(i18n.language);
 
 // سربرگ آکاردئونی هر بخش. با پاس‌دادن step، شماره‌ی مرحله در سمت راست عنوان
 // نمایش داده می‌شود (حالت stepper در «انتخاب سیستماتیک»).
-export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, done }) => (
+//
+// `required` (اختیاری): تا وقتی مرحله پر نشده، یک نشان «الزامی» کنار عنوان
+// می‌گذارد؛ `requiredLabel` متن دلخواه نشان را می‌دهد (مثلاً برای گروهی از مراحل
+// که فقط یکی‌شان الزامی است).
+export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, done, required, requiredLabel }) => (
   <View
     style={{
       flexDirection: 'row',
@@ -62,16 +66,37 @@ export const AccordionHeader = ({ title, hint, icon, expanded, onPress, step, do
             fontWeight: 'bold',
             fontFamily: 'VazirBold',
             textAlign: 'center',
+            flexShrink: 1,
           }}
         >
           {title}
         </Text>
+        {required && !done ? <RequiredBadge label={requiredLabel} /> : null}
         {step ? <StepBadge step={step} done={done} /> : null}
       </View>
       <View style={{ width: 26, alignItems: 'flex-end' }}>
         <HintBadge hint={hint} title={title} size={22} />
       </View>
     </TouchableOpacity>
+  </View>
+);
+
+// نشان کوچک «الزامی» برای مرحله‌ای که هنوز پر نشده است.
+export const RequiredBadge = ({ label }) => (
+  <View
+    style={{
+      backgroundColor: colors.error.bgColor(0.16),
+      borderColor: colors.error.bgColor(0.55),
+      borderWidth: 1,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.xs,
+      paddingVertical: 2,
+      marginHorizontal: spacing.xs,
+    }}
+  >
+    <Text style={{ color: colors.error.color, fontSize: fontSize.xs, fontFamily: 'VazirBold' }}>
+      {label || L('الزامی')}
+    </Text>
   </View>
 );
 

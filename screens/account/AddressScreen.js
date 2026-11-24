@@ -208,7 +208,9 @@ export default function AddressScreen({ route, navigation }) {
             ListEmptyComponent={renderEmptyState}
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            showsVerticalScrollIndicator={false}
+            // نشانگر اسکرول روشن است (درخواست کارفرما ۱۴۰۵/۰۹/۰۲): با آدرس‌های زیاد
+            // معلوم شود فهرست اسکرول می‌شود؛ در نسخه‌ی ویندوز نوار باریک و ظریف است.
+            showsVerticalScrollIndicator
           />
         )}
       </View>

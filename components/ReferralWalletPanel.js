@@ -45,7 +45,7 @@ export default function ReferralWalletPanel() {
   if (summary && !summary.is_agent) return null;
   if (!summary && !error) return null;
   return <View style={styles.panel}>
-    <Text style={styles.title}>کیف پول پورسانت کد معرف</Text>
+    <Text style={styles.title}>کیف پول پورسانت مسئول خرید</Text>
     {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     {message ? <Text accessibilityRole="alert" style={styles.text}>{message}</Text> : null}
     <TouchableOpacity accessibilityRole="button" onPress={load}><Text style={styles.link}>دریافت اطلاعات تازه</Text></TouchableOpacity>

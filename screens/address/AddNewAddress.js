@@ -53,7 +53,7 @@ export default function AddNewAddress({ navigation }) {
             <ScreenHeaders title={t('Register Address')} />
             <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
 
-                <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false}>
+                <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator>
 
                     {/* انتخاب آدرس از روی نقشه‌ی نشان — میان‌بُرِ پر کردنِ آدرس،
                         منطقه و شهر بدون تایپ کردن. */}

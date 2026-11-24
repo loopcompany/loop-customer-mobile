@@ -12,7 +12,6 @@ import {
     Alert,
     Linking,
 } from "react-native";
-// CodeField imports removed - using InviteCodeInput component instead
 import Button from "@components/Button";
 import NewStyles from "@styles/NewStyles";
 import { themeColor10, themeColor4, themeColor0, themeColor3, themeColor6 } from "@theme/Color";
@@ -20,7 +19,6 @@ import { authAPI } from "@services/Api";
 import { termsPdfUrl } from "@services/URL";
 import { showToastOrAlert, langIsRTL } from "@helpers/Common";
 import CustomStatusBar from "@components/CustomStatusBar";
-import InviteCodeInput from "@components/InviteCodeInput";
 import LocationPicker from "@components/LocationPicker";
 import { Ionicons } from '@expo/vector-icons';
 import { ImageBackground } from "expo-image";
@@ -32,7 +30,6 @@ const initialState = {
     melicode: '',
     phone: '',
     email: '',
-    otherReferralCode: '',
     captchaInput: '',
     captcha: Math.floor(1000 + Math.random() * 9000).toString(),
     province: null,
@@ -79,7 +76,6 @@ export default function MainSignIn({ navigation }) {
     const hashApp = useSelector(state => state.hashApp?.hash)
     // console.log(hashApp?.[0]);
 
-    const inviteLetter = 'L'; // Static invite letter
     const { t, i18n } = useTranslation();
     const NewStyles = useMemo(
         () => createStyles(i18n.language),
@@ -165,7 +161,6 @@ export default function MainSignIn({ navigation }) {
                 province_id: state.province?.id,
                 city_id: state.city?.id,
                 region_id: state.region?.id,
-                other_referral_code: state.otherReferralCode ? `${inviteLetter}${state.otherReferralCode}` : null,
                 hashApp: hashApp?.[0]
             };
 
@@ -282,14 +277,6 @@ export default function MainSignIn({ navigation }) {
                             </View>
                         </View>
 
-                        {/* Other Referral Code using reusable component */}
-                        <InviteCodeInput
-                            value={state.otherReferralCode}
-                            onChangeText={(value) => dispatch({ type: 'SET_FIELD', field: 'otherReferralCode', value })}
-                            prefix={inviteLetter}
-                            hasError={!!state.errors.otherReferralCode}
-                            errorMessage={state.errors.otherReferralCode}
-                        />
 
                         {/* Email */}
                         <View style={styles.inputContainer}>
@@ -523,7 +510,6 @@ const createLocalStyles = (NewStyles, isRtl) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center'
     },
-    // inviteCodeCell styles moved to InviteCodeInput component
     mobileInput: {
         flex: 1,
         textAlign: isRtl ? 'right' : 'left', writingDirection: isRtl ? 'rtl' : 'ltr'

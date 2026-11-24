@@ -1580,5 +1580,6 @@
   "Order attachments": "تصاویر و پیوست‌های سفارش",
   "Open order attachment": "باز کردن پیوست {{number}}",
   "Unable to open order attachment": "باز کردن پیوست سفارش ممکن نشد.",
-  "Coming soon": "به‌زودی"
+  "Coming soon": "به‌زودی",
+  "Tap to continue": "برای ادامه لمس کنید"
 }

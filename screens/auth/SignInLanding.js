@@ -29,6 +29,14 @@ export default function SignInLanding({ navigation }) {
           navigation.navigate("MainSignIn");
         }}
       />
+      {/* ورود و ثبت‌نام سازمانی/شرکتی. مهمان‌ها از ۱۴۰۵/۰۹/۰۲ مستقیم به همین صفحه
+          می‌آیند و دیگر از منوی سفارش رد نمی‌شوند، پس مسیر سازمانی باید همین‌جا هم باشد. */}
+      <TransparentButton
+        onPress={() => navigation.navigate("Grouping")}
+        customStyle={[{ borderColor: themeColor0.bgColor(1), borderWidth: 1, width: '70%', maxWidth: 400, backgroundColor: themeColor4.bgColor(0.5), marginVertical: 6 }, NewStyles.border10]}
+        title={t("Organization / Company")}
+        customTextStyle={NewStyles.title}
+      />
       <TransparentButton
         onPress={() => { Linking.openURL(`${imageUri}/${pdf?.user}`) }}
         customStyle={[{ borderColor: themeColor0.bgColor(1), borderWidth: 1, width: '70%', maxWidth: 400, backgroundColor: themeColor4.bgColor(0.5) }, NewStyles.border10]}

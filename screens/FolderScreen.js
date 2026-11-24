@@ -25,6 +25,18 @@ import { createStyles } from "@styles/NewStyles";
 import { imageUri } from "@services/URL";
 import { Text } from "react-native";
 
+// ترتیب کاشی‌های شبکه (حساب کاربری جداگانه بالای آن است): مانیتور، Trash، لپ تاپ،
+// کیس، آل این وان، پرینتر / کپی، هارد — همان ترتیب سند کارفرما (۲۵ آبان ۱۴۰۵، بند ۲۹).
+const TILE_ORDER = ['monitor', 'trash', 'laptop', 'case', 'all_in_one', 'printer_copy', 'hard_disk'];
+
+// کاشی‌هایی که از همان اول با تصاویر محلی نمایش داده می‌شوند؛ پاسخ سرور فقط
+// شناسه‌ی سروری هر دسته را به آن‌ها اضافه می‌کند.
+const localTiles = () =>
+  TILE_ORDER.map((id) => {
+    const local = SYSTEMATIC_CATEGORIES.find((entry) => entry.id === id);
+    return { title: local.title, localImage: local.image, systematicId: id };
+  });
+
 function FolderScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const NewStyles = useMemo(
@@ -32,9 +44,12 @@ function FolderScreen({ navigation }) {
     [i18n.language]
   );
   const styles = useMemo(() => createLocalStyles(NewStyles), [NewStyles]);
-  const [folders, setFolders] = useState([]);
+  // کاشی‌ها از همان اول با تصاویر محلیِ اصلی کارفرما نمایش داده می‌شوند؛ پاسخ
+  // /categories فقط شناسه‌ی سروری هر دسته را اضافه می‌کند. تا ۱۴۰۵/۰۹/۰۲ صفحه تا
+  // رسیدن پاسخ سرور Loader نشان می‌داد و کاربر آن را «دیر لود شدن آیکون‌ها» می‌دید.
+  const [folders, setFolders] = useState(localTiles);
   const [refreshing, setRefreshing] = useState(false);
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector(state => state?.user?.data);
   const token = useSelector(state => state?.auth?.token);
@@ -54,8 +69,7 @@ function FolderScreen({ navigation }) {
       const categories = Array.isArray(res.data)
         ? res.data
         : res.data || res.data?.data || [];
-      const order=['monitor','trash','laptop','case','all_in_one','printer_copy','hard_disk'];
-      setFolders(order.map((id)=>{const remote=categories.find((entry)=>resolveSystematicCategoryId(entry)===id);const local=SYSTEMATIC_CATEGORIES.find((entry)=>entry.id===id);return {...remote,title:local.title,localImage:local.image,systematicId:id};}));
+      setFolders(TILE_ORDER.map((id)=>{const remote=categories.find((entry)=>resolveSystematicCategoryId(entry)===id);const local=SYSTEMATIC_CATEGORIES.find((entry)=>entry.id===id);return {...remote,title:local.title,localImage:local.image,systematicId:id};}));
     } catch (err) {
       console.error("Failed to load categories:", err);
       // 401 را interceptor با هشدار «ورود مجدد» مدیریت می‌کند؛ پیام دوم ندهیم.
@@ -110,7 +124,7 @@ function FolderScreen({ navigation }) {
             navigation.navigate("Profile")
           }} >
             <Image
-              source={require('@assets/icons/sections/account-menu.png')}
+              source={require('@assets/icons/systematic/account.webp')}
               style={[styles.folderIcon]}
             />
             <Text style={NewStyles.title4}>{t("User Account")}</Text>
@@ -120,8 +134,9 @@ function FolderScreen({ navigation }) {
               return (
                 <View key={item.systematicId || item.id}>
                   <Folder
-                    title={item?.systematicId==='trash'?`${t(item.title)} — ${t('به زودی')}`:item?.title}
-                    loading={item?.systematicId==='trash'}
+                    // «Trash» در هر دو زبان همین‌طور نوشته می‌شود؛ کاشی غیرفعال نیست و
+                    // با ضربه پیام «به زودی» را نشان می‌دهد.
+                    title={item?.systematicId === 'trash' ? 'Trash' : item?.title}
                     imageSource={item?.localImage}
                     image={item?.localImage ? undefined : item?.image_path}
                     onPress={async () => {

@@ -516,6 +516,7 @@ function Details({ route, navigation }) {
         </View>
     ), []);
     const minPrice = useSelector(state => state.minPrice?.data)
+    const settlementBalance = data?.payment_method === 'remaining' ? data?.remaining_amount : null;
     if (data.length <= 0) { return <Loader /> }
 
 
@@ -797,10 +798,10 @@ function Details({ route, navigation }) {
                             {user?.apple_check == 0 && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Payable amount")}</Text>
                                 <Text style={[NewStyles.title]}>
-                                    {formatPrice(totalDiscountedPrice < Number(minPrice?.price) ? totalDiscountedPrice + 200000 : totalDiscountedPrice)} {t("Tomans")}
+                                    {formatPrice(settlementBalance ?? (totalDiscountedPrice < Number(minPrice?.price) ? totalDiscountedPrice + 200000 : totalDiscountedPrice))} {t("Tomans")}
                                 </Text>
                             </View>}
-                            {user?.apple_check == 0 && totalDiscountedPrice < Number(minPrice?.price) && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
+                            {user?.apple_check == 0 && settlementBalance == null && totalDiscountedPrice < Number(minPrice?.price) && <View style={[NewStyles.rowWrapper, { backgroundColor: themeColor0.bgColor(0.05), padding: 10, borderRadius: 8 }]}>
                                 <Text style={[NewStyles.title]}>{t("Travel and tuition fees")}</Text>
                                 <Text style={[NewStyles.title]}>
                                     {formatPrice(200000)} {t("Tomans")}

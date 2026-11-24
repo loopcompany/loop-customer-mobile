@@ -3,7 +3,7 @@
     "name": "loop",
     "slug": "loop",
     "scheme": "expo.loop.with-webbrowser-redirect",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -26,6 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.clpiran.loop",
+      "allowBackup": false,
       "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
@@ -37,7 +38,7 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.POST_NOTIFICATIONS"
       ],
-      "versionCode": 20261123
+      "versionCode": 20261124
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -82,7 +83,15 @@
         }
       ],
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/withNativeUpdates.cjs",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "اجازهٔ دوربین برای اسکن کارت تکنسین لوپ",
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "extra": {
       "eas": {

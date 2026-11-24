@@ -25,29 +25,39 @@ const sectionIcon = {
   criticalInfra: require('@assets/icons/sections/critical-infra.png'),
 };
 
+// تصاویر کاشی‌های صفحه‌ی «انتخاب سیستماتیک»: همان تصاویر اصلی که کارفرما داده است
+// (روی سرور: category/*.png و userfolder/TrashV.png؛ masterها در
+// `1/original-category-icons/`). تا ۱۴۰۵/۰۹/۰۲ این کاشی‌ها آیکون‌های بازطراحی‌شده‌ی
+// سرمه‌ای را نشان می‌دادند و کاشی Trash اصلا تصویر نداشت. برای نمایش فوری فقط اندازه
+// کوچک شده (۵۱۲ پیکسل WebP، مجموع ۲۵۲ کیلوبایت به‌جای ۱۰ مگابایت)؛ ظاهر دست‌نخورده است.
 const deviceIcon = {
-  laptop: require('@assets/icons/hardware-services/laptop.png'),
-  monitor: require('@assets/icons/hardware-services/monitor.png'),
-  case: require('@assets/icons/hardware-services/case-standard.png'),
-  allInOne: require('@assets/icons/hardware-services/all-in-one.png'),
-  printer: require('@assets/icons/hardware-services/printer-multi.png'),
-  hardDisk: require('@assets/icons/hardware-services/storage-drive.png'),
+  laptop: require('@assets/icons/systematic/laptop.webp'),
+  monitor: require('@assets/icons/systematic/monitor.webp'),
+  case: require('@assets/icons/systematic/case.webp'),
+  allInOne: require('@assets/icons/systematic/all-in-one.webp'),
+  printer: require('@assets/icons/systematic/printer.webp'),
+  hardDisk: require('@assets/icons/systematic/hard-disk.webp'),
+  trash: require('@assets/icons/systematic/trash.webp'),
 };
 
 // ---------------------------------------------------------------------------
 // شبکه‌ی دسته‌ها - همان کاشی‌های صفحه‌ی «انتخاب سیستماتیک» در طرح
+//
+// ترتیب، همان ترتیب سند کارفرما (۲۵ آبان ۱۴۰۵، بند ۲۹) است:
+// حساب کاربری، مانیتور، Trash، لپ تاپ، کیس، آل این وان، پرینتر / کپی، هارد.
 // ---------------------------------------------------------------------------
 export const SYSTEMATIC_CATEGORIES = [
   {
     id: 'user_account',
     title: 'حساب کاربری',
     subtitle: 'User Account',
-    image: require('@assets/icons/sections/account-menu.png'),
+    image: require('@assets/icons/systematic/account.webp'),
     // این کاشی مرحله‌ای ندارد و مستقیم صفحه‌ی حساب کاربری موجود را باز می‌کند.
     screen: 'Profile',
   },
   { id: 'monitor', title: 'مانیتور', subtitle: 'Monitor', image: deviceIcon.monitor },
-  { id: 'trash', title: 'ضایعات', subtitle: 'به زودی', image: deviceIcon.trash },
+  // «Trash» طبق سند در هر دو زبان همین‌طور نوشته می‌شود؛ با ضربه پیام «به زودی» می‌آید.
+  { id: 'trash', title: 'Trash', subtitle: 'Coming soon', image: deviceIcon.trash },
   { id: 'laptop', title: 'لپ تاپ', subtitle: 'Laptop', image: deviceIcon.laptop },
   { id: 'case', title: 'کیس', subtitle: 'Case', image: deviceIcon.case },
   { id: 'all_in_one', title: 'آل این وان', subtitle: 'All in One', image: deviceIcon.allInOne },
@@ -328,20 +338,51 @@ export const SYSTEMATIC_FLOWS = {
       options: softwareChecklist,
       columns: 1,
     },
+    // طبق سند کارفرما (۲۵ آبان ۱۴۰۵): بند ۱۱ نام‌ها را «عیوب نرم افزار» و «عیوب سخت
+    // افزار» گذاشت و بند ۳۵ گفت یکی از چهار مرحله‌ی خدمات (سیستم عامل / نصب نرم
+    // افزار / عیوب نرم افزار / عیوب سخت افزار) حتماً باید انتخاب شود.
+    //
+    // تا ۱۴۰۵/۰۹/۰۲ فقط یکی از این دو مرحله وجود داشت و آن هم با نام «عیوب سخت افزار»
+    // گزینه‌های نرم‌افزاری داشت؛ مرحله‌ی software_default وجود نداشت و getFlow برای
+    // بقیه‌ی دستگاه‌ها از روی قالبی ناموجود یک مرحله‌ی بی‌id می‌ساخت.
+    //
+    // این مرحله قالب «عیوب نرم افزار» بقیه‌ی دستگاه‌ها هم هست (getFlow).
     {
-      id: 'hardware_default',
-      title: 'عیوب سخت افزار',
-      hint: 'مشکلات متداول نرم‌افزاری و سیستمی لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
-      icon: sectionIcon.hardware,
+      id: 'software_default',
+      title: 'عیوب نرم افزار',
+      // متن‌ها مستقل از دستگاه هستند، چون getFlow همین مرحله را برای کیس، آل این
+      // وان، هارد و پرینتر هم کپی می‌کند.
+      hint: 'مشکلات نرم‌افزاری دستگاه؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.software,
       type: 'checklist',
       options: [
         { id: 'blue_screen', title: 'پیغام صفحه آبی می‌آید' },
         { id: 'apps_not_running', title: 'برخی برنامه‌ها اجرا نمی‌شوند' },
         { id: 'software_not_installing', title: 'برخی نرم‌افزارها نصب نمی‌شوند' },
         { id: 'antivirus_not_updating', title: 'آنتی ویروس، بروزرسانی یا آپدیت نمی‌شود' },
-        { id: 'infected', title: 'ویروسی شدن لپ تاپ' },
+        { id: 'infected', title: 'ویروسی شدن دستگاه' },
         { id: 'windows_not_installing', title: 'ویندوز نصب نمی‌شود' },
         { id: 'missing_storage_drivers', title: 'درایورهای هارد در زمان نصب ویندوز نمایش داده نمی‌شوند' },
+      ],
+      columns: 1,
+    },
+    {
+      id: 'hardware_default',
+      title: 'عیوب سخت افزار',
+      hint: 'عیوب قطعات و سخت‌افزار لپ تاپ؛ هر مورد که مصداق دارد را انتخاب کنید.',
+      icon: sectionIcon.hardware,
+      type: 'checklist',
+      options: [
+        { id: 'no_power', title: 'روشن نمی‌شود' },
+        { id: 'screen_fault', title: 'صفحه نمایش خط دارد، خاموش است یا شکسته' },
+        { id: 'keyboard_fault', title: 'کیبورد یا بعضی کلیدها کار نمی‌کند' },
+        { id: 'charge_fault', title: 'شارژ نمی‌شود / پورت شارژ مشکل دارد' },
+        { id: 'battery_fault', title: 'باتری خیلی زود تخلیه می‌شود' },
+        { id: 'overheat_noise', title: 'زیاد داغ می‌کند / فن صدای زیادی دارد' },
+        { id: 'disk_fault', title: 'هارد صدا می‌دهد یا شناخته نمی‌شود' },
+        { id: 'ports_fault', title: 'پورت‌های USB / HDMI کار نمی‌کنند' },
+        { id: 'hinge_case_fault', title: 'لولا یا بدنه آسیب دیده' },
+        { id: 'other_hardware', title: 'سایر عیوب سخت‌افزاری' },
       ],
       columns: 1,
     },
@@ -903,7 +944,13 @@ export const getFlow = (categoryId) => {
   const normalized = flow.slice();
   if (['case', 'all_in_one', 'hard_disk', 'printer_copy'].includes(categoryId) && !normalized.some((step) => step.id === 'software_default')) {
     const template = SYSTEMATIC_FLOWS.laptop.find((step) => step.id === 'software_default');
-    normalized.splice(normalized.findIndex((step) => step.id === 'hardware_default'), 0, { ...template, title: 'عیوب نرم افزار' });
+    // اگر قالب نباشد، `{...undefined}` یک مرحله‌ی بدون id و type می‌ساخت (باگ
+    // ۱۴۰۵/۰۹/۰۲: یک آکاردئون خالی و بی‌اثر در وسط سفارش). خطای صریح بهتر از
+    // مرحله‌ی مرده است؛ تست‌ها همین را می‌گیرند.
+    if (!template) throw new Error('software_default template is missing from the laptop flow');
+    const anchor = normalized.findIndex((step) => step.id === 'hardware_default');
+    if (anchor < 0) throw new Error('hardware_default step is missing from the ' + categoryId + ' flow');
+    normalized.splice(anchor, 0, { ...template, title: 'عیوب نرم افزار' });
   }
   // Reject ambiguous step identities before navigation or receipt generation.
   const ids = normalized.map((step) => step.id);

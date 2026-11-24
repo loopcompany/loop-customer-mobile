@@ -1579,5 +1579,6 @@
   "Order attachments": "Order attachments",
   "Open order attachment": "Open attachment {{number}}",
   "Unable to open order attachment": "Could not open the order attachment.",
-  "Coming soon": "Coming soon"
+  "Coming soon": "Coming soon",
+  "Tap to continue": "Tap to continue"
 }

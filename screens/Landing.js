@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { setToken, setUserType } from '@slices/authSlice';
@@ -58,9 +58,20 @@ export default function Landing({ navigation }) {
   // لوگوموشن با صدا پخش می‌شود. روی اندروید/iOS مستقیم؛ روی وب پخش را
   // utils/autoplayWithSound.js شروع می‌کند (پایین‌تر)، چون مرورگر ممکن است پخش
   // صدادار را تا اولین لمس کاربر مسدود کند.
-  const player = useVideoPlayer(require('@assets/video/InShot_20260626_171217014.mp4'), player => {
+  // لوگوموشن رسمی لوپ، ساخته‌شده از مستر ۴K خود کارفرما: کل کادر با فضای
+  // ستاره‌دارِ متحرکِ همان کلیپ پر است و خودِ کلیپ (لوگو و یوزپلنگ) کامل و بی‌برش
+  // در وسط می‌نشیند. نسبت کادر ۹:۲۱ است تا روی گوشی‌های کشیده هم `cover` فقط از
+  // لبه‌های ستاره‌دار ببرد و نوار لوگو هرگز بریده نشود.
+  //
+  // فایل عمودی است؛ روی وبِ افقی (پنجره‌ی رایانه) `contain` نمایش داده می‌شود تا
+  // لوگو بریده نشود — نسخه‌ی ویندوز فایل افقی خودش را در override دارد.
+  const { width, height } = useWindowDimensions();
+  const landscapeWeb = Platform.OS === 'web' && width > height;
+  const player = useVideoPlayer(require('@assets/video/logo-motion-portrait.mp4'), player => {
     player.muted = false;
     player.volume = 1;
+    // صدای لوگوموشن باید واضح باشد؛ پخش‌کننده‌های دیگر را وادار به سکوت می‌کند.
+    player.audioMixingMode = 'doNotMix';
     if (Platform.OS !== 'web') player.play();
   });
   // ریشه‌ی صفحه؛ روی وب همان div است و تگ <video> داخلش پیدا می‌شود.
@@ -260,7 +271,7 @@ export default function Landing({ navigation }) {
         style={styles.video}
         nativeControls={false}
         player={player}
-        contentFit="cover"
+        contentFit={landscapeWeb ? 'contain' : 'cover'}
       />
       {soundBlocked ? (
         <View pointerEvents="none" style={styles.soundHint}>
